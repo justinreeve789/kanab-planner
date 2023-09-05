@@ -1,0 +1,47 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateLocationsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('locations', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->integer('area_id')->unsigned();
+            $table->float('latitude', 10, 7)->nullable();
+            $table->float('longitude', 10, 7)->nullable();
+            $table->string('address')->nullable();
+            $table->string('city')->nullable();
+            $table->string('state')->nullable();
+            $table->string('zip')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
+            $table->string('url')->nullable();
+            $table->timestamps();
+            $table->foreign('area_id')->references('id')->on('areas')->onDelete('cascade');
+        });
+
+        DB::table('locations')->insert([
+            ['name' => 'El Pueblo', 'area_id' => 3],
+        ]);
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('locations');
+    }
+}
