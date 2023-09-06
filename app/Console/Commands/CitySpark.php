@@ -17,14 +17,14 @@ class CitySpark extends Command
      *
      * @var string
      */
-    protected $signature = 'crawl:cityspark';
+    protected $signature = 'import:cityspark';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Retrieve events from cityspark.com';
+    protected $description = 'Import events from cityspark.com';
 
     /**
      * Execute the console command.
