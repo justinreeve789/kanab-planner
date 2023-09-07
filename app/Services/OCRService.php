@@ -1,18 +1,14 @@
 <?php
 
-namespace App\Models;
+namespace App\Services;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use thiagoalessio\TesseractOCR\TesseractOCR;
 
-class OCR extends Model
+class OCRService
 {
-    use HasFactory;
-
     public function convertPdfToImage($pdfPath): ?string
     {
-        $temp = storage_path('ocr/png_' . sha1(microtime()) . '.png');
+        $temp = storage_path('temp/png_' . sha1(microtime()) . '.png');
         try {
             $im = new \Imagick($pdfPath);
             $im->writeImage($temp);
@@ -27,7 +23,7 @@ class OCR extends Model
 
     public function scanPdfUrl(string $url): ?string
     {
-        $temp = storage_path('ocr/pdf_' . sha1(microtime()) . '.pdf');
+        $temp = storage_path('temp/pdf_' . sha1(microtime()) . '.pdf');
         $pdfPath = file_get_contents($url);
         file_put_contents($temp, $pdfPath);
         try {
@@ -46,23 +42,44 @@ class OCR extends Model
     public function scanImageUrl(string $url): ?string
     {
         $text = null;
-        $temp = storage_path('ocr/image_' . sha1(microtime()));
-        $imagePath = file_get_contents($url);
-        file_put_contents($temp, $imagePath);
+        $temp = storage_path('temp/img_' . sha1(microtime()));
+
         try {
-            $text = $this->convertImageToText($imagePath);
+            $image = file_get_contents($url);
+            file_put_contents($temp, $image);
         } catch (\Exception $e) {
             // TODO: Error-handling.
+            echo 'Could not download ' . $url . '
+';
+            return null;
         }
-        unlink($imagePath);
+
+        try {
+            $text = trim($this->convertImageToText($temp));
+            if ($text == '') {
+                $text = null;
+            }
+        } catch (\Exception $e) {
+            // TODO: Error-handling.
+            if (file_exists($temp)) {
+                unlink($temp);
+            }
+            return null;
+        }
+
+        if (file_exists($temp)) {
+            unlink($temp);
+        }
+
         return $text;
     }
 
-    private function convertImageToText(string $imagePath): ?string
+    public function convertImageToText(string $imagePath): ?string
     {
         if (file_exists($imagePath)) {
-            $tesseract = new TesseractOCR(asset($imagePath));
-            return $tesseract->recognize();
+            $ocr = new TesseractOCR();
+            $ocr->image($imagePath);
+            return $ocr->run();
         }
         return null;
     }

@@ -4,9 +4,14 @@ namespace App\Console\Commands;
 
 use App\Models\Area;
 use App\Models\Event;
+use App\Models\Image;
 use App\Models\Location;
 use App\Models\LocationImage;
 use App\Models\LocationTag;
+use App\Models\ResourceText;
+use App\Models\Restaurant;
+use App\Services\ConversionService;
+use App\Services\OCRService;
 use Illuminate\Console\Command;
 
 class VisitSouthernUtah extends Command
@@ -27,6 +32,9 @@ class VisitSouthernUtah extends Command
      */
     protected $description = 'Import events for visitsouthernutah.com';
 
+    private $conversionService;
+    private $ocrService;
+
     /**
      * Execute the console command.
      */
@@ -34,6 +42,9 @@ class VisitSouthernUtah extends Command
     {
         $doEvents = $this->option('events');
         $doRestaurants = $this->option('restaurants');
+
+        $this->conversionService = new ConversionService();
+        $this->ocrService = new OCRService();
 
         if ($doEvents !== false) {
             $json = file_get_contents('https://visitsouthernutah.com/wp-json/wp/v2/events?per_page=100&page=1');
@@ -50,7 +61,7 @@ class VisitSouthernUtah extends Command
 
     private function getProp($data, $prop)
     {
-        return isset($data->{$prop}) ? $data->{$prop} : null;
+        return isset($data->{$prop}) && $data->{$prop} != '' ? $data->{$prop} : null;
     }
 
     protected function processTrails(array $trails)
@@ -59,9 +70,9 @@ class VisitSouthernUtah extends Command
 
     protected function processRestaurants(array $restaurants)
     {
-        foreach ($restaurants as $rst) {
+        foreach ($restaurants as $index => $rst) {
             $locName = $this->getProp($rst, 'company');
-            $locDescription = $this->getProp($rst, 'description');
+            $locDescription = trim(html_entity_decode(strip_tags($this->getProp($rst, 'description'))));
             $locAddress = $this->getProp($rst, 'addr1');
             $locCity = $this->getProp($rst, 'city');
             $locState = $this->getProp($rst, 'state');
@@ -100,12 +111,12 @@ class VisitSouthernUtah extends Command
             }
 
             if ($rst->subcatname) {
-                $locationTag = new LocationTag([
-                    'location_id' => $location->id,
-                    'tag' => $rst->subcatname,
-                ]);
-                $locationTag->save();
+                LocationTag::updateOrCreate(['location_id' => $location->id, 'tag' => $rst->subcatname]);
             }
+
+            Restaurant::updateOrCreate(['location_id' => $location->id], [
+                'description' => $locDescription,
+            ]);
         }
     }
 
@@ -121,8 +132,6 @@ class VisitSouthernUtah extends Command
             if (!isset($event->acf->location_name) || trim($event->acf->location_name) == '') {
                 continue;
             }
-
-            echo $event->title->rendered . ' | ';
 
             $evtObj = Event::updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $event->id], [
                 'name' => $event->title->rendered,
@@ -161,6 +170,18 @@ class VisitSouthernUtah extends Command
                 $evtObj->location_id = $location->id;
             }
             $evtObj->save();
+
+            $imageUrls = $this->conversionService->extractImagesFromHtml($event->acf->information_block);
+            foreach ($imageUrls as $imageUrl) {
+                $text = $this->ocrService->scanImageUrl($imageUrl);
+                if ($text) {
+                    ResourceText::updateOrCreate([
+                        'resource_table' => 'events',
+                        'resource_id' => $evtObj->id,
+                        'raw' => $text,
+                    ]);
+                }
+            }
         }
     }
 }

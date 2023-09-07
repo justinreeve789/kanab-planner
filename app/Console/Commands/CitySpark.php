@@ -5,6 +5,9 @@ namespace App\Console\Commands;
 use App\Models\Area;
 use App\Models\Event;
 use App\Models\Location;
+use App\Models\ResourceText;
+use App\Services\ConversionService;
+use App\Services\OCRService;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 
@@ -26,21 +29,32 @@ class CitySpark extends Command
      */
     protected $description = 'Import events from cityspark.com';
 
+    private $conversionService;
+    private $ocrService;
+
     /**
      * Execute the console command.
      */
     public function handle()
     {
+        $this->conversionService = new ConversionService();
+        $this->ocrService = new OCRService();
+
         $client = new Client();
         $queries = $this->getQueries();
-        foreach ($queries as $query) {
+        foreach ($queries as $areaId => $query) {
             $response = $client->post('https://portal.cityspark.com/v1/events/CitySparkPortalHome', [
                 'headers' => ['Accept' => 'application/json', 'Content-Type' => 'application/json; charset=UTF-8'],
                 'json' => $query,
             ]);
             $events = json_decode($response->getBody()->getContents());
-            $this->processEvents($events->Value);
+            $this->processEvents($events->Value, $areaId);
         }
+    }
+
+    private function getProp($data, $prop)
+    {
+        return isset($data->{$prop}) && $data->{$prop} != '' ? $data->{$prop} : null;
     }
 
     protected function getQueries(): array
@@ -58,7 +72,7 @@ class CitySpark extends Command
             "sparks" => false,
             "sort" => "Popularity",
             "category" => [],
-            "distance" => 50,
+            "distance" => 30,
             "lat" => 37.1052853,
             "lng" => -112.1430215,
             "search" => "",
@@ -77,10 +91,15 @@ class CitySpark extends Command
         $northRim['lng'] = 112.0580965;
         $northRim['distance'] = 50;
 
-        return [$kanab, $bryce, $zion, $northRim];
+        return [
+            Area::KANAB => $kanab,
+            Area::BRYCE => $bryce,
+            Area::ZION => $zion,
+            Area::NORTH_RIM => $northRim
+        ];
     }
 
-    protected function processEvents(array $events)
+    protected function processEvents(array $events, int $areaId = Area::KANAB)
     {
         foreach ($events as $event) {
             if (isset($event->Price)) {
@@ -103,36 +122,51 @@ class CitySpark extends Command
             ]);
 
             $cityState = explode(',', $event->CityState);
-            $locName = isset($event->Venue) ? $event->Venue : null;
-            $locAddress = isset($event->Address) ? $event->Address : null;
+            $locName = $this->getProp($event, 'Venue') ?? $this->getProp($event, 'Name');
             $locCity = isset($cityState[0]) ? trim($cityState[0]) : null;
             $locState = isset($event->cityState[1]) ? trim($cityState[1]) : null;
-            $locZip = isset($event->Zip) ? $event->Zip : null;
+            $locAddress = $this->getProp($event, 'Address');
+            $locZip = $this->getProp($event, 'Zip');
+            $locPhone = $this->getProp($event, 'VenuePhone');
+            $locLat = $this->getProp($event, 'latitude');
+            $locLng = $this->getProp($event, 'longitude');
 
             $location = Location::search(['address' => $locAddress, 'zip' => $locZip]) ??
                 Location::search(['address' => $locAddress, 'city' => $locCity]) ??
-                Location::search(['name' => $locName, 'city' => $locCity, 'state' => $locState]) ??
+                Location::search(['name' => $locName, 'city' => $locCity]) ??
                 Location::search(['name' => $locName, 'address' => $locAddress]);
             if ($location) {
                 $evtObj->location_id = $location->id;
             } else {
                 $location = new Location([
-                    'name' => $event->Venue,
-                    'area_id' => Area::KANAB,
+                    'name' => $locName,
+                    'area_id' => $areaId,
                     'address' => $locAddress,
                     'city' => $locCity,
                     'state' => $locState,
                     'zip' => $locZip,
-                    'phone' => $event->VenuePhone,
+                    'phone' => $locPhone,
 //                    'email' => $event->VenueEmail,
 //                    'url' => $event->Url,
-                    'latitude' => $event->latitude,
-                    'longitude' => $event->longitude,
+                    'latitude' => $locLat,
+                    'longitude' => $locLng,
                 ]);
                 $location->save();
                 $evtObj->location_id = $location->id;
             }
             $evtObj->save();
+
+            $imageUrls = $this->conversionService->extractImagesFromHtml($event->Description);
+            foreach ($imageUrls as $imageUrl) {
+                $text = $this->ocrService->scanImageUrl($imageUrl);
+                if ($text) {
+                    ResourceText::updateOrCreate([
+                        'resource_table' => 'events',
+                        'resource_id' => $evtObj->id,
+                        'raw' => $text,
+                    ]);
+                }
+            }
         }
     }
 }

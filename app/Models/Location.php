@@ -9,13 +9,14 @@ class Location extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name', 'area_id', 'address', 'city', 'state', 'zip', 'phone', 'email', 'url', 'latitude', 'longitude'
-    ];
+    protected $guarded = ['id'];
 
     static public function search($params = []): ?Location {
         if (!empty($params)) {
             foreach ($params as $key => $value) {
+                if (!$value || trim($value) == '') {
+                    return null;
+                }
                 if (!isset($loc)) {
                     $loc = Location::where($key, $value);
                 }
