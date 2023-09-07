@@ -10,6 +10,7 @@ use App\Models\LocationImage;
 use App\Models\LocationTag;
 use App\Models\ResourceText;
 use App\Models\Restaurant;
+use App\Models\Trail;
 use App\Services\ConversionService;
 use App\Services\OCRService;
 use Illuminate\Console\Command;
@@ -23,7 +24,7 @@ class VisitSouthernUtah extends Command
      *
      * @var string
      */
-    protected $signature = 'import:vsu {--events} {--restaurants}';
+    protected $signature = 'import:vsu {--events} {--restaurants} {--trails}';
 
     /**
      * The console command description.
@@ -42,6 +43,7 @@ class VisitSouthernUtah extends Command
     {
         $doEvents = $this->option('events');
         $doRestaurants = $this->option('restaurants');
+        $doTrails = $this->options('trails');
 
         $this->conversionService = new ConversionService();
         $this->ocrService = new OCRService();
@@ -57,6 +59,12 @@ class VisitSouthernUtah extends Command
             $restaurants = json_decode($json);
             $this->processRestaurants($restaurants->listings->listing);
         }
+
+        if ($doTrails !== false) {
+            $json = file_get_contents('https://visitsouthernutah.com/wp-json/wp/v2/trail_maps?per_page=100&page=1');
+            $trails = json_decode($json);
+            $this->processTrails($trails);
+        }
     }
 
     private function getProp($data, $prop)
@@ -66,6 +74,37 @@ class VisitSouthernUtah extends Command
 
     protected function processTrails(array $trails)
     {
+        foreach ($trails as $index => $trail) {
+            $trailName = $trail->title->rendered;
+            $trailUrl = $trail->link;
+            $trailDifficulty = isset($trail->acf->difficulty->name) ? $trail->acf->difficulty->name : null;
+
+            $trailObj = Trail::where('name', $trailName)->first();
+            if (!$trailObj) {
+                $trailObj = new Trail([
+                    'name' => $trailName,
+                    'url' => $trailUrl,
+                    'difficulty' => $trailDifficulty,
+                    'raw_data' => json_encode($trail),
+                ]);
+                $trailObj->save();
+            }
+
+            $mapFile = $trail->acf->map_file;
+            $parts = parse_url($mapFile);
+            if (!isset($parts['host'])) {
+                $mapFile = 'https://visitsouthernutah.com' . $mapFile;
+            }
+
+            $text = $this->ocrService->scanPdfUrl($mapFile);
+            if ($text) {
+                ResourceText::updateOrCreate([
+                    'resource_table' => 'trails',
+                    'resource_id' => $trailObj->id,
+                    'raw' => $text,
+                ]);
+            }
+        }
     }
 
     protected function processRestaurants(array $restaurants)
@@ -174,6 +213,19 @@ class VisitSouthernUtah extends Command
             $imageUrls = $this->conversionService->extractImagesFromHtml($event->acf->information_block);
             foreach ($imageUrls as $imageUrl) {
                 $text = $this->ocrService->scanImageUrl($imageUrl);
+                if ($text) {
+                    ResourceText::updateOrCreate([
+                        'resource_table' => 'events',
+                        'resource_id' => $evtObj->id,
+                        'raw' => $text,
+                    ]);
+                }
+            }
+
+            $pdfUrls = $this->conversionService->extractPdfsFromHtml($event->acf->information_block);
+            foreach ($pdfUrls as $pdfUrl) {
+                echo $pdfUrl . ' ';
+                $text = $this->conversionService->extractTextFromPdfUrl($pdfUrl);
                 if ($text) {
                     ResourceText::updateOrCreate([
                         'resource_table' => 'events',

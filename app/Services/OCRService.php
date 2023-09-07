@@ -10,8 +10,11 @@ class OCRService
     {
         $temp = storage_path('temp/png_' . sha1(microtime()) . '.png');
         try {
-            $im = new \Imagick($pdfPath);
+            $im = new \Imagick();
+            $im->readImage($pdfPath);
             $im->writeImage($temp);
+//            $cmd = 'convert -density 96 -quality 85 "' . $pdfPath . '" "' . $temp . '"';
+//            exec($cmd);
         } catch (\Exception $e) {
             // TODO: Error-handling.
         }
@@ -23,25 +26,41 @@ class OCRService
 
     public function scanPdfUrl(string $url): ?string
     {
-        $temp = storage_path('temp/pdf_' . sha1(microtime()) . '.pdf');
-        $pdfPath = file_get_contents($url);
-        file_put_contents($temp, $pdfPath);
+        $text = null;
+
         try {
-            $imagePath = $this->convertPdfToImage($pdfPath);
-            $text = $this->convertImageToText($imagePath);
+            $temp = storage_path('temp/pdf_' . sha1(microtime()) . '.pdf');
+            $pdf = file_get_contents($url);
+            file_put_contents($temp, $pdf);
+        } catch (\Exception $e) {
+            // TODO: Error-handling.
+            echo 'Could not download ' . $url . '
+';
+            return null;
+        }
+
+        try {
+            $imagePath = $this->convertPdfToImage($temp);
+            if ($imagePath) {
+                $text = $this->convertImageToText($imagePath);
+            }
         } catch (\Exception $e) {
             // TODO: Error-handling.
         }
-        if (isset($imagePath)) {
-            unlink($imagePath);
+
+        if (file_exists($imagePath)) {
+//            unlink($imagePath);
         }
-        unlink($pdfPath);
+
+        if (file_exists($temp)) {
+            unlink($temp);
+        }
+
         return $text;
     }
 
     public function scanImageUrl(string $url): ?string
     {
-        $text = null;
         $temp = storage_path('temp/img_' . sha1(microtime()));
 
         try {

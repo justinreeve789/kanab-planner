@@ -12,6 +12,7 @@
         "laravel/tinker": "^2.8",
         "openai-php/laravel": "^0.6.3",
         "roach-php/laravel": "^2.0",
+        "spatie/pdf-to-text": "^1.52",
         "thiagoalessio/tesseract_ocr": "^2.12"
     },
     "require-dev": {

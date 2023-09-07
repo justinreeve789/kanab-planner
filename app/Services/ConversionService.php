@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Image;
+use Spatie\PdfToText\Pdf;
 use thiagoalessio\TesseractOCR\TesseractOCR;
 
 class ConversionService
@@ -20,6 +21,26 @@ class ConversionService
             return $temp;
         }
         return null;
+    }
+
+    public function extractTextFromPdfUrl($pdfUrl): ?string
+    {
+        $text = null;
+
+        try {
+            $temp = storage_path('temp/pdf_' . sha1(microtime()) . '.pdf');
+            $pdf = file_get_contents($pdfUrl);
+            file_put_contents($temp, $pdf);
+            $text = Pdf::getText($temp);
+        } catch (\Exception $e) {
+            // TODO: Error-handling.
+        }
+
+        if (file_exists($temp)) {
+            unlink($temp);
+        }
+
+        return $text;
     }
 
     public function deleteFiles(array $files)
@@ -44,5 +65,12 @@ class ConversionService
 //        preg_match_all('#\bhttps?://[^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/))#', $text, $match);
         preg_match_all('/<img.+src=[\'"](?P<src>.+?)[\'"].*>|background-image[ ]?:[ ]?url\([ ]?[\']?["]?(.*?\.(?:png|jpg|jpeg|gif|svg))/i', $html, $match);
         return $match['src'];
+    }
+
+    public function extractPDFsFromHtml(string $html): ?array
+    {
+        preg_match_all('/href=["\']?[^"\'>]+(?:\.pdf)["\']?/', $html, $match);
+        print_r($match);
+        return [];
     }
 }

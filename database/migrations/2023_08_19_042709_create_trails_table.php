@@ -15,9 +15,29 @@ class CreateTrailsTable extends Migration
     {
         Schema::create('trails', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('location_id')->unsigned();
+            $table->string('source_type');
+            $table->string('source_id');
+            $table->integer('area_id')->unsigned();
+            $table->string('name');
+            $table->string('name_alt')->nullable();
+            $table->text('description')->nullable();
+            $table->text('description_alt')->nullable();
+            $table->text('directions')->nullable();
+            $table->text('accessibility')->nullable();
+            $table->string('duration')->nullable();
+            $table->boolean('pets_allowed')->nullable();
+            $table->float('latitude', 10, 7)->nullable();
+            $table->float('longitude', 10, 7)->nullable();
+            $table->string('url')->nullable();
+            $table->string('season')->nullable();
+            $table->string('difficulty')->nullable();
+            $table->integer('elevation')->nullable();
+            $table->string('vehicle')->nullable();
+            $table->decimal('distance', 4, 1)->nullable();
+            $table->boolean('reservation')->nullable();
+            $table->boolean('fee')->nullable();
+            $table->text('raw_data')->nullable();
             $table->timestamps();
-            $table->foreign('location_id')->references('id')->on('locations')->cascadeOnDelete();
         });
     }
 
