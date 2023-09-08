@@ -3,9 +3,16 @@ import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
+    server: {
+	host: true,
+        hmr: {
+            host: 'dev.visitkanab.org',
+	},
+    },
     plugins: [
-        laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+        vue(),
+	laravel({
+            input: ['resources/scss/app.scss', 'resources/js/app.js'],
             refresh: true,
         }),
     ],

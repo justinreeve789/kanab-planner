@@ -8,8 +8,8 @@
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css'>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Roboto:wght@100&amp;display=swap'>
-    <link rel="stylesheet" href="{{ mix('css/app.css') }}">
     <link rel="icon" href="https://image.flaticon.com/icons/svg/2983/2983687.svg">
+    @vite('resources/scss/app.scss')
     <title>{{ env('APP_NAME' )}}</title>
     <script src="https://cdn.jsdelivr.net/npm/ismobilejs@1/dist/isMobile.min.js"></script>
 </head>
@@ -17,8 +17,6 @@
 <div id="app">
     <app></app>
 </div>
-<script>
-</script>
-<script src="{{ mix('js/app.js') }}"></script>
+@vite('resources/js/app.js')
 </body>
 </html>

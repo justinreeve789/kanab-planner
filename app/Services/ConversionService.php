@@ -3,14 +3,40 @@
 namespace App\Services;
 
 use App\Models\Image;
+use App\Services\OCRService;
 use Spatie\PdfToText\Pdf;
-use thiagoalessio\TesseractOCR\TesseractOCR;
 
 class ConversionService
 {
-    public function convertPdfToImage($pdfPath): ?string
+    private $ocrService;
+
+    public function __construct()
     {
-        $temp = storage_path('temp/png_' . sha1(microtime()) . '.png');
+        $this->ocrService = new OCRService(['conversionService' => $this]);
+    }
+
+    public function isUrl($str)
+    {
+        return (filter_var($str, FILTER_VALIDATE_URL) !== false);
+    }
+
+    public function downloadFile($url)
+    {
+//        $headers = get_headers($url, 1);
+//        $contentType = $headers['Content-Type'];
+        $temp = storage_path('temp/file_' . sha1(microtime()));
+        $file = file_get_contents($url);
+        file_put_contents($temp, $file  );
+        return $temp;
+    }
+
+    public function convertPdfToImage($pdfPath, $fileType = 'png'): ?string
+    {
+        if ($this->isUrl($pdfPath)) {
+            $pdfPath = $this->downloadFile($pdfPath);
+        }
+
+        $temp = storage_path('temp/' . $fileType . '_' . sha1(microtime()) . '.' . $fileType);
         try {
             $im = new \Imagick($pdfPath);
             $im->writeImage($temp);
@@ -21,6 +47,11 @@ class ConversionService
             return $temp;
         }
         return null;
+    }
+
+    public function convertPdfToText($pdfPath): ?string
+    {
+        return $this->ocrService->convertPdfToText($pdfPath);
     }
 
     public function extractTextFromPdfUrl($pdfUrl): ?string

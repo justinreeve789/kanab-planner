@@ -34,7 +34,7 @@ class VisitSouthernUtah extends Command
     protected $description = 'Import events for visitsouthernutah.com';
 
     private $conversionService;
-    private $ocrService;
+//    private $ocrService;
 
     /**
      * Execute the console command.
@@ -46,7 +46,7 @@ class VisitSouthernUtah extends Command
         $doTrails = $this->option('trails');
 
         $this->conversionService = new ConversionService();
-        $this->ocrService = new OCRService();
+//        $this->ocrService = new OCRService();
 
         if ($doEvents !== false) {
             $json = file_get_contents('https://visitsouthernutah.com/wp-json/wp/v2/events?per_page=100&page=1');
@@ -81,13 +81,13 @@ class VisitSouthernUtah extends Command
 
             $trailObj = Trail::where('name', $trailName)->first();
             if (!$trailObj) {
-                $trailObj = new Trail([
+                $trailObj = Trail::updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $trail->id], [
+                    'area_id' => Area::KANAB,
                     'name' => $trailName,
                     'url' => $trailUrl,
                     'difficulty' => $trailDifficulty,
                     'raw_data' => json_encode($trail),
                 ]);
-                $trailObj->save();
             }
 
             $mapFile = $trail->acf->map_file;
@@ -96,7 +96,7 @@ class VisitSouthernUtah extends Command
                 $mapFile = 'https://visitsouthernutah.com' . $mapFile;
             }
 
-            $text = $this->ocrService->scanPdfUrl($mapFile);
+            $text = $this->conversionService->convertPdfToText($mapFile);
             if ($text) {
                 ResourceText::updateOrCreate([
                     'resource_table' => 'trails',
