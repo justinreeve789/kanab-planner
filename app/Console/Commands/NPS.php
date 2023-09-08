@@ -89,13 +89,13 @@ class NPS extends Command
             $itemAccessibility = trim(html_entity_decode(strip_tags($this->getProp($item, 'accessibilityInformation'))));
             $itemDirections = $this->getProp($item, 'directions');
             $itemDuration = $this->getProp($item, 'duration');
-            $itemPetsAllowed = $this->getProp($item, 'arePetsPermitted');
+            $itemPetsAllowed = $this->getProp($item, 'arePetsPermitted') ? true : false;
             $itemLat = $this->getProp($item, 'latitude');
             $itemLng = $this->getProp($item, 'longitude');
             $itemUrl = $this->getProp($item, 'url');
             $itemSeason = $this->getProp($item, 'seasonDescription');
-            $itemReservation = $this->getProp($item, 'isReservationRequired');
-            $itemFee = $this->getProp($item, 'doFeesApply');
+            $itemReservation = $this->getProp($item, 'isReservationRequired') ? true : false;
+            $itemFee = $this->getProp($item, 'doFeesApply') ? true : false;
 
             $trail = Trail::updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $item->id], [
                 'name' => $itemName,
@@ -127,7 +127,7 @@ class NPS extends Command
 //            }
 
             $evtName = $this->getProp($evt, 'title');
-            $evtDescription = trim(html_entity_decode(strip_tags($this->getProp($evt, 'description'))));
+            $evtDescription = html_entity_decode(trim(strip_tags($this->getProp($evt, 'description'))));
             $evtDescription .= '\r\n\r\n' . $evt->location;
             $evtEmail = $this->getProp($evt, 'contactemailaddress');
             $evtPhone = $this->getProp($evt, 'phone');

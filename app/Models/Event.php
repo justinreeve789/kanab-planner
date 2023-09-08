@@ -9,9 +9,11 @@ class Event extends Model
 {
     use HasFactory;
 
-//    protected $fillable = [
-//        'source_type', 'source_id', 'name', 'description', 'free', 'price', 'location_id', 'start_date', 'start_time', 'end_date', 'end_time', 'raw_data'
-//    ];
-
     protected $guarded = ['id'];
+    protected $hidden = ['raw_data', 'location_id'];
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class, 'location_id', 'id');
+    }
 }

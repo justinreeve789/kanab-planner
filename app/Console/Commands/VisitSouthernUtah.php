@@ -43,7 +43,7 @@ class VisitSouthernUtah extends Command
     {
         $doEvents = $this->option('events');
         $doRestaurants = $this->option('restaurants');
-        $doTrails = $this->options('trails');
+        $doTrails = $this->option('trails');
 
         $this->conversionService = new ConversionService();
         $this->ocrService = new OCRService();

@@ -17,13 +17,19 @@ class NPSService
     {
         try {
             $response = $this->client->request($type, self::API_URL . $endpoint, [
-                'headers' => ['Accept' => 'application/json', 'X-Api-Key' => env('NPS_API_KEY')],
+                'headers' => ['X-Api-Key' => env('NPS_API_KEY')],
                 'json' => $params,
             ]);
             return json_decode($response->getBody()->getContents());
         } catch (\GuzzleHttp\Exception\ClientException $e) {
-            // TODO: Error-handling.
-            print_r((string) $e);
+            \Log::info((string) $e);
+
+            // TODO: Figure out why Guzzle doesn't work sometimes (i.e. for /thingstodo).
+            if ($type == 'GET') {
+                $queryString = '?api_key=' . env('NPS_API_KEY') . '&' . http_build_query($params);
+                $response = file_get_contents(self::API_URL . $endpoint . $queryString);
+                return json_decode($response);
+            }
         }
     }
 
@@ -49,9 +55,11 @@ class NPSService
             $response = $this->request('GET', '/thingstodo', $params);
             if ($response) {
                 $trails = array_merge($trails, $response->data);
+            } else {
+                break;
             }
             $params['start'] = ++$pageNumber;
-        } while ($response->total > ($response->pagenumber * $response->pagesize));
+        } while ($response->total > (($response->start + 1) * $response->limit));
         return $trails;
     }
 }
