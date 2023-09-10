@@ -30,9 +30,9 @@ class CreateLocationsTable extends Migration
             $table->foreign('area_id')->references('id')->on('areas')->onDelete('cascade');
         });
 
-        DB::table('locations')->insert([
-            ['name' => 'El Pueblo', 'area_id' => 3],
-        ]);
+        if (file_exists('./database/dumps/locations.sql')) {
+            DB::unprepared(file_get_contents('./database/dumps/locations.sql'));
+        }
     }
 
     /**

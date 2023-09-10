@@ -36,6 +36,10 @@ class CreateEventsTable extends Migration
             $table->unique(['source_type', 'source_id']);
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });
+
+        if (file_exists('./database/dumps/events.sql')) {
+            DB::unprepared(file_get_contents('./database/dumps/events.sql'));
+        }
     }
 
     /**

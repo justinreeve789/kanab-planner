@@ -38,8 +38,8 @@ class ConversionService
 
         $temp = storage_path('temp/' . $fileType . '_' . sha1(microtime()) . '.' . $fileType);
         try {
-            $im = new \Imagick($pdfPath);
-            $im->writeImage($temp);
+            $cmd = 'convert "' . $pdfPath . '" -append "' . $temp . '"';
+            @exec($cmd);
         } catch (\Exception $e) {
             // TODO: Error-handling.
         }
@@ -74,8 +74,11 @@ class ConversionService
         return $text;
     }
 
-    public function deleteFiles(array $files)
+    public function deleteFiles($files)
     {
+        if (!is_array($files)) {
+            $files = [$files];
+        }
         foreach ($files as $file) {
             if (file_exists($file)) {
                 unlink($file);

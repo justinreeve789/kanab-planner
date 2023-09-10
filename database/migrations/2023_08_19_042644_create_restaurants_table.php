@@ -24,6 +24,10 @@ class CreateRestaurantsTable extends Migration
 //            $table->index('restaurant_type_id');
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });
+
+        if (file_exists('./database/dumps/restaurants.sql')) {
+            DB::unprepared(file_get_contents('./database/dumps/restaurants.sql'));
+        }
     }
 
     /**

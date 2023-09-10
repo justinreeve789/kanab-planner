@@ -16,9 +16,14 @@ return new class extends Migration
             $table->string('resource_table', 16);
             $table->integer('resource_id');
             $table->text('raw')->nullable();
+            $table->text('clean')->nullable();
             $table->timestamps();
             $table->index(['resource_table', 'resource_id']);
         });
+
+        if (file_exists('./database/dumps/resource_text.sql')) {
+            DB::unprepared(file_get_contents('./database/dumps/resource_text.sql'));
+        }
     }
 
     /**

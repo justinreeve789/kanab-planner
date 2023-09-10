@@ -39,6 +39,10 @@ class CreateTrailsTable extends Migration
             $table->text('raw_data')->nullable();
             $table->timestamps();
         });
+
+        if (file_exists('./database/dumps/trails.sql')) {
+            DB::unprepared(file_get_contents('./database/dumps/trails.sql'));
+        }
     }
 
     /**

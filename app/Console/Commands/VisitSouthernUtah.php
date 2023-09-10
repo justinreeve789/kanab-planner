@@ -74,7 +74,7 @@ class VisitSouthernUtah extends Command
 
     protected function processTrails(array $trails)
     {
-        foreach ($trails as $index => $trail) {
+        foreach ($trails as $trail) {
             $trailName = $trail->title->rendered;
             $trailUrl = $trail->link;
             $trailDifficulty = isset($trail->acf->difficulty->name) ? $trail->acf->difficulty->name : null;
@@ -96,13 +96,20 @@ class VisitSouthernUtah extends Command
                 $mapFile = 'https://visitsouthernutah.com' . $mapFile;
             }
 
-            $text = $this->conversionService->convertPdfToText($mapFile);
-            if ($text) {
-                ResourceText::updateOrCreate([
-                    'resource_table' => 'trails',
-                    'resource_id' => $trailObj->id,
-                    'raw' => $text,
-                ]);
+            // OCR the map file if we haven't already.
+            $resourceText = ResourceText::where([
+                'resource_table' => 'trails',
+                'resource_id' => $trailObj->id,
+            ])->first();
+            if (!$resourceText) {
+                $text = $this->conversionService->convertPdfToText($mapFile);
+                if ($text) {
+                    ResourceText::updateOrCreate([
+                        'resource_table' => 'trails',
+                        'resource_id' => $trailObj->id,
+                        'raw' => $text,
+                    ]);
+                }
             }
         }
     }

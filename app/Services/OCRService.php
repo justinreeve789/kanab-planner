@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use AhmadMayahi\Vision\Vision;
 use App\Services\ConversionService;
-use Google;
 use GuzzleHttp\Client;
 use thiagoalessio\TesseractOCR\TesseractOCR;
 
@@ -44,10 +44,7 @@ class OCRService
         }
 
         $text = $this->convertPdfToText($temp);
-
-        if (file_exists($temp)) {
-            unlink($temp);
-        }
+        $this->conversionService->deleteFiles($temp);
 
         return $text;
     }
@@ -96,14 +93,16 @@ class OCRService
         }
         switch ($ocr) {
             case self::GOOGLE_CLOUD_VISION:
-                $text = $this->convertPdfToTextWithGoogleCloudVision($pdfPath);
+                $imagePath = $this->conversionService->convertPdfToImage($pdfPath);
+                $text = $this->convertImageToTextWithGoogleCloudVision($imagePath);
+                $this->conversionService->deleteFiles($imagePath);
                 break;
             case self::OCR_SPACE:
                 $text = $this->convertPdfToTextWithOCRSpace($pdfPath);
                 break;
             case self::TESSERACT:
             default:
-                $imagePath = $this->convertPdfToImage($pdfPath);
+                $imagePath = $this->conversionService->convertPdfToImage($pdfPath);
                 $text = $this->convertImageToTextWithTesseract($imagePath);
                 $this->deleteFiles([$imagePath]);
                 break;
@@ -113,12 +112,21 @@ class OCRService
 
     public function convertImageToTextWithGoogleCloudVision(string $imagePath): ?string
     {
+        $config = (new \AhmadMayahi\Vision\Config())
+            ->setCredentials('google-service-account.json')
+            ->setTempDirPath(storage_path());
+        $response = Vision::init($config)
+            ->file($imagePath)
+            ->imageTextDetection()
+            ->plain();
+        if ($response) {
+            return $response->text;
+        }
         return null;
     }
 
     public function convertPdfToTextWithGoogleCloudVision(string $pdfPath): ?string
     {
-        $vision = Google::make('vision');
         return null;
     }
 
