@@ -11,10 +11,12 @@ use App\Models\LocationTag;
 use App\Models\ResourceText;
 use App\Models\Restaurant;
 use App\Models\Trail;
+use App\Models\TrailImage;
 use App\Models\TrailTag;
 use App\Services\ConversionService;
 use App\Services\NPSService;
 use Illuminate\Console\Command;
+use IvoPetkov\HTML5DOMDocument;
 use Nesk\Puphpeteer\Puppeteer;
 use Nesk\Rialto\Data\JsFunction;
 
@@ -82,29 +84,125 @@ class HikingProject extends Command
             'https://www.hikingproject.com/directory/8025601/upper-zion-trail-system',
             'https://www.hikingproject.com/directory/8012304/virgin',
             'https://www.hikingproject.com/directory/8010544/zion-national-park',
+            'https://www.hikingproject.com/directory/8013242/north-rim',
         ];
         $this->trailUrls = [];
-        $this->conversionService->deleteFiles(storage_path('temp/trailurls.txt'));
         if (empty($this->areaUrls)) {
             $this->parseHome();
         }
 
-        $this->initBrowser();
-        foreach ($this->areaUrls as $areaUrl) {
-            $areaId = $this->getAreaIdFromUrl($areaUrl);
-            $this->trailUrls[$areaId] = $this->getTrailUrlsForArea($areaId);
+        $jsonFile = storage_path('temp/hikingproject.json');
+
+        // Create the JSON file if it doesn't exist.
+        if (!file_exists($jsonFile)) {
+            foreach ($this->areaUrls as $areaUrl) {
+                $areaId = $this->getAreaIdFromUrl($areaUrl);
+                $this->trailUrls[$areaId] = $this->getTrailUrlsForArea($areaId);
+            }
+            file_put_contents($jsonFile, json_encode($this->trailUrls));
         }
-
-        file_put_contents(storage_path('temp/hikingproject.json'), json_encode($this->trailUrls));
-
         die;
 
-        foreach ($trailUrls as $trailUrl) {
-            file_put_contents(storage_path('temp/trailurls.txt'), $trailUrl . '
-', FILE_APPEND);
+//        $this->initBrowser();
+
+        $json = json_decode(file_get_contents($jsonFile));
+        foreach ($json as $areaId => $trailUrls) {
+            foreach ($trailUrls as $trailUrl) {
+                $this->parseTrailPage($trailUrl, $areaId);
+            }
         }
 
-        $this->browser->close();
+//        $this->browser->close();
+    }
+
+    private function parseTrailPage($trailUrl, $areaId) {
+        echo 'Processing ' . $trailUrl . '
+';
+        $trailHtml = file_get_contents($trailUrl);
+        $dom = new HTML5DOMDocument();
+        $dom->loadHTML($trailHtml, HTML5DOMDocument::ALLOW_DUPLICATE_IDS);
+        $name = trim($dom->querySelector('#trail-title')->textContent);
+        $difficulty = trim($dom->querySelector('.difficulty-text')->textContent);
+        $distanceMiles = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(0)->querySelector('.imperial')->textContent);
+        $distanceType = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(0)->querySelectorAll('h3')->item(2)->textContent);
+        $elevationHigh = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(1)->querySelectorAll('h3 .imperial')->item(0)->textContent);
+        $elevationLow = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(1)->querySelectorAll('h3 .imperial')->item(1)->textContent);
+        $incline = html_entity_decode(trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(2)->querySelectorAll('h3 .imperial')->item(0)->textContent));
+        $decline = html_entity_decode(trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(2)->querySelectorAll('h3 .imperial')->item(1)->textContent));
+//        $avgGrade = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(3)->querySelectorAll('h3')->item(0)->textContent);
+//        $maxGrade = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(3)->querySelectorAll('h3')->item(1)->textContent);
+        $grade = html_entity_decode(trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(3)->textContent));
+        $gpxUrl = trim($dom->querySelector('#toolbox a.mt-threequarter.require-user')->getAttribute('href'));
+        try {
+            $pets = trim($dom->querySelectorAll('#trail-text .mb-1')->item(1)->querySelectorAll('h3 span')->item(0)->textContent);
+            $features = trim($dom->querySelectorAll('#trail-text .mb-1')->item(1)->querySelectorAll('h3 span')->item(1)->textContent);
+            $description = trim($dom->querySelectorAll('#trail-text .mb-1')->item(2)->textContent);
+            $contactName = trim($dom->querySelector('#trail-text .mb-1 .trail-contacts a')->getAttribute('href'));
+            $contactUrl = trim($dom->querySelector('#trail-text .mb-1 .trail-contacts a')->textContent);
+        } catch (\Throwable $e) {
+            $pets = $features = $description = $contactName = $contactUrl = null;
+        }
+
+        $imageUrls = [];
+        try {
+            $images = $dom->querySelector('#photo-carousel')->innerHTML;
+            $urls = $this->conversionService->extractUrlsFromHtml($images);
+            foreach ($urls as $url) {
+                if (strpos($url, 'hikingproject.com/assets') !== false) {
+                    $imageUrls[] = $url;
+                }
+            }
+        } catch (\Exception $e) {}
+
+        $sourceId = $this->getTrailIdFromUrl($trailUrl);
+        try {
+            $trail = Trail::updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
+                'name' => $name,
+                'name_alt' => $areaId,
+                'area_id' => 0,
+                'description' => $description,
+                'description_alt' => null,
+                'directions' => null,
+                'accessibility' => null,
+                'duration' => null,
+                'pets_allowed' => $pets,
+                'latitude' => null,
+                'longitude' => null,
+                'contact_url' => $contactUrl,
+                'contact_name' => $contactName,
+                'season ' => null,
+                'reservation' => null,
+                'fee' => null,
+                'gpx_url' => $gpxUrl,
+                'features' => $features,
+                'distance_miles' => $distanceMiles,
+                'distance_type' => $distanceType,
+                'elevation_high' => $elevationHigh,
+                'elevation_low' => $elevationLow,
+                'incline' => $incline,
+                'decline' => $decline,
+                'grade' => $grade,
+                'raw_data' => $areaId . ' | ' . $trailUrl,
+            ]);
+        } catch (\Illuminate\Database\QueryException) {
+            $trail = Trail::updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
+                'name' => $name,
+                'name_alt' => $areaId,
+                'area_id' => 0,
+                'distance_miles' => $distanceMiles,
+                'distance_type' => $distanceType,
+                'elevation_high' => $elevationHigh,
+                'elevation_low' => $elevationLow,
+                'incline' => $incline,
+                'decline' => $decline,
+                'grade' => $grade,
+                'raw_data' => $areaId . ' | ' . $trailUrl,
+            ]);
+        }
+
+        foreach ($imageUrls as $imageUrl) {
+            TrailImage::updateOrCreate(['trail_id' => $trail->id, 'url' => $imageUrl]);
+        }
     }
 
     private function initBrowser()
@@ -113,7 +211,6 @@ class HikingProject extends Command
             'args' => ['--no-sandbox', '--disable-setuid-sandbox'],
             'headless' => 'new',
         ]);
-        $this->browser->page = $this->browser->newPage();
     }
 
     private function page()
@@ -144,6 +241,15 @@ class HikingProject extends Command
         }
     }
 
+    public function getTrailIdFromUrl($trailUrl) {
+        $parts = explode('/', $trailUrl);
+        foreach ($parts as $part) {
+            if (is_numeric($part)) {
+                return $part;
+            }
+        }
+    }
+
     private function getTrailUrlsForArea($areaId) {
         $trailUrls = [];
         $page = -3; // For some reason, the first 10 trails are only retrieved if we start at -3.
@@ -161,13 +267,6 @@ class HikingProject extends Command
             }
         } while (!empty($urls) && $page++ < 100);
         return array_values(array_unique($trailUrls));
-    }
-
-    private function parseTrailPage($trailUrl) {
-        $this->page()->goto($trailUrl);
-        $name = $this->page()->querySelectorEval('#trail-title', JSFunction::createWithParameters(['element'])->body('return body.textContent;'));
-        echo $name;
-        die;
     }
 
     private function parseAreaPage($areaUrl)
