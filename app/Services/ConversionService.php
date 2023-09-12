@@ -107,4 +107,10 @@ class ConversionService
         print_r($match);
         return [];
     }
+
+    public function extractUrlsFromHtml(string $html): ?array
+    {
+        preg_match_all('/(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])/', $html, $match);
+        return $match[0];
+    }
 }
