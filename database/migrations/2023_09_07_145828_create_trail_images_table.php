@@ -19,6 +19,10 @@ return new class extends Migration
             $table->timestamps();
             $table->foreign('trail_id')->references('id')->on('trails')->onDelete('cascade');
         });
+
+        if (file_exists('./database/dumps/trail_images.sql')) {
+            DB::unprepared(file_get_contents('./database/dumps/trail_images.sql'));
+        }
     }
 
     /**
