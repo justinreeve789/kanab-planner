@@ -14,11 +14,10 @@ return new class extends Migration
         Schema::create('event_dates', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('event_id')->unsigned();
-            $table->date('start_date');
-            $table->time('start_time')->nullable();
-            $table->date('end_date')->nullable();
-            $table->time('end_time')->nullable();
+            $table->dateTime('start_date');
+            $table->dateTime('end_date')->nullable();
             $table->timestamps();
+            $table->unique(['event_id', 'start_date']);
             $table->foreign('event_id')->references('id')->on('events')->onDelete('cascade');
         });
     }

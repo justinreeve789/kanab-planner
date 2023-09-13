@@ -164,7 +164,7 @@ class VisitSouthernUtah extends Command
         }
     }
 
-    protected function processEvents(array $events)
+    protected function processEvents(array $events, $extract = false)
     {
         foreach ($events as $event) {
             // Skip past events.
@@ -180,14 +180,12 @@ class VisitSouthernUtah extends Command
             $evtObj = Event::updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $event->id], [
                 'name' => $event->title->rendered,
                 'description' => trim(html_entity_decode(htmlspecialchars(strip_tags($event->acf->information_block)))),
-                'start_date' => date('Y-m-d', strtotime($event->acf->start_datetime)),
-                'start_time' => date('H:i', strtotime($event->acf->start_datetime)),
+                'start_date' => date('Y-m-d H:i:s', strtotime($event->acf->start_datetime)),
                 'raw_data' => json_encode($event),
             ]);
 
             if (isset($event->acf->end_date)) {
-                $evtObj->end_date = date('Y-m-d', strtotime($event->acf->end_date));
-                $evtObj->end_time = date('H:i', strtotime($event->acf->end_date));
+                $evtObj->end_date = date('Y-m-d H:i:s', strtotime($event->acf->end_date));
             }
 
             $locName = isset($event->acf->location_name) ? $event->acf->location_name : null;
@@ -215,28 +213,29 @@ class VisitSouthernUtah extends Command
             }
             $evtObj->save();
 
-            $imageUrls = $this->conversionService->extractImagesFromHtml($event->acf->information_block);
-            foreach ($imageUrls as $imageUrl) {
-                $text = $this->conversionService->convertImageToText($imageUrl);
-                if ($text) {
-                    ResourceText::updateOrCreate([
-                        'resource_table' => 'events',
-                        'resource_id' => $evtObj->id,
-                        'raw' => $text,
-                    ]);
+            if ($extract === true) {
+                $imageUrls = $this->conversionService->extractImagesFromHtml($event->acf->information_block);
+                foreach ($imageUrls as $imageUrl) {
+                    $text = $this->conversionService->convertImageToText($imageUrl);
+                    if ($text) {
+                        ResourceText::updateOrCreate([
+                            'resource_table' => 'events',
+                            'resource_id' => $evtObj->id,
+                            'raw' => $text,
+                        ]);
+                    }
                 }
-            }
 
-            $pdfUrls = $this->conversionService->extractPdfsFromHtml($event->acf->information_block);
-            foreach ($pdfUrls as $pdfUrl) {
-                echo $pdfUrl . ' ';
-                $text = $this->conversionService->extractTextFromPdfUrl($pdfUrl);
-                if ($text) {
-                    ResourceText::updateOrCreate([
-                        'resource_table' => 'events',
-                        'resource_id' => $evtObj->id,
-                        'raw' => $text,
-                    ]);
+                $pdfUrls = $this->conversionService->extractPdfsFromHtml($event->acf->information_block);
+                foreach ($pdfUrls as $pdfUrl) {
+                    $text = $this->conversionService->extractTextFromPdfUrl($pdfUrl);
+                    if ($text) {
+                        ResourceText::updateOrCreate([
+                            'resource_table' => 'events',
+                            'resource_id' => $evtObj->id,
+                            'raw' => $text,
+                        ]);
+                    }
                 }
             }
         }

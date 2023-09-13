@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Models\Area;
 use App\Models\Event;
+use App\Models\EventDate;
+use App\Models\EventLink;
 use App\Models\Location;
 use App\Models\ResourceText;
 use App\Services\ConversionService;
@@ -29,6 +31,7 @@ class CitySpark extends Command
      */
     protected $description = 'Import events from cityspark.com';
 
+    private $client;
     private $conversionService;
     private $ocrService;
 
@@ -39,15 +42,20 @@ class CitySpark extends Command
     {
         $this->conversionService = new ConversionService();
 
-        $client = new Client();
+        $this->client = new Client();
         $queries = $this->getQueries();
         foreach ($queries as $areaId => $query) {
-            $response = $client->post('https://portal.cityspark.com/v1/events/CitySparkPortalHome', [
+            $response = $this->client->post('https://portal.cityspark.com/v1/events/CitySparkPortalHome', [
                 'headers' => ['Accept' => 'application/json', 'Content-Type' => 'application/json; charset=UTF-8'],
                 'json' => $query,
             ]);
             $events = json_decode($response->getBody()->getContents());
             $this->processEvents($events->Value, $areaId);
+        }
+
+        $events = Event::where('source_type', 'cityspark')->get();
+        foreach ($events as $event) {
+            $this->processEventPage($event->source_id);
         }
     }
 
@@ -110,6 +118,40 @@ class CitySpark extends Command
         ];
     }
 
+    protected function processEventPage(string $eventSourceId)
+    {
+        // https://portal.cityspark.com/#/details/_/{$eventSourceId}
+
+        $response = $this->client->post('https://portal.cityspark.com/v1/event/CitySparkPortalHome', [
+            'headers' => ['Accept' => 'application/json', 'Content-Type' => 'application/json; charset=UTF-8'],
+            'json' => ['pid' => $eventSourceId],
+        ]);
+        $responseData = json_decode($response->getBody()->getContents());
+        if ($responseData->Success != 1 || !isset($responseData->Value)) {
+            return null;
+        }
+        $data = $responseData->Value;
+
+        $event = Event::updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $eventSourceId], [
+            'email' => $this->getProp($data->ct, 'email'),
+            'phone' => $this->getProp($data->ct, 'phone'),
+            'raw_data' => json_encode($data),
+        ]);
+
+        EventDate::where('event_id', $event->id)->delete();
+        foreach ($data->Occurances as $date) {
+            // Skip dates in the past.
+            if (strtotime($date->Start) >= time()) {
+                $eventDate = new EventDate([
+                    'event_id' => $event->id,
+                    'start_date' => date('Y-m-d H:i:s', strtotime($date->Start)),
+                    'end_date' => date('Y-m-d H:i:s', strtotime($date->End)),
+                ]);
+                $eventDate->save();
+            }
+        }
+    }
+
     protected function processEvents(array $events, int $areaId = Area::KANAB)
     {
         foreach ($events as $event) {
@@ -131,10 +173,8 @@ class CitySpark extends Command
                 'description' => $event->Description,
                 'free' => $event->Free,
                 'price' => $price ?? null,
-                'start_date' => date('Y-m-d', strtotime($event->DateStart)),
-                'start_time' => date('H:i', strtotime($event->DateStart)),
-                'end_date' => date('Y-m-d', strtotime($event->DateEnd)),
-                'end_time' => date('H:i', strtotime($event->DateEnd)),
+                'start_date' => date('Y-m-d H:i:s', strtotime($event->DateStart)),
+                'end_date' => date('Y-m-d H:i:s', strtotime($event->DateEnd)),
                 'raw_data' => json_encode($event),
             ]);
 

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Itinerary;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Itinerary extends Model
+class Period extends Model
 {
     use HasFactory;
 
-    private $homeLocationId;
+    private $activities;
 }

@@ -147,10 +147,8 @@ class NPS extends Command
                 'url' => $evtUrl,
                 'latitude' => $evtLat,
                 'longitude' => $evtLng,
-                'start_date' => date('Y-m-d', strtotime($evtStartDate)),
-                'start_time' => date('H:i', strtotime($evtStartTime)),
-                'end_date' => date('Y-m-d', strtotime($evtEndDate)),
-                'end_time' => date('H:i', strtotime($evtEndTime)),
+                'start_date' => date('Y-m-d H:i:s', strtotime($evtStartDate)),
+                'end_date' => date('Y-m-d H:i:s', strtotime($evtEndDate)),
                 'raw_data' => json_encode($evt),
             ]);
 

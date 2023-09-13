@@ -27,10 +27,8 @@ class CreateEventsTable extends Migration
             $table->string('url')->nullable();
             $table->boolean('free')->nullable();
             $table->string('price')->nullable();
-            $table->date('start_date');
-            $table->time('start_time')->nullable();
-            $table->date('end_date')->nullable();
-            $table->time('end_time')->nullable();
+            $table->dateTime('start_date');
+            $table->dateTime('end_date')->nullable();
             $table->text('raw_data')->nullable();
             $table->timestamps();
             $table->unique(['source_type', 'source_id']);

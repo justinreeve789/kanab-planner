@@ -34,9 +34,9 @@ Route::prefix('v1')->group(function() {
     });
 
     Route::prefix('itinerary')->group(function() {
-        Route::get('/', 'App\Http\Controllers\ItineraryController@index');
+//        Route::get('/', 'App\Http\Controllers\ItineraryController@index');
         Route::get('/{id}', 'App\Http\Controllers\ItineraryController@getItinerary');
-        Route::post('/', 'App\Http\Controllers\ItineraryController@createItinerary');
+        Route::get('/', 'App\Http\Controllers\ItineraryController@createItinerary');
         Route::put('/{id}', 'App\Http\Controllers\ItineraryController@updateItinerary');
     });
 

@@ -2,26 +2,33 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
 use App\Services\ConversionService;
-use App\Services\OpenAIService;
+use App\Services\EventService;
+use App\Services\ItineraryService;
 use Illuminate\Http\Request;
 
 class ItineraryController extends Controller
 {
-    private $openAIService;
     private $conversionService;
+    private $itineraryService;
 
     public function __construct()
     {
-        $this->openAIService = new OpenAIService();
         $this->conversionService = new ConversionService();
+        $this->itineraryService = new ItineraryService();
     }
 
     public function index(Request $request)
     {
     }
 
-    public function create(Request $request)
+    /**
+     * Activity weight: 0.25
+     * Event weight: 0.5 (they're not something anyone can do any day)
+     * Trail weight: 0.25
+     */
+    public function createItinerary(Request $request)
     {
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
@@ -38,7 +45,6 @@ class ItineraryController extends Controller
 //        echo $response;
 
         $events = Event::between($startDate, $endDate);
-        print_r($events);
         return;
     }
 }
