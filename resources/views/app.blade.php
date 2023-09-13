@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Roboto:wght@100&amp;display=swap'>
     <link rel="icon" href="https://image.flaticon.com/icons/svg/2983/2983687.svg">
-    @vite('resources/scss/app.scss')
+    <link rel="stylesheet" href="{{ mix('css/app.css') }}">
     <title>{{ env('APP_NAME' )}}</title>
     <script src="https://cdn.jsdelivr.net/npm/ismobilejs@1/dist/isMobile.min.js"></script>
 </head>
@@ -17,6 +17,6 @@
 <div id="app">
     <app></app>
 </div>
-@vite('resources/js/app.js')
+<script src="{{ mix('js/app.js') }}" defer></script>
 </body>
 </html>

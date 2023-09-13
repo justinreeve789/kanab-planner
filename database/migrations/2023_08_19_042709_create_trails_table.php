@@ -15,11 +15,11 @@ class CreateTrailsTable extends Migration
     {
         Schema::create('trails', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('name');
+            $table->string('name_alt')->nullable();
             $table->string('source_type');
             $table->string('source_id');
             $table->integer('area_id')->unsigned();
-            $table->string('name');
-            $table->string('name_alt')->nullable();
             $table->text('description')->nullable();
             $table->text('description_alt')->nullable();
             $table->text('directions')->nullable();

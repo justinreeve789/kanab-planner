@@ -83,6 +83,29 @@ class OCRService
         return $text;
     }
 
+    public function convertImageToText($imagePath): ?string
+    {
+        if (env('OCR')) {
+            $ocrOptions = explode(',', env('OCR'));
+            if (!empty($ocrOptions)) {
+                $ocr = $ocrOptions[0];
+            }
+        }
+        switch ($ocr) {
+            case self::GOOGLE_CLOUD_VISION:
+                $text = $this->convertImageToTextWithGoogleCloudVision($imagePath);
+                $this->conversionService->deleteFiles($imagePath);
+                break;
+            case self::OCR_SPACE:
+            case self::TESSERACT:
+            default:
+                $text = $this->convertImageToTextWithTesseract($imagePath);
+                $this->deleteFiles([$imagePath]);
+                break;
+        }
+        return $text;
+    }
+
     public function convertPdfToText($pdfPath): ?string
     {
         if (env('OCR')) {

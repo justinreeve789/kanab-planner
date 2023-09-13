@@ -38,7 +38,6 @@ class CitySpark extends Command
     public function handle()
     {
         $this->conversionService = new ConversionService();
-        $this->ocrService = new OCRService();
 
         $client = new Client();
         $queries = $this->getQueries();
@@ -50,6 +49,18 @@ class CitySpark extends Command
             $events = json_decode($response->getBody()->getContents());
             $this->processEvents($events->Value, $areaId);
         }
+    }
+
+    private function skippedEvents(): array {
+        return [
+            'Book Club',
+            'Book Discussion Group',
+            'Dixie High',
+            'High School',
+            'Meeting',
+            'Moms \'n Tots',
+            'Movie',
+        ];
     }
 
     private function getProp($data, $prop)
@@ -109,11 +120,17 @@ class CitySpark extends Command
                 }
             }
 
+            foreach ($this->skippedEvents() as $skippedEvent) {
+                if (stripos(strtolower($event->Name), strtolower($skippedEvent)) !== false) {
+                    continue 2;
+                }
+            }
+
             $evtObj = Event::updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $event->PId], [
                 'name' => $event->Name,
                 'description' => $event->Description,
                 'free' => $event->Free,
-                'price' => $price,
+                'price' => $price ?? null,
                 'start_date' => date('Y-m-d', strtotime($event->DateStart)),
                 'start_time' => date('H:i', strtotime($event->DateStart)),
                 'end_date' => date('Y-m-d', strtotime($event->DateEnd)),
@@ -158,7 +175,7 @@ class CitySpark extends Command
 
             $imageUrls = $this->conversionService->extractImagesFromHtml($event->Description);
             foreach ($imageUrls as $imageUrl) {
-                $text = $this->ocrService->scanImageUrl($imageUrl);
+                $text = $this->conversionService->convertImageToText($imageUrl);
                 if ($text) {
                     ResourceText::updateOrCreate([
                         'resource_table' => 'events',

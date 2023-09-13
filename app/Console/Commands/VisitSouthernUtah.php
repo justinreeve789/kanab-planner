@@ -34,7 +34,6 @@ class VisitSouthernUtah extends Command
     protected $description = 'Import events for visitsouthernutah.com';
 
     private $conversionService;
-//    private $ocrService;
 
     /**
      * Execute the console command.
@@ -46,7 +45,6 @@ class VisitSouthernUtah extends Command
         $doTrails = $this->option('trails');
 
         $this->conversionService = new ConversionService();
-//        $this->ocrService = new OCRService();
 
         if ($doEvents !== false) {
             $json = file_get_contents('https://visitsouthernutah.com/wp-json/wp/v2/events?per_page=100&page=1');
@@ -219,7 +217,7 @@ class VisitSouthernUtah extends Command
 
             $imageUrls = $this->conversionService->extractImagesFromHtml($event->acf->information_block);
             foreach ($imageUrls as $imageUrl) {
-                $text = $this->ocrService->scanImageUrl($imageUrl);
+                $text = $this->conversionService->convertImageToText($imageUrl);
                 if ($text) {
                     ResourceText::updateOrCreate([
                         'resource_table' => 'events',

@@ -15,9 +15,10 @@ class CreateEventsTable extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('name');
             $table->string('source_type');
             $table->string('source_id');
-            $table->string('name');
+            $table->integer('location_id')->unsigned()->nullable();
             $table->text('description')->nullable();
             $table->float('latitude', 10, 7)->nullable();
             $table->float('longitude', 10, 7)->nullable();
@@ -26,7 +27,6 @@ class CreateEventsTable extends Migration
             $table->string('url')->nullable();
             $table->boolean('free')->nullable();
             $table->string('price')->nullable();
-            $table->integer('location_id')->unsigned()->nullable();
             $table->date('start_date');
             $table->time('start_time')->nullable();
             $table->date('end_date')->nullable();

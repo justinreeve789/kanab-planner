@@ -20,14 +20,31 @@ class ConversionService
         return (filter_var($str, FILTER_VALIDATE_URL) !== false);
     }
 
-    public function downloadFile($url)
+    public function downloadFile($url): ?string
     {
 //        $headers = get_headers($url, 1);
 //        $contentType = $headers['Content-Type'];
         $temp = storage_path('temp/file_' . sha1(microtime()));
-        $file = file_get_contents($url);
-        file_put_contents($temp, $file  );
+        try {
+            $file = file_get_contents($url);
+        } catch (\Throwable $e) {
+            return null;
+        }
+        file_put_contents($temp, $file);
         return $temp;
+    }
+
+    public function convertImageToText($imagePath): ?string
+    {
+        $text = null;
+        if ($this->isUrl($imagePath)) {
+            $imagePath = $this->downloadFile($imagePath);
+        }
+        if ($imagePath) {
+            $text = $this->ocrService->convertImageToText($imagePath);
+        }
+        $this->deleteFiles($imagePath);
+        return $text;
     }
 
     public function convertPdfToImage($pdfPath, $fileType = 'png'): ?string
@@ -51,7 +68,15 @@ class ConversionService
 
     public function convertPdfToText($pdfPath): ?string
     {
-        return $this->ocrService->convertPdfToText($pdfPath);
+        $text = null;
+        if ($this->isUrl($pdfPath)) {
+            $pdfPath = $this->downloadFile($pdfPath);
+        }
+        if ($pdfPath) {
+            $text = $this->ocrService->convertPdfToText($pdfPath);
+        }
+        $this->deleteFiles($pdfPath);
+        return $text;
     }
 
     public function extractTextFromPdfUrl($pdfUrl): ?string
