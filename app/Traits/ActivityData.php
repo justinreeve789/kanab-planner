@@ -151,6 +151,29 @@ trait ActivityData
     /**
      * The incline/decline, distance, and grade are used for calculating the strenuousness of the trail (-0.2/+0.9).
      * Account for differences between hiking and off-roading by calling setActivityType() before this function.
+     * Strenuousness = ActivityAdventurousness + K1 * K2 * K3
+
+    Where:
+    - ActivityAdventurousness is a constant representing the adventurousness of the trail based on the activity type.
+    - K1 = 0.5 (a constant)
+    - K2 = 1.0 - 1.0 / (1.0 + exp(-K * (incline - decline)))
+    - K is the incline/decline sensitivity (0.75 in the code).
+    - incline and decline are the incline and decline values of the trail.
+    - K3 = 1.0 - 1.0 / (1.0 + exp(D * (distance - A)))
+    - D is the distance sensitivity (1 in the code).
+    - A is the distance threshold (3.0 in the code).
+
+    - exp(x) is the exponential function: e^x, where e is the base of the natural logarithm.
+
+    The result of K2 and K3 is constrained to the range [0, 1] using the sigmoid function (1.0 / (1.0 + exp(-x))). This ensures that these terms are between 0 and 1.
+
+    Additionally, there are adjustments based on the difficulty and average hours of the trail:
+
+    - If the trail is marked as easy, subtract 0.2 from the final score.
+    - If the trail is marked as difficult, add 0.2 to the final score.
+    - If there is an average hours value, adjust the final score based on it.
+
+    This equation allows you to calculate the strenuousness score for a trail based on its characteristics and activity type. Simply plug in the values for incline, decline, distance, and other parameters to compute the score.
      */
     private function calculateStrenuousnessForTrail(): float
     {
