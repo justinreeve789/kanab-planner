@@ -15,24 +15,25 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name');
             $table->decimal('adventurousness', 3, 2);
-            $table->decimal('solitude', 3, 2);
+            $table->decimal('solitariness', 3, 2);
+            $table->decimal('strenuousness', 3, 2);
         });
 
         DB::table('activities')->insert([
-            ['name' => 'bicycling', 'adventurousness' => 0.8, 'solitude' => 0.7],
-            ['name' => 'boating', 'adventurousness' => 0.7, 'solitude' => 0.3],
-            ['name' => 'concert', 'adventurousness' => 0.5, 'solitude' => 0.1],
-            ['name' => 'dining', 'adventurousness' => 0.1, 'solitude' => 0.2],
-            ['name' => 'endurance-race', 'adventurousness' => 1.0, 'solitude' => 0.1],
-            ['name' => 'festivals-and-celebrations', 'adventurousness' => 0.4, 'solitude' => 0.1],
-            ['name' => 'hiking', 'adventurousness' => 0.4, 'solitude' => 0.5],
-            ['name' => 'location', 'adventurousness' => 0.4, 'solitude' => 0.3],
-            ['name' => 'museum', 'adventurousness' => 0.3, 'solitude' => 0.3],
-            ['name' => 'offroading', 'adventurousness' => 0.8, 'solitude' => 0.3],
-            ['name' => 'rock-climbing', 'adventurousness' => 0.9, 'solitude' => 0.2],
-            ['name' => 'shopping', 'adventurousness' => 0.0, 'solitude' => 0.1],
-            ['name' => 'sightseeing', 'adventurousness' => 0.3, 'solitude' => 0.5],
-            ['name' => 'swimming', 'adventurousness' => 0.2, 'solitude' => 0.2],
+            ['name' => 'bicycling', 'adventurousness' => 0.5, 'solitariness' => 0.7, 'strenuousness' => 0.7],
+            ['name' => 'boating', 'adventurousness' => 0.7, 'solitariness' => 0.3, 'strenuousness' => 0.4],
+            ['name' => 'concert', 'adventurousness' => 0.5, 'solitariness' => 0.1, 'strenuousness' => 0.3],
+            ['name' => 'dining', 'adventurousness' => 0.1, 'solitariness' => 0.2, 'strenuousness' => 0],
+            ['name' => 'endurance-race', 'adventurousness' => 0.8, 'solitariness' => 0.1, 'strenuousness' => 1.0],
+            ['name' => 'festivals-and-celebrations', 'adventurousness' => 0.8, 'solitariness' => 0.1, 'strenuousness' => 0.2],
+            ['name' => 'hiking', 'adventurousness' => 0.6, 'solitariness' => 0.5, 'strenuousness' => 0.7],
+            ['name' => 'location', 'adventurousness' => 0.4, 'solitariness' => 0.3, 'strenuousness' => 0.2],
+            ['name' => 'museum', 'adventurousness' => 0.3, 'solitariness' => 0.3, 'strenuousness' => 0.1],
+            ['name' => 'offroading', 'adventurousness' => 0.8, 'solitariness' => 0.3, 'strenuousness' => 0.6],
+            ['name' => 'rock-climbing', 'adventurousness' => 0.9, 'solitariness' => 0.2, 'strenuousness' => 0.8],
+            ['name' => 'shopping', 'adventurousness' => 0, 'solitariness' => 0.1, 'strenuousness' => 0],
+            ['name' => 'sightseeing', 'adventurousness' => 0.3, 'solitariness' => 0.5, 'strenuousness' => 0],
+            ['name' => 'swimming', 'adventurousness' => 0.2, 'solitariness' => 0.2, 'strenuousness' => 0.1],
         ]);
     }
 

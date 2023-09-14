@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('resource_table', 16);
             $table->integer('resource_id');
             $table->decimal('adventurousness', 3, 2);
-            $table->decimal('solitude', 3, 2);
+            $table->decimal('solitariness', 3, 2);
+            $table->decimal('strenuousness', 3, 2);
             $table->timestamps();
             $table->primary(['resource_table', 'resource_id']);
             $table->index('resource_table');

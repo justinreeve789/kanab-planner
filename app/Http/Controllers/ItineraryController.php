@@ -50,14 +50,16 @@ class ItineraryController extends Controller
         $events = Event::between($startDate, $endDate)->with('data')->get();
         foreach ($events as $event) {
         }
+
         $restaurants = Restaurant::with('data')->with('location')->get();
         foreach ($restaurants as $item) {
-            echo $item->location->name . ' ' . $item->average_price . ' ' . $item->adventurousness() . ' ' . $item->solitude() . '<br>';
+            echo $item->location->name . ' ' . $item->average_price . ' ' . $item->adventurousness() . ' ' . $item->solitariness() . ' ' . $item->strenuousness() . '<br>';
         }
+
         $trails = Trail::with('data')->get();
         foreach ($trails as $item) {
             $item->setActivityType('hiking');
-            echo $item->name . ' ' . $item->adventurousness() . ' ' . $item->solitude() . '<br>';
+            echo $item->name . ' ' . $item->adventurousness() . ' ' . $item->solitariness() . ' ' . $item->strenuousness() . ' - ' . $item->distance_miles . ' miles<br>';
         }
         return;
     }

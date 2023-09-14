@@ -115,7 +115,15 @@ class HikingProject extends Command
 //        $this->browser->close();
     }
 
-    private function parseTrailPage($trailUrl, $areaId) {
+    private function fixSymbols($str): string
+    {
+        $str = str_replace("html5-dom-document-internal-entity2-39-end", "'", $str);
+        $str = str_replace("html5-dom-document-internal-entity1-deg-end", "&deg;", $str);
+        return $str;
+    }
+
+    private function parseTrailPage($trailUrl, $areaId)
+    {
         echo 'Processing ' . $trailUrl . '
 ';
         $trailHtml = file_get_contents($trailUrl);
@@ -141,6 +149,27 @@ class HikingProject extends Command
             $contactUrl = trim($dom->querySelector('#trail-text .mb-1 .trail-contacts a')->textContent);
         } catch (\Throwable $e) {
             $pets = $features = $description = $contactName = $contactUrl = null;
+        }
+
+        $distanceMiles = str_replace(' Miles', '', $distanceMiles);
+        $elevationHigh = $this->fixSymbols($elevationHigh);
+        $elevationLow = $this->fixSymbols($elevationLow);
+        $incline = $this->fixSymbols($incline);
+        $decline = $this->fixSymbols($decline);
+        $avgGrade = null;
+        $maxGrade = null;
+        $elevationHigh = preg_replace("/[^0-9.]/", "", $elevationHigh);
+        $elevationLow = preg_replace("/[^0-9.]/", "", $elevationLow);
+        $incline = preg_replace("/[^0-9.]/", "", $incline);
+        $decline = preg_replace("/[^0-9.]/", "", $decline);
+        $gradeParts = explode(' ', $grade);
+        for ($g = 0; $g < count($gradeParts); $g++) {
+            if ($gradeParts[$g] == 'Avg') {
+                $avgGrade = floatval($gradeParts[$g - 1]) / 100.00;
+            }
+            if ($gradeParts[$g] == 'Max') {
+                $maxGrade = floatval($gradeParts[$g - 1]) / 100.00;
+            }
         }
 
         $imageUrls = [];
@@ -175,13 +204,15 @@ class HikingProject extends Command
                 'fee' => null,
                 'gpx_url' => $gpxUrl,
                 'features' => $features,
+                'difficulty' => $difficulty,
                 'distance_miles' => $distanceMiles,
                 'distance_type' => $distanceType,
-                'elevation_high' => $elevationHigh,
-                'elevation_low' => $elevationLow,
-                'incline' => $incline,
-                'decline' => $decline,
-                'grade' => $grade,
+                'elevation_high_ft' => $elevationHigh,
+                'elevation_low_ft' => $elevationLow,
+                'incline_ft' => $incline,
+                'decline_ft' => $decline,
+                'average_grade_percent' => $avgGrade,
+                'max_grade_percent' => $maxGrade,
                 'raw_data' => $areaId . ' | ' . $trailUrl,
             ]);
         } catch (\Illuminate\Database\QueryException) {
@@ -191,11 +222,13 @@ class HikingProject extends Command
                 'area_id' => 0,
                 'distance_miles' => $distanceMiles,
                 'distance_type' => $distanceType,
-                'elevation_high' => $elevationHigh,
-                'elevation_low' => $elevationLow,
-                'incline' => $incline,
-                'decline' => $decline,
+                'elevation_high_ft' => $elevationHigh,
+                'elevation_low_ft' => $elevationLow,
+                'incline_ft' => $incline,
+                'decline_ft' => $decline,
                 'grade' => $grade,
+                'average_grade_pt' => $avgGrade,
+                'max_grade_pt' => $maxGrade,
                 'raw_data' => $areaId . ' | ' . $trailUrl,
             ]);
         }

@@ -9,6 +9,11 @@ use App\Models\Location;
 use App\Models\Restaurant;
 use App\Models\Trail;
 
+/**
+ * Adventurousness = The uniqueness of the experience, and how outside an average person's comfort zone it is.
+ * Solitariness = How much a person who enjoys less-crowded or non-human-interacting experiences would enjoy it.
+ * Strenousness = How physically exerting the experience is.
+ */
 trait ActivityData
 {
     private $activities;
@@ -76,7 +81,7 @@ trait ActivityData
         return round($adventurousness, 2);
     }
 
-    public function solitude($activityType = null)
+    public function solitariness($activityType = null)
     {
         switch (static::class) {
             case 'App\\Models\\Events':
@@ -92,8 +97,27 @@ trait ActivityData
                 }
             default:
         }
-        $solitude = $this->calculateSolitude();
-        return round($solitude, 2);
+        $solitariness = $this->calculateSolitariness();
+        return round($solitariness, 2);
+    }
+
+    public function strenuousness($activityType = null): float
+    {
+        $strenuousness = null;
+        switch (static::class) {
+            case 'App\\Models\\Trail':
+                if (!$this->getActivityType()) {
+                    $this->setActivityType('hiking');
+                }
+                $strenuousness = $this->calculateStrenuousnessForTrail();
+                break;
+            case 'App\\Models\\Events':
+            case 'App\\Models\\Location':
+            case 'App\\Models\\Restaurant':
+            default:
+                $strenuousness = $this->data->strenuousness;
+        }
+        return round($strenuousness, 2);
     }
 
     /**
@@ -107,48 +131,25 @@ trait ActivityData
     }
 
     /**
-     * The more strenuous, the more adventurous the trail (up to +0.5).
-     * Account for differences between hiking and off-roading by calling setActivityType() first.
+     * The more "unique" the trail, the higher the adventurousness.
      */
     private function calculateAdventurousnessForTrail(): float
     {
         $activityType = $this->getActivityType();
-
-        // Calculate the individual terms
-        $K = 0.01; // Incline/decline sensitivity
-        $D = 0.01; // Distance sensitivity
-        $G = 0.01; // Grade sensitivity
-        $A = 5.0;  // Distance threshold
-
-        $incline = (int)str_replace("'", "", $this->incline);
-        $decline = (int)str_replace("'", "", $this->decline);
-        $distance = (float)str_replace(' Miles', '', $this->distance_miles);
-        $avgGrade = 0.06;
-        $maxGrade = 0.17;
-
-        $inclineDeclineTerm = 1.0 / (1.0 + exp(-$K * ($incline - $decline)));
-        $distanceTerm = 1.0 / (1.0 + exp($D * ($distance - $A)));
-        $gradeTerm = 1.0 / (1.0 + exp(-$G * ($avgGrade - $maxGrade)));
-
-        // Calculate the overall strenuousness score
-        $strenuousness = 0.5 * (1.0 - $inclineDeclineTerm) * (1.0 - $distanceTerm) * (1.0 - $gradeTerm);
-
-        // Ensure the result is between 0 and 0.5
-        $strenuousness = max(0, min(0.5, $strenuousness));
-        return $this->activity($activityType)->adventurousness + $strenuousness;
+        return $this->activity($activityType)->adventurousness;
     }
 
     /**
-     * The busier the event, restaurant, or trail, the lower the solitude.
+     * The busier the event, restaurant, or trail, the lower the solitariness.
      * (x - 0.5) / y
      */
-    private function calculateSolitude(): float
+    private function calculateSolitariness(): float
     {
         $activityType = $this->getActivityType();
         $busynessAdj = ($this->getBusyness() - 0.5);
 
         switch (static::class) {
-            // We don't care so much about solitude at a restaurant.
+            // We don't care so much about solitariness at a restaurant.
             case 'App\\Models\\Restaurant':
                 $busynessAdj = $busynessAdj / 3;
                 break;
@@ -158,6 +159,42 @@ trait ActivityData
             default:
                 $busynessAdj = $busynessAdj / 1.5;
         }
-        return $this->activity($activityType)->solitude - $busynessAdj;
+        return $this->activity($activityType)->solitariness - $busynessAdj;
+    }
+
+    /**
+     * The incline/decline, distance, and grade are used for calculating the strenuousness of the trail (up to +0.5).
+     * Account for differences between hiking and off-roading by calling setActivityType() before this function.
+     */
+    private function calculateStrenuousnessForTrail(): float
+    {
+        $activityType = $this->getActivityType();
+
+        // Calculate the individual terms.
+        $K = 0.75; // Incline/decline sensitivity
+        $D = 1; // Distance sensitivity
+        $G = 1.25; // Grade sensitivity
+        $A = 3.0;  // Distance threshold
+
+        $incline = (int)$this->incline_ft;
+        $decline = (int)$this->decline_ft;
+        $distance = (float)$this->distance_miles;
+        $avgGrade = (float)$this->average_grade_pt;
+        $maxGrade = (float)$this->max_grade_pt;
+
+        // Use a logarithmic value based on distance, so extremely long distances don't skew the results too much. This
+        // will have a wider curve for smaller numbers, and cap out at 7.5.
+        $distance = 7.5 / (1 + exp(-$distance * 7.5));
+
+        $inclineDeclineTerm = 1.0 / (1.0 + exp(-$K * ($incline - $decline)));
+        $distanceTerm = 1.0 / (1.0 + exp($D * ($distance - $A)));
+        $gradeTerm = 1.0 / (1.0 + exp(-$G * ($avgGrade - $maxGrade)));
+
+        // Calculate the overall strenuousness score.
+        $strenuousness = 0.5 * (1.0 - $inclineDeclineTerm) * (1.0 - $distanceTerm) * (1.0 - $gradeTerm);
+
+        // Ensure the result is between 0 and 0.5.
+        $strenuousness = max(0, min(0.5, $strenuousness));
+        return $this->activity($activityType)->adventurousness + $strenuousness;
     }
 }
