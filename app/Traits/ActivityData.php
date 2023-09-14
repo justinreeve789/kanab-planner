@@ -81,23 +81,30 @@ trait ActivityData
         return round($adventurousness, 2);
     }
 
+    /**
+     * The busier the event, restaurant, or trail, the lower the solitariness.
+     * (x - 0.5) / y
+     */
     public function solitariness($activityType = null)
     {
+        $busynessAdj = ($this->getBusyness() - 0.5);
         switch (static::class) {
-            case 'App\\Models\\Events':
-                break;
-            case 'App\\Models\\Location':
-                break;
+            // We don't care so much about solitariness at a restaurant.
             case 'App\\Models\\Restaurant':
+                $busynessAdj = $busynessAdj / 3;
                 $this->setActivityType('dining');
                 break;
             case 'App\\Models\\Trail':
+                $busynessAdj = $busynessAdj / 1.5;
                 if (!$this->getActivityType()) {
                     $this->setActivityType('hiking');
                 }
+            case 'App\\Models\\Event':
+            case 'App\\Models\\Location':
             default:
+                $busynessAdj = $busynessAdj / 1.5;
         }
-        $solitariness = $this->calculateSolitariness();
+        $solitariness = ($this->activity($activityType)->solitariness ?? 0.5) - $busynessAdj;
         return round($solitariness, 2);
     }
 
@@ -111,9 +118,11 @@ trait ActivityData
                 }
                 $strenuousness = $this->calculateStrenuousnessForTrail();
                 break;
+            case 'App\\Models\\Restaurant':
+                $strenuousness = 0;
+                break;
             case 'App\\Models\\Events':
             case 'App\\Models\\Location':
-            case 'App\\Models\\Restaurant':
             default:
                 $strenuousness = $this->data->strenuousness;
         }
@@ -137,29 +146,6 @@ trait ActivityData
     {
         $activityType = $this->getActivityType();
         return $this->activity($activityType)->adventurousness;
-    }
-
-    /**
-     * The busier the event, restaurant, or trail, the lower the solitariness.
-     * (x - 0.5) / y
-     */
-    private function calculateSolitariness(): float
-    {
-        $activityType = $this->getActivityType();
-        $busynessAdj = ($this->getBusyness() - 0.5);
-
-        switch (static::class) {
-            // We don't care so much about solitariness at a restaurant.
-            case 'App\\Models\\Restaurant':
-                $busynessAdj = $busynessAdj / 3;
-                break;
-            case 'App\\Models\\Event':
-            case 'App\\Models\\Location':
-            case 'App\\Models\\Trail':
-            default:
-                $busynessAdj = $busynessAdj / 1.5;
-        }
-        return $this->activity($activityType)->solitariness - $busynessAdj;
     }
 
     /**

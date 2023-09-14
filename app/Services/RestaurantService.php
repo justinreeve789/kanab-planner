@@ -22,7 +22,11 @@ class RestaurantService
     public function getAveragePriceForRestaurant($restaurantId)
     {
         $restaurant = Restaurant::with('location')->where('id', $restaurantId)->first();
-    }
+        // Initialize the Places API Service
+                $placesService = new Google_Service_Places($client);
+
+        // Restaurant name or Place ID
+                $restaurantName = 'Restaurant Name'; // You can also use a Place ID    }
 
     private function getPlace()
     {}
