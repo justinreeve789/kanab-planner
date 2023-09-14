@@ -149,7 +149,7 @@ trait ActivityData
     }
 
     /**
-     * The incline/decline, distance, and grade are used for calculating the strenuousness of the trail (up to +0.5).
+     * The incline/decline, distance, and grade are used for calculating the strenuousness of the trail (-0.2/+0.9).
      * Account for differences between hiking and off-roading by calling setActivityType() before this function.
      */
     private function calculateStrenuousnessForTrail(): float
@@ -182,7 +182,7 @@ trait ActivityData
         // Ensure the result is between 0 and 0.5.
         $strenuousness = max(0, min(0.5, $strenuousness));
 
-        // Take into account what the difficulty field specifies.
+        // Take into account what the difficulty field specifies (-0.2/+0.2).
         if ($this->isEasy()) {
             $strenuousness -= 0.2;
         }
