@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('activities', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->decimal('adventurousness', 2, 1);
-            $table->decimal('solitude', 2, 1);
+            $table->decimal('adventurousness', 3, 2);
+            $table->decimal('solitude', 3, 2);
         });
 
         DB::table('activities')->insert([

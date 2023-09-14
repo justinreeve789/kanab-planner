@@ -2,15 +2,22 @@
 
 namespace App\Models;
 
+use App\Traits\ActivityData;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Event extends Model
 {
+    use ActivityData;
     use HasFactory;
 
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'location_id'];
+
+    public function data()
+    {
+        return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'event');
+    }
 
     public function dates()
     {
@@ -37,6 +44,6 @@ class Event extends Model
             $query->where('event_dates.start_date', '>=', date('Y-m-d H:i:s', strtotime($startDateTime)));
             $query->where('event_dates.start_date', '<=', date('Y-m-d H:i:s', strtotime($endDateTime)));
             $query->where('event_dates.end_date', '<=', date('Y-m-d H:i:s', strtotime($endDateTime)));
-        })->get();
+        });
     }
 }
