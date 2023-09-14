@@ -23,4 +23,19 @@ class Trail extends Model
     {
         return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'trails');
     }
+
+    public function isEasy()
+    {
+        return strpos(strtolower($this->difficulty), 'easy') !== false;
+    }
+
+    public function isIntermediate()
+    {
+        return strpos(strtolower($this->difficulty), 'intermediate') !== false;
+    }
+
+    public function isDifficult()
+    {
+        return strpos(strtolower($this->difficulty), 'difficult') !== false;
+    }
 }

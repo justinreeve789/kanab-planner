@@ -39,6 +39,7 @@ class CreateTrailsTable extends Migration
             $table->string('vehicle')->nullable();
             $table->decimal('distance_miles', 4, 1)->nullable();
             $table->string('distance_type')->nullable();
+            $table->decimal('average_hours', 3, 1)->nullable();
             $table->smallInteger('incline_ft')->nullable();
             $table->smallInteger('decline_ft')->nullable();
             $table->decimal('average_grade_pt', 3, 2)->nullable()->comment('Average grade as a percentage');

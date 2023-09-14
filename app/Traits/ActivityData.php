@@ -195,6 +195,20 @@ trait ActivityData
 
         // Ensure the result is between 0 and 0.5.
         $strenuousness = max(0, min(0.5, $strenuousness));
+
+        // Take into account what the difficulty field specifies.
+        if ($this->isEasy()) {
+            $strenuousness -= 0.2;
+        }
+        if ($this->isDifficult()) {
+            $strenuousness += 0.2;
+        }
+
+        // Take into account the average hours of the trail (-0.1/+0.2).
+        if ($this->average_hours) {
+            $strenuousness += (0.4 * (1 - exp(-0.2 * $this->average_hours)) - 0.2) / 2;
+        }
+
         return $this->activity($activityType)->adventurousness + $strenuousness;
     }
 }
