@@ -50,6 +50,10 @@ class ItineraryController extends Controller
 //        $response = $this->openAIService->query('Create a vacation itinerary for Kanab, Utah from October 3, 2023 to October 10, 2023. Display dining and activities for morning, afternoon, and evening each day. Place more weight on rock climbing and hiking and escape rooms.');
 //        echo $response;
 
+        $itinerary = new Itinerary();
+        $itinerary->setDates($startDate . ' ' . $checkInTimeOfDay, $endDate . ' ' . $checkOutTimeOfDay);
+
+        // Find out which events are within their dates. Since these are usually one-time events, we may want to weigh them heavier, especially if they match their preferences.
         $events = Event::between($startDate, $endDate)
             ->with('data')
             ->sortByDeviation('adventurousness', $this->itinerary->adventurousness)
@@ -57,15 +61,13 @@ class ItineraryController extends Controller
 
         $restaurants = Restaurant::with('data')->with('location')->get();
         foreach ($restaurants as $item) {
-            echo $item->location->name . ' ' . $item->average_price . ' ' . $item->adventurousness() . ' ' . $item->solitariness() . ' ' . $item->strenuousness() . '<br>';
+//            echo $item->location->name . ' ' . $item->average_price . ' ' . $item->adventurousness() . ' ' . $item->solitariness() . ' ' . $item->strenuousness() . '<br>';
         }
 
         $trails = Trail::with('data')
             ->sortByDeviation('strenuousness', $this->itinerary->strenuousness)
             ->get();
         echo '<pre>'; print_r($trails->toArray()); echo '</pre>';
-        foreach ($trails as $item) {
-        }
         return;
     }
 }

@@ -26,7 +26,7 @@ class Trail extends Resource
 
     public function data()
     {
-        return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'trails');
+        return $this->hasMany(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'trails');
     }
 
     public function isEasy()

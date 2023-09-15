@@ -26,6 +26,7 @@ class Itinerary
     private $estimatedCost;
     private $homeLocationId;
     private $interests;
+    private $season;
     public $solitariness = self::DEFAULT_SOLITARINESS;
     private $startDate;
     public $strenuousness = self::DEFAULT_STRENUOUSNESS;
@@ -66,5 +67,16 @@ class Itinerary
     public function getDays(): array
     {
         return $this->days;
+    }
+
+    public function setDates($arrivalDateTime, $departureDateTime)
+    {
+        $this->arrivalDateTime = $arrivalDateTime;
+        $this->departureDateTime = $departureDateTime;
+    }
+
+    public function setDurationDays($durationDays)
+    {
+        $this->durationDays = $durationDays;
     }
 }
