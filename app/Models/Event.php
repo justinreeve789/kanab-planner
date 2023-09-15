@@ -50,8 +50,4 @@ class Event extends Resource
             $query->where('event_dates.end_date', '<=', date('Y-m-d H:i:s', strtotime($endDateTime)));
         });
     }
-
-    public static function sortByDeviation($events, string $prop, float $value)
-    {
-    }
 }

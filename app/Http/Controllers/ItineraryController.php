@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Itinerary\Itinerary;
+use App\Models\Location;
 use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Traits\ActivityData;
@@ -44,6 +45,7 @@ class ItineraryController extends Controller
         $durationDays = $request->get('durationDays');
         $endDate = $request->get('end_date');
         $interests = $request->get('interests');
+        $priorities = ['trails', 'events', 'locations', 'restaurants'];
         $startDate = $request->get('start_date');
         $tripPreference = $request->get('trip_preference');
 
@@ -56,18 +58,24 @@ class ItineraryController extends Controller
         // Find out which events are within their dates. Since these are usually one-time events, we may want to weigh them heavier, especially if they match their preferences.
         $events = Event::between($startDate, $endDate)
             ->with('data')
-            ->sortByDeviation('adventurousness', $this->itinerary->adventurousness)
+            ->sortByDeviation(['adventurousness' => $this->itinerary->adventurousness, 'solitariness' => $this->itinerary->solitariness, 'strenuousness' => $this->itinerary->strenuousness])
             ->get();
 
-        $restaurants = Restaurant::with('data')->with('location')->get();
-        foreach ($restaurants as $item) {
-//            echo $item->location->name . ' ' . $item->average_price . ' ' . $item->adventurousness() . ' ' . $item->solitariness() . ' ' . $item->strenuousness() . '<br>';
-        }
+        $locations = Location::with('data')
+            ->whereProximity(37.2592463, -112.9513419, 30)
+//            ->sortByDeviation(['adventurousness' => $this->itinerary->adventurousness, 'solitariness' => $this->itinerary->solitariness, 'strenuousness' => $this->itinerary->strenuousness])
+            ->get();
+        echo '<pre>'; print_r($locations->toArray()); echo '</pre>';
+
+        $restaurants = Restaurant::with('data')
+            ->with('location')
+            ->sortByDeviation(['adventurousness' => $this->itinerary->adventurousness, 'solitariness' => $this->itinerary->solitariness, 'strenuousness' => $this->itinerary->strenuousness])
+            ->get();
 
         $trails = Trail::with('data')
-            ->sortByDeviation('strenuousness', $this->itinerary->strenuousness)
+            ->sortByDeviation(['strenuousness' => $this->itinerary->strenuousness])
             ->get();
-        echo '<pre>'; print_r($trails->toArray()); echo '</pre>';
+//        echo '<pre>'; print_r($trails->toArray()); echo '</pre>';
         return;
     }
 }

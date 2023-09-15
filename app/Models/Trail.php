@@ -4,12 +4,14 @@ namespace App\Models;
 
 use App\Models\Resource;
 use App\Traits\ActivityData;
+use App\Traits\Proximity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Trail extends Resource
 {
     use ActivityData;
     use HasFactory;
+    use Proximity;
 
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'area_id'];

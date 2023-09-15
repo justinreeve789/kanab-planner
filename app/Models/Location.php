@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\Proximity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Location extends Resource
 {
     use HasFactory;
+    use Proximity;
 
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'area_id'];
@@ -15,6 +17,16 @@ class Location extends Resource
     public function area()
     {
         return $this->belongsTo(Area::class, 'area_id', 'id');
+    }
+
+    public function data()
+    {
+        return $this->hasMany(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'locations');
+    }
+
+    public function text()
+    {
+        return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_text', 'locations');
     }
 
     static public function search($params = []): ?Location {

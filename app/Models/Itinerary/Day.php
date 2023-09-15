@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Day extends Model
 {
     use HasFactory;
+
+    public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
+    public $date;
+    public $solitariness = self::DEFAULT_SOLITARINESS;
+    public $strenuousness = self::DEFAULT_STRENUOUSNESS;
 }
