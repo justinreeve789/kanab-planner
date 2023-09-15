@@ -17,6 +17,11 @@ return new class extends Migration
             $table->decimal('adventurousness', 3, 2);
             $table->decimal('solitariness', 3, 2);
             $table->decimal('strenuousness', 3, 2);
+//            $table->decimal('childfriendliness', 3, 2)->nullable();
+//            $table->decimal('lengthiness', 3, 2)->nullable();
+//            $table->decimal('originalness', 3, 2)->nullable();
+//            $table->decimal('weatheriness', 3, 2)->nullable()->comment('How dependents this is on the weather');
+//            $table->decimal('noisiness', 3, 2)->nullable();
         });
 
         DB::table('activities')->insert([
