@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\Resource;
 use App\Traits\ActivityData;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
-class Trail extends Model
+class Trail extends Resource
 {
     use ActivityData;
     use HasFactory;

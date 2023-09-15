@@ -6,7 +6,7 @@ use App\Traits\ActivityData;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Event extends Model
+class Event extends Resource
 {
     use ActivityData;
     use HasFactory;
@@ -50,5 +50,9 @@ class Event extends Model
             $query->where('event_dates.start_date', '<=', date('Y-m-d H:i:s', strtotime($endDateTime)));
             $query->where('event_dates.end_date', '<=', date('Y-m-d H:i:s', strtotime($endDateTime)));
         });
+    }
+
+    public static function sortByDeviation($events, string $prop, float $value)
+    {
     }
 }

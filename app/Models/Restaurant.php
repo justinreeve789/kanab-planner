@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Models\Builder\CustomQueryBuilder;
 use App\Traits\ActivityData;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Restaurant extends Model
+class Restaurant extends Resource
 {
     use ActivityData;
     use HasFactory;

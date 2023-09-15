@@ -7,6 +7,7 @@ use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Models\Image;
 use App\Repositories\ItineraryRepository;
+use Illuminate\Database\Eloquent\Model;
 
 class ItineraryService
 {
@@ -20,8 +21,8 @@ class ItineraryService
         return $this->repository;
     }
 
-    public function getEventsNearAdventurousness(float $adventurousness)
+    public function getResourcesNearAdventurousness(Model $model, float $adventurousness)
     {
-        return $this->getRepository()->getEventsNearAdventurousness(Event::class, $adventurousness);
+        return $this->getRepository()->getResourcesNearAdventurousness(with(new $model)->getTable(), $adventurousness);
     }
 }

@@ -50,21 +50,21 @@ class ItineraryController extends Controller
 //        $response = $this->openAIService->query('Create a vacation itinerary for Kanab, Utah from October 3, 2023 to October 10, 2023. Display dining and activities for morning, afternoon, and evening each day. Place more weight on rock climbing and hiking and escape rooms.');
 //        echo $response;
 
-        $events = Event::between($startDate, $endDate)->with('data')->get();
-        foreach ($events as $event) {
-        }
-
-        $events = $this->itineraryService->getEventsNearAdventurousness($this->itinerary->adventurousness);
+        $events = Event::between($startDate, $endDate)
+            ->with('data')
+            ->sortByDeviation('adventurousness', $this->itinerary->adventurousness)
+            ->get();
 
         $restaurants = Restaurant::with('data')->with('location')->get();
         foreach ($restaurants as $item) {
             echo $item->location->name . ' ' . $item->average_price . ' ' . $item->adventurousness() . ' ' . $item->solitariness() . ' ' . $item->strenuousness() . '<br>';
         }
 
-        $trails = Trail::with('data')->get();
+        $trails = Trail::with('data')
+            ->sortByDeviation('strenuousness', $this->itinerary->strenuousness)
+            ->get();
+        echo '<pre>'; print_r($trails->toArray()); echo '</pre>';
         foreach ($trails as $item) {
-            $item->setActivityType('hiking');
-            echo $item->name . ' ' . $item->adventurousness() . ' ' . $item->solitariness() . ' ' . $item->strenuousness() . ' - ' . $item->distance_miles . ' miles<br>';
         }
         return;
     }
