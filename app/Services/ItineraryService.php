@@ -6,19 +6,22 @@ use App\Models\Event;
 use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Models\Image;
-use App\Services\OCRService;
-use Spatie\PdfToText\Pdf;
+use App\Repositories\ItineraryRepository;
 
 class ItineraryService
 {
-    private $ocrService;
+    private $repository;
 
-    public function __construct()
+    public function getRepository()
     {
-        $this->ocrService = new OCRService(['conversionService' => $this]);
+        if (!isset($this->repository)) {
+            $this->repository = new ItineraryRepository();
+        }
+        return $this->repository;
     }
 
-    public function getEventsBetweenDates($startDate, $endDate)
+    public function getEventsNearAdventurousness(float $adventurousness)
     {
+        return $this->getRepository()->getEventsNearAdventurousness(Event::class, $adventurousness);
     }
 }

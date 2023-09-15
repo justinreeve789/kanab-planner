@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Itinerary\Itinerary;
 use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Traits\ActivityData;
@@ -14,10 +15,12 @@ use Illuminate\Http\Request;
 class ItineraryController extends Controller
 {
     private $conversionService;
+    private $itinerary;
     private $itineraryService;
 
     public function __construct()
     {
+        $this->itinerary = new Itinerary();
         $this->conversionService = new ConversionService();
         $this->itineraryService = new ItineraryService();
     }
@@ -50,6 +53,8 @@ class ItineraryController extends Controller
         $events = Event::between($startDate, $endDate)->with('data')->get();
         foreach ($events as $event) {
         }
+
+        $events = $this->itineraryService->getEventsNearAdventurousness($this->itinerary->adventurousness);
 
         $restaurants = Restaurant::with('data')->with('location')->get();
         foreach ($restaurants as $item) {
