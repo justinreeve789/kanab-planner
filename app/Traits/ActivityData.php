@@ -6,13 +6,14 @@ use App\Models\Activity;
 use App\Models\Event;
 use App\Models\EventTag;
 use App\Models\Location;
+use App\Models\ResourceData;
 use App\Models\Restaurant;
 use App\Models\Trail;
 
 /**
  * Adventurousness = The uniqueness of the experience, and how outside an average person's comfort zone it is.
  * Solitariness = How much a person who enjoys less-crowded or non-human-interacting experiences would enjoy it.
- * Strenousness = How physically exerting the experience is.
+ * Strenuousness = How physically exerting the experience is.
  */
 trait ActivityData
 {
@@ -20,13 +21,11 @@ trait ActivityData
     private string $activityType;
     private float $busyness = 0.5;
 
-    public function __construct()
+    public function activity($name): ?Activity
     {
-        $this->activities = Activity::all()->keyBy('name');
-    }
-
-    private function activity($name): ?Activity
-    {
+        if (!isset($this->activities)) {
+            $this->activities = Activity::all()->keyBy('name');
+        }
         try {
             return $this->activities[$name];
         } catch (\Exception $e) {
@@ -35,7 +34,7 @@ trait ActivityData
         return null;
     }
 
-    public function getActivityType(): string
+    public function getActivityType(): ?string
     {
         return $this->activityType;
     }
@@ -62,8 +61,10 @@ trait ActivityData
     public function adventurousness($activityType = null)
     {
         $adventurousness = null;
+        $this->setActivityType($activityType);
         switch (static::class) {
             case 'App\\Models\\Events':
+                $adventurousness = reset($this->data)->adventurousness;
                 break;
             case 'App\\Models\\Location':
                 break;
@@ -100,6 +101,11 @@ trait ActivityData
                     $this->setActivityType('hiking');
                 }
             case 'App\\Models\\Event':
+                if (isset($this->data[0])) {
+                    $busynessAdj = -($this->data[0]->solitariness);
+                }
+                $this->setActivityType('event');
+                break;
             case 'App\\Models\\Location':
             default:
                 $busynessAdj = $busynessAdj / 1.5;
@@ -110,7 +116,6 @@ trait ActivityData
 
     public function strenuousness($activityType = null): float
     {
-        $strenuousness = null;
         switch (static::class) {
             case 'App\\Models\\Trail':
                 if (!$this->getActivityType()) {
@@ -121,12 +126,25 @@ trait ActivityData
             case 'App\\Models\\Restaurant':
                 $strenuousness = 0;
                 break;
-            case 'App\\Models\\Events':
+            case 'App\\Models\\Event':
+                $strenuousness = reset($this->data)->strenuousness;
             case 'App\\Models\\Location':
             default:
                 $strenuousness = $this->data->strenuousness;
         }
         return round($strenuousness, 2);
+    }
+
+    /**
+     * The resource data for events is calculated in EventService and populated with "php artisan import:data --events."
+     * TODO: Does this belong in the ResourceData model?
+     */
+    private function getResourceDataForEvent(): array
+    {
+    }
+
+    private function getAdventurousnessForEvent(): float
+    {
     }
 
     /**
@@ -138,6 +156,18 @@ trait ActivityData
         $activityType = $this->getActivityType();
         return $this->activity($activityType)->adventurousness + 0.2 * tanh(0.1 * ($this->getAveragePrice() - 15));
     }
+
+    /**
+     * The resource data for events is calculated in EventService and populated with "php artisan import:data --events."
+     */
+    private function getSolitarinessForEvent(): float
+    {}
+
+    /**
+     * The resource data for events is calculated in EventService and populated with "php artisan import:data --events."
+     */
+    private function getStrenuousnessForEvent(): float
+    {}
 
     /**
      * The more "unique" the trail, the higher the adventurousness.
@@ -218,6 +248,6 @@ trait ActivityData
             $strenuousness += (0.4 * (1 - exp(-0.2 * $this->average_hours)) - 0.2) / 2;
         }
 
-        return $this->activity($activityType)->adventurousness + $strenuousness;
+        return $this->activity($activityType)->strenuousness + $strenuousness;
     }
 }

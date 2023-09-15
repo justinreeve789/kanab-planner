@@ -16,7 +16,7 @@ class Event extends Model
 
     public function data()
     {
-        return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'event');
+        return $this->hasMany(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'events');
     }
 
     public function dates()
@@ -32,6 +32,11 @@ class Event extends Model
     public function location()
     {
         return $this->belongsTo(Location::class, 'location_id', 'id');
+    }
+
+    public function text()
+    {
+        return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_text', 'events');
     }
 
     public static function between($startDateTime, $endDateTime)

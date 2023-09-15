@@ -9,7 +9,7 @@ class ResourceData extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['*'];
+    protected $guarded = ['id'];
     protected $hidden = ['resource_table', 'resource_id', 'created_at', 'updated_at'];
     protected $table = 'resource_data';
 }

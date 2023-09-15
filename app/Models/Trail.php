@@ -14,6 +14,11 @@ class Trail extends Model
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'area_id'];
 
+    public function __construct()
+    {
+//        $this->setActivityType(self::DEFAULT_ACTIVITY_TYPE);
+    }
+
     public function area()
     {
         return $this->belongsTo(Area::class, 'area_id', 'id');

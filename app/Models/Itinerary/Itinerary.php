@@ -10,7 +10,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Itinerary
 {
+    const DEFAULT_ADVENTUROUSNESS = 0.3;
+    const DEFAULT_SOLITARINESS = 0.3;
+    const DEFAULT_STRENUOUSNESS = 0.3;
+
     private $accommodationPreference;
+    private $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
     private $arrivalDateTime;
     private $checkInTimeOfDay;
     private $checkOutTimeOfDay;
@@ -21,7 +26,9 @@ class Itinerary
     private $estimatedCost;
     private $homeLocationId;
     private $interests;
+    private $solitariness = self::DEFAULT_SOLITARINESS;
     private $startDate;
+    private $strenuousness = self::DEFAULT_STRENUOUSNESS;
     private $tripPreference;
 
     public function __construct()

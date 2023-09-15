@@ -11,16 +11,16 @@ use OpenAI\Laravel\Facades\OpenAI;
 
 class OpenAIService
 {
-    public function query($prompt) {
+    public function query($prompt, $maxTokens = 500) {
         $result = OpenAI::chat()->create([
-            'max_tokens' => 500,
+            'max_tokens' => $maxTokens,
             'model' => 'gpt-3.5-turbo',
             'messages' => [[
                 'role' => 'user',
                 'content' => $prompt,
             ]],
         ]);
-        return $result['choices'][0]['text']; // an open-source, widely-used, server-side scripting language.
+        return $result['choices'][0]['message']['content']; // an open-source, widely-used, server-side scripting language.
     }
 
     public function cleanTextWithWGPT(string $text): ?string {
