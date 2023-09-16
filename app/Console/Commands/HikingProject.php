@@ -119,6 +119,7 @@ class HikingProject extends Command
     {
         $str = str_replace("html5-dom-document-internal-entity2-39-end", "'", $str);
         $str = str_replace("html5-dom-document-internal-entity1-deg-end", "&deg;", $str);
+        $str = str_replace("html5-dom-document-internal-entity1-middot-end", "/", $str);
         return $str;
     }
 
@@ -150,8 +151,20 @@ class HikingProject extends Command
         } catch (\Throwable $e) {
             $pets = $features = $description = $contactName = $contactUrl = null;
         }
+        $json = $dom->querySelectorAll('script[type="application/ld+json"]')->item(1)->textContent;
+        $json = str_replace('<![CDATA[-html5-dom-document-internal-cdata', '', $json);
+        $json = str_replace('-html5-dom-document-internal-cdata]]>', '', $json);
+        $json = json_decode(trim($json));
+        if (isset($json->description)) {
+            $descriptionAlt = trim($json->description);
+        }
+        if (isset($json->geo)) {
+            $latitude = trim($json->geo->latitude);
+            $longitude = trim($json->geo->longitude);
+        }
 
         $distanceMiles = str_replace(' Miles', '', $distanceMiles);
+        $features = $this->fixSymbols($features);
         $elevationHigh = $this->fixSymbols($elevationHigh);
         $elevationLow = $this->fixSymbols($elevationLow);
         $incline = $this->fixSymbols($incline);
@@ -190,13 +203,13 @@ class HikingProject extends Command
                 'name_alt' => $areaId,
                 'area_id' => 0,
                 'description' => $description,
-                'description_alt' => null,
+                'description_alt' => $descriptionAlt ?? null,
                 'directions' => null,
                 'accessibility' => null,
                 'duration' => null,
                 'pets_allowed' => $pets,
-                'latitude' => null,
-                'longitude' => null,
+                'latitude' => $latitude ?? null,
+                'longitude' => $longitude ?? null,
                 'contact_url' => $contactUrl,
                 'contact_name' => $contactName,
                 'season ' => null,

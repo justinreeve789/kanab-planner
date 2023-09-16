@@ -62,10 +62,9 @@ class ItineraryController extends Controller
             ->get();
 
         $locations = Location::with('data')
-            ->whereProximity(37.2592463, -112.9513419, 30)
+            ->whereProximity(37.2982000, -113.0263000, 30)
 //            ->sortByDeviation(['adventurousness' => $this->itinerary->adventurousness, 'solitariness' => $this->itinerary->solitariness, 'strenuousness' => $this->itinerary->strenuousness])
             ->get();
-        echo '<pre>'; print_r($locations->toArray()); echo '</pre>';
 
         $restaurants = Restaurant::with('data')
             ->with('location')
@@ -73,9 +72,10 @@ class ItineraryController extends Controller
             ->get();
 
         $trails = Trail::with('data')
-            ->sortByDeviation(['strenuousness' => $this->itinerary->strenuousness])
+            ->whereProximity(37.2982000, -113.0263000, 30)
+//            ->sortByDeviation(['strenuousness' => $this->itinerary->strenuousness])
             ->get();
-//        echo '<pre>'; print_r($trails->toArray()); echo '</pre>';
+        echo '<pre>'; print_r($trails->toArray()); echo '</pre>';
         return;
     }
 }
