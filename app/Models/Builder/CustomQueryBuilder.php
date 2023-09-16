@@ -23,15 +23,48 @@ class CustomQueryBuilder extends Builder
                 $order .= ' + ABS(resource_data.' . $prop . ' - ' . $value . ')';
             }
         }
-        return $this->join('resource_data', function ($join) use ($table) {
+        return $this->join('resource_data', function($join) use ($table) {
             $join->on('resource_table', '=', \DB::raw('"' . $table . '"'));
             $join->on('resource_id', '=', \DB::raw($table . '.id'));
         })->orderByRaw($order);
     }
 
+    /**
+     * Calculate the proximity to the latitude/longtitude coordinates using the Haversine formula.
+     */
     public function whereProximity($latitude, $longitude, $maxDistance)
     {
         return $this->whereRaw('3959 * ACOS(COS(RADIANS(?)) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(?)) + SIN(RADIANS(?)) * SIN(RADIANS(latitude))) <= ?', [$latitude, $longitude, $latitude, $maxDistance])
             ->orderByRaw('3959 * ACOS(COS(RADIANS(?)) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(?)) + SIN(RADIANS(?)) * SIN(RADIANS(latitude)))', [$latitude, $longitude, $latitude]);
+    }
+
+    /**
+     * Determine if the event, location, restaurant, or trail is open on the specified date within the time range.
+     * If we don't have hours for something, and $defaultIsOpen is set to true, we'll just assume it's open if it's
+     * between the hours of 08:00 and 20:00.
+     */
+    public function whereIsOpen($dateTime, $defaultIsOpen = true)
+    {
+        $table = $this->getModel()->getTable();
+        switch ($table) {
+            case 'events':
+                break;
+            case 'locations':
+                $dayOfWeek = date('w', strtotime($dateTime));
+                $time = date('H:i:s', strtotime($dateTime));
+                return $this->leftJoin('location_hours', 'location_hours.location_id', '=', 'locations.id')
+                    ->where('location_hours.day_of_week', '=', $dayOfWeek)
+                    ->whereRaw('location_hours.time_open <= TIME(?)', [$time])
+                    ->whereRaw('location_hours.time_close >= TIME(?)', [$time])
+                    ->orWhere(function($query) use ($time) {
+                        $query->whereNull('location_hours.id')
+                            ->whereRaw('TIME(?) BETWEEN TIME("06:00") AND TIME("22:00")', [$time]);
+                    });
+                break;
+            case 'restaurants':
+                break;
+            case 'trails':
+            default:
+        }
     }
 }
