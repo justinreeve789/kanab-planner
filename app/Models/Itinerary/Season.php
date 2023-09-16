@@ -91,7 +91,49 @@ class Season
                 }
             }
         }
-
         return null;
+    }
+
+    public static function randomDateInSeason(string $season): string {
+        // Define the start and end dates for each season.
+        $seasons = [
+            'spring' => ['start' => '03-20', 'end' => '06-20'],
+            'summer' => ['start' => '06-21', 'end' => '09-21'],
+            'fall' => ['start' => '09-22', 'end' => '12-20'],
+            'winter' => ['start' => '12-21', 'end' => '03-19'],
+        ];
+
+        // Get the current year.
+        $currentYear = date('Y');
+
+        // Get the start and end dates for the specified season.
+        $start = new \DateTime($currentYear . '-' . $seasons[$season]['start']);
+        $end = new \DateTime($currentYear . '-' . $seasons[$season]['end']);
+
+        if ($end < $start) {
+            $end = new \DateTime($currentYear + 1 . '-' . $seasons[$season]['end']);
+        }
+
+        // Calculate the minimum date (2 weeks from the start of the season).
+        $minDate = clone $start;
+        $minDate->add(new \DateInterval('P2W'));
+
+        // Calculate the maximum date (2 weeks before the end of the season).
+        $maxDate = clone $end;
+        $maxDate->sub(new \DateInterval('P2W'));
+
+        // Check if the minimum date is after the maximum date.
+        if ($minDate > $maxDate) {
+            throw new \Exception("Invalid date range.");
+        }
+
+        // Generate a random timestamp within the season's date range.
+        $randomTimestamp = mt_rand($minDate->getTimestamp(), $maxDate->getTimestamp());
+
+        // Create a random DateTime object from the generated timestamp.
+        $randomDate = new \DateTime();
+        $randomDate->setTimestamp($randomTimestamp);
+
+        return $randomDate->format('Y-m-d');
     }
 }

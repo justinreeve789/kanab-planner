@@ -49,7 +49,6 @@ class ItineraryController extends Controller
         $arrivalDateTime = $request->get('arrival_datetime');
         $departureDateTime = $request->get('departure_datetime');
         $interests = $request->get('interests');
-        $priorities = ['trails', 'events', 'locations', 'restaurants'];
         $tripPreference = $request->get('trip_preference');
 
         $this->getItinerary()->setCheckInTime($request->get('check_in'));
@@ -73,17 +72,83 @@ class ItineraryController extends Controller
             }
         }
 
-        $adventurousness = $request->get('adventurousness');
-        $solitariness = $request->get('solitariness');
-        $strenuousness = $request->get('strenuousness');
+        $this->getItinerary()->setAdventurousness($request->get('adventurousness'));
+        $this->getItinerary()->setSolitariness($request->get('solitariness'));
+        $this->getItinerary()->setStrenuousness($request->get('strenuousness'));
+        $this->getItinerary()->setPriorities($request->get('priorities'));
+
+        $this->determineAndSetMissingDates();
     }
 
     /**
      * Most users probably won't have specific dates in mind. Just a season or month. We can decide on dates here.
      * TODO: Incorporate the reservation system, so we're favoring dates that have accommodation openings.
      */
-    private function determineDates()
+    private function determineAndSetMissingDates()
     {
+        if ($this->getItinerary()->getStartDate()) {
+            if ($this->getItinerary()->getEndDate()) {
+                // We're good. Just exit.
+                return;
+            } else if ($this->getItinerary()->getDurationDays()) {
+                $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($this->getItinerary()->getStartDate() . ' +' . $this->getItinerary()->getDurationDays() . ' days')));
+                return;
+            }
+        }
+
+        if (!$this->getItinerary()->getStartDate() || !$this->getItinerary()->getEndDate()) {
+            // Let's try the month.
+            if ($this->getItinerary()->getMonth()) {
+                // Pick a random date in the month that's at least 2 weeks ahead of the current date.
+                $startDate = $this->getRandomDateInMonth($this->getItinerary()->getMonth());
+                $this->getItinerary()->setStartDate($startDate);
+
+                if ($this->getItinerary()->getDurationDays()) {
+                    $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($this->getItinerary()->getStartDate() . ' +' . $this->getItinerary()->getDurationDays() . ' days')));
+                    return;
+                }
+            }
+
+            // Let's try the season.
+            if ($this->getItinerary()->getSeason()) {
+                $startDate = Season::randomDateInSeason($this->getItinerary()->getSeason());
+                $this->getItinerary()->setStartDate($startDate);
+
+                if ($this->getItinerary()->getDurationDays()) {
+                    $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($this->getItinerary()->getStartDate() . ' +' . $this->getItinerary()->getDurationDays() . ' days')));
+                    return;
+                }
+            }
+        }
+
+        throw new \Exception('Could not set dates: ' . print_r($this->getItinerary(), true));
+    }
+
+    private function getRandomDateInMonth($month) {
+        // Get the current date
+        $currentDate = new \DateTime();
+
+        // Calculate the target year
+        $targetYear = (int)$currentDate->format('Y');
+        if ($currentDate->format('n') > $month) {
+            $targetYear++; // Move to the next year if the specified month is in the past
+        }
+
+        // Calculate the minimum date (2 weeks from the current date)
+        $minimumDate = clone $currentDate;
+        $minimumDate->add(new \DateInterval('P2W'));
+
+        // Generate a random date in the specified month
+        $randomDay = mt_rand(1, cal_days_in_month(CAL_GREGORIAN, $month, $targetYear));
+        $randomDate = new \DateTime("$targetYear-$month-$randomDay");
+
+        // Check if the random date is at least 2 weeks ahead
+        if ($randomDate < $minimumDate) {
+            // If not, add 2 weeks to the random date
+            $randomDate->add(new \DateInterval('P2W'));
+        }
+
+        return $randomDate->format('Y-m-d');
     }
 
     /**
