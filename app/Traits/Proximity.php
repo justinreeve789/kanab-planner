@@ -13,8 +13,8 @@ use App\Models\Trail;
 trait Proximity
 {
     public function calculateDistance($lat1, $lon1, $lat2, $lon2) {
-        // Radius of the Earth in kilometers (mean value).
-        $earthRadius = 6371;
+        // Radius of the Earth in miles (mean value).
+        $earthRadius = 3959;
 
         // Convert latitude and longitude from degrees to radians.
         $lat1 = deg2rad($lat1);

@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('activities', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->decimal('adventurousness', 3, 2);
-            $table->decimal('solitariness', 3, 2);
-            $table->decimal('strenuousness', 3, 2);
-//            $table->decimal('childfriendliness', 3, 2)->nullable();
+            $table->decimal('adventurousness', 3, 2)->comment('The uniqueness of the experience, and how outside an average person\'s comfort zone it is');
+            $table->decimal('solitariness', 3, 2)->comment('How much a person who enjoys less-crowded or non-human-interacting experiences would enjoy it');
+            $table->decimal('strenuousness', 3, 2)->comment('How physically exerting the experience is');
+//            $table->decimal('childfriendliness', 3, 2)->nullable()->comment('How suitable the experience is for children');
 //            $table->decimal('lengthiness', 3, 2)->nullable();
-//            $table->decimal('originalness', 3, 2)->nullable();
-//            $table->decimal('weatheriness', 3, 2)->nullable()->comment('How dependents this is on the weather');
+//            $table->decimal('outbackiness', 3, 2)->nullable()->comment('How remote the experience is');
+//            $table->decimal('weatheriness', 3, 2)->nullable()->comment('How dependents the experience is on the weather');
 //            $table->decimal('noisiness', 3, 2)->nullable();
         });
 

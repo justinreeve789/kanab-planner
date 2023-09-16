@@ -31,11 +31,12 @@ class CustomQueryBuilder extends Builder
 
     /**
      * Calculate the proximity to the latitude/longtitude coordinates using the Haversine formula.
+     * This should come after other where() statements, both native and custom.
      */
     public function whereProximity($latitude, $longitude, $maxDistance)
     {
-        return $this->whereRaw('3959 * ACOS(COS(RADIANS(?)) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(?)) + SIN(RADIANS(?)) * SIN(RADIANS(latitude))) <= ?', [$latitude, $longitude, $latitude, $maxDistance])
-            ->orderByRaw('3959 * ACOS(COS(RADIANS(?)) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(?)) + SIN(RADIANS(?)) * SIN(RADIANS(latitude)))', [$latitude, $longitude, $latitude]);
+        return $this->whereRaw('3959 * ACOS(COS(RADIANS(?)) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(?)) + SIN(RADIANS(?)) * SIN(RADIANS(latitude))) <= ?', [$latitude, $longitude, $latitude, $maxDistance]);
+//            ->orderByRaw('3959 * ACOS(COS(RADIANS(?)) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(?)) + SIN(RADIANS(?)) * SIN(RADIANS(latitude)))', [$latitude, $longitude, $latitude]);
     }
 
     /**
@@ -61,7 +62,9 @@ class CustomQueryBuilder extends Builder
                             $query->whereNull('location_hours.id')
                                 ->orWhereNotIn('location_hours.day_of_week', [$dayOfWeek]);
                         })->whereRaw('TIME(?) BETWEEN TIME("06:00") AND TIME("22:00")', [$time]);
-                    });
+                    })
+                    ->select('locations.*')
+                    ->distinct();
                 break;
             case 'restaurants':
                 break;

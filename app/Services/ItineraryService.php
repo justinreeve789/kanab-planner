@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Itinerary\Season;
 use App\Models\Event;
 use App\Models\Restaurant;
 use App\Models\Trail;
@@ -12,6 +13,12 @@ use Illuminate\Database\Eloquent\Model;
 class ItineraryService
 {
     private $repository;
+    private $seasons;
+
+    public function __construct()
+    {
+        $this->seasons = Season::all();
+    }
 
     public function getRepository()
     {
@@ -24,5 +31,10 @@ class ItineraryService
     public function getResourcesNearAdventurousness(Model $model, float $adventurousness)
     {
         return $this->getRepository()->getResourcesNearAdventurousness(with(new $model)->getTable(), $adventurousness);
+    }
+
+    public function generateRandomDates($durationDays = 5, $season = null)
+    {
+        if ($season === null) {}
     }
 }
