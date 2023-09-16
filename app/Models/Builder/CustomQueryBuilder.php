@@ -56,9 +56,11 @@ class CustomQueryBuilder extends Builder
                     ->where('location_hours.day_of_week', '=', $dayOfWeek)
                     ->whereRaw('location_hours.time_open <= TIME(?)', [$time])
                     ->whereRaw('location_hours.time_close >= TIME(?)', [$time])
-                    ->orWhere(function($query) use ($time) {
-                        $query->whereNull('location_hours.id')
-                            ->whereRaw('TIME(?) BETWEEN TIME("06:00") AND TIME("22:00")', [$time]);
+                    ->orWhere(function($query) use ($dayOfWeek, $time) {
+                        $query->where(function($query) use ($dayOfWeek) {
+                            $query->whereNull('location_hours.id')
+                                ->orWhereNotIn('location_hours.day_of_week', [$dayOfWeek]);
+                        })->whereRaw('TIME(?) BETWEEN TIME("06:00") AND TIME("22:00")', [$time]);
                     });
                 break;
             case 'restaurants':

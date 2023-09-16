@@ -63,7 +63,7 @@ class ItineraryController extends Controller
 
         $locations = Location::with('data')
 //            ->whereProximity(37.2982000, -113.0263000, 30)
-            ->whereIsOpen('2023-10-01 12:00:00')
+            ->whereIsOpen('2023-10-01 03:00:00')
 //            ->sortByDeviation(['adventurousness' => $this->itinerary->adventurousness, 'solitariness' => $this->itinerary->solitariness, 'strenuousness' => $this->itinerary->strenuousness]);
             ->get();
 
