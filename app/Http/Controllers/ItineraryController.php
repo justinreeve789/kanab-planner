@@ -36,6 +36,70 @@ class ItineraryController extends Controller
     {
     }
 
+    /**
+     * Activity weight: 0.25
+     * Event weight: 0.5 (they're not something anyone can do any day)
+     * Trail weight: 0.25
+     */
+    public function createItinerary(Request $request)
+    {
+        $this->setupItinerary($request);
+        echo '<pre>'; print_r($this->getItinerary()); echo '</pre>';
+        $this->itineraryService->setItinerary($this->getItinerary());
+        $areas = $this->itineraryService->getAreasForDays();
+        die;
+
+        echo $this->itinerary->getStartDate() . ' - ' . $this->getItinerary()->getEndDate() . '<br>';
+
+        // Find out which events are within their dates. Since these are usually one-time events, we may want to weigh them heavier, especially if they match their preferences.
+
+        $events = $this->getEvents();
+
+        $locations = Location::with('data')
+            ->whereIsOpen('2023-10-01 12:00:00')
+            ->whereProximity($this->getItinerary()->getLatitude(), $this->getItinerary()->getLongitude(), self::DEFAULT_DISTANCE)
+//            ->sortByDeviation(['adventurousness' => $this->itinerary->adventurousness, 'solitariness' => $this->itinerary->solitariness, 'strenuousness' => $this->itinerary->strenuousness]);
+            ->get();
+
+        $restaurants = Restaurant::with('data')
+            ->with('location')
+            ->sortByDeviation(['adventurousness' => $this->itinerary->adventurousness, 'solitariness' => $this->itinerary->solitariness, 'strenuousness' => $this->itinerary->strenuousness])
+            ->get();
+
+        $trails = Trail::with('data')
+            ->whereProximity($this->getItinerary()->getLatitude(), $this->getItinerary()->getLongitude(), self::DEFAULT_DISTANCE)
+            ->sortByDeviation(['strenuousness' => $this->itinerary->strenuousness])
+            ->get();
+        echo '<pre>'; print_r($events->toArray()); echo '</pre>';
+        return;
+    }
+
+    private function getDeviations(): array
+    {
+        $deviations = [];
+        if ($this->getItinerary()->getAdventurousness()) {
+            $deviations['adventurousness'] = $this->getItinerary()->getAdventurousness();
+        }
+        if ($this->getItinerary()->getSolitariness()) {
+            $deviations['adventurousness'] = $this->getItinerary()->getSolitariness();
+        }
+        if ($this->getItinerary()->getStrenuousness()) {
+            $deviations['strenuousness'] = $this->getItinerary()->getStrenuousness();
+        }
+        return $deviations;
+    }
+
+    private function getEvents()
+    {
+        $query = Event::between($this->itinerary->getStartDate(), $this->getItinerary()->getEndDate())
+            ->with('data');
+        $deviations = $this->getDeviations();
+        if (!empty($deviations)) {
+            $query = $query->sortByDeviation($deviations);
+        }
+        return $query->get();
+    }
+
     private function getItinerary()
     {
         return $this->itinerary;
@@ -51,6 +115,7 @@ class ItineraryController extends Controller
         $interests = $request->get('interests');
         $tripPreference = $request->get('trip_preference');
 
+        $this->getItinerary()->setBaseAreaId($request->get('base_area_id'));
         $this->getItinerary()->setCheckInTime($request->get('check_in'));
         $this->getItinerary()->setCheckOutTime($request->get('check_out'));
         $this->getItinerary()->setDurationDays($request->get('duration_days'));
@@ -75,7 +140,8 @@ class ItineraryController extends Controller
         $this->getItinerary()->setAdventurousness($request->get('adventurousness'));
         $this->getItinerary()->setSolitariness($request->get('solitariness'));
         $this->getItinerary()->setStrenuousness($request->get('strenuousness'));
-        $this->getItinerary()->setPriorities($request->get('priorities'));
+        $this->getItinerary()->setActivityPriorities($request->get('activities'));
+        $this->getItinerary()->setTrailPriorities($request->get('trails'));
 
         $this->determineAndSetMissingDates();
     }
@@ -120,7 +186,6 @@ class ItineraryController extends Controller
                 }
             }
         }
-
         throw new \Exception('Could not set dates: ' . print_r($this->getItinerary(), true));
     }
 
@@ -150,46 +215,4 @@ class ItineraryController extends Controller
 
         return $randomDate->format('Y-m-d');
     }
-
-    /**
-     * Activity weight: 0.25
-     * Event weight: 0.5 (they're not something anyone can do any day)
-     * Trail weight: 0.25
-     */
-    public function createItinerary(Request $request)
-    {
-        $this->setupItinerary($request);
-
-        echo $this->itinerary->getStartDate() . ' - ' . $this->getItinerary()->getEndDate() . '<br>';
-
-        // Find out which events are within their dates. Since these are usually one-time events, we may want to weigh them heavier, especially if they match their preferences.
-        $events = Event::between($this->itinerary->getStartDate(), $this->getItinerary()->getEndDate())
-            ->with('data')
-            ->sortByDeviation(['adventurousness' => $this->itinerary->adventurousness, 'solitariness' => $this->itinerary->solitariness, 'strenuousness' => $this->itinerary->strenuousness])
-            ->get();
-
-        $locations = Location::with('data')
-            ->whereIsOpen('2023-10-01 12:00:00')
-            ->whereProximity($this->getItinerary()->getLatitude(), $this->getItinerary()->getLongitude(), self::DEFAULT_DISTANCE)
-//            ->sortByDeviation(['adventurousness' => $this->itinerary->adventurousness, 'solitariness' => $this->itinerary->solitariness, 'strenuousness' => $this->itinerary->strenuousness]);
-            ->get();
-
-        $restaurants = Restaurant::with('data')
-            ->with('location')
-            ->sortByDeviation(['adventurousness' => $this->itinerary->adventurousness, 'solitariness' => $this->itinerary->solitariness, 'strenuousness' => $this->itinerary->strenuousness])
-            ->get();
-
-        $trails = Trail::with('data')
-            ->whereProximity($this->getItinerary()->getLatitude(), $this->getItinerary()->getLongitude(), self::DEFAULT_DISTANCE)
-            ->sortByDeviation(['strenuousness' => $this->itinerary->strenuousness])
-            ->get();
-        echo '<pre>'; print_r($trails->toArray()); echo '</pre>';
-        return;
-    }
-
-    /**
-     * Get areas for days.
-     */
-    public function getAreasForDays()
-    {}
 }

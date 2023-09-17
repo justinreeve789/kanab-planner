@@ -161,6 +161,7 @@ class HikingProject extends Command
         if (isset($json->geo)) {
             $latitude = trim($json->geo->latitude);
             $longitude = trim($json->geo->longitude);
+            $areaId = Area::getAreaForLatLng($latitude, $longitude)->id;
         }
 
         $distanceMiles = str_replace(' Miles', '', $distanceMiles);
@@ -201,7 +202,7 @@ class HikingProject extends Command
             $trail = Trail::updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
                 'name' => $name,
                 'name_alt' => $areaId,
-                'area_id' => 0,
+                'area_id' => $areaId ?? 0,
                 'description' => $description,
                 'description_alt' => $descriptionAlt ?? null,
                 'directions' => null,

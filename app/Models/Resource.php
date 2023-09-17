@@ -11,7 +11,7 @@ class Resource extends Model
     use HasFactory;
 
     /**
-     * @return \App\Models\QueryBuilder
+     * @return \App\Models\Builder\CustomQueryBuilder
      */
     public function newEloquentBuilder($query)
     {

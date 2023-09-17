@@ -2,6 +2,7 @@
 
 namespace App\Models\Itinerary;
 
+use App\Models\Area;
 use App\Models\Itinerary\Activity;
 use App\Models\Itinerary\Day;
 use App\Models\Itinerary\Period;
@@ -19,17 +20,22 @@ class Itinerary
     const DEFAULT_STRENUOUSNESS = 0.3;
     const DEFAULT_CHECKIN_TIME = '16:00';
     const DEFAULT_CHECKOUT_TIME = '10:00';
+    const DEFAULT_ACTIVITY_PRIORITIES = ['hiking'];
+    const DEFAULT_BASE_AREA_ID = Area::KANAB;
     const DEFAULT_DURATION_DAYS = 5;
     const DEFAULT_PRIORITIES = ['trails', 'events', 'locations', 'restaurants'];
     const DEFAULT_SEASON = 'summer';
+    const DEFAULT_TRAIL_PRIORITIES = [378];
     const FALL = 'fall';
     const SPRING = 'spring';
     const SUMMER = 'summer';
     const WINTER = 'winter';
 
     private $accommodationPreference;
+    private $activityPriorities;
     public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
     private $arrivalDateTime;
+    private $baseAreaId = self::DEFAULT_BASE_AREA_ID;
     private $checkInTime;
     private $checkOutTime;
     private $days;
@@ -47,6 +53,7 @@ class Itinerary
     public $solitariness = self::DEFAULT_SOLITARINESS;
     private $startDate;
     public $strenuousness = self::DEFAULT_STRENUOUSNESS;
+    private $trailPriorities;
     private $tripPreference;
 
     public function __construct()

@@ -13,4 +13,10 @@ class Day extends Model
     public $date;
     public $solitariness = self::DEFAULT_SOLITARINESS;
     public $strenuousness = self::DEFAULT_STRENUOUSNESS;
+    public $periods;
+
+    public function __construct()
+    {
+        $this->periods = [];
+    }
 }

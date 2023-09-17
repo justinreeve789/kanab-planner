@@ -33,10 +33,13 @@ class CustomQueryBuilder extends Builder
      * Calculate the proximity to the latitude/longtitude coordinates using the Haversine formula.
      * This should come after other where() statements, both native and custom.
      */
-    public function whereProximity($latitude, $longitude, $maxDistance)
+    public function whereProximity($latitude, $longitude, $maxDistance, $orderBy = false)
     {
-        return $this->whereRaw('3959 * ACOS(COS(RADIANS(?)) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(?)) + SIN(RADIANS(?)) * SIN(RADIANS(latitude))) <= ?', [$latitude, $longitude, $latitude, $maxDistance]);
-//            ->orderByRaw('3959 * ACOS(COS(RADIANS(?)) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(?)) + SIN(RADIANS(?)) * SIN(RADIANS(latitude)))', [$latitude, $longitude, $latitude]);
+        $query = $this->whereRaw('3959 * ACOS(COS(RADIANS(?)) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(?)) + SIN(RADIANS(?)) * SIN(RADIANS(latitude))) <= ?', [$latitude, $longitude, $latitude, $maxDistance]);
+        if ($orderBy !== false) {
+            $query->orderByRaw('3959 * ACOS(COS(RADIANS(?)) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(?)) + SIN(RADIANS(?)) * SIN(RADIANS(latitude)))', [$latitude, $longitude, $latitude]);
+        }
+        return $query;
     }
 
     /**

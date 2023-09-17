@@ -136,7 +136,7 @@ class VisitSouthernUtah extends Command
                 $location = new Location([
                     'name' => $locName,
                     'description' => $locDescription,
-                    'area_id' => Area::KANAB,
+                    'area_id' => ($locLat !== null && $locLng !== null) ? Area::getAreaForLatLng($locLat, $locLng)->id : 0,
                     'address' => $locAddress,
                     'city' => $locCity,
                     'state' => $locState,

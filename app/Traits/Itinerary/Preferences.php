@@ -6,9 +6,19 @@ use App\Models\Itinerary\Season;
 
 trait Preferences
 {
-    public function getAdventurousness(): float
+    public function getActivityPriorities(): ?array
+    {
+        return $this->activityPriorities;
+    }
+
+    public function getAdventurousness(): ?float
     {
         return $this->adventurousness;
+    }
+
+    public function getBaseAreaId(): int
+    {
+        return $this->baseAreaId;
     }
 
     public function getCheckIn()
@@ -56,7 +66,7 @@ trait Preferences
         return $this->season;
     }
 
-    public function getSolitariness(): float
+    public function getSolitariness(): ?float
     {
         return $this->solitariness;
     }
@@ -66,14 +76,38 @@ trait Preferences
         return $this->startDate;
     }
 
-    public function getStrenuousness(): float
+    public function getStrenuousness(): ?float
     {
         return $this->strenuousness;
     }
 
+    public function getTrailPriorities(): ?array
+    {
+        return $this->trailPriorities;
+    }
+
+    public function setActivityPriorities($priorities = null) {
+        if ($priorities === null) {
+            $priorities = self::DEFAULT_ACTIVITY_PRIORITIES;
+        }
+        if (!is_array($priorities)) {
+            $priorities = explode(',', $priorities);
+        }
+        $this->activityPriorities = $priorities;
+    }
+
     public function setAdventurousness(?float $adventurousness)
     {
-        $this->adventurousness = $adventurousness ?? self::DEFAULT_ADVENTUROUSNESS;
+//        $this->adventurousness = $adventurousness ?? self::DEFAULT_ADVENTUROUSNESS;
+        $this->adventurousness = $adventurousness;
+    }
+
+    public function setBaseAreaId(?int $baseAreaId)
+    {
+        if ($baseAreaId === null) {
+            $baseAreaId = self::DEFAULT_BASE_AREA_ID;
+        }
+        $this->baseAreaId = $baseAreaId;
     }
 
     public function setCheckInTime(?string $checkInTime)
@@ -152,7 +186,8 @@ trait Preferences
 
     public function setSolitariness(?float $solitariness)
     {
-        $this->solitariness = $solitariness ?? self::DEFAULT_SOLITARINESS;
+//        $this->solitariness = $solitariness ?? self::DEFAULT_SOLITARINESS;
+        $this->solitariness = $solitariness;
     }
 
     public function setStartDate($startDate)
@@ -162,6 +197,17 @@ trait Preferences
 
     public function setStrenuousness(?float $strenuousness)
     {
-        $this->strenuousness = $strenuousness ?? self::DEFAULT_STRENUOUSNESS;
+//        $this->strenuousness = $strenuousness ?? self::DEFAULT_STRENUOUSNESS;
+        $this->strenuousness = $strenuousness;
+    }
+
+    public function setTrailPriorities($priorities = null) {
+        if ($priorities === null) {
+            $priorities = self::DEFAULT_TRAIL_PRIORITIES;
+        }
+        if (!is_array($priorities)) {
+            $priorities = explode(',', $priorities);
+        }
+        $this->trailPriorities = $priorities;
     }
 }
