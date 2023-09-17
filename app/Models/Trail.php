@@ -14,7 +14,7 @@ class Trail extends Resource
     use Proximity;
 
     protected $guarded = ['id'];
-    protected $hidden = ['raw_data', 'area_id'];
+    protected $hidden = ['raw_data'];
 
     public function __construct()
     {

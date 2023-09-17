@@ -46,10 +46,26 @@ class ItineraryController extends Controller
         $this->setupItinerary($request);
         echo '<pre>'; print_r($this->getItinerary()); echo '</pre>';
         $this->itineraryService->setItinerary($this->getItinerary());
-        $areas = $this->itineraryService->getAreasForDays();
-        die;
+        $days = $this->itineraryService->getDaysForAreas();
+        foreach ($days as $day) {
+            $day = $this->itineraryService->fillDay($day);
+        }
 
         echo $this->itinerary->getStartDate() . ' - ' . $this->getItinerary()->getEndDate() . '<br>';
+
+        foreach ($days as $day) {
+            echo '<strong>' . $day->date . '</strong><br>';
+            foreach ($day->periods as $name => $period) {
+                echo strtoupper($name) . ' - ' . Area::where('id', $period->getAreaId())->pluck('name')->first() . '<br><ul>';
+                foreach ($period->getActivities() as $activity) {
+                    echo '<li>';
+                    echo isset($activity) && isset($activity->name) ? $activity->name : (isset($activity->location->name) ? $activity->location->name : 'unknown');
+                    echo '</li>';
+                }
+                echo '</ul><br>';
+            }
+        }
+        die;
 
         // Find out which events are within their dates. Since these are usually one-time events, we may want to weigh them heavier, especially if they match their preferences.
 
@@ -70,8 +86,6 @@ class ItineraryController extends Controller
             ->whereProximity($this->getItinerary()->getLatitude(), $this->getItinerary()->getLongitude(), self::DEFAULT_DISTANCE)
             ->sortByDeviation(['strenuousness' => $this->itinerary->strenuousness])
             ->get();
-        echo '<pre>'; print_r($events->toArray()); echo '</pre>';
-        return;
     }
 
     private function getDeviations(): array
@@ -142,6 +156,7 @@ class ItineraryController extends Controller
         $this->getItinerary()->setStrenuousness($request->get('strenuousness'));
         $this->getItinerary()->setActivityPriorities($request->get('activities'));
         $this->getItinerary()->setTrailPriorities($request->get('trails'));
+        $this->getItinerary()->setAverageHikingSpeed($request->get('average_hiking_speed'));
 
         $this->determineAndSetMissingDates();
     }

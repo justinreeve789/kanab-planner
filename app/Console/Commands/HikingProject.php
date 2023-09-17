@@ -15,6 +15,7 @@ use App\Models\TrailImage;
 use App\Models\TrailTag;
 use App\Services\ConversionService;
 use App\Services\NPSService;
+use App\Services\TrailService;
 use Illuminate\Console\Command;
 use IvoPetkov\HTML5DOMDocument;
 use Nesk\Puphpeteer\Puppeteer;
@@ -41,6 +42,7 @@ class HikingProject extends Command
     private $areaUrls;
     private $browser;
     private $conversionService;
+    private $trailService;
     private $trailUrls;
 
     /**
@@ -49,6 +51,7 @@ class HikingProject extends Command
     public function handle()
     {
         $this->conversionService = new ConversionService();
+        $this->trailService = new TrailService();
 
         $parks = [
             'brca' => ['name' => 'Bryce Canyon National Park', 'area_id' => Area::BRYCE],
@@ -227,6 +230,7 @@ class HikingProject extends Command
                 'decline_ft' => $decline,
                 'average_grade_percent' => $avgGrade,
                 'max_grade_percent' => $maxGrade,
+                'average_hours' => $this->trailService->calculateHikingTime($distanceMiles, null, $difficulty),
                 'raw_data' => $areaId . ' | ' . $trailUrl,
             ]);
         } catch (\Illuminate\Database\QueryException) {

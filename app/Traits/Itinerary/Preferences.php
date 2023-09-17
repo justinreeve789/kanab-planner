@@ -16,6 +16,11 @@ trait Preferences
         return $this->adventurousness;
     }
 
+    public function getAverageHikingSpeed(): ?float
+    {
+        return $this->averageHikingSpeed;
+    }
+
     public function getBaseAreaId(): int
     {
         return $this->baseAreaId;
@@ -81,9 +86,13 @@ trait Preferences
         return $this->strenuousness;
     }
 
-    public function getTrailPriorities(): ?array
+    public function getTrailPriorities($random = false): ?array
     {
-        return $this->trailPriorities;
+        if ($random === true) {
+            return $this->shuffleArray($this->trailPriorities);
+        } else {
+            return $this->trailPriorities;
+        }
     }
 
     public function setActivityPriorities($priorities = null) {
@@ -100,6 +109,11 @@ trait Preferences
     {
 //        $this->adventurousness = $adventurousness ?? self::DEFAULT_ADVENTUROUSNESS;
         $this->adventurousness = $adventurousness;
+    }
+
+    public function setAverageHikingSpeed(?float $averageHikingSpeed)
+    {
+        $this->averageHikingSpeed = $averageHikingSpeed ?? self::DEFAULT_AVERAGE_HIKING_SPEED;
     }
 
     public function setBaseAreaId(?int $baseAreaId)
@@ -209,5 +223,15 @@ trait Preferences
             $priorities = explode(',', $priorities);
         }
         $this->trailPriorities = $priorities;
+    }
+
+    protected function shuffleArray($array) {
+        $keys = array_keys($array);
+        shuffle($keys);
+        $shuffledArray = [];
+        foreach ($keys as $key) {
+            $shuffledArray[$key] = $array[$key];
+        }
+        return $shuffledArray;
     }
 }
