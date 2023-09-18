@@ -37,17 +37,4 @@ class Event extends Resource
     {
         return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_text', 'events');
     }
-
-    public static function between($startDateTime, $endDateTime)
-    {
-        if ((int) date('Hi', strtotime($endDateTime)) === 0) {
-            $endDateTime = date('Y-m-d 23:59:59', strtotime($endDateTime));
-        }
-
-        return Event::whereHas('dates', function($query) use ($startDateTime, $endDateTime) {
-            $query->where('event_dates.start_date', '>=', date('Y-m-d H:i:s', strtotime($startDateTime)));
-            $query->where('event_dates.start_date', '<=', date('Y-m-d H:i:s', strtotime($endDateTime)));
-            $query->where('event_dates.end_date', '<=', date('Y-m-d H:i:s', strtotime($endDateTime)));
-        });
-    }
 }

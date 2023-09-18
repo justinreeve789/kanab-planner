@@ -17422,7 +17422,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 /* harmony import */ var _vuepic_vue_datepicker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @vuepic/vue-datepicker */ "./node_modules/@vuepic/vue-datepicker/dist/vue-datepicker.js");
 /* harmony import */ var _vuepic_vue_datepicker_dist_main_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @vuepic/vue-datepicker/dist/main.css */ "./node_modules/@vuepic/vue-datepicker/dist/main.css");
-/* harmony import */ var _Itinerary_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Itinerary.vue */ "./resources/js/views/Itinerary.vue");
+/* harmony import */ var _Day_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Day.vue */ "./resources/js/views/Day.vue");
+/* harmony import */ var _Itinerary_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Itinerary.vue */ "./resources/js/views/Itinerary.vue");
+
 
 
 
@@ -17430,7 +17432,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {
     DatePicker: _vuepic_vue_datepicker__WEBPACK_IMPORTED_MODULE_1__["default"],
-    Itinerary: _Itinerary_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
+    Itinerary: _Itinerary_vue__WEBPACK_IMPORTED_MODULE_4__["default"]
   }
 });
 var startDate = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)();
@@ -17502,19 +17504,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
-var _hoisted_1 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h1", null, " Plan Your Experience ", -1 /* HOISTED */);
-var _hoisted_2 = {
-  id: "dates"
-};
+var _hoisted_1 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"day\"><div class=\"timeline\"></div><div class=\"day-content\"><h2>Day 1</h2><p class=\"date\">September 18, 2023</p><ul><li class=\"expandable\"><input type=\"checkbox\" id=\"item1\"><label for=\"item1\"><span class=\"time\">8:00 AM</span> Breakfast at Cafe Sunrise <div class=\"expand-content\"><p>Start your day with a delicious breakfast at Cafe Sunrise, known for its amazing coffee and pastries.</p><p>Address: 123 Main St, Zion</p></div></label></li><li class=\"expandable\"><input type=\"checkbox\" id=\"item2\"><label for=\"item2\"><span class=\"time\">10:00 AM</span> Explore Zion National Park <div class=\"expand-content\"><p>Explore the stunning Zion National Park with its red rock formations and beautiful trails.</p><p>Don&#39;t forget to bring your camera!</p></div></label></li><li class=\"expandable\"><input type=\"checkbox\" id=\"item3\"><label for=\"item3\"><span class=\"time\">1:00 PM</span> Lunch at Canyon View Restaurant <div class=\"expand-content\"><p>Enjoy a hearty lunch at Canyon View Restaurant, offering a variety of dishes with a view of the canyon.</p><p>Address: 456 Canyon Rd, Zion</p></div></label></li><!-- Add more expandable items as needed --></ul></div></div><h1> Plan Your Experience </h1>", 2);
 var _hoisted_3 = {
-  "class": "date-select"
+  id: "dates"
 };
 var _hoisted_4 = {
   "class": "date-select"
 };
+var _hoisted_5 = {
+  "class": "date-select"
+};
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_DatePicker = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("DatePicker");
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [_hoisted_1, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("section", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DatePicker, {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [_hoisted_1, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("section", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DatePicker, {
     modelValue: _ctx.startDate,
     "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
       return _ctx.startDate = $event;
@@ -17524,7 +17526,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "month-change-on-scroll": false,
     format: _ctx.dateFormat,
     "auto-apply": ""
-  }, null, 8 /* PROPS */, ["modelValue", "format"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DatePicker, {
+  }, null, 8 /* PROPS */, ["modelValue", "format"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DatePicker, {
     modelValue: _ctx.endDate,
     "onUpdate:modelValue": _cache[1] || (_cache[1] = function ($event) {
       return _ctx.endDate = $event;
@@ -17551,8 +17553,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
+var _hoisted_1 = {
+  "class": "day"
+};
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"timeline\"></div><div class=\"day-content\"><h2>Day 1</h2><p class=\"date\">September 18, 2023</p><ul><li class=\"expandable\"><input type=\"checkbox\" id=\"item1\"><label for=\"item1\"><span class=\"time\">8:00 AM</span> Breakfast at Cafe Sunrise <div class=\"expand-content\"><p>Start your day with a delicious breakfast at Cafe Sunrise, known for its amazing coffee and pastries.</p><p>Address: 123 Main St, Zion</p></div></label></li><li class=\"expandable\"><input type=\"checkbox\" id=\"item2\"><label for=\"item2\"><span class=\"time\">10:00 AM</span> Explore Zion National Park <div class=\"expand-content\"><p>Explore the stunning Zion National Park with its red rock formations and beautiful trails.</p><p>Don&#39;t forget to bring your camera!</p></div></label></li><li class=\"expandable\"><input type=\"checkbox\" id=\"item3\"><label for=\"item3\"><span class=\"time\">1:00 PM</span> Lunch at Canyon View Restaurant <div class=\"expand-content\"><p>Enjoy a hearty lunch at Canyon View Restaurant, offering a variety of dishes with a view of the canyon.</p><p>Address: 456 Canyon Rd, Zion</p></div></label></li><!-- Add more expandable items as needed --></ul></div>", 2);
+var _hoisted_4 = [_hoisted_2];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("h1");
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, _hoisted_4);
 }
 
 /***/ }),
@@ -17584,6 +17591,8 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 /* harmony import */ var _views_App_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./views/App.vue */ "./resources/js/views/App.vue");
+/* harmony import */ var _views_Day_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./views/Day.vue */ "./resources/js/views/Day.vue");
+
 
 
 (0,vue__WEBPACK_IMPORTED_MODULE_0__.createApp)(_views_App_vue__WEBPACK_IMPORTED_MODULE_1__["default"]).mount("#app");

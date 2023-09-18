@@ -10,4 +10,6 @@ class Activity extends Model
     use HasFactory;
 
     public $activityType;   // hiking, off-roading, etc.
+    public $endTime;
+    public $startTime;
 }

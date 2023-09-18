@@ -21,8 +21,10 @@ class Itinerary
     const DEFAULT_CHECKIN_TIME = '16:00';
     const DEFAULT_CHECKOUT_TIME = '10:00';
     const DEFAULT_ACTIVITY_PRIORITIES = ['hiking'];
+    const DEFAULT_ARRIVAL_TIME = '16:00';
     const DEFAULT_AVERAGE_HIKING_SPEED = 1.3;
     const DEFAULT_BASE_AREA_ID = Area::KANAB;
+    const DEFAULT_DEPARTURE_TIME = '10:00';
     const DEFAULT_DURATION_DAYS = 5;
     const DEFAULT_PRIORITIES = ['trails', 'events', 'locations', 'restaurants'];
     const DEFAULT_SEASON = 'summer';
@@ -56,6 +58,8 @@ class Itinerary
     public $strenuousness = self::DEFAULT_STRENUOUSNESS;
     private $trailPriorities;
     private $tripPreference;
+    private $useFirstDay;
+    private $useLastDay;
 
     public function __construct()
     {
@@ -84,6 +88,15 @@ class Itinerary
         return $this->days;
     }
 
+    public function getArrivalDateTime()
+    {
+        if (isset($this->arrivalDateTime)) {
+            return $this->arrivalDateTime;
+        }
+        $this->arrivalDateTime = date('Y-m-d H:i:s', strtotime($this->startDate . ' ' . self::DEFAULT_ARRIVAL_TIME));
+        return $this->arrivalDateTime;
+    }
+
     public function getDay($index = 0): Day
     {
         return $this->days[$index];
@@ -94,8 +107,36 @@ class Itinerary
         return $this->days;
     }
 
+    public function getDepartureDateTime()
+    {
+        if (isset($this->departureDateTime)) {
+            return $this->departureDateTime;
+        }
+        $this->departureDateTime = date('Y-m-d H:i:s', strtotime($this->endDate . ' ' . self::DEFAULT_DEPARTURE_TIME));
+        return $this->departureDateTime;
+    }
+
+    public function eventExists(): bool
+    {
+        return false;
+    }
+
     public function trailExists(): bool
     {
         return false;
+    }
+
+    public function getUseFirstDay(): bool
+    {
+        $a = strtotime($this->getArrivalDateTime());
+        $b = strtotime($this->startDate . ' ' . self::DEFAULT_ARRIVAL_TIME);
+        return $a < $b - 3600;
+    }
+
+    public function getUseLastDay(): bool
+    {
+        $a = strtotime($this->getDepartureDateTime());
+        $b = strtotime($this->endDate . ' ' . self::DEFAULT_DEPARTURE_TIME);
+        return $a > $b + 3600;
     }
 }

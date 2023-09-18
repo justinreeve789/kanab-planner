@@ -13,6 +13,25 @@ class TrailService
     }
 
     /**
+     * TODO: This doesn't seem to work properly.
+     */
+    public function getRandomTrailForPeriod($areaId, $period, $itinerary = null, $existingTrails = []): ?Trail
+    {
+        $trails = Trail::with('data')->where('area_id', $areaId);
+        if ($itinerary !== null) {
+            $trails = $trails->sortByDeviations($itinerary->getDeviations());
+        }
+        $trails = $trails->inRandomOrder()->limit(10)->get();
+        foreach ($trails as $trail) {
+            $p = $this->getBestPeriodOfDayForTrail($trail);
+            if ($p == $period) {
+                return $trail;
+            }
+        }
+        return null;
+    }
+
+    /**
      * TODO: Add more log into this, using busyness tracking. For now, we'll just say to do it in the morning if it's
      * at Zion, due to the crowds. If it's a longer trail (6+ hours), we'll also say to do it in the morning. If it's
      * easy and short (less than 1 mile), evening. Otherwise, afternoon.

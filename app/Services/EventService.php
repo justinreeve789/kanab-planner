@@ -27,7 +27,7 @@ class EventService
     public function queryEvents($startDateTime, $endDateTime, $params = []) {
         $adventurousness = $params['adventurousness'];
         $solitude = $params['solitude'];
-        $events = Event::between($startDateTime, $endDateTime);
+        $events = Event::betweenDates($startDateTime, $endDateTime);
         foreach ($events as $event) {
         }
     }

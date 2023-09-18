@@ -6,6 +6,19 @@ use Illuminate\Database\Eloquent\Builder;
 
 class CustomQueryBuilder extends Builder
 {
+    public function betweenDates($startDateTime, $endDateTime)
+    {
+        if ((int) date('Hi', strtotime($endDateTime)) === 0) {
+            $endDateTime = date('Y-m-d 23:59:59', strtotime($endDateTime));
+        }
+
+        return $this->whereHas('dates', function($query) use ($startDateTime, $endDateTime) {
+            $query->where('event_dates.start_date', '>=', date('Y-m-d H:i:s', strtotime($startDateTime)));
+            $query->where('event_dates.start_date', '<=', date('Y-m-d H:i:s', strtotime($endDateTime)));
+            $query->where('event_dates.end_date', '<=', date('Y-m-d H:i:s', strtotime($endDateTime)));
+        });
+    }
+
     /**
      * We want to get as close to all the properties as we can. For example, if adventurousness is 0.1 and strenuousness
      * is 0.9, we should weigh adv 0.2/str 0.8 higher than adv 0.5/str 0.5. We should evaluate the total deviation
@@ -17,16 +30,24 @@ class CustomQueryBuilder extends Builder
     public function sortByDeviation(array $propValues)
     {
         $table = $this->getModel()->getTable();
-        $order = '0';
+
+        $order = '';
+        if (!empty($propValues)) {
+            $order .= '0';
+        }
         foreach ($propValues as $prop => $value) {
             if ($value !== null) {
                 $order .= ' + ABS(resource_data.' . $prop . ' - ' . $value . ')';
             }
         }
-        return $this->join('resource_data', function($join) use ($table) {
+        $query = $this->join('resource_data', function($join) use ($table) {
             $join->on('resource_table', '=', \DB::raw('"' . $table . '"'));
             $join->on('resource_id', '=', \DB::raw($table . '.id'));
-        })->orderByRaw($order);
+        });
+        if ($order != '') {
+            $query->orderByRaw($order);
+        }
+        return $query;
     }
 
     /**
@@ -58,18 +79,20 @@ class CustomQueryBuilder extends Builder
                 $time = date('H:i:s', strtotime($dateTime));
                 return $this->leftJoin('location_hours', 'location_hours.location_id', '=', 'locations.id')
                     ->where('location_hours.day_of_week', '=', $dayOfWeek)
-                    ->whereRaw('location_hours.time_open <= TIME(?)', [$time])
-                    ->whereRaw('location_hours.time_close >= TIME(?)', [$time])
-                    ->orWhere(function($query) use ($dayOfWeek, $time) {
-                        $query->where(function($query) use ($dayOfWeek) {
-                            $query->whereNull('location_hours.id')
-                                ->orWhereNotIn('location_hours.day_of_week', [$dayOfWeek]);
-                        })->whereRaw('TIME(?) BETWEEN TIME("06:00") AND TIME("22:00")', [$time]);
-                    })
+                    ->whereRaw('COALESCE(location_hours.time_open, TIME("06:00")) <= TIME(?)', [$time])
+                    ->whereRaw('COALESCE(location_hours.time_close, TIME("22:00")) >= TIME(?)', [$time])
                     ->select('locations.*')
                     ->distinct();
                 break;
             case 'restaurants':
+                $dayOfWeek = date('w', strtotime($dateTime));
+                $time = date('H:i:s', strtotime($dateTime));
+                return $this->leftJoin('location_hours', 'location_hours.location_id', '=', 'restaurants.location_id')
+                    ->where('location_hours.day_of_week', '=', $dayOfWeek)
+                    ->whereRaw('COALESCE(location_hours.time_open, TIME("06:00")) <= TIME(?)', [$time])
+                    ->whereRaw('COALESCE(location_hours.time_close, TIME("22:00")) >= TIME(?)', [$time])
+                    ->select('restaurants.*')
+                    ->distinct();
                 break;
             case 'trails':
             default:

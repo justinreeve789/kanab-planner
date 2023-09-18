@@ -19,15 +19,27 @@ class RestaurantService
         return $this->googleClient;
     }
 
-    public function getAveragePriceForRestaurant($restaurantId)
+    public function calculateAveragePriceForPriceLevel(?int $priceLevel)
     {
-        $restaurant = Restaurant::with('location')->where('id', $restaurantId)->first();
-        // Initialize the Places API Service
-                $placesService = new Google_Service_Places($client);
-
-        // Restaurant name or Place ID
-                $restaurantName = 'Restaurant Name'; // You can also use a Place ID    }
-
-    private function getPlace()
-    {}
+        switch ($priceLevel) {
+            case 0:
+                $averagePrice = 8;
+                break;
+            case 1:
+                $averagePrice = 10;
+                break;
+            case 2:
+                $averagePrice = 15;
+                break;
+            case 3:
+                $averagePrice = 30;
+                break;
+            case 4:
+                $averagePrice = 50;
+                break;
+            default:
+                $averagePrice = 15;
+        }
+        return $averagePrice;
+    }
 }

@@ -159,7 +159,10 @@ class VisitSouthernUtah extends Command
             }
 
             Restaurant::updateOrCreate(['location_id' => $location->id], [
+                'source_type' => self::SOURCE_TYPE,
+                'source_id' => $this->getProp($rst, 'id'),
                 'description' => $locDescription,
+                'raw_data' => json_encode($rst),
             ]);
         }
     }

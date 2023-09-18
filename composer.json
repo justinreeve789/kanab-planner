@@ -7,6 +7,8 @@
     "require": {
         "php": "^8.1",
         "ahmadmayahi/php-google-vision": "^1.0",
+        "google/apiclient": "^2.0",
+        "google/apiclient-services": "^0.316.0",
         "google/cloud-vision": "^1.7",
         "guzzlehttp/guzzle": "^7.2",
         "ivopetkov/html5-dom-document-php": "2.*",

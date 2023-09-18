@@ -12,14 +12,21 @@ class Day extends Model
 {
     use HasFactory;
 
-//    public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
+    const DEFAULT_ARRIVAL_TIME = '16:00:00';
+    const DEFAULT_DEPARTURE_TIME = '10:00:00';
+
+    //    public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
+    public $activities;
     public $areaId;
     public $date;
+    public $dayNum;
 //    public $solitariness = self::DEFAULT_SOLITARINESS;
 //    public $strenuousness = self::DEFAULT_STRENUOUSNESS;
+    public $endTime = '22:00';
     public $periods;
+    public $startTime = '07:00';
 
-    public function __construct($date, ?int $areaId)
+    public function __construct($date, ?int $areaId, ?int $dayNum)
     {
         $this->date = $date;
 
@@ -27,6 +34,11 @@ class Day extends Model
             $this->areaId = $areaId;
         }
 
+        if ($dayNum !== null) {
+            $this->dayNum = $dayNum;
+        }
+
+        $this->activities = [];
         $this->periods = [
             Period::MORNING => new Period(Period::MORNING, $this->areaId),
             Period::AFTERNOON => new Period(Period::AFTERNOON, $this->areaId),

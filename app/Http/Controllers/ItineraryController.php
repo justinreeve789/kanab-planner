@@ -46,9 +46,9 @@ class ItineraryController extends Controller
         $this->setupItinerary($request);
         echo '<pre>'; print_r($this->getItinerary()); echo '</pre>';
         $this->itineraryService->setItinerary($this->getItinerary());
-        $days = $this->itineraryService->getDaysForAreas();
-        foreach ($days as $day) {
-            $day = $this->itineraryService->fillDay($day);
+        $days = $this->itineraryService->getDaysForAreas($this->getItinerary()->getUseFirstDay(), $this->getItinerary()->getUseLastDay());
+        foreach ($days as $dayNum => $day) {
+            $day = $this->itineraryService->fillDay($day, null, $dayNum);
         }
 
         echo $this->itinerary->getStartDate() . ' - ' . $this->getItinerary()->getEndDate() . '<br>';
@@ -90,22 +90,12 @@ class ItineraryController extends Controller
 
     private function getDeviations(): array
     {
-        $deviations = [];
-        if ($this->getItinerary()->getAdventurousness()) {
-            $deviations['adventurousness'] = $this->getItinerary()->getAdventurousness();
-        }
-        if ($this->getItinerary()->getSolitariness()) {
-            $deviations['adventurousness'] = $this->getItinerary()->getSolitariness();
-        }
-        if ($this->getItinerary()->getStrenuousness()) {
-            $deviations['strenuousness'] = $this->getItinerary()->getStrenuousness();
-        }
-        return $deviations;
+        return $this->itineraryService->getDeviations();
     }
 
     private function getEvents()
     {
-        $query = Event::between($this->itinerary->getStartDate(), $this->getItinerary()->getEndDate())
+        $query = Event::betweenDates($this->itinerary->getStartDate(), $this->getItinerary()->getEndDate())
             ->with('data');
         $deviations = $this->getDeviations();
         if (!empty($deviations)) {
