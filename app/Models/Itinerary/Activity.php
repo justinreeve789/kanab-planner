@@ -23,16 +23,16 @@ class Activity extends Model
     public $startTime;
     private $phraseService;
 
-    public function __construct($data, $activityType = null, $startTime = null, $endTime = null)
+    public function __construct($resource, $activityType = null, $startTime = null, $endTime = null)
     {
         $this->phraseService = new PhraseService();
 
-        $this->data = $data;
-        $this->name = $data->name;
-        $this->description = $data->description;
+        $this->data = $resource;
+        $this->name = $resource->name;
+        $this->description = $resource->description;
         $this->activityType = $activityType;
         $this->startTime = $startTime;
         $this->endTime = $endTime;
-        $this->phrase = $this->phraseService->getPhraseForActivityResource($data);
+        $this->phrase = $this->phraseService->getPhraseForActivityResource($resource);
     }
 }
