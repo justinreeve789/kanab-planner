@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Area;
 use App\Models\Event;
+use App\Models\Itinerary\Activity;
 use App\Models\Itinerary\Day;
 use App\Models\Itinerary\Itinerary;
 use App\Models\Itinerary\Period;
@@ -19,13 +20,17 @@ use Illuminate\Database\Eloquent\Model;
 class ItineraryService
 {
     private $itinerary;
+    private $phraseService;
     private $repository;
+    private $restaurantService;
     private $seasons;
     private $trailService;
 
     public function __construct($itinerary = null)
     {
         $this->setItinerary($itinerary);
+        $this->phraseService = new PhraseService();
+        $this->restaurantService = new RestaurantService();
         $this->trailService = new TrailService();
 //        $this->seasons = Season::all();
     }
@@ -79,20 +84,23 @@ class ItineraryService
         // If this is the first day and they're arriving at a normal late time, let's not plan any activities. Just
         // grocery shopping, maybe fast food.
         if ($dayNum === 0 && !$this->getItinerary()->getUseFirstDay()) {
-            $day->periods[Period::EVENING]->addActivity(new Task([
-                'name' => 'Arrive at your accommodations',
-                'description' => 'Get situated. If there\'s time, drop by the grocery store to pick up a few things.',
-            ]));
+            $task = new Task([
+                'name' => 'Arrival',
+                'description' => $this->phraseService->getPhraseForCheckingIn(),
+            ]);
+            $day->addActivity($task, null, Day::DEFAULT_ARRIVAL_TIME);
+            $day->periods[Period::EVENING]->addActivity($task, null, Day::DEFAULT_ARRIVAL_TIME);
             return;
         }
 
-        // If this is the first day and they're departing at a normal early time, let's not plan any activities.
+        // If this is the last day and they're departing at a normal early time, let's not plan any activities.
         if ($dayNum === $durationDays && !$this->getItinerary()->getUseLastDay()) {
-            echo $dayNum . ' ' . $durationDays . ' ';
-            $day->periods[Period::MORNING]->addActivity(new Task([
-                'name' => 'Check out from  your accommodations',
-                'description' => 'Hit the road, reminisce on the adventures you had, and travel safely.',
-            ]));
+            $task = new Task([
+                'name' => 'Departure',
+                'description' => $this->phraseService->getPhraseForCheckingOut(),
+            ]);
+            $day->addActivity($task, null, Day::DEFAULT_DEPARTURE_TIME);
+            $day->periods[Period::MORNING]->addActivity($task, null, Day::DEFAULT_DEPARTURE_TIME);
             return;
         }
 
@@ -100,10 +108,19 @@ class ItineraryService
         foreach ($this->getItinerary()->getTrailPriorities(true) as $trailId) {
             $trail = Trail::where('id', $trailId)->first();
             if ($trail->area_id == $day->getAreaId() && !$this->getItinerary()->trailExists()) {
-                $period = $this->trailService->getBestPeriodOfDayForTrail($trail);
-                $day->periods[$period]->addActivity($trail);
+                $trailPeriod = $this->trailService->getBestPeriodOfDayForTrail($trail);
                 break;
             }
+        }
+
+        // If we have a trail for today, and it's in the morning, and in Zion, they probably won't have time to stop
+        // to eat in the morning if they want to start on time. They should eat at home.
+        if (isset($trail) && isset($trailPeriod) && $trailPeriod === Period::MORNING && $trail->area_id = Area::ZION) {
+            $day->periods[$trailPeriod]->addActivity(new Task([
+                'name' > 'Eat breakfast at home to make sure you can get to the trail at an early hour.',
+                'description' => 'Ideally you\'ll reach the trail by 8:00am to avoid larger crowds.',
+            ]), null, '06:30', '07:30');
+            $day->periods[$trailPeriod]->addActivity($trail, 'hiking', '08:00', date('H:i', strtotime('08:00') + $trail->getAverageHours() * 60 * 60));
         }
 
         // Are there possible events for the day to fill in any gaps?
@@ -125,27 +142,18 @@ class ItineraryService
             }
         }
 
-        if (empty($day->periods[Period::EVENING]->getActivities())) {
-            $event = Event::betweenDates($day->date . ' 12:00:00', $day->date . ' 16:00:00')->with('location')->whereHas('location', function($query) use ($day) {
-                $query->where('area_id', $day->getAreaId());
-            })->inRandomOrder()->first();
-            if ($event) {
-                $day->periods[Period::EVENING]->addActivity($event);
-            }
-        }
-
         // Are there trails for the day to fill in any gaps?
         if (empty($day->periods[Period::MORNING]->getActivities())) {
             $trail = $this->trailService->getRandomTrailForPeriod($day->getAreaId(), Period::MORNING);
             if ($trail && !$this->getItinerary()->trailExists()) {
-                $day->periods[Period::MORNING]->addActivity($trail);
+                $day->periods[Period::MORNING]->addActivity($trail, 'hiking');
             }
         }
 
         if (empty($day->periods[Period::AFTERNOON]->getActivities())) {
             $trail = $this->trailService->getRandomTrailForPeriod($day->getAreaId(), Period::AFTERNOON);
             if ($trail && !$this->getItinerary()->trailExists()) {
-                $day->periods[Period::AFTERNOON]->addActivity($trail);
+                $day->periods[Period::AFTERNOON]->addActivity($trail, 'hiking');
             }
         }
 
@@ -153,13 +161,13 @@ class ItineraryService
         $restaurant = Restaurant::with('location')->whereIsOpen($day->date . ' 09:00:00')->whereHas('location', function($query) use ($day) {
             $query->where('area_id', $day->getAreaId());
         })->inRandomOrder()->first();
-        $day->periods[Period::MORNING]->addActivity($restaurant);
+        $day->periods[Period::MORNING]->addActivity($restaurant, 'dining');
 
         // Add a restaurant in the area for the evening.
         $restaurant = Restaurant::with('location')->whereIsOpen($day->date . ' 17:00:00')->whereHas('location', function($query) use ($day) {
             $query->where('area_id', $day->getAreaId());
         })->inRandomOrder()->first();
-        $day->periods[Period::EVENING]->addActivity($restaurant);
+        $day->periods[Period::EVENING]->addActivity($restaurant, 'dining');
 
         // TODO: $this->eventService()->getEventForDay(
         return $day;

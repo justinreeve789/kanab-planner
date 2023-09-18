@@ -8,12 +8,15 @@ use App\Models\Itinerary\Day;
 use App\Models\Itinerary\Period;
 use App\Models\Itinerary\Season;
 use App\Traits\Itinerary\Preferences;
+use App\Traits\ReturnAllProperties;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Itinerary
+class Itinerary extends Model
 {
+    use HasFactory;
     use Preferences;
+    use ReturnAllProperties;
 
     const DEFAULT_ADVENTUROUSNESS = 0.3;
     const DEFAULT_SOLITARINESS = 0.3;
@@ -34,36 +37,43 @@ class Itinerary
     const SUMMER = 'summer';
     const WINTER = 'winter';
 
-    private $accommodationPreference;
-    private $activityPriorities;
+    protected $fillable = ['*'];
+
+    public $accommodationPreference;
+    public $activityPriorities;
     public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
-    private $arrivalDateTime;
-    private $baseAreaId = self::DEFAULT_BASE_AREA_ID;
-    private $checkInTime;
-    private $checkOutTime;
-    private $days;
-    private $departureDateTime;
-    private $durationDays;
-    private $endDate;
-    private $estimatedCost;
-    private $homeLocationId;
-    private $interests;
-    private $latitude;  // The latitude of the "base camp."
-    private $longitude; // The longitude of the "base camp."
-    private $month;
-    private array $priorities;
-    private string $season;
+    public $arrivalDateTime;
+    public $baseAreaId = self::DEFAULT_BASE_AREA_ID;
+    public $checkInTime;
+    public $checkOutTime;
+    public $days;
+    public $departureDateTime;
+    public $durationDays;
+    public $endDate;
+    public $estimatedCost;
+    public $homeLocationId;
+    public $interests;
+    public $latitude;  // The latitude of the "base camp."
+    public $longitude; // The longitude of the "base camp."
+    public $month;
+    public $priorities;
+    public $season;
     public $solitariness = self::DEFAULT_SOLITARINESS;
-    private $startDate;
+    public $startDate;
     public $strenuousness = self::DEFAULT_STRENUOUSNESS;
-    private $trailPriorities;
-    private $tripPreference;
-    private $useFirstDay;
-    private $useLastDay;
+    public $trailPriorities;
+    public $tripPreference;
+    public $useFirstDay;
+    public $useLastDay;
 
     public function __construct()
     {
         $this->days = [];
+    }
+
+    public function days()
+    {
+        return $this->hasMany(Day::class, 'itinerary_id', 'id');
     }
 
     public function addDay(Day $day, $index = null): array
@@ -138,5 +148,10 @@ class Itinerary
         $a = strtotime($this->getDepartureDateTime());
         $b = strtotime($this->endDate . ' ' . self::DEFAULT_DEPARTURE_TIME);
         return $a > $b + 3600;
+    }
+
+    public function setDays(array $days)
+    {
+        $this->days = $days;
     }
 }

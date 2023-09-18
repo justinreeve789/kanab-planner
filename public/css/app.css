@@ -9,124 +9,95 @@ html {
 }
 
 /* Reset some default styles */
-body, h1, h2, h3, p, ul, li {
+body, h1, h2, ul, li {
   margin: 0;
   padding: 0;
 }
 
+/* Center everything vertically and horizontally */
+body {
+  background-color: #f0f5f9;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px; /* Added padding to center content */
+}
+
 /* Style the header */
 header {
-  background-color: #333;
-  color: white;
+  background-color: #ff9f1c; /* Orange */
   text-align: center;
-  padding: 20px;
-}
-
-/* Style the itinerary section */
-.itinerary {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 20px;
-}
-
-/* Style individual days */
-.day {
-  display: flex;
-  margin-bottom: 20px;
-}
-
-/* Style the timeline */
-.timeline {
-  width: 30px;
-  background: linear-gradient(to bottom, #000066, #3399FF, #FF4500);
   padding: 20px 0;
-  text-align: center;
-  color: white;
+}
+
+h1 {
   font-family: "Playfair Display", serif;
+  font-size: 36px;
+  color: white;
 }
 
-/* Style time segments within the timeline */
-.time-morning {
-  background-color: #000066;
-  padding: 10px 0;
+.day {
+  margin-bottom: 40px;
 }
 
-.time-afternoon {
-  background-color: #3399FF;
-  padding: 10px 0;
-}
-
-.time-evening {
-  background-color: #800080;
-  padding: 10px 0;
-}
-
-/* Style day content */
-.day-content {
-  flex: 1;
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
+/* Style the main content container */
+.itinerary {
+  background-color: white;
   border-radius: 5px;
-  padding: 10px;
-  margin-left: 10px;
+  max-width: 800px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden; /* Ensure child elements don't overflow */
+  padding: 20px; /* Added padding to the main container */
 }
 
-/* Style headings */
-h2 {
-  font-size: 24px;
-  margin-bottom: 10px;
-  color: #333;
+/* Style the day section */
+.itinerary .day {
+  border-top: 1px solid #ccc;
+  cursor: pointer;
+  padding: 15px;
+  text-align: left;
 }
 
-/* Style date */
-.date {
-  font-size: 16px;
-  color: #666;
+.itinerary .day:hover {
+  background-color: #f7f7f7; /* Light gray on hover */
 }
 
-/* Style the time next to each item */
-.time {
-  font-weight: bold;
-  margin-right: 10px;
-}
-
-/* Style list items */
-ul {
-  list-style: none;
-}
-
-li {
-  margin-bottom: 10px;
-  line-height: 1.4;
-}
-
-/* Style the hidden checkboxes and labels */
-.expandable input[type=checkbox] {
+/* Remove the timeline */
+.itinerary .day .timeline {
   display: none;
 }
 
-.expandable label {
+/* Style the expandable items */
+.expandable {
+  list-style-type: none;
+  padding: 10px 0;
   cursor: pointer;
-  border-bottom: 1px solid #ddd;
+}
+
+.expandable:hover {
+  background-color: #f7f7f7; /* Light gray on hover */
+}
+
+.expandable label {
   display: block;
-  transition: background-color 0.3s ease;
-  padding: 10px 0; /* Adjusted padding */
+  padding: 5px 0;
 }
 
-/* Style the expandable content */
+/* Style the expand-content */
 .expand-content {
-  max-height: 0;
-  overflow: hidden;
-  margin-top: 0; /* Removed margin-top */
-  padding: 0; /* Removed padding */
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  transition: max-height 0.5s ease;
+  display: none;
+  padding: 10px;
 }
 
-/* Show the expandable content when the checkbox is checked */
-.expandable input[type=checkbox]:checked + label .expand-content {
-  max-height: 200px; /* Adjust this value based on your content's maximum height */
-  padding: 10px; /* Added padding for expanded content */
+/* Style the headings */
+h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+/* Style the paragraphs */
+p {
+  margin-top: 5px;
 }

@@ -1,62 +1,63 @@
 <template>
-    <div class="day">
+  <div class="day">
+    <!-- Display day-specific data here -->
+    <h2>Day {{ day.dayNum }} - {{ day.area.name }}</h2>
+    <p>Date: {{ day.date }}</p>
+
+    <section class="itinerary">
         <div class="timeline"></div>
-        <div class="day-content">
-            <h2>Day 1</h2>
-            <p class="date">September 18, 2023</p>
+        <div class="day-content morning" v-for="(activity, index) in day.periods['morning'].activities" :key="index">
             <ul>
                 <li class="expandable">
-                    <input type="checkbox" id="item1">
-                    <label for="item1">
-                        <span class="time">8:00 AM</span> Breakfast at Cafe Sunrise
-                        <div class="expand-content">
-                            <p>Start your day with a delicious breakfast at Cafe Sunrise, known for its amazing coffee and pastries.</p>
-                            <p>Address: 123 Main St, Zion</p>
-                        </div>
-                    </label>
+                    <div v-if="activity.activityType == 'hiking'">
+                        <Trail :trail="activity" />
+                    </div>
+                    <p><strong>{{ activity.name }}</strong></p>
+                    <p>{{ activity.description }}</p>
                 </li>
-                <li class="expandable">
-                    <input type="checkbox" id="item2">
-                    <label for="item2">
-                        <span class="time">10:00 AM</span> Explore Zion National Park
-                        <div class="expand-content">
-                            <p>Explore the stunning Zion National Park with its red rock formations and beautiful trails.</p>
-                            <p>Don't forget to bring your camera!</p>
-                        </div>
-                    </label>
-                </li>
-                <li class="expandable">
-                    <input type="checkbox" id="item3">
-                    <label for="item3">
-                        <span class="time">1:00 PM</span> Lunch at Canyon View Restaurant
-                        <div class="expand-content">
-                            <p>Enjoy a hearty lunch at Canyon View Restaurant, offering a variety of dishes with a view of the canyon.</p>
-                            <p>Address: 456 Canyon Rd, Zion</p>
-                        </div>
-                    </label>
-                </li>
-                <!-- Add more expandable items as needed -->
             </ul>
         </div>
-    </div>
+
+        <div class="day-content afternoon" v-for="(activity, index) in day.periods['afternoon'].activities" :key="index">
+            <ul>
+                <li class="expandable">
+                    <div v-if="activity.activityType == 'hiking'">
+                        <Trail :trail="activity" />
+                    </div>
+                    <p><strong>{{ activity.name }}</strong></p>
+                    <p>{{ activity.description }}</p>
+                </li>
+            </ul>
+        </div>
+
+        <div class="day-content evening" v-for="(activity, index) in day.periods['evening'].activities" :key="index">
+            <ul>
+                <li class="expandable">
+                    <div v-if="activity.activityType == 'hiking'">
+                        <Trail :trail="activity" />
+                    </div>
+                    <p><strong>{{ activity.name }}</strong></p>
+                    <p>{{ activity.description }}</p>
+                </li>
+            </ul>
+        </div>
+
+        <div class="day-content night" v-for="(activity, index) in day.periods['night'].activities" :key="index">
+            <ul>
+                <li class="expandable">
+                    <p><strong>{{ activity.name }}</strong></p>
+                    <p>{{ activity.description }}</p>
+                </li>
+            </ul>
+        </div>
+    </section>
+  </div>
 </template>
 
 <script>
-import Event from './activities/Event.vue';
-import Map from './panels/Map.vue';
-import Photo from './panels/Photo.vue';
-import Restaurant from './activities/Restaurant.vue';
-import Trail from './activities/Trail.vue';
-import Weather from './panels/Weather.vue';
-
 export default {
-  components: {
-    Event,
-    Map,
-    Photo,
-    Restaurant,
-    Trail,
-    Weather,
+  props: {
+    day: Object, // The day data passed as a prop
   },
 };
 </script>

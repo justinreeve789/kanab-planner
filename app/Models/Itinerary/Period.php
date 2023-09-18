@@ -2,21 +2,25 @@
 
 namespace App\Models\Itinerary;
 
+use App\Traits\ReturnAllProperties;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Period extends Model
 {
     use HasFactory;
+    use ReturnAllProperties;
 
     public const MORNING = 'morning';
     public const AFTERNOON = 'afternoon';
     public const EVENING = 'evening';
     public const NIGHT = 'night';
 
-    private $activities = [];
-    private $areaId;
-    private $type;
+    protected $guarded = [];
+
+    public $activities = [];
+    public $areaId;
+    public $type;
 
     public function __construct(?string $type, ?int $areaId) {
         if ($type !== null) {
@@ -27,9 +31,9 @@ class Period extends Model
         }
     }
 
-    public function addActivity($activity)
+    public function addActivity($activity, $activityType = null, $startTime = null, $endTime = null)
     {
-        $this->activities[] = $activity;
+        $this->activities[] = new Activity($activity, $activityType, $startTime, $endTime);
     }
 
     public function getActivities(): array

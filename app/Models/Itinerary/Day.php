@@ -2,6 +2,8 @@
 
 namespace App\Models\Itinerary;
 
+use App\Models\Area;
+use App\Traits\ReturnAllProperties;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,13 +13,17 @@ use Illuminate\Database\Eloquent\Model;
 class Day extends Model
 {
     use HasFactory;
+    use ReturnAllProperties;
 
     const DEFAULT_ARRIVAL_TIME = '16:00:00';
     const DEFAULT_DEPARTURE_TIME = '10:00:00';
 
+    protected $guarded = [];
+
     //    public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
     public $activities;
     public $areaId;
+    public $area;
     public $date;
     public $dayNum;
 //    public $solitariness = self::DEFAULT_SOLITARINESS;
@@ -26,12 +32,16 @@ class Day extends Model
     public $periods;
     public $startTime = '07:00';
 
-    public function __construct($date, ?int $areaId, ?int $dayNum)
+    public function __construct($date, $area, ?int $dayNum)
     {
         $this->date = $date;
 
-        if ($areaId !== null) {
-            $this->areaId = $areaId;
+        if ($area !== null) {
+            if (is_integer($area)) {
+                $area = Area::where('id', $area)->first();
+            }
+            $this->areaId = $area->id;
+            $this->area = $area;
         }
 
         if ($dayNum !== null) {
@@ -45,6 +55,21 @@ class Day extends Model
             Period::EVENING => new Period(Period::EVENING, $this->areaId),
             Period::NIGHT => new Period(Period::NIGHT, $this->areaId),
         ];
+    }
+
+    public function addActivity($activity, $activityType = null, $startTime = null, $endTime = null)
+    {
+        $this->activities[] = new Activity($activity, $activityType, $startTime, $endTime);
+    }
+
+    public function getActivities(): array
+    {
+        return $this->activities;
+    }
+
+    public function periods()
+    {
+        return $this->hasMany(Period::class, 'day_id', 'id');
     }
 
     public function getAreaId(): int

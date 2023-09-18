@@ -83,7 +83,7 @@ class TrailService
         return $distanceMiles / ($mph + $modifier);
     }
 
-    public function calculateMphByDifficulty(string $difficulty): float
+    public function calculateMphByDifficulty(?string $difficulty): float
     {
         switch ($difficulty) {
             case 'Easy':
@@ -105,5 +105,10 @@ class TrailService
                 $mph = 1.3;
         }
         return $mph;
+    }
+
+    public function calculateTrailDifficulty($trail): string
+    {
+        return 'Intermediate';
     }
 }

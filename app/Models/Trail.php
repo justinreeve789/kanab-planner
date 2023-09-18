@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Resource;
+use App\Services\TrailService;
 use App\Traits\ActivityData;
 use App\Traits\Proximity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,10 +16,12 @@ class Trail extends Resource
 
     protected $guarded = ['id'];
     protected $hidden = ['raw_data'];
+    public $trailService;
 
     public function __construct()
     {
 //        $this->setActivityType(self::DEFAULT_ACTIVITY_TYPE);
+        $this->trailService = new TrailService();
     }
 
     public function area()
@@ -29,6 +32,16 @@ class Trail extends Resource
     public function data()
     {
         return $this->hasMany(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'trails');
+    }
+
+    public function getAverageHours()
+    {
+        if (isset($this->average_hours)) {
+            return $this->average_hours;
+        }
+        $this->average_hours = $this->trailService->calculateHikingTime($this->distance_miles, null, $this->difficulty);
+        $this->save();
+        return $this->average_hours;
     }
 
     public function isEasy()
