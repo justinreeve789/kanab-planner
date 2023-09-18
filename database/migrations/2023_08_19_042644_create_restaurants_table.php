@@ -26,6 +26,7 @@ class CreateRestaurantsTable extends Migration
             $table->boolean('dine_in')->nullable();
             $table->boolean('reservable')->nullable();
             $table->text('raw_data')->nullable();
+            $table->boolean('is_usable')->default(true);
             $table->timestamps();
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });

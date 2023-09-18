@@ -27,7 +27,7 @@ export default {
   methods: {
     fetchItineraryData() {
       axios
-        .get('/api/v1/itinerary?start_date=2023-11-15&duration_days=15') // Replace with your API endpoint
+        .get('/api/v1/itinerary?duration_days=15&adventurousness=0.5&strenuousness=0.8')
         .then((response) => {
           this.itineraryData = response.data;
         })

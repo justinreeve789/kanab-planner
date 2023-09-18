@@ -30,6 +30,7 @@ class CreateEventsTable extends Migration
             $table->dateTime('start_date');
             $table->dateTime('end_date')->nullable();
             $table->text('raw_data')->nullable();
+            $table->boolean('is_usable')->default(true);
             $table->timestamps();
             $table->unique(['source_type', 'source_id']);
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');

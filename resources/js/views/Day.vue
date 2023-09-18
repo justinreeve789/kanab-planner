@@ -1,8 +1,8 @@
 <template>
   <div class="day">
     <!-- Display day-specific data here -->
-    <h2>Day {{ day.dayNum }} - {{ day.area.name }}</h2>
-    <p>Date: {{ day.date }}</p>
+    <p style="float: right;">{{ day.formattedDate }}</p>
+    <h2>Day {{ day.dayNum + 1 }} - {{ day.area.name }}</h2>
 
     <section class="itinerary">
         <div class="timeline"></div>
@@ -10,10 +10,13 @@
             <ul>
                 <li class="expandable">
                     <div v-if="activity.activityType == 'hiking'">
-                        <Trail :trail="activity" />
+                        <Trail :trail="activity.data" />
                     </div>
-                    <p><strong>{{ activity.name }}</strong></p>
-                    <p>{{ activity.description }}</p>
+                    <div v-else>
+                        <p><strong>{{ activity.name }}</strong></p>
+                        <p>{{ activity.phrase }}</p>
+                        <p>{{ activity.description }}</p>
+                    </div>
                 </li>
             </ul>
         </div>
@@ -24,8 +27,11 @@
                     <div v-if="activity.activityType == 'hiking'">
                         <Trail :trail="activity" />
                     </div>
-                    <p><strong>{{ activity.name }}</strong></p>
-                    <p>{{ activity.description }}</p>
+                    <div v-else>
+                        <p><strong>{{ activity.name }}</strong></p>
+                        <p>{{ activity.phrase }}</p>
+                        <p>{{ activity.description }}</p>
+                    </div>
                 </li>
             </ul>
         </div>
@@ -36,8 +42,11 @@
                     <div v-if="activity.activityType == 'hiking'">
                         <Trail :trail="activity" />
                     </div>
-                    <p><strong>{{ activity.name }}</strong></p>
-                    <p>{{ activity.description }}</p>
+                    <div v-else>
+                        <p><strong>{{ activity.name }}</strong></p>
+                        <p>{{ activity.phrase }}</p>
+                        <p>{{ activity.description }}</p>
+                    </div>
                 </li>
             </ul>
         </div>
@@ -55,7 +64,18 @@
 </template>
 
 <script>
+import Event from './activities/Event.vue';
+import Location from './activities/Location.vue';
+import Restaurant from './activities/Restaurant.vue';
+import Trail from './activities/Trail.vue';
+
 export default {
+  components: {
+    Event,
+    Location,
+    Restaurant,
+    Trail,
+  },
   props: {
     day: Object, // The day data passed as a prop
   },

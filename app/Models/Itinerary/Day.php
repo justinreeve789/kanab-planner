@@ -29,12 +29,14 @@ class Day extends Model
 //    public $solitariness = self::DEFAULT_SOLITARINESS;
 //    public $strenuousness = self::DEFAULT_STRENUOUSNESS;
     public $endTime = '22:00';
+    public $formattedDate;
     public $periods;
     public $startTime = '07:00';
 
     public function __construct($date, $area, ?int $dayNum)
     {
         $this->date = $date;
+        $this->formattedDate = date('l, F n, Y', strtotime($this->date));
 
         if ($area !== null) {
             if (is_integer($area)) {

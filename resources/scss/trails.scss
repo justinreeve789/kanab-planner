@@ -1,0 +1,49 @@
+/* Trail details section styles */
+.trail-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+/* Trail info styles */
+.trail-info {
+  flex: 1;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+
+  /* Set the background image and adjust background properties */
+  background-image: url('/images/3d-hazy-mountain-range-against-sunset-sky.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+/* Trail map styles */
+.trail-map {
+  flex: 1;
+  margin-left: 20px;
+}
+
+/* Trail stats styles */
+.trail-stats {
+  flex: 1;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Style for trail statistics */
+.trail-stats h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  text-align: center;
+  color: #333;
+}
+
+/* Style for trail statistics values */
+.stats {
+  font-size: 18px;
+  margin: 8px 0;
+  color: #666;
+}

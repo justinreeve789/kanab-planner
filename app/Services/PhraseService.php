@@ -10,10 +10,17 @@ use App\Repositories\ResourceRepository;
 
 class PhraseService
 {
-    public function getPhraseForActivityResource($resource, $activityId = null): string
+    public function getPhraseForActivityResource($resource, $activity = null): string
     {
         if (get_class($resource) == 'App\\Models\\Restaurant') {
             return $this->getPhraseForDining($resource);
+        } else if (get_class($resource) == 'App\\Models\\Trail') {
+            if ($activity === null) {
+                $activity = 'hiking';
+            }
+            if ($activity === 'hiking') {
+                return $this->getPhraseForHiking($resource);
+            }
         }
         return '';
     }
@@ -186,6 +193,63 @@ class PhraseService
             "Sip on fine wine and dine on exquisite dishes at $name.",
             "Relish a night of culinary exploration at $name.",
             "Let your taste buds dance with joy at $name."
+        ];
+        return $phrases[array_rand($phrases)];
+    }
+
+    public function getPhraseForHiking($trail)
+    {
+        $phrases = [
+            "Embark on a scenic trek through the wilderness on the $trail.",
+            "Explore the great outdoors on a hiking adventure, like the $trail.",
+            "Hit the trails and embrace the beauty of nature on the $trail.",
+            "Commence a journey into the heart of the wilderness on the $trail.",
+            "Hike through picturesque landscapes and rugged terrain on the $trail trail.",
+            "Connect with nature as you venture into the woods on the $trail hike.",
+            "Begin a hiking expedition to conquer new heights like the $trail.",
+            "Set off on a trailblazing adventure through the wilderness on the $trail.",
+            "Take a hike to immerse yourself in natural wonders, such as the $trail.",
+            "Trek through forests, valleys, and mountains on the $trail.",
+            "Traverse the wilderness and discover hidden gems along the $trail.",
+            "Step into nature's embrace on a breathtaking hike like the $trail.",
+            "Embark on a nature walk to recharge your spirit on the $trail.",
+            "Start your ascent to awe-inspiring viewpoints on the $trail trail.",
+            "Begin a hiking odyssey to find serenity in nature, like on the $trail.",
+            "Set out on a trail to uncover breathtaking vistas along the $trail.",
+            "Wander through the wild and untamed landscapes of the $trail.",
+            "Lace up your hiking boots and hit the trails, starting with the $trail.",
+            "Journey through pristine wilderness and fresh air on the $trail.",
+            "Embark on an outdoor expedition to reconnect with nature on the $trail.",
+            "Take the path less traveled for a unique adventure on the $trail.",
+            "Explore the untouched beauty of the great outdoors, as seen on the $trail.",
+            "Begin your hike to experience the wonders of nature, starting with the $trail.",
+            "Set your sights on hiking to magnificent summits along the $trail.",
+            "Traverse rocky terrain on an exciting hiking journey like the $trail.",
+            "Walk through the heart of nature's wilderness on the $trail.",
+            "Hike along winding trails to discover hidden treasures along the $trail.",
+            "Commence a journey of discovery amidst nature's splendor on the $trail.",
+            "Set off on an expedition to explore untouched beauty like on the $trail.",
+            "Venture into the wilderness for an unforgettable hike on the $trail.",
+            "Start your hike and breathe in the fresh mountain air on the $trail.",
+            "Trek through lush forests and scenic meadows on the $trail trail.",
+            "Embark on a hike to find peace in the great outdoors on the $trail.",
+            "Begin your ascent to reach the pinnacle of adventure, starting at $trail.",
+            "Take a hike to experience the beauty of solitude along the $trail.",
+            "Explore the natural world on a captivating hike like the $trail.",
+            "Start your journey into the wild with every step on the $trail.",
+            "Hike through the tranquility of serene landscapes found on the $trail.",
+            "Traverse challenging terrain for an adrenaline rush on the $trail.",
+            "Begin your hike with the promise of scenic rewards, especially on $trail.",
+            "Set out on a hiking trail for a nature-inspired escape like $trail.",
+            "Walk through unspoiled wilderness and rejuvenate on the $trail.",
+            "Embark on a hike to embrace the wonders of nature, starting with $trail.",
+            "Start your outdoor exploration with enthusiasm on the $trail.",
+            "Take to the trails and leave urban life behind on the $trail route.",
+            "Trek through the great outdoors for a dose of adventure on the $trail.",
+            "Commence your hike to witness nature's grandeur, particularly on $trail.",
+            "Begin your ascent to conquer the peaks of exploration, beginning with $trail.",
+            "Set off on a journey to reconnect with the Earth, starting with $trail.",
+            "Hike with determination, and let nature guide your way on the $trail."
         ];
         return $phrases[array_rand($phrases)];
     }

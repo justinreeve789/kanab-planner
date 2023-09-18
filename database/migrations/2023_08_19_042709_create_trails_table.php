@@ -48,6 +48,7 @@ class CreateTrailsTable extends Migration
             $table->boolean('fee')->nullable();
             $table->string('gpx_url')->nullable();
             $table->text('raw_data')->nullable();
+            $table->boolean('is_usable')->default(true);
             $table->timestamps();
             $table->foreign('area_id')->references('id')->on('areas')->onDelete('cascade');
         });
