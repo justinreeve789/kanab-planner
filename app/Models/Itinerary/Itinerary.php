@@ -132,7 +132,7 @@ class Itinerary extends Model
         return $this->arrivalDateTime;
     }
 
-    public function getActivities(): array
+    public function getActivities(): ?array
     {
         return $this->activities;
     }
@@ -156,14 +156,73 @@ class Itinerary extends Model
         return $this->departureDateTime;
     }
 
-    public function eventExists(): bool
+    public function hasMeal($date, $period): bool
     {
+        switch ($period) {
+            case Period::MORNING:
+                $startTime = '07:00:00';
+                $endTime = '11:29:59';
+                break;
+            case Period::AFTERNOON:
+                $startTime = '11:30:00';
+                $endTime = '15:59:59';
+                break;
+            case Period::EVENING:
+                $startTime = '16:00:00';
+                $endTime = '23:59:59';
+                break;
+            default:
+                return false;
+        }
+
+        foreach ($this->getActivities() as $activity) {
+        }
+
         return false;
     }
 
-    public function trailExists(): bool
+    public function hasBreakfast(): bool
     {
+        return $this->hasMeal(Period::MORNING);
+    }
+
+    public function hasDinner(): bool
+    {
+        return $this->hasMeal(Period::EVENING);
+    }
+
+    public function hasLunch(): bool
+    {
+        return $this->hasMeal(Period::AFTERNOON);
+    }
+
+    public function resourceExists($resource): bool
+    {
+        if ($this->getActivities()) {
+            foreach ($this->getActivities() as $activity) {
+                if (get_class($activity->data) === get_class($resource)) {
+                    if ($activity->id === $resource->id) {
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
+    }
+
+    public function eventExists($event): bool
+    {
+        return $this->resourceExists($event);
+    }
+
+    public function restaurantExists($restaurant): bool
+    {
+        return $this->resourceExists($restaurant);
+    }
+
+    public function trailExists($trail): bool
+    {
+        return $this->resourceExists($trail);
     }
 
     public function getUseFirstDay(): bool

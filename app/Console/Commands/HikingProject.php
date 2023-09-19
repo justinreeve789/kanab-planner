@@ -20,9 +20,14 @@ use Illuminate\Console\Command;
 use IvoPetkov\HTML5DOMDocument;
 use Nesk\Puphpeteer\Puppeteer;
 use Nesk\Rialto\Data\JsFunction;
+use Symfony\Component\Panther\PantherTestCase;
+use Symfony\Component\Panther\WebDriver;
+use Symfony\Component\Panther\Client;
+use Symfony\Component\Panther\DomCrawler\Crawler;
 
 class HikingProject extends Command
 {
+    const COOKIE = 'GCLB=CMWrhfG39LvNOg; photosTitle=Nearby%20Photos; emailSentTo=eyJpdiI6IjJzTTcvWW8xcUhvUEZ0S2hiTVI1enc9PSIsInZhbHVlIjoiM2w3RHJsZ2VEaU56azlhN3A5NGxHcTZpSHYrSHJ3UkJnalNlVjBSOGVxL081MFovaGhHWHRoaklCQThhUzc3M3NRYkJGcmZSMk9vK0l5anIzUW1GS2c9PSIsIm1hYyI6ImM1ZDlkM2ZhYmNlNjY0MjAyZjcyYWU3N2M0NjIxMjU4MmE5NjU2MGUwMjU4MzRiZDRlMTcwNzQ5OTBjNjlkNTUiLCJ0YWciOiIifQ%3D%3D; user=eyJpdiI6IjU2ZDRoTUlPU3ZhZGQveTJtQUEzdGc9PSIsInZhbHVlIjoiZDdNb3VwRUN0bTQ0Rk9CNUNiSWVDdDRhdTVXYXRENS9mWnJYaG9nR2JEeWZCUDREMzhUNzIvcmRkd2hjaXVzQlZZai80QktXYS9xNWFEcUpUdlVFaVdwM01mdTNuNjErRUM0eThIbjdDeUdKbDQ1amdTaEZmRGtyOTdjYmtheXlwcXFZdjI5N0dzSnU4eldiU1R5Vzd3WDlXeW9FbjdFNDRqNmphZnUzVGFRPSIsIm1hYyI6ImI5N2EyNjM2ZTgyNzAwYjQzODEyZjg1Mjk0ZjFjMTkzZmEzNWUzNmEwZGZhMmVjMjJmZWQ3NzcxZDBiMDJiZTAiLCJ0YWciOiIifQ%3D%3D; ids=eyJpdiI6IkVyWFowUWxQVDIrVS9yMWFLY1lFVXc9PSIsInZhbHVlIjoiOC85akZyMXpCZlhraU11WG1VcnRlWSt1ZlhSOHk2eGFlWnV4SGpkUFN6eTVhS3hNdlpTN1hBc3hsQmRnUUg3THh3OThhY2FCN2NaWi9LY2lGYjZrQUE9PSIsIm1hYyI6ImMwZGJjNTQ5YTk5ZWNiZmU3ZDg5ZjcwMTZkNGU3NGNmZmVhMTQ2Njg5OGQ1NDlmZjQyMjkyNGIwNzk3OTc0ZDEiLCJ0YWciOiIifQ%3D%3D; photoIds=eyJpdiI6InQzZXVDSGRvZGs2MEQrVS9GUlBNV0E9PSIsInZhbHVlIjoiWkEzam1vWElia0k0dm5TM0dIdFlUK2dtNURaSzRVNFNWdlF3TWtubVRrNVphcmVJaUplanRGaG5SeFhwblFhRmxYVGFVdEFjN0Q2OHFBVXZ5RlducEVteFhEcXB6MWpzZjFiZ05RZFowa1FEbkx6VFRRQkVVcEJKRWNFcU1NNDhwSEZQNEEzOFFyb2dBN0RwdHk0QXNrRnNXbHJpbFRNWFVBODgvOWVUUElhcUYvVXVCV2Q2czNNem5DMVltemNUIiwibWFjIjoiZTgzMDhjMGQ1YmNjZWI0OWVjZDBmZGQ5NDE3MGY3YmI3MDViZmE5ZDE2ZWUwMzRjZTIwMjhiZTllYjkwZTE4OCIsInRhZyI6IiJ9; prefs=%5BcommentSort%7Coldest%5D%5BmapX%7C-11918277%5D%5BmapY%7C4707011%5D%5BmapZoom%7C12.4%5D; XSRF-TOKEN=eyJpdiI6ImlpUCtRZDF0dFpTbmp1V2NCNEZQMkE9PSIsInZhbHVlIjoiT1hYbDNiaVZTWkdheEhBUStTWUpMdjRLdnBmWndZc0RtdDdLK3NKcE5IVkVVc1I5ejh6SXBBcWtuUzlQdjhYdVorMGw3dDZjdzZvQlhMbzgyZlY4c3JhK000YnpUOW9pMFpydVc4b2lKY2hCbU5xeDBGaU5WcXJTVDAzTkV3UFYiLCJtYWMiOiJlMmZhZGMxMTJlNTA5ZTMxYzcwMDliNTgyZGQ3ZDU3ZTBiMTI4OTQyZGM4MDNiYjBhNGJkZmZkZWYxNDc5MzY0IiwidGFnIjoiIn0%3D; ap_session=eyJpdiI6ImE1d1krbjBIQlo1MVRvM3N4bVc2aFE9PSIsInZhbHVlIjoibTVjNWFvcmp4TmhHZWhjb1JLUTBSWlU2b0htaDExWk8rVVZKUS9VQ2x4UEVJWnhwalZ3RnhvNFdFTE90aThTaHo5cEZub0FhYzFMNEtDeHhDWHhkYk16blI3R3ZvVUtSekh1VlZIQzcwb0orUmYweml6c1BaRDNqdE9LalBkZHYiLCJtYWMiOiI4ZjIwZWEwYzFhOGUxMjMzYzUyZWM5NGYzMzA0YjMwMzFkODdkOTBjNTcxYjJlZTFkZTg5ZWFlMTE2YjFmYTE5IiwidGFnIjoiIn0%3D; pageCount=eyJpdiI6Ik1QQ3I2dzVHaXpnR1lwZm9JN0dsYnc9PSIsInZhbHVlIjoieko2Z0FlUW9OczF2aWM0WnVvZXl1L0k4RXVGcGpJUWRLTG8vaWxtNHRuai8rY3AyMTJnbkIxVFZLTWcvTGt4SCIsIm1hYyI6ImE3ZTExNTlhNzIzODA4ZTQ3M2JkMWU3ZTYyODU4YzU3NmY0ZTQ2YjE2OWU5OWJiODI5NjljNzUzMTk2NjlhMzUiLCJ0YWciOiIifQ%3D%3D';
     const SOURCE_TYPE = 'hikingproject';
 
     /**
@@ -30,7 +35,7 @@ class HikingProject extends Command
      *
      * @var string
      */
-    protected $signature = 'import:hikingproject';
+    protected $signature = 'import:hikingproject {--gpx} {--trails}';
 
     /**
      * The console command description.
@@ -50,6 +55,15 @@ class HikingProject extends Command
      */
     public function handle()
     {
+        $doGpx = $this->option('gpx');
+        $doTrails = $this->option('trails');
+        if ($doGpx) {
+            $this->downloadGpxFiles();
+            if (!$doTrails) {
+                return;
+            }
+        }
+
         $this->conversionService = new ConversionService();
         $this->trailService = new TrailService();
 
@@ -106,16 +120,76 @@ class HikingProject extends Command
             file_put_contents($jsonFile, json_encode($this->trailUrls));
         }
 
-//        $this->initBrowser();
-
         $json = json_decode(file_get_contents($jsonFile));
         foreach ($json as $areaId => $trailUrls) {
             foreach ($trailUrls as $trailUrl) {
                 $this->parseTrailPage($trailUrl, $areaId);
             }
         }
+    }
 
-//        $this->browser->close();
+    public function downloadGpxFiles()
+    {
+        $trails = Trail::where('source_type', self::SOURCE_TYPE)->whereNotNull('gpx_url')->get();
+        $client = Client::createChromeClient(base_path("drivers/chromedriver"), null, ["port" => 9558], null, [
+            "no-sandbox" => true,
+            "headless" => "new",
+            "disable-gpu" => true,
+            "user-agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
+        ]);
+
+        foreach ($trails as $trail) {
+            if (file_exists(storage_path('gpx/' . $trail->id . '-' . $trail->source_id . '.gpx'))) {
+                continue;
+            }
+            $url = 'https://www.hikingproject.com/trail/' . $trail->source_id;
+            $crawler = $client->request('GET', $url);
+            $client->waitFor('#user');
+            if (trim($crawler->filter('#user')->text() == 'Sign In')) {
+                $client->clickLink('Sign In');
+                $client->waitForVisibility('.login-signup-block');
+                $crawler->filter('.login-signup-block input[type="email"]')->sendKeys(getenv('HIKING_PROJECT_USERNAME'));
+                $crawler->filter('.login-signup-block input[type="password"]')->sendKeys(getenv('HIKING_PROJECT_PASSWORD'));
+                $client->executeScript("document.querySelector('.login-signup-block button').click()");
+                $crawler = $client->request('GET', $url);
+                $crawler = $client->refreshCrawler();
+            }
+
+            $client->waitFor('#user');
+            $crawler = $client->refreshCrawler();
+            $client->waitFor('#toolbox');
+            $client->executeScript("document.querySelector('#toolbox a.mt-threequarter.btn.btn-xs.btn-secondary.width100.require-user').click()");
+            $this->moveGpxFile(storage_path('gpx/' . $trail->id . '-' . $trail->source_id . '.gpx'));
+        }
+    }
+
+    private function moveGpxFile($toFile)
+    {
+        // Wait for the download to complete (check for file presence)
+        $timeout = 15; // Set a timeout (in seconds) for waiting
+        $startTime = time();
+
+        while (time() - $startTime < $timeout) {
+            // Check if the file exists in the download directory
+            $matchingFiles = glob('/var/www/dev.visitkanab.org/*.gpx');
+            if ($matchingFiles !== false) {
+                foreach($matchingFiles as $index => $fromFile) {
+                    if (count($matchingFiles) > 1) {
+                        $parts = pathinfo($fromFile);
+                        $toFile .= basename($parts['dirname'] . '/' . $parts['filename'] . '-' . $index . '.' . $parts['extension']);
+                    }
+                    if (!rename($fromFile, $toFile)) {
+                        echo 'Could not move file ' . $toFile . '
+';
+                    } else {
+                        return;
+                    }
+                }
+            }
+
+            // Sleep for a short period to avoid high CPU usage
+            sleep(1);
+        }
     }
 
     private function fixSymbols($str): string

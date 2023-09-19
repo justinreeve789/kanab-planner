@@ -7,7 +7,6 @@
             <p class="stats" v-if="trail.incline_ft">Elevation Gain: {{ trail.incline_ft }}'</p>
             <p class="stats" v-if="trail.average_grade_pt">Average Grade: {{ trail.average_grade_pt * 100 }}%</p>
             <p v-if="trail.reservation">Reservation required</p>
-            <!-- <p>{{ trail.description }}</p> -->
         </div>
         <div class="trail-map">
             <!-- Embedded map (you can use Google Maps, Mapbox, or another mapping service) -->
