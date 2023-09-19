@@ -40,6 +40,7 @@ class Itinerary extends Model
     protected $fillable = ['*'];
 
     public $accommodationPreference;
+    public $activities;
     public $activityPriorities;
     public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
     public $arrivalDateTime;
@@ -51,16 +52,20 @@ class Itinerary extends Model
     public $durationDays;
     public $endDate;
     public $estimatedCost;
+    public $eventIds = [];
     public $homeLocationId;
     public $interests;
     public $latitude;  // The latitude of the "base camp."
+    public $locationIds = [];
     public $longitude; // The longitude of the "base camp."
     public $month;
     public $priorities;
+    public $restaurantIds = [];
     public $season;
     public $solitariness = self::DEFAULT_SOLITARINESS;
     public $startDate;
     public $strenuousness = self::DEFAULT_STRENUOUSNESS;
+    public $trailIds = [];
     public $trailPriorities;
     public $tripPreference;
     public $useFirstDay;
@@ -71,9 +76,29 @@ class Itinerary extends Model
         $this->days = [];
     }
 
+    /**
+     * We're using this as a singleton, so we can reference it from both ItineraryController and ItineraryService.
+     */
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
     public function days()
     {
         return $this->hasMany(Day::class, 'itinerary_id', 'id');
+    }
+
+    public function addActivity($resource, $startDateTime, $endDateTime, int $dayNum, $period = null, $activityType = null)
+    {
+        $activity = new Activity($resource, $activityType, $startDateTime, $endDateTime);
+        $this->activities[] = $activity;
+        $this->getDay($dayNum)->addActivity($resource, $activityType, date('H:i:s', strtotime($startDateTime)), date('H:i:s', strtotime($endDateTime)));
+        if ($period) {
+            $this->getDay($dayNum)->periods[$period]->addActivity($resource, $activityType, date('H:i:s', strtotime($startDateTime)), date('H:i:s', strtotime($endDateTime)));
+        }
     }
 
     public function addDay(Day $day, $index = null): array
@@ -107,7 +132,12 @@ class Itinerary extends Model
         return $this->arrivalDateTime;
     }
 
-    public function getDay($index = 0): Day
+    public function getActivities(): array
+    {
+        return $this->activities;
+    }
+
+    public function getDay(int $index = 0): Day
     {
         return $this->days[$index];
     }

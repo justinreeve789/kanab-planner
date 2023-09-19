@@ -2,13 +2,6 @@ html {
   font-family: Roboto, sans-serif;
 }
 
-.date-select {
-  float: left;
-  margin: 0 50px;
-  max-width: 480px;
-}
-
-/* Reset some default styles */
 body, h1, h2, ul, li {
   margin: 0;
   padding: 0;
@@ -24,7 +17,6 @@ body {
   padding: 20px; /* Added padding to center content */
 }
 
-/* Style the header */
 header {
   background-color: #ff9f1c; /* Orange */
   text-align: center;
@@ -37,15 +29,50 @@ h1 {
   color: white;
 }
 
+h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+/* Style the paragraphs */
+p {
+  margin-top: 5px;
+}
+
+.date-select {
+  float: left;
+  margin: 0 50px;
+  max-width: 480px;
+}
+
 .day {
   margin-bottom: 40px;
+}
+
+.date {
+  position: relative;
+  bottom: -18px;
+  float: right;
+}
+
+.day-header {
+  display: flex;
+  align-items: flex-end;
+}
+
+.day-content ul {
+  margin: -40px;
+}
+.day-content li.day-activity {
+  padding: 40px;
 }
 
 /* Style the main content container */
 .itinerary {
   background-color: white;
   border-radius: 5px;
-  max-width: 800px;
+  max-width: 1024px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
   overflow: hidden; /* Ensure child elements don't overflow */
   padding: 20px; /* Added padding to the main container */
@@ -90,27 +117,15 @@ h1 {
   padding: 10px;
 }
 
-/* Style the headings */
-h2 {
-  font-family: "Playfair Display", serif;
-  font-size: 24px;
-  margin-bottom: 10px;
-}
-
-/* Style the paragraphs */
-p {
-  margin-top: 5px;
-}
-
 /* Trail details section styles */
-.trail-details {
+.resource-details {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
 }
 
 /* Trail info styles */
-.trail-info {
+.resource-info {
   flex: 1;
   padding: 20px;
   border-radius: 5px;
@@ -121,11 +136,15 @@ p {
   background-repeat: no-repeat;
   background-position: center center;
 }
+.resource-info .description {
+  font-size: 14px;
+}
 
 /* Trail map styles */
 .trail-map {
   flex: 1;
   margin-left: 20px;
+  max-width: 300px;
 }
 
 /* Trail stats styles */
@@ -149,4 +168,33 @@ p {
   font-size: 18px;
   margin: 8px 0;
   color: #666;
+}
+
+.graph {
+  display: flex;
+  align-items: flex-end; /* Align lines to the bottom of the container */
+  height: 50px; /* Fixed height of the graph container */
+  padding: 0 0 0 40px; /* Add spacing around the graph */
+}
+
+/* Style for the gradient lines */
+.gradient-line {
+  cursor: pointer;
+  width: 20px; /* Adjust the width of the lines */
+  margin-right: 10px; /* Adjust spacing between lines */
+}
+
+/* Style for the gradient line with class "adventurousness" */
+.adventurousness {
+  background: linear-gradient(to bottom, #FF5733, #FFC300); /* Customize gradient colors */
+}
+
+/* Style for the gradient line with class "solitariness" */
+.solitariness {
+  background: linear-gradient(to bottom, #33FF57, #33FFEC); /* Customize gradient colors */
+}
+
+/* Style for the gradient line with class "strenuousness" */
+.strenuousness {
+  background: linear-gradient(to bottom, #5733FF, #C833FF); /* Customize gradient colors */
 }

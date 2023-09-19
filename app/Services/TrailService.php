@@ -8,16 +8,12 @@ use App\Models\Trail;
 
 class TrailService
 {
-    public function __construct()
-    {
-    }
-
     /**
      * TODO: This doesn't seem to work properly.
      */
     public function getRandomTrailForPeriod($areaId, $period, $itinerary = null, $existingTrails = []): ?Trail
     {
-        $trails = Trail::with('data')->where('area_id', $areaId);
+        $trails = Trail::with('data')->where('area_id', $areaId)->whereNotNull('distance_miles');
         if ($itinerary !== null) {
             $trails = $trails->sortByDeviations($itinerary->getDeviations());
         }

@@ -106,7 +106,7 @@ class ItineraryService
 
         // Using the trail priorities for the day's area, determine when the user should best start the trail.
         foreach ($this->getItinerary()->getTrailPriorities(true) as $trailId) {
-            $trail = Trail::where('id', $trailId)->first();
+            $trail = Trail::where('id', $trailId)->whereNotNull('distance_miles')->first();
             if ($trail->area_id == $day->getAreaId() && !$this->getItinerary()->trailExists()) {
                 $trailPeriod = $this->trailService->getBestPeriodOfDayForTrail($trail);
                 break;
@@ -115,12 +115,19 @@ class ItineraryService
 
         // If we have a trail for today, and it's in the morning, and in Zion, they probably won't have time to stop
         // to eat in the morning if they want to start on time. They should eat at home.
-        if (isset($trail) && isset($trailPeriod) && $trailPeriod === Period::MORNING && $trail->area_id = Area::ZION) {
-            $day->periods[$trailPeriod]->addActivity(new Task([
+        if (isset($trail) && isset($trailPeriod) && $trailPeriod === Period::MORNING && $trail->area_id == Area::ZION) {
+            $task = new Task([
                 'name' > 'Eat breakfast at home to make sure you can get to the trail at an early hour.',
                 'description' => 'Ideally you\'ll reach the trail by 8:00am to avoid larger crowds.',
-            ]), null, '06:30', '07:30');
-            $day->periods[$trailPeriod]->addActivity($trail, 'hiking', '08:00', date('H:i', strtotime('08:00') + $trail->getAverageHours() * 60 * 60));
+            ]);
+            $this->getItinerary()->addActivity($task, ($day->date . ' 06:30'), ($day->date . ' 07:30'), $day->dayNum, $trailPeriod, null);
+            $this->getItinerary()->addActivity($trail,
+                $day->date . ' 08:00',
+                date('H:i', strtotime('08:00') + $trail->getAverageHours() * 60 * 60),
+                $day->dayNum,
+                $trailPeriod,
+                'hiking'
+            );
         }
 
         // Are there possible events for the day to fill in any gaps?
@@ -176,7 +183,7 @@ class ItineraryService
     /**
      * We'll need to examine the priorities and make sure we include those areas.
      */
-    public function getDaysForAreas(bool $useFirstDay = false, bool $useLastDay = false): array
+    public function assignDaysForAreas(bool $useFirstDay = false, bool $useLastDay = false): array
     {
         $durationDays = $this->getItinerary()->getDurationDays();
         $dayNum = 0;
@@ -204,7 +211,7 @@ class ItineraryService
 
         // Get the areas for the trails. Weight the areas that appear the most so they are first in the array.
         // TODO: Make sure the trails are actually opening on the date.
-        $trailAreaIds = Trail::select('area_id', \DB::raw('COUNT(area_id) AS occurrences'))->whereIn('id', $trailPriorities)->groupBy('area_id')->orderByRaw('COUNT(area_id) DESC')->get()->keyBy('area_id');
+        $trailAreaIds = Trail::select('area_id', \DB::raw('COUNT(area_id) AS occurrences'))->whereNotNull('distance_miles')->whereIn('id', $trailPriorities)->groupBy('area_id')->orderByRaw('COUNT(area_id) DESC')->get()->keyBy('area_id');
 
         // Add areas as long as we have days remaining in the duration of the trip.
         $modifier = $useLastDay ? 0 : -1;
@@ -225,6 +232,8 @@ class ItineraryService
             $date = $this->incrementDate($date);
         } while (count($days) < $durationDays + 1); // TODO: Why does this need to be +1?
         ksort($days);
+
+        $this->getItinerary()->setDays($days);
 
         return $days;
     }

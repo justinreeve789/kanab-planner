@@ -1,0 +1,28 @@
+.graph {
+  display: flex;
+  align-items: flex-end; /* Align lines to the bottom of the container */
+  height: 50px; /* Fixed height of the graph container */
+  padding: 0 0 0 40px; /* Add spacing around the graph */
+}
+
+/* Style for the gradient lines */
+.gradient-line {
+  cursor: pointer;
+  width: 20px; /* Adjust the width of the lines */
+  margin-right: 10px; /* Adjust spacing between lines */
+}
+
+/* Style for the gradient line with class "adventurousness" */
+.adventurousness {
+  background: linear-gradient(to bottom, #FF5733, #FFC300); /* Customize gradient colors */
+}
+
+/* Style for the gradient line with class "solitariness" */
+.solitariness {
+  background: linear-gradient(to bottom, #33FF57, #33FFEC); /* Customize gradient colors */
+}
+
+/* Style for the gradient line with class "strenuousness" */
+.strenuousness {
+  background: linear-gradient(to bottom, #5733FF, #C833FF); /* Customize gradient colors */
+}

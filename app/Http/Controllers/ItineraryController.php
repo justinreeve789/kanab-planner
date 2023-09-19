@@ -45,9 +45,9 @@ class ItineraryController extends Controller
     {
         $this->setupItinerary($request);
         $this->itineraryService->setItinerary($this->getItinerary());
-        $days = $this->itineraryService->getDaysForAreas($this->getItinerary()->getUseFirstDay(), $this->getItinerary()->getUseLastDay());
+        $days = $this->itineraryService->assignDaysForAreas($this->getItinerary()->getUseFirstDay(), $this->getItinerary()->getUseLastDay());
         foreach ($days as $dayNum => $day) {
-            $day = $this->itineraryService->fillDay($day, null, $dayNum);
+            $day = $this->itineraryService->fillDay($day);
         }
         $this->getItinerary()->setDays($days);
 //        echo '<pre>'; print_r($this->getItinerary()); echo '</pre>';

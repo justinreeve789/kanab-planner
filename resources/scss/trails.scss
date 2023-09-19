@@ -1,12 +1,12 @@
 /* Trail details section styles */
-.trail-details {
+.resource-details {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
 }
 
 /* Trail info styles */
-.trail-info {
+.resource-info {
   flex: 1;
   padding: 20px;
   border-radius: 5px;
@@ -17,12 +17,17 @@
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center center;
+
+  .description {
+    font-size: 14px;
+  }
 }
 
 /* Trail map styles */
 .trail-map {
   flex: 1;
   margin-left: 20px;
+  max-width: 300px;
 }
 
 /* Trail stats styles */

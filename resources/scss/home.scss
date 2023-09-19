@@ -2,6 +2,44 @@ html {
   font-family: Roboto, sans-serif;
 }
 
+body, h1, h2, ul, li {
+  margin: 0;
+  padding: 0;
+}
+
+/* Center everything vertically and horizontally */
+body {
+  background-color: #f0f5f9;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px; /* Added padding to center content */
+}
+
+header {
+  background-color: #ff9f1c; /* Orange */
+  text-align: center;
+  padding: 20px 0;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px;
+  color: white;
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+/* Style the paragraphs */
+p {
+  margin-top: 5px;
+}
+
 .date-select {
   float: left;
   margin: 0 50px;

@@ -1,13 +1,13 @@
 <template>
-    <section class="trail-details">
-        <div class="trail-info">
+    <section class="resource-details">
+        <div class="resource-info">
             <h2>{{ trail.name }}</h2>
-            <p>{{ trail.description }}</p>
-            <p class="stats">Distance: {{ trail.distance_miles }}</p>
+            <p class="stats">Distance: {{ trail.distance_miles }} miles</p>
             <p class="stats" v-if="trail.difficulty">Difficulty: {{ trail.difficulty }}</p>
             <p class="stats" v-if="trail.incline_ft">Elevation Gain: {{ trail.incline_ft }}'</p>
-            <p class="stats" v-if="trail.average_grade_pt">Average Grade: {{ trail.average_grade_pt }}%</p>
+            <p class="stats" v-if="trail.average_grade_pt">Average Grade: {{ trail.average_grade_pt * 100 }}%</p>
             <p v-if="trail.reservation">Reservation required</p>
+            <!-- <p>{{ trail.description }}</p> -->
         </div>
         <div class="trail-map">
             <!-- Embedded map (you can use Google Maps, Mapbox, or another mapping service) -->

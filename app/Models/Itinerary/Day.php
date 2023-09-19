@@ -36,7 +36,7 @@ class Day extends Model
     public function __construct($date, $area, ?int $dayNum)
     {
         $this->date = $date;
-        $this->formattedDate = date('l, F n, Y', strtotime($this->date));
+        $this->formattedDate = date('l, F j, Y', strtotime($this->date));
 
         if ($area !== null) {
             if (is_integer($area)) {

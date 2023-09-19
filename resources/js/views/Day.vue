@@ -1,15 +1,24 @@
 <template>
   <div class="day">
-    <!-- Display day-specific data here -->
-    <p style="float: right;">{{ day.formattedDate }}</p>
-    <h2>Day {{ day.dayNum + 1 }} - {{ day.area.name }}</h2>
+    <p class="date">{{ day.formattedDate }}</p>
+    <div class="day-header">
+        <h2>Day {{ day.dayNum + 1 }} - {{ day.area.name }}</h2>
+        <div class="graph">
+            <div class="gradient-line adventurousness" style="height: 50%;"></div>
+            <div class="gradient-line solitariness" style="height: 30%;"></div>
+            <div class="gradient-line strenuousness" style="height: 70%;"></div>
+        </div>
+    </div>
 
     <section class="itinerary">
         <div class="timeline"></div>
         <div class="day-content morning" v-for="(activity, index) in day.periods['morning'].activities" :key="index">
             <ul>
-                <li class="expandable">
-                    <div v-if="activity.activityType == 'hiking'">
+                <li class="day-activity expandable">
+                    <div v-if="activity.activityType == 'dining'">
+                        <Restaurant :resource="activity.data" />
+                    </div>
+                    <div v-else-if="activity.activityType == 'hiking'">
                         <Trail :trail="activity.data" />
                     </div>
                     <div v-else>
@@ -23,9 +32,12 @@
 
         <div class="day-content afternoon" v-for="(activity, index) in day.periods['afternoon'].activities" :key="index">
             <ul>
-                <li class="expandable">
-                    <div v-if="activity.activityType == 'hiking'">
-                        <Trail :trail="activity" />
+                <li class="day-activity expandable">
+                    <div v-if="activity.activityType == 'dining'">
+                        <Restaurant :resource="activity.data" />
+                    </div>
+                    <div v-else-if="activity.activityType == 'hiking'">
+                        <Trail :trail="activity.data" />
                     </div>
                     <div v-else>
                         <p><strong>{{ activity.name }}</strong></p>
@@ -38,9 +50,12 @@
 
         <div class="day-content evening" v-for="(activity, index) in day.periods['evening'].activities" :key="index">
             <ul>
-                <li class="expandable">
-                    <div v-if="activity.activityType == 'hiking'">
-                        <Trail :trail="activity" />
+                <li class="day-activity expandable">
+                    <div v-if="activity.activityType == 'dining'">
+                        <Restaurant :resource="activity.data" />
+                    </div>
+                    <div v-else-if="activity.activityType == 'hiking'">
+                        <Trail :trail="activity.data" />
                     </div>
                     <div v-else>
                         <p><strong>{{ activity.name }}</strong></p>
