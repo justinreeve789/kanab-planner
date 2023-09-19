@@ -30,6 +30,12 @@ class Restaurant extends Resource
         return $this->hasMany(LocationTag::class, 'location_id', 'location_id');
     }
 
+    public function calculateEndDate(string $startDateTime)
+    {
+        // TODO: Use busyness and popularity rankings.
+        return date('Y-m-d H:i:s', strtotime($startDateTime) + (90 * 60));
+    }
+
     public function getAveragePrice()
     {
         return $this->average_price;
