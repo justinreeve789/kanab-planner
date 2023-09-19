@@ -33,7 +33,6 @@ class Period extends Model
 
     public function addActivity($resource, $activityType = null, $startTime = null, $endTime = null)
     {
-        echo '<pre>'; print_r($resource); echo '</pre>';
         $this->activities[] = new Activity($resource, $activityType, $startTime, $endTime);
     }
 
