@@ -211,7 +211,7 @@ trait ActivityData
 
         // Calculate the individual terms.
         $K = 0.75; // Incline/decline sensitivity
-        $D = 1; // Distance sensitivity
+        $D = 3; // Distance sensitivity
         $G = 1.25; // Grade sensitivity
         $A = 3.0;  // Distance threshold
 

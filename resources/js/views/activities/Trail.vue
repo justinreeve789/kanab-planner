@@ -13,7 +13,7 @@
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
                         </svg>
                     </div>
-                    <div class="text-xl">{{ trail.name }}</div>
+                    <div class="text-xl text-left">{{ trail.name }}</div>
                     <div class="difficulty hidden">
                         <img :src="'/images/icons/difficulty-' + trail.difficulty + '.png'" :alt="trail.formattedDifficulty">
                     </div>
@@ -46,7 +46,7 @@
                     <p v-if="activity.phrase"><em>{{ activity.phrase }}</em></p>
                 </div>
                 <div class="w-1/3 pl-4" v-if="trail.images">
-                    <Side :resource="trail" :type="'trail'" v-if="trail.images" />
+                    <Side :resource="trail" :type="'trail'" :images="trail.images" />
                 </div>
             </div>
         </div>

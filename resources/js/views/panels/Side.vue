@@ -1,5 +1,5 @@
 <template>
-    <Gallery :photos="resource.images" v-if="type === 'trail' && resource.images" />
+    <Gallery :photos="images" v-if="images" />
 </template>
 
 <script>
@@ -11,6 +11,7 @@ export default {
     initTabs();
   },
   props: {
+    images: Object,
     resource: Object,
     type: String,
   },

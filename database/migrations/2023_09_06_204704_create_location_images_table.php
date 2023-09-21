@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('url')->nullable();
             $table->string('size')->nullable();
             $table->timestamps();
+            $table->unique(['location_id', 'url']);
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });
     }

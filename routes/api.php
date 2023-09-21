@@ -40,6 +40,10 @@ Route::prefix('v1')->group(function() {
         Route::put('/{id}', 'App\Http\Controllers\ItineraryController@updateItinerary');
     });
 
+    Route::prefix('image')->group(function() {
+        Route::get('/', 'App\Http\Controllers\ImageController@getImageByQuery');
+    });
+
     Route::prefix('location')->group(function() {
         Route::get('/', 'App\Http\Controllers\LocationController@index');
         Route::get('/{id}', 'App\Http\Controllers\LocationController@getLocation');

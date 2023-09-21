@@ -30,6 +30,11 @@ class Location extends Resource
         return $this->hasMany(LocationHour::class, 'location_id', 'id');
     }
 
+    public function images()
+    {
+        return $this->hasMany(LocationImage::class, 'location_id', 'id');
+    }
+
     public function text()
     {
         return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'locations');

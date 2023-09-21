@@ -13,7 +13,7 @@
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
                         </svg>
                     </div>
-                    <div class="text-xl">{{ restaurant.name }}</div>
+                    <div class="text-xl text-left">{{ restaurant.name }}</div>
                 </div>
                 <div class="stats flex items-center text-right">
                     <span class="distance flex">
@@ -35,8 +35,8 @@
                 <div class="w-2/3">
                     {{ restaurant.description }}
                 </div>
-                <div class="w-1/3 pl-4" v-if="restaurant.images">
-                    <Side :resource="restaurant" :type="'restaurant'" v-if="restaurant.images" />
+                <div class="w-1/3 pl-4" v-if="restaurant.location.images">
+                    <Side :resource="restaurant" :type="'restaurant'" :images="restaurant.location.images" />
                 </div>
             </div>
         </div>

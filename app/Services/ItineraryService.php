@@ -13,12 +13,12 @@ use App\Models\Itinerary\Task;
 use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Models\Image;
-use App\Services\TrailService;
 use App\Repositories\ItineraryRepository;
 use Illuminate\Database\Eloquent\Model;
 
 class ItineraryService
 {
+    private $imageService;
     private $itinerary;
     private $phraseService;
     private $repository;
@@ -29,6 +29,7 @@ class ItineraryService
     public function __construct($itinerary = null)
     {
         $this->setItinerary($itinerary);
+        $this->imageService = new ImageService();
         $this->phraseService = new PhraseService();
         $this->restaurantService = new RestaurantService();
         $this->trailService = new TrailService();
@@ -178,8 +179,9 @@ class ItineraryService
         }
 
         // Add a restaurant in the area for the morning.
-        $restaurant = Restaurant::with('location')
-            ->whereIsOpen($date . ' 09:00:00')
+        $restaurant = Restaurant::with(['location' => function($query) {
+            $query->with('images');
+        }])->whereIsOpen($date . ' 09:00:00')
             ->whereHas('location', function($query) use ($day) {
                 $query->where('area_id', $day->getAreaId());
             })->inRandomOrder()->first();
@@ -190,7 +192,9 @@ class ItineraryService
         }
 
         // Add a restaurant in the area for the afternoon.
-        $restaurant = Restaurant::with('location')->whereIsOpen($date . ' 09:00:00')->whereHas('location', function($query) use ($day) {
+        $restaurant = Restaurant::with(['location' => function($query) {
+            $query->with('images');
+        }])->whereIsOpen($date . ' 09:00:00')->whereHas('location', function($query) use ($day) {
             $query->where('area_id', $day->getAreaId());
         })->inRandomOrder()->first();
         if ($restaurant && !$this->getItinerary()->restaurantExists($restaurant)) {
@@ -200,7 +204,9 @@ class ItineraryService
         }
 
         // Add a restaurant in the area for the evening.
-        $restaurant = Restaurant::with('location')->whereIsOpen($date . ' 17:00:00')->whereHas('location', function($query) use ($day) {
+        $restaurant = Restaurant::with(['location' => function($query) {
+            $query->with('images');
+        }])->whereIsOpen($date . ' 17:00:00')->whereHas('location', function($query) use ($day) {
             $query->where('area_id', $day->getAreaId());
         })->inRandomOrder()->first();
         if ($restaurant && !$this->getItinerary()->restaurantExists($restaurant)) {
@@ -210,7 +216,8 @@ class ItineraryService
             $this->phraseService->getPhraseForLightMeals(Period::EVENING);
         }
 
-        // TODO: $this->eventService()->getEventForDay(
+        // TODO: $this->eventService()->getEventForDay()
+        $day->getASS();
         return $day;
     }
 

@@ -12,6 +12,10 @@ class Activity extends Model
     use HasFactory;
     use ReturnAllProperties;
 
+    const DEFAULT_ADVENTUROUSNESS = 0.3;
+    const DEFAULT_SOLITARINESS = 0.3;
+    const DEFAULT_STRENUOUSNESS = 0.3;
+
     protected $guarded = [];
 
     public $data;
