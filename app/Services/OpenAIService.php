@@ -33,16 +33,19 @@ class OpenAIService
         $result = OpenAI::chat()->create([
             'model' => 'gpt-3.5-turbo',
             'messages' => [[
+                'role' => 'system',
+                'content' => 'You are a helpful assistant transcribing scanned text and re-summarizing it for a travel web site about southern Utah and northern Arizona.',
+            ],[
                 'role' => 'user',
-                'content' => 'Clean up and rewrite the following text so it\'s properly formatted and legible: ' . $text,
+                'content' => 'Summarize, fix misspellings, remove the title, expand on the text, and format as a JSON string containing trail_name, distance, best_season, difficulty, elevation, latitude, longitude, accessibility, pets_allowed, reservation_required, average_hours_to_hike, vehicle, getting_there, description, description_html, and additional_info: ' . $text,
             ]],
-            'max_tokens' => 1000,
+            'max_tokens' => 2000,
         ]);
-        print_r($result);
+        return $result['choices'][0]['message']['content'];
     }
 
     public function cleanText(string $text): ?string {
-        return $this->cleanTextWithWGPT($text);
+        return $this->cleanTextWithOpenAI($text);
     }
 
     public function trainEvent(Event $event) {

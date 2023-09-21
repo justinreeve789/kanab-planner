@@ -30,7 +30,7 @@ class CleanResourceText extends Command
     public function handle()
     {
         $this->openAIService = new OpenAIService();
-        $resourceText = ResourceText::whereNull('clean')->get();
+        $resourceText = ResourceText::whereNull('clean')->orWhere('clean', '---')->get();
         foreach ($resourceText as $rt) {
             $text = $this->openAIService->cleanText($rt->raw);
             echo $text;
