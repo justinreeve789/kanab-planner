@@ -9,12 +9,11 @@ class RestaurantController extends Controller
 {
     public function index(Request $request)
     {
-        return Restaurant::with('location')->with('tags')->get();
+        return Restaurant::with(['data', 'location', 'tags'])->get();
     }
 
-    public function getRestaurant(Request $request)
+    public function getRestaurant(Request $request, int $id)
     {
-        $id = $request->get('id');
-        return Restaurant::with('location')->where('id', $id)->first();
+        return Restaurant::with(['data', 'location', 'tags'])->where('id', $id)->first();
     }
 }

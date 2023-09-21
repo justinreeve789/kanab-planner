@@ -118,6 +118,7 @@ class OCRService
             case self::GOOGLE_CLOUD_VISION:
                 $imagePath = $this->conversionService->convertPdfToImage($pdfPath);
                 $text = $this->convertImageToTextWithGoogleCloudVision($imagePath);
+                echo $text;
                 $this->conversionService->deleteFiles($imagePath);
                 break;
             case self::OCR_SPACE:

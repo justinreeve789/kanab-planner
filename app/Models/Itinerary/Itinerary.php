@@ -44,6 +44,7 @@ class Itinerary extends Model
     public $activityPriorities;
     public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
     public $arrivalDateTime;
+    public $baseArea;
     public $baseAreaId = self::DEFAULT_BASE_AREA_ID;
     public $checkInTime;
     public $checkOutTime;
@@ -123,6 +124,35 @@ class Itinerary extends Model
         return $this->days;
     }
 
+    public function getActivities(): ?array
+    {
+        return $this->activities;
+    }
+
+    public function getAdventurousness(): ?float
+    {
+        if (!$this->adventurousness) {
+            $this->adventurousness = self::DEFAULT_ADVENTUROUSNESS;
+        }
+        return $this->adventurousness;
+    }
+
+    public function getSolitariness(): ?float
+    {
+        if (!$this->solitariness) {
+            $this->solitariness = self::DEFAULT_SOLITARINESS;
+        }
+        return $this->solitariness;
+    }
+
+    public function getStrenuousness(): ?float
+    {
+        if (!$this->strenuousness) {
+            $this->strenuousness = self::DEFAULT_STRENUOUSNESS;
+        }
+        return $this->strenuousness;
+    }
+
     public function getArrivalDateTime()
     {
         if (isset($this->arrivalDateTime)) {
@@ -132,9 +162,12 @@ class Itinerary extends Model
         return $this->arrivalDateTime;
     }
 
-    public function getActivities(): ?array
+    public function getBaseArea(): ?Area
     {
-        return $this->activities;
+        if ($this->baseArea === null && $this->baseAreaId !== null) {
+            $this->baseArea = Area::where('id', $this->baseAreaId)->first();
+        }
+        return $this->baseArea;
     }
 
     public function getDay(int $index = 0): Day
@@ -237,6 +270,11 @@ class Itinerary extends Model
         $a = strtotime($this->getDepartureDateTime());
         $b = strtotime($this->endDate . ' ' . self::DEFAULT_DEPARTURE_TIME);
         return $a > $b + 3600;
+    }
+
+    public function setBaseArea($area)
+    {
+        $this->baseArea = $area;
     }
 
     public function setDays(array $days)

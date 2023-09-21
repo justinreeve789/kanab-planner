@@ -1,4 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @import 'home.scss';
+@import 'modal.scss';
 @import 'day.scss';
 @import 'trails.scss';
 @import 'props.scss';

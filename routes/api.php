@@ -60,5 +60,7 @@ Route::prefix('v1')->group(function() {
     Route::prefix('trail')->group(function() {
         Route::get('/', 'App\Http\Controllers\TrailController@index');
         Route::get('/{id}', 'App\Http\Controllers\TrailController@getTrail');
+        Route::get('/{id}/gpx', 'App\Http\Controllers\TrailController@getGpxData');
+        Route::get('/{id}/gpx/download', 'App\Http\Controllers\TrailController@downloadGpx');
     });
 });

@@ -72,6 +72,8 @@ class ItineraryService
      * Let's go hour by hour and figure out where activities fit. Breakfast ~8:00am, lunch ~12:00pm, dinner ~5:00pm.
      * Make sure there's at least 3 hours between breakfast and lunch, and 4 hours between lunch and dinner. If lunch
      * won't be possible, set a "bringSnacks" flag in the overlapping activity to true.
+     *
+     * A combioned less adventurous and more solitary setting will avoid taking them too far, such as St. George or Page.
      */
     public function fillDay(Day $day)
     {
@@ -106,9 +108,11 @@ class ItineraryService
         // Using the trail priorities for the day's area, determine when the user should best start the trail.
         foreach ($this->getItinerary()->getTrailPriorities(true) as $trailId) {
             $trail = Trail::where('id', $trailId)->whereNotNull('distance_miles')->first();
-            if ($trail->area_id == $day->getAreaId() && !$this->getItinerary()->trailExists($trail)) {
-                $trailPeriod = $this->trailService->getBestPeriodOfDayForTrail($trail);
-                break;
+            if ($trail) {
+                if ($trail->area_id == $day->getAreaId() && !$this->getItinerary()->trailExists($trail)) {
+                    $trailPeriod = $this->trailService->getBestPeriodOfDayForTrail($trail);
+                    break;
+                }
             }
         }
 
@@ -240,8 +244,14 @@ class ItineraryService
         $trailPriorities = $this->getItinerary()->getTrailPriorities();
 
         // Get the areas for the trails. Weight the areas that appear the most so they are first in the array.
-        // TODO: Make sure the trails are actually opening on the date.
-        $trailAreaIds = Trail::select('area_id', \DB::raw('COUNT(area_id) AS occurrences'))->whereNotNull('distance_miles')->whereIn('id', $trailPriorities)->groupBy('area_id')->orderByRaw('COUNT(area_id) DESC')->get()->keyBy('area_id');
+        // TODO: Make sure the trails are actually open on the date.
+        $trailAreaIds = Trail::select('area_id', \DB::raw('COUNT(area_id) AS occurrences'))
+            ->whereNotNull('distance_miles')
+            ->whereIn('id', $trailPriorities)
+            ->groupBy('area_id')
+            ->orderByRaw('COUNT(area_id) DESC')
+            ->get()
+            ->keyBy('area_id');
 
         // Add areas as long as we have days remaining in the duration of the trip.
         $modifier = $useLastDay ? 0 : -1;
@@ -257,7 +267,13 @@ class ItineraryService
         do {
             // TODO: Don't be so random about the area. Get an area with other events they'd be interested in. Also take
             // into account other preferences like maximum distance they want to travel.
-            $day = new Day($date, Area::inRandomOrder()->value('id'), $dayNum);
+            $query = Area::inRandomOrder();
+            // If the user's adventurousness is really low (< 0.2), we won't pick areas that are too far from their base area.
+            if ($this->getItinerary()->getAdventurousness() < 0.2) {
+                $query->whereProximity($this->getItinerary()->getBaseArea()->latitude, $this->getItinerary()->getBaseArea()->longitude, 40);
+            }
+            $areaId = $query->value('id');
+            $day = new Day($date, $areaId, $dayNum);
             $days[$dayNum++] = $day;
             $date = $this->incrementDate($date);
         } while (count($days) < $durationDays + 1); // TODO: Why does this need to be +1?

@@ -9,12 +9,12 @@ class EventController extends Controller
 {
     public function index(Request $request)
     {
-        return Event::with('location')->get();
+        return Event::with(['data', 'dates', 'links', 'location', 'text'])->get();
     }
 
-    public function getEvent(Request $request)
+    public function getEvent(Request $request, int $id)
     {
-        $id = $request->get('id');
-        return Event::with('location')->where('id', $id)->first();
+        return Event::with(['data', 'dates', 'links', 'location', 'text'])->where('id', $id)->first();
     }
+
 }

@@ -1,0 +1,34 @@
+.modal {
+  position: absolute;
+  background-color: #ffffff;
+  border-radius: 15px;
+  border: solid 5px #d0e0f0;
+  height: 95%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 95%;
+  z-index: 1000;
+
+  span.close {
+    position: absolute;
+    cursor: pointer;
+    font-size: 36px;
+    right: 10px;
+    top: 0;
+  }
+
+  .modal-content {
+    padding: 30px 20px 20px 20px;
+  }
+}
+
+.modal-backdrop {
+  position: absolute;
+  background-color: #000000;
+  height: 100%;
+  left: 0;
+  opacity: 0.25;
+  top: 0;
+  width: 100%;
+}

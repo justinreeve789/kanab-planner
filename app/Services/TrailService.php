@@ -13,7 +13,7 @@ class TrailService
      */
     public function getRandomTrailForPeriod($areaId, $period, $itinerary = null, $existingTrails = []): ?Trail
     {
-        $trails = Trail::with('data')->where('area_id', $areaId)->whereNotNull('distance_miles');
+        $trails = Trail::with(['data', 'images'])->where('area_id', $areaId)->whereNotNull('distance_miles');
         if ($itinerary !== null) {
             $trails = $trails->sortByDeviations($itinerary->getDeviations());
         }

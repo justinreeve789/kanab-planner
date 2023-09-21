@@ -1,80 +1,47 @@
 <template>
-  <div class="day">
-    <p class="date">{{ day.formattedDate }}</p>
-    <div class="day-header">
-        <h2>Day {{ day.dayNum + 1 }} - {{ day.area.name }}</h2>
-        <div class="graph">
-            <div class="gradient-line adventurousness" style="height: 50%;"></div>
-            <div class="gradient-line solitariness" style="height: 30%;"></div>
-            <div class="gradient-line strenuousness" style="height: 70%;"></div>
+  <div class="day" data-accordion="open">
+    <h2 :id="'day-heading-' + day.dayNum" class="day-heading relative w-full" :aria-labelledby="'day-heading-' + day.dayNum">
+        <button type="button" class="flex bg-white items-center justify-between w-full font-medium text-left text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800" :data-accordion-target="'#day-body-' + day.dayNum" aria-expanded="true" :aria-controls="'day-body-' + day.dayNum">
+            <div class="day-title p-4 justify-end">
+                <span class="day md:inline font-large text-3xl">Day {{ day.dayNum + 1 }}</span>
+                <span class="separator hidden md:inline md:text-lg"> - </span>
+                <span class="area font-large md:inline text-md md:text-3xl md:inline-block block">{{ day.area.name }}</span>
+            </div>
+            <div class="flex-1 p-4 items-start justify-end">
+                <div class="graph">
+                    <div class="gradient-line adventurousness" style="height: 50%;"></div>
+                    <div class="gradient-line solitariness" style="height: 30%;"></div>
+                    <div class="gradient-line strenuousness" style="height: 70%;"></div>
+                </div>
+            </div>
+            <div class="p-4 justify-end text-md text-right">
+                <span class="date-day-of-week hidden md:inline">{{ day.formattedDayOfWeek }}</span>
+                <span class="pr-1 hidden md:inline">,</span>
+                <span class="date-month-day">{{ day.formattedMonthDay }}</span>
+                <span class="pr-1 hidden md:inline">,</span>
+                <span class="date-year block md:inline">{{ day.formattedYear }}</span>
+            </div>
+        </button>
+    </h2>
+
+    <div :id="'day-body-' + day.dayNum" class="bg-white w-full p-4 hidden" :aria-labelledby="'day-header-' + day.dayNum">
+        <div v-for="(period, periodType) in day.periods" :key="periodType">
+            <div class="timeline"></div>
+            <div :class="'day-content pt-4 period-' + period.type" v-for="(activity, index) in period.activities" :key="index">
+                <div class="mb-8" v-if="activity.activityType == 'dining'">
+                    <Restaurant :restaurant="activity.data" />
+                </div>
+                <div class="mb-8" v-else-if="activity.activityType == 'hiking'">
+                    <Trail :activity="activity" />
+                </div>
+                <div class="mb-8" v-else>
+                    <h3 class="text-2xl">{{ activity.name }}</h3>
+                    <p>{{ activity.phrase }}</p>
+                    <p>{{ activity.description }}</p>
+                </div>
+            </div>
         </div>
     </div>
-
-    <section class="itinerary">
-        <div class="timeline"></div>
-        <div class="day-content morning" v-for="(activity, index) in day.periods['morning'].activities" :key="index">
-            <ul>
-                <li class="day-activity expandable">
-                    <div v-if="activity.activityType == 'dining'">
-                        <Restaurant :resource="activity.data" />
-                    </div>
-                    <div v-else-if="activity.activityType == 'hiking'">
-                        <Trail :trail="activity.data" />
-                    </div>
-                    <div v-else>
-                        <p><strong>{{ activity.name }}</strong></p>
-                        <p>{{ activity.phrase }}</p>
-                        <p>{{ activity.description }}</p>
-                    </div>
-                </li>
-            </ul>
-        </div>
-
-        <div class="day-content afternoon" v-for="(activity, index) in day.periods['afternoon'].activities" :key="index">
-            <ul>
-                <li class="day-activity expandable">
-                    <div v-if="activity.activityType == 'dining'">
-                        <Restaurant :resource="activity.data" />
-                    </div>
-                    <div v-else-if="activity.activityType == 'hiking'">
-                        <Trail :trail="activity.data" />
-                    </div>
-                    <div v-else>
-                        <p><strong>{{ activity.name }}</strong></p>
-                        <p>{{ activity.phrase }}</p>
-                        <p>{{ activity.description }}</p>
-                    </div>
-                </li>
-            </ul>
-        </div>
-
-        <div class="day-content evening" v-for="(activity, index) in day.periods['evening'].activities" :key="index">
-            <ul>
-                <li class="day-activity expandable">
-                    <div v-if="activity.activityType == 'dining'">
-                        <Restaurant :resource="activity.data" />
-                    </div>
-                    <div v-else-if="activity.activityType == 'hiking'">
-                        <Trail :trail="activity.data" />
-                    </div>
-                    <div v-else>
-                        <p><strong>{{ activity.name }}</strong></p>
-                        <p>{{ activity.phrase }}</p>
-                        <p>{{ activity.description }}</p>
-                    </div>
-                </li>
-            </ul>
-        </div>
-
-        <div class="day-content night" v-for="(activity, index) in day.periods['night'].activities" :key="index">
-            <ul>
-                <li class="expandable">
-                    <p><strong>{{ activity.name }}</strong></p>
-                    <p>{{ activity.description }}</p>
-                </li>
-            </ul>
-        </div>
-    </section>
   </div>
 </template>
 
@@ -91,8 +58,17 @@ export default {
     Restaurant,
     Trail,
   },
+  mounted() {
+    initAccordions();
+  },
   props: {
     day: Object, // The day data passed as a prop
   },
 };
+</script>
+
+<script setup>
+import {
+    initAccordions,
+} from 'flowbite'
 </script>

@@ -121,7 +121,14 @@ class ItineraryController extends Controller
         $interests = $request->get('interests');
         $tripPreference = $request->get('trip_preference');
 
-        $this->getItinerary()->setBaseAreaId($request->get('base_area_id'));
+        if ($request->get('base_area_id')) {
+            $area = Area::where('id', $request->get('base_area_id'))->first();
+            if ($area) {
+                $this->getItinerary()->setBaseArea($area);
+                $this->getItinerary()->setBaseAreaId($request->get('base_area_id'));
+            }
+        }
+
         $this->getItinerary()->setCheckInTime($request->get('check_in'));
         $this->getItinerary()->setCheckOutTime($request->get('check_out'));
         $this->getItinerary()->setDurationDays($request->get('duration_days'));

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Resource;
 use App\Services\TrailService;
 use App\Traits\ActivityData;
 use App\Traits\Proximity;
@@ -34,6 +33,11 @@ class Trail extends Resource
         return $this->hasMany(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'trails');
     }
 
+    public function images()
+    {
+        return $this->hasMany(TrailImage::class, 'trail_id', 'id');
+    }
+
     public function calculateEndDate(string $startDateTime)
     {
         return date('Y-m-d H:i:s', strtotime($startDateTime) + $this->getAverageHours() * 60 * 60);
@@ -47,6 +51,17 @@ class Trail extends Resource
         $this->average_hours = $this->trailService->calculateHikingTime($this->distance_miles, null, $this->difficulty);
         $this->save();
         return $this->average_hours;
+    }
+
+    public function getGpxData()
+    {
+        $file = storage_path('gpx/' . $this->id . '-' . $this->source_id . '.gpx');
+        if (file_exists($file)) {
+            $data = file_get_contents($file);
+            $xml = simplexml_load_string($data);
+            return json_decode(json_encode($xml));
+        }
+        return null;
     }
 
     public function isEasy()

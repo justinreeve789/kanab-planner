@@ -35,6 +35,6 @@ class Event extends Resource
 
     public function text()
     {
-        return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_text', 'events');
+        return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'events');
     }
 }

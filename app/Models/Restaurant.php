@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Builder\CustomQueryBuilder;
 use App\Traits\ActivityData;
+use App\Traits\Usable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,6 +12,7 @@ class Restaurant extends Resource
 {
     use ActivityData;
     use HasFactory;
+    use Usable;
 
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'location_id'];

@@ -1,47 +1,47 @@
 html {
-  font-family: Roboto, sans-serif;
+  font-family: Arial, sans-serif;
 }
 
-body, h1, h2, ul, li {
+body {
+  background-attachment: fixed;
+  background-image: url('/images/desert-landscape.jpg');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
   margin: 0;
   padding: 0;
+  position: relative;
 }
 
-/* Center everything vertically and horizontally */
-body {
-  background-color: #f0f5f9;
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px; /* Added padding to center content */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: -1;
 }
 
-header {
-  background-color: #ff9f1c; /* Orange */
-  text-align: center;
-  padding: 20px 0;
-}
-
-h1 {
+h1, h2 {
   font-family: 'Playfair Display', serif;
-  font-size: 36px;
-  color: white;
-}
-
-h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 24px;
-  margin-bottom: 10px;
-}
-
-/* Style the paragraphs */
-p {
-  margin-top: 5px;
 }
 
 .date-select {
   float: left;
   margin: 0 50px;
   max-width: 480px;
+}
+
+.progress {
+  .text {
+    font-family: 'Satisfy', sans-serif;
+    z-index: 1;
+  }
+
+  .circle {
+    z-index: 0;
+  }
 }

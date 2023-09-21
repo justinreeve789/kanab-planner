@@ -1,7 +1,5 @@
 <template>
-  <div>
     <Itinerary />
-  </div>
 </template>
 
 <script>
@@ -11,6 +9,6 @@ import Itinerary from './Itinerary.vue';
 export default {
   components: {
     Itinerary,
-  },
+  }
 };
 </script>

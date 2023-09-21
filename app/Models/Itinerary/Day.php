@@ -30,6 +30,9 @@ class Day extends Model
 //    public $strenuousness = self::DEFAULT_STRENUOUSNESS;
     public $endTime = '22:00';
     public $formattedDate;
+    public $formattedDayOfWeek;
+    public $formattedMonthDay;
+    public $formattedYear;
     public $periods;
     public $startTime = '07:00';
 
@@ -37,6 +40,9 @@ class Day extends Model
     {
         $this->date = $date;
         $this->formattedDate = date('l, F j, Y', strtotime($this->date));
+        $this->formattedDayOfWeek = date('l', strtotime($this->date));
+        $this->formattedMonthDay = date('F j', strtotime($this->date));
+        $this->formattedYear = date('Y', strtotime($this->date));
 
         if ($area !== null) {
             if (is_integer($area)) {

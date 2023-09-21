@@ -9,12 +9,12 @@ class LocationController extends Controller
 {
     public function index(Request $request)
     {
-        return Location::with('area')->get();
+        return Location::with(['area', 'data', 'hours', 'text'])->get();
     }
 
-    public function getLocation(Request $request)
+    public function getLocation(Request $request, int $id)
     {
-        $id = $request->get('id');
-        return Location::with('area')->where('id', $id)->first();
+        return Location::with(['area', 'data', 'hours', 'text'])->where('id', $id)->first();
     }
+
 }

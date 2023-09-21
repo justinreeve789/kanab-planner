@@ -32,7 +32,7 @@ class Location extends Resource
 
     public function text()
     {
-        return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_text', 'locations');
+        return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'locations');
     }
 
     public function isOpen($dateTime)
