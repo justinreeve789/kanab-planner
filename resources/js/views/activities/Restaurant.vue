@@ -30,12 +30,12 @@
             </button>
         </div>
 
-        <div :id="'restaurant-body-' + restaurant.id" class="hidden p-2" :aria-labelledby="'restaurant-heading-' + restaurant.id">
+        <div :id="'restaurant-body-' + restaurant.id" class="hidden bg-gray-200 p-2" :aria-labelledby="'restaurant-heading-' + restaurant.id">
             <div class="md:flex md:justify-between">
-                <div class="w-2/3">
+                <div class="w-full md:w-2/3">
                     {{ restaurant.description }}
                 </div>
-                <div class="w-1/3 pl-4" v-if="restaurant.location.images">
+                <div class="w-full md:w-1/3 mt-4 md:mt-0 md:pl-4" v-if="restaurant.location.images">
                     <Side :resource="restaurant" :type="'restaurant'" :images="restaurant.location.images" />
                 </div>
             </div>

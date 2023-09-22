@@ -52,7 +52,7 @@ class UpdateImages extends Command
     {
         $locations = Location::whereDoesntHave('images')->get();
         foreach ($locations as $loc) {
-            $images = $this->imageService->getPhotos($loc->area->name . ' ' . $loc->name);
+            $images = $this->imageService->getPhotos($loc->name . ' ' . $loc->address);
             foreach ($images as $image) {
                 try {
                     LocationImage::updateOrCreate(['location_id' => $loc->id, 'url' => $image->url]);

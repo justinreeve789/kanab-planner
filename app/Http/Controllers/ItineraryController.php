@@ -46,47 +46,14 @@ class ItineraryController extends Controller
         $this->setupItinerary($request);
         $this->itineraryService->setItinerary($this->getItinerary());
         $days = $this->itineraryService->assignDaysForAreas($this->getItinerary()->getUseFirstDay(), $this->getItinerary()->getUseLastDay());
+        $this->getItinerary()->setTotalPossibleTrails($this->itineraryService->calculateTotalPossibleTrailsForTrip());
         foreach ($days as $dayNum => $day) {
             $day = $this->itineraryService->fillDay($day);
         }
         $this->getItinerary()->setDays($days);
-//        echo '<pre>'; print_r($this->getItinerary()); echo '</pre>';
 
-//        echo $this->itinerary->getStartDate() . ' - ' . $this->getItinerary()->getEndDate() . '<br>';
-//
-//        foreach ($days as $day) {
-//            echo '<strong>' . $day->date . '</strong><br>';
-//            foreach ($day->periods as $name => $period) {
-//                echo strtoupper($name) . ' - ' . Area::where('id', $period->getAreaId())->pluck('name')->first() . '<br><ul>';
-//                foreach ($period->getActivities() as $activity) {
-//                    echo '<li>';
-//                    echo isset($activity) && isset($activity->name) ? $activity->name : (isset($activity->location->name) ? $activity->location->name : 'unknown');
-//                    echo '</li>';
-//                }
-//                echo '</ul><br>';
-//            }
-//        }
+        // TODO: If we have a situation where the last days aren't as well-filled as earlier days, let's shuffle them around.
 
-        // Find out which events are within their dates. Since these are usually one-time events, we may want to weigh them heavier, especially if they match their preferences.
-/*
-        $events = $this->getEvents();
-
-        $locations = Location::with('data')
-            ->whereIsOpen('2023-10-01 12:00:00')
-            ->whereProximity($this->getItinerary()->getLatitude(), $this->getItinerary()->getLongitude(), self::DEFAULT_DISTANCE)
-//            ->sortByDeviation(['adventurousness' => $this->itinerary->adventurousness, 'solitariness' => $this->itinerary->solitariness, 'strenuousness' => $this->itinerary->strenuousness]);
-            ->get();
-
-        $restaurants = Restaurant::with('data')
-            ->with('location')
-            ->sortByDeviation(['adventurousness' => $this->itinerary->adventurousness, 'solitariness' => $this->itinerary->solitariness, 'strenuousness' => $this->itinerary->strenuousness])
-            ->get();
-
-        $trails = Trail::with('data')
-            ->whereProximity($this->getItinerary()->getLatitude(), $this->getItinerary()->getLongitude(), self::DEFAULT_DISTANCE)
-            ->sortByDeviation(['strenuousness' => $this->itinerary->strenuousness])
-            ->get();
-*/
         return response()->json($this->getItinerary());
     }
 

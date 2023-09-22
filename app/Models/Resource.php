@@ -17,4 +17,20 @@ class Resource extends Model
     {
         return new CustomQueryBuilder($query);
     }
+
+    public function isEvent() {
+        return get_class($this) === 'App\\Models\\Event';
+    }
+
+    public function isLocation() {
+        return get_class($this) === 'App\\Models\\Location';
+    }
+
+    public function isRestaurant() {
+        return get_class($this) === 'App\\Models\\Restaurant';
+    }
+
+    public function isTrail() {
+        return get_class($this) === 'App\\Models\\Trail';
+    }
 }

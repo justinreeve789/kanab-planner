@@ -32,13 +32,15 @@ class CustomQueryBuilder extends Builder
         $table = $this->getModel()->getTable();
 
         $order = '';
-        if (!empty($propValues)) {
-            $order .= '0';
-        }
+        $index = 0;
         foreach ($propValues as $prop => $value) {
-            if ($value !== null) {
-                $order .= ' + ABS(resource_data.' . $prop . ' - ' . $value . ')';
+            if (!is_numeric($prop) && $value !== null) {
+                $order .= 'ABS(resource_data.' . $prop . ' - ' . $value . ')';
+                if ($index < count($propValues) - 1) {
+                    $order .= ' + ';
+                }
             }
+            $index++;
         }
         $query = $this->join('resource_data', function($join) use ($table) {
             $join->on('resource_table', '=', \DB::raw('"' . $table . '"'));

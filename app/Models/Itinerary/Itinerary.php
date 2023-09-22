@@ -66,6 +66,7 @@ class Itinerary extends Model
     public $solitariness = self::DEFAULT_SOLITARINESS;
     public $startDate;
     public $strenuousness = self::DEFAULT_STRENUOUSNESS;
+    public $totalPossibleTrails = 0;
     public $trailIds = [];
     public $trailPriorities;
     public $tripPreference;
@@ -99,6 +100,16 @@ class Itinerary extends Model
         $this->getDay($dayNum)->addActivity($resource, $activityType, date('H:i:s', strtotime($startDateTime)), date('H:i:s', strtotime($endDateTime)));
         if ($period) {
             $this->getDay($dayNum)->periods[$period]->addActivity($resource, $activityType, date('H:i:s', strtotime($startDateTime)), date('H:i:s', strtotime($endDateTime)));
+        }
+
+        if ($resource->isEvent()) {
+            $this->eventIds[] = $resource->id;
+        } else if ($resource->isLocation()) {
+            $this->locationIds[] = $resource->id;
+        } else if ($resource->isRestaurant()) {
+            $this->restaurantIds[] = $resource->id;
+        } else if ($resource->isTrail()) {
+            $this->trailIds[] = $resource->id;
         }
     }
 
@@ -189,6 +200,16 @@ class Itinerary extends Model
         return $this->departureDateTime;
     }
 
+    public function getTotalPossibleTrails(): ?int
+    {
+        return $this->totalPossibleTrails;
+    }
+
+    public function setTotalPossibleTrails(int $totalPossibleTrails)
+    {
+        $this->totalPossibleTrails = $totalPossibleTrails;
+    }
+
     public function hasMeal($date, $period): bool
     {
         switch ($period) {
@@ -245,17 +266,22 @@ class Itinerary extends Model
 
     public function eventExists($event): bool
     {
-        return $this->resourceExists($event);
+        return in_array($event->id, $this->eventIds);
+    }
+
+    public function locationExists($location): bool
+    {
+        return in_array($location->id, $this->locationIds);
     }
 
     public function restaurantExists($restaurant): bool
     {
-        return $this->resourceExists($restaurant);
+        return in_array($restaurant->id, $this->restaurantIds);
     }
 
     public function trailExists($trail): bool
     {
-        return $this->resourceExists($trail);
+        return in_array($trail->id, $this->trailIds);
     }
 
     public function getUseFirstDay(): bool

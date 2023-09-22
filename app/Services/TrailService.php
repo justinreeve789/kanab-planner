@@ -13,11 +13,19 @@ class TrailService
      */
     public function getRandomTrailForPeriod($areaId, $period, $itinerary = null, $existingTrails = []): ?Trail
     {
-        $trails = Trail::with(['data', 'images'])->where('area_id', $areaId)->whereNotNull('distance_miles');
-        if ($itinerary !== null) {
-            $trails = $trails->sortByDeviations($itinerary->getDeviations());
+        $trails = Trail::with(['data', 'images'])
+            ->where('area_id', $areaId)
+            ->whereNotNull('distance_miles')
+            ->whereNotIn('trails.id', $existingTrails);
+        if ($period === Period::EVENING) {
+            $trails = $trails->where('distance_miles', '<=', '1.5');
         }
-        $trails = $trails->inRandomOrder()->limit(10)->get();
+        if ($itinerary !== null) {
+            $trails = $trails->sortByDeviation(['adventurousness', 'solitariness', 'strenuousness']);
+        } else {
+            $trails = $trails->inRandomOrder();
+        }
+        $trails = $trails->get();
         foreach ($trails as $trail) {
             $p = $this->getBestPeriodOfDayForTrail($trail);
             if ($p == $period) {

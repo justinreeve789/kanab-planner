@@ -1,5 +1,5 @@
 <template>
-    <div class="resource-details" data-accordion="collapse">
+    <div class="resource-details bg-gray-200" data-accordion="collapse">
         <div class="md:flex md:justify-between">
             <button :id="'trail-heading-' + trail.id + '-day-' + day.dayNum + '-activity-'"
                 class="flex items-center p-2 justify-between w-full"
@@ -38,14 +38,14 @@
             </button>
         </div>
 
-        <div :id="'trail-body-' + trail.id + '-day-' + day.dayNum + '-activity-'" class="hidden p-2" :aria-labelledby="'trail-heading-' + trail.id + '-day-' + day.dayNum + '-activity-'">
+        <div :id="'trail-body-' + trail.id + '-day-' + day.dayNum + '-activity-'" class="hidden bg-gray-200 p-2" :aria-labelledby="'trail-heading-' + trail.id + '-day-' + day.dayNum + '-activity-'">
             <div class="md:flex md:justify-between">
-                <div class="w-2/3">
+                <div class="w-full md:w-2/3">
                     <p class="mb-4" v-if="trail.description_alt">{{ trail.description_alt }}</p>
                     <p class="mb-4" v-if="trail.description">{{ trail.description }}</p>
                     <p v-if="activity.phrase"><em>{{ activity.phrase }}</em></p>
                 </div>
-                <div class="w-1/3 pl-4" v-if="trail.images">
+                <div class="w-full md:w-1/3 mt-4 md:mt-0 md:pl-4" v-if="trail.images">
                     <Side :resource="trail" :type="'trail'" :images="trail.images" />
                 </div>
             </div>

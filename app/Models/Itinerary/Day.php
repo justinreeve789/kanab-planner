@@ -94,9 +94,19 @@ class Day extends Model
                 $advModifier = 1.25;
                 $strModifier = 1.5;
             }
-            $stats['adventurousness'] += $advModifier * $activity->data->data[0]->adventurousness ?? $activity->adventurousness() ?? Activity::DEFAULT_ADVENTUROUSNESS;
-            $stats['solitariness'] += $solModifier * $activity->data->data[0]->solitariness ?? $activity->solitariness() ?? Activity::DEFAULT_SOLITARINESS;
-            $stats['strenuousness'] += $strModifier * $activity->data->data[0]->strenuousness ?? $activity->strenuousness() ?? Activity::DEFAULT_STRENUOUSNESS;
+            if (isset($activity->data->data[0])) {
+//                $stats['adventurousness'] += $advModifier * $activity->data->data[0]->adventurousness ??
+//                    $activity->adventurousness() ?? Activity::DEFAULT_ADVENTUROUSNESS;
+//                $stats['solitariness'] += $solModifier * isset($activity->data->data[0]) ??
+//                    $activity->data->data[0]->solitariness ??
+//                    $activity->solitariness() ?? Activity::DEFAULT_SOLITARINESS;
+//                $stats['strenuousness'] += $strModifier * isset($activity->data->data[0]) ??
+//                    $activity->data->data[0]->strenuousness ??
+//                    $activity->strenuousness() ?? Activity::DEFAULT_STRENUOUSNESS;
+                $stats['adventurousness'] += $advModifier * $activity->data->data[0]->adventurousness ?? Activity::DEFAULT_ADVENTUROUSNESS;
+                $stats['solitariness'] += $solModifier * $activity->data->data[0]->solitariness ?? Activity::DEFAULT_SOLITARINESS;
+                $stats['strenuousness'] += $strModifier * $activity->data->data[0]->strenuousness ?? Activity::DEFAULT_STRENUOUSNESS;
+            }
         }
         if ($count > 0) {
             $stats['adventurousness'] = round($stats['adventurousness'] / $count, 2);

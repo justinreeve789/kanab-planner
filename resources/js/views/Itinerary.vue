@@ -1,5 +1,5 @@
 <template>
-<div v-if="itineraryData" v-for="(day, index) in itineraryData.days" :key="index" class="p-4">
+<div v-if="itineraryData" v-for="(day, index) in itineraryData.days" :key="index" class="p-2 md:p-4">
     <Day :day="day" />
 </div>
 <div v-else class="progress w-full h-screen flex justify-center items-center text-6xl">
