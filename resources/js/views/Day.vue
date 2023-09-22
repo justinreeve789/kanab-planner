@@ -32,7 +32,7 @@
                     <Restaurant :restaurant="activity.data" />
                 </div>
                 <div class="mb-8" v-else-if="activity.activityType == 'hiking'">
-                    <Trail :activity="activity" />
+                    <Trail :activity="activity" :day="day" />
                 </div>
                 <div class="mb-8" v-else>
                     <h3 class="text-2xl">{{ activity.name }}</h3>

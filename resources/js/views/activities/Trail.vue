@@ -1,10 +1,10 @@
 <template>
     <div class="resource-details" data-accordion="collapse">
         <div class="md:flex md:justify-between">
-            <button :id="'trail-heading-' + trail.id"
+            <button :id="'trail-heading-' + trail.id + '-day-' + day.dayNum + '-activity-'"
                 class="flex items-center p-2 justify-between w-full"
                 data-active-classes="bg-blue-100 dark:bg-gray-800 text-blue-600 dark:text-white"
-                :data-accordion-target="'#trail-body-' + trail.id"
+                :data-accordion-target="'#trail-body-' + trail.id + '-day-' + day.dayNum + '-activity-'"
                 aria-expanded="false"
                 :aria-controls="'trail-body-' + trail.id">
                 <div class="title flex items-center space-x-2">
@@ -38,7 +38,7 @@
             </button>
         </div>
 
-        <div :id="'trail-body-' + trail.id" class="hidden p-2" :aria-labelledby="'trail-heading-' + trail.id">
+        <div :id="'trail-body-' + trail.id + '-day-' + day.dayNum + '-activity-'" class="hidden p-2" :aria-labelledby="'trail-heading-' + trail.id + '-day-' + day.dayNum + '-activity-'">
             <div class="md:flex md:justify-between">
                 <div class="w-2/3">
                     <p class="mb-4" v-if="trail.description_alt">{{ trail.description_alt }}</p>
@@ -79,6 +79,7 @@ export default {
   },
   props: {
     activity: Object,
+    day: Object,
   },
 };
 </script>

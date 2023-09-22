@@ -20,6 +20,10 @@ return new class extends Migration
             $table->unique(['location_id', 'url']);
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });
+
+        if (file_exists('./database/dumps/location_images.sql')) {
+            DB::unprepared(file_get_contents('./database/dumps/location_images.sql'));
+        }
     }
 
     /**
