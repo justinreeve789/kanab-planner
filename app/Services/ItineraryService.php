@@ -244,76 +244,13 @@ class ItineraryService
         }
 
         // Add a restaurant in the area for the morning.
-        $restaurant = Restaurant::with(['location' => function($query) {
-            $query->with('images');
-        }])->whereNotIn('restaurants.id', $this->getItinerary()->restaurantIds)
-            ->whereIsOpen($date . ' 09:00:00')
-            ->whereHas('location', function($query) use ($day) {
-                $query->where('area_id', $day->getAreaId());
-            })->inRandomOrder()->first();
-        if ($restaurant && !$this->getItinerary()->restaurantExists($restaurant)) {
-            $this->getItinerary()->addActivity($restaurant, ($date . ' 09:00:00'), $restaurant->calculateEndDate('09:00:00'), $dayNum, Period::MORNING, 'dining');
-        } else {
-            // No restaurant available. Tell the user to make some food.
-            if ($this->shouldAddCooking($day, Period::MORNING)) {
-                $task = new Task([
-                    'name' => 'Breakfast',
-                    'description' => $this->phraseService->getPhraseForBreakfast(),
-                ]);
-                $times = Period::getTimesForMeals(Period::MORNING);
-                $this->getItinerary()->addActivity($task, ($date . ' ' . $times['startTime']), ($date . ' ' . $times['endTime']), $dayNum, Period::MORNING, 'cooking');
-            }
-        }
+        $this->addMeal($day, Period::MORNING);
+
+        // Add a restaurant in the area for the afternoon.
+        $this->addMeal($day, Period::AFTERNOON);
 
         // Add a restaurant in the area for the evening.
-        if ($this->shouldAddDining($day, Period::EVENING)) {
-            $restaurant = Restaurant::with(['location' => function($query) {
-                $query->with('images');
-            }])->whereNotIn('restaurants.id', $this->getItinerary()->restaurantIds)
-                ->whereIsOpen($date . ' 17:00:00')->whereHas('location', function($query) use ($day) {
-                    $query->where('area_id', $day->getAreaId());
-                })->inRandomOrder()->first();
-            if ($restaurant && !$this->getItinerary()->restaurantExists($restaurant)) {
-                $this->getItinerary()->addActivity(
-                    $restaurant,
-                    ($date . ' 17:00:00'),
-                    $restaurant->calculateEndDate('17:00:00'),
-                    $dayNum,
-                    Period::EVENING,
-                    'dining'
-                );
-            }
-        }
-
-        // If a restaurant isn't available, add cooking, if possible.
-        if ($this->shouldAddCooking($day, Period::EVENING)) {
-            $task = new Task([
-                'name' => 'Dinner',
-                'description' => $this->phraseService->getPhraseForLightMeal(Period::EVENING),
-            ]);
-            $times = Period::getTimesForMeals(Period::EVENING);
-            $this->getItinerary()->addActivity($task, ($date . ' ' . $times['startTime']), ($date . ' ' . $times['endTime']), $dayNum, Period::EVENING, 'cooking');
-        }
-
-        // Add a restaurant in the area for the evening.
-        if ($this->shouldAddDining($day, Period::EVENING)) {
-            $restaurant = Restaurant::with(['location' => function($query) {
-                $query->with('images');
-            }])->whereNotIn('restaurants.id', $this->getItinerary()->restaurantIds)
-                ->whereIsOpen($date . ' 17:00:00')->whereHas('location', function($query) use ($day) {
-                    $query->where('area_id', $day->getAreaId());
-                })->inRandomOrder()->first();
-            if ($restaurant && !$this->getItinerary()->restaurantExists($restaurant)) {
-                $this->getItinerary()->addActivity(
-                    $restaurant,
-                    ($date . ' 17:00:00'),
-                    $restaurant->calculateEndDate('17:00:00'),
-                    $dayNum,
-                    Period::EVENING,
-                    'dining'
-                );
-            }
-        }
+        $this->addMeal($day, Period::EVENING);
 
         if ($this->shouldAddCooking($day, Period::EVENING)) {
             $task = new Task([
@@ -376,9 +313,10 @@ class ItineraryService
                         $name = 'Lunch';
                         $phrase = $this->phraseService->getPhraseForLunch();
                         break;
-                    case Period::DINNER:
+                    case Period::EVENING:
                         $name = 'Dinner';
-                        $phrase = $this->phraseService->getPhraseForDinner();
+//                        $phrase = $this->phraseService->getPhraseForDinner();
+                        $phrase = $this->phraseService->getPhraseForLightMeal();
                         break;
                     default:
                         $name = 'Meal time!';
