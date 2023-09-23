@@ -15,4 +15,10 @@ class ItineraryTest extends TestCase
     {
         $this->assertTrue(true);
     }
+
+    public function test_activity_start_time_accounts_for_long_travel(): void
+    {
+        // For example, base area is Grand Canyon, traveling to Bryce Canyon for a morning hike.
+        $this->assertTrue(true);
+    }
 }

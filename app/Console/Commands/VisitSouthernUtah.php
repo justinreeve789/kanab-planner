@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Area;
 use App\Models\Event;
+use App\Models\EventDate;
 use App\Models\Image;
 use App\Models\Location;
 use App\Models\LocationImage;
@@ -190,6 +191,28 @@ class VisitSouthernUtah extends Command
             if (isset($event->acf->end_date)) {
                 $evtObj->end_date = date('Y-m-d H:i:s', strtotime($event->acf->end_date));
             }
+
+            EventDate::where('event_id', $evtObj->id)->delete();
+            $start = strtotime($event->acf->start_datetime);
+            if (date('H:i:s', $start) === '00:00:00') {
+                $start = date('Y-m-d 08:00:00', $start);
+            } else {
+                $start = date('Y-m-d H:i:s', $start);
+            }
+
+            $end = strtotime($event->acf->end_date ?? null);
+            if (!$end) {
+                $end = null;
+            } else {
+                $end = date('Y-m-d H:i:s', $end);
+            }
+
+            $eventDate = new EventDate([
+                'event_id' => $evtObj->id,
+                'start_date' => $start,
+                'end_date' => $end,
+            ]);
+            $eventDate->save();
 
             $locName = isset($event->acf->location_name) ? $event->acf->location_name : null;
             $locAddress = isset($event->acf->address) ? $event->acf->address : null;

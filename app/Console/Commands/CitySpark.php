@@ -142,10 +142,23 @@ class CitySpark extends Command
         foreach ($data->Occurances as $date) {
             // Skip dates in the past.
             if (strtotime($date->Start) >= time()) {
+                $start = strtotime($date->Start);
+                if (date('H:i:s', $start) === '00:00:00') {
+                    $start = date('Y-m-d 08:00:00', $start);
+                } else {
+                    $start = date('Y-m-d H:i:s', $start);
+                }
+
+                $end = strtotime($date->End);
+                if (!$end) {
+                    $end = null;
+                } else {
+                    $end = date('Y-m-d H:i:s', $end);
+                }
                 $eventDate = new EventDate([
                     'event_id' => $event->id,
-                    'start_date' => date('Y-m-d H:i:s', strtotime($date->Start)),
-                    'end_date' => date('Y-m-d H:i:s', strtotime($date->End)),
+                    'start_date' => $start,
+                    'end_date' => $end,
                 ]);
                 $eventDate->save();
             }

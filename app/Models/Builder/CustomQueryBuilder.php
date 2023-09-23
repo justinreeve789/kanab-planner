@@ -6,16 +6,28 @@ use Illuminate\Database\Eloquent\Builder;
 
 class CustomQueryBuilder extends Builder
 {
+    /**
+     * Some events might be all-day where the user could attend at any time, while others are certain hours where the
+     * user should attend at the start. If there's no start date, assume it starts as 10am. If there's no end date,
+     * assume it ends at 10pm, or within 4 hours, whichever is earliest, unless it starts at 10pm or later, in which
+     * case it ends at midnight (23:59:59), regardless of any specified end date.
+     */
     public function betweenDates($startDateTime, $endDateTime)
     {
-        if ((int) date('Hi', strtotime($endDateTime)) === 0) {
-            $endDateTime = date('Y-m-d 23:59:59', strtotime($endDateTime));
-        }
-
         return $this->whereHas('dates', function($query) use ($startDateTime, $endDateTime) {
-            $query->where('event_dates.start_date', '>=', date('Y-m-d H:i:s', strtotime($startDateTime)));
-            $query->where('event_dates.start_date', '<=', date('Y-m-d H:i:s', strtotime($endDateTime)));
-            $query->where('event_dates.end_date', '<=', date('Y-m-d H:i:s', strtotime($endDateTime)));
+            $query->whereRaw("DATE_FORMAT(?, '%Y-%m-%d %h-%i-%s') >= COALESCE(event_dates.start_date, DATE_FORMAT(event_dates.start_date, '%Y-%m-%d 10:00:00'))", [$startDateTime]);
+            $query->whereRaw("DATE_FORMAT(?, '%Y-%m-%d %h-%i-%s') <= COALESCE(
+                event_dates.end_date,
+                CASE
+                    WHEN TIME(event_dates.start_date) >= '22:00:00'
+                        THEN DATE_FORMAT(event_dates.start_date, '%Y-%m-%d 23:59:59')
+                    ELSE
+                        LEAST(
+                            DATE_FORMAT(event_dates.start_date, '%Y-%m-%d 22:00:00'),
+                            ADDTIME(event_dates.start_date, '04:00:00')
+                        )
+                END
+            )", [$endDateTime]);
         });
     }
 
