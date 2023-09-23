@@ -1233,9 +1233,6 @@ input:checked + .toggle-bg {
 .rounded-lg {
   border-radius: 0.5rem;
 }
-.rounded-xl {
-  border-radius: 0.75rem;
-}
 .rounded-l-lg {
   border-top-left-radius: 0.5rem;
   border-bottom-left-radius: 0.5rem;
@@ -1489,7 +1486,7 @@ html {
 
 body {
   background-attachment: fixed;
-  background-image: url("/images/desert-landscape.jpg");
+  background-image: url("/images/2878.jpg");
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;

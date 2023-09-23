@@ -1,5 +1,5 @@
 <template>
-    <div class="resource-details bg-gray-200" data-accordion="collapse">
+    <div class="resource-details bg-gray-200" data-accordion="collapse" data-type="trail" :data-id="trail.id">
         <div class="md:flex md:justify-between">
             <button :id="'trail-heading-' + trail.id + '-day-' + day.dayNum + '-activity-'"
                 class="flex items-center p-2 justify-between w-full"

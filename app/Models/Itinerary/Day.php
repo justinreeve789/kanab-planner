@@ -66,9 +66,19 @@ class Day extends Model
         ];
     }
 
+    public function periods()
+    {
+        return $this->hasMany(Period::class, 'day_id', 'id');
+    }
+
     public function addActivity($resource, $activityType = null, $startTime = null, $endTime = null)
     {
         $this->activities[] = new Activity($resource, $activityType, $startTime, $endTime);
+    }
+
+    public function getPeriods(): array
+    {
+        return $this->periods;
     }
 
     /**
@@ -122,9 +132,80 @@ class Day extends Model
         return $this->activities;
     }
 
-    public function periods()
+    public function hasActivityType($activityType): bool
     {
-        return $this->hasMany(Period::class, 'day_id', 'id');
+        foreach ($this->periods as $period) {
+            foreach ($period->activities as $activity) {
+                if ($activity->activityType === $activityType) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public function hasActivityTypeInPeriod(string $activityType, string $period): bool
+    {
+        return $this->getPeriods()[$period]->hasActivityType($activityType);
+    }
+
+    public function hasResourceClass($resourceClass): bool
+    {
+        foreach ($this->periods as $period) {
+            foreach ($period->activities as $activity) {
+                if ($activity->data && get_class($activity->data) === $resourceClass) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public function hasEvent(): bool
+    {
+        return $this->hasResourceClass('App\\Models\\Event');
+    }
+
+    public function hasLocation(): bool
+    {
+        return $this->hasResourceClass('App\\Models\\Location');
+    }
+
+    public function hasRestaurant(): bool
+    {
+        return $this->hasResourceClass('App\\Models\\Restaurant');
+    }
+
+    public function hasTrail(): bool
+    {
+        return $this->hasResourceClass('App\\Models\\Trail');
+    }
+
+    public function shouldAddActivityTypeForPeriod(string $activityType, string $period): bool
+    {
+        if ($this->hasActivityTypeInPeriod($activityType, $period)) {
+            return false;
+        }
+
+        switch ($activityType) {
+            case 'cooking':
+                if ($this->periods()[$period]->hasRestaurant()) {
+                    return false;
+                }
+                break;
+            default:
+        }
+
+        return true;
+    }
+
+    public function shouldAddCookingForPeriod(string $period): bool
+    {
+        return $this->shouldAddActivityTypeForPeriod('cooking', $period);
+    }
+
+    public function shouldAddTrail(): bool
+    {
     }
 
     public function getAreaId(): int

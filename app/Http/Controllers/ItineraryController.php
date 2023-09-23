@@ -52,9 +52,33 @@ class ItineraryController extends Controller
         }
         $this->getItinerary()->setDays($days);
 
+        // TODO: If the user is visiting two or more national parks or monuments, or spending two or more days at the
+        // same national park or monument, advise they purchase a national park pass.
+
         // TODO: If we have a situation where the last days aren't as well-filled as earlier days, let's shuffle them around.
+        // For now, we'll shuffle them around regardless.
+        $this->shuffleDays();
 
         return response()->json($this->getItinerary());
+    }
+
+    /**
+     * Keep the first and last day, and shuffle the rest.
+     */
+    private function shuffleDays()
+    {
+        $days = $this->getItinerary()->getDays();
+        if (count($days) <= 3) {
+            return $days;
+        }
+        $first = array_shift($days);
+        $last = array_pop($days);
+        shuffle($days);
+        $days = array_merge([$first], $days, [$last]);
+        foreach ($days as $dayNum => $day) {
+            $day->dayNum = $dayNum;
+        }
+        $this->getItinerary()->setDays($days);
     }
 
     private function getDeviations(): array
@@ -133,25 +157,31 @@ class ItineraryController extends Controller
      */
     private function determineAndSetMissingDates()
     {
-        if ($this->getItinerary()->getStartDate()) {
-            if ($this->getItinerary()->getEndDate()) {
-                // We're good. Just exit.
+        $startDate = $this->getItinerary()->getStartDate();
+        $endDate = $this->getItinerary()->getEndDate();
+        $durationDays = $this->getItinerary()->getDurationDays();
+
+        if ($startDate) {
+            if ($endDate) {
+                $dateStart = new \DateTime($startDate);
+                $dateEnd = new \DateTime($endDate);
+                $this->getItinerary()->setDurationDays($dateStart->diff($dateEnd)->days + 1);
                 return;
-            } else if ($this->getItinerary()->getDurationDays()) {
-                $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($this->getItinerary()->getStartDate() . ' +' . $this->getItinerary()->getDurationDays() . ' days')));
+            } else if ($durationDays) {
+                $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($startDate . ' +' . $durationDays . ' days')));
                 return;
             }
         }
 
-        if (!$this->getItinerary()->getStartDate() || !$this->getItinerary()->getEndDate()) {
+        if (!$startDate || !$endDate) {
             // Let's try the month.
             if ($this->getItinerary()->getMonth()) {
                 // Pick a random date in the month that's at least 2 weeks ahead of the current date.
                 $startDate = $this->getRandomDateInMonth($this->getItinerary()->getMonth());
                 $this->getItinerary()->setStartDate($startDate);
 
-                if ($this->getItinerary()->getDurationDays()) {
-                    $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($this->getItinerary()->getStartDate() . ' +' . $this->getItinerary()->getDurationDays() . ' days')));
+                if ($durationDays) {
+                    $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($startDate . ' +' . $durationDays . ' days')));
                     return;
                 }
             }
@@ -161,8 +191,8 @@ class ItineraryController extends Controller
                 $startDate = Season::randomDateInSeason($this->getItinerary()->getSeason());
                 $this->getItinerary()->setStartDate($startDate);
 
-                if ($this->getItinerary()->getDurationDays()) {
-                    $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($this->getItinerary()->getStartDate() . ' +' . $this->getItinerary()->getDurationDays() . ' days')));
+                if ($durationDays) {
+                    $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($startDate . ' +' . $durationDays . ' days')));
                     return;
                 }
             }

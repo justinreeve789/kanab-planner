@@ -1,5 +1,5 @@
 <template>
-    <div class="resource-details" data-accordion="collapse">
+    <div class="resource-details" data-accordion="collapse" data-type="restaurant" :data-id="restaurant.id">
         <div class="md:flex md:justify-between">
             <button :id="'restaurant-heading-' + restaurant.id"
                 class="flex items-center p-2 justify-between w-full"

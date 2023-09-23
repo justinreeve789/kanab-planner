@@ -21,7 +21,7 @@ class TrailService
             $trails = $trails->where('distance_miles', '<=', '1.5');
         }
         if ($itinerary !== null) {
-            $trails = $trails->sortByDeviation(['adventurousness', 'solitariness', 'strenuousness']);
+            $trails = $trails->sortByDeviation(['adventurousness', 'solitariness', 'strenuousness'])->take(5)->inRandomOrder();
         } else {
             $trails = $trails->inRandomOrder();
         }
