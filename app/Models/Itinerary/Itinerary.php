@@ -21,6 +21,7 @@ class Itinerary extends Model
     const DEFAULT_ADVENTUROUSNESS = 0.3;
     const DEFAULT_SOLITARINESS = 0.3;
     const DEFAULT_STRENUOUSNESS = 0.3;
+    const DEFAULT_THRIFTINESS = 0.5;
     const DEFAULT_CHECKIN_TIME = '16:00';
     const DEFAULT_CHECKOUT_TIME = '10:00';
     const DEFAULT_ACTIVITY_PRIORITIES = ['hiking'];
@@ -43,6 +44,7 @@ class Itinerary extends Model
     public $activities;
     public $activityPriorities;
     public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
+    public $thriftiness = self::DEFAULT_THRIFTINESS;
     public $arrivalDateTime;
     public $baseArea;
     public $baseAreaId = self::DEFAULT_BASE_AREA_ID;

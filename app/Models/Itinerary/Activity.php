@@ -18,6 +18,7 @@ class Activity extends Model
 
     protected $guarded = [];
 
+    public $hash;
     public $data;
     public $activityType;   // hiking, offroading, etc.
     public $description;
@@ -31,6 +32,7 @@ class Activity extends Model
     {
         $this->phraseService = new PhraseService();
 
+        $this->hash = md5(microtime(true));
         $this->data = $resource;
         $this->name = $resource->name;
         $this->description = $resource->description;

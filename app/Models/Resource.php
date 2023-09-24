@@ -30,6 +30,10 @@ class Resource extends Model
         return get_class($this) === 'App\\Models\\Restaurant';
     }
 
+    public function isTask() {
+        return get_class($this) === 'App\\Models\\Itinerary\\Task';
+    }
+
     public function isTrail() {
         return get_class($this) === 'App\\Models\\Trail';
     }

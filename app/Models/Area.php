@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Builder\CustomQueryBuilder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -24,6 +25,58 @@ class Area extends Model
     public function newEloquentBuilder($query)
     {
         return new CustomQueryBuilder($query);
+    }
+
+    public function weather()
+    {
+        return $this->hasMany(AreaWeather::class, 'area_id', 'id');
+    }
+
+    public function scopeTemperatureIsAbout(Builder $query, $temperature, $startDateTime = null, $endDateTime = null, $tolerance = 10)
+    {
+        return $this->hasTemperature($query, '~', $temperature, $startDateTime, $endDateTime);
+    }
+
+    public function scopeIsColderThan(Builder $query, $temperature, $startDateTime = null, $endDateTime = null)
+    {
+        return $this->hasTemperature($query, '<=', $temperature, $startDateTime, $endDateTime);
+    }
+
+    public function scopeIsHotterThan(Builder $query, $temperature, $startDateTime = null, $endDateTime = null)
+    {
+        return $this->hasTemperature($query, '>=', $temperature, $startDateTime, $endDateTime);
+    }
+
+    /**
+     * If there's an area, we can determine the temperature. Use the min/max temp, depending on $greaterThanOrLessThen.
+     * If $startDateTime and $endDateTime are null, use the current date and time.
+     * If only $startDateTime is set, assume $endDateTime is 3 hours.
+     */
+    private function hasTemperature($query, $greaterThanOrLessThanOrAbout, $temperature, $startDateTime = null, $endDateTime = null, $tolerance = 10)
+    {
+        if ($startDateTime === null) {
+            if ($endDateTime !== null) {
+                $endDateTime = null;
+            }
+            $startDateTime = date('Y-m-d H:i:s');
+        }
+
+        if ($endDateTime === null) {
+            $endDateTime = date('Y-m-d H:i:s', strtotime($startDateTime . ' +3 hours'));
+        }
+
+        return $query->whereHas('weather', function($query) use ($greaterThanOrLessThanOrAbout, $temperature, $startDateTime, $endDateTime, $tolerance) {
+            if ($greaterThanOrLessThanOrAbout === '~') {
+                $query->where(function($query) use ($temperature, $tolerance) {
+                    $query->where('temperature', '>=', $temperature - $tolerance)
+                    ->orWhere('temperature', '<=', $temperature + $tolerance);
+                });
+            } else {
+                $query->where('temperature', $greaterThanOrLessThanOrAbout, $temperature)
+                    ->where('start', '>=', $startDateTime)
+                    ->where('end', '<=', $endDateTime);
+            }
+        });
     }
 
     public static function getAreaForLatLng(float $latitude, float $longitude): ?Area

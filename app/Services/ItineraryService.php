@@ -158,7 +158,7 @@ class ItineraryService
         $this->addEventForEvening($day);
         $this->addEventForNight($day);
 
-        // Determine whether to put the trail in the morning or the afternoon.
+        // Determine whether to put a trail in the morning or the afternoon.
         $period = $this->getPeriodForTrail($day);
         if ($period === Period::MORNING) {
             $this->addTrailForMorning($day);
@@ -174,7 +174,6 @@ class ItineraryService
         $this->addMeal($day, Period::AFTERNOON);
         $this->addMeal($day, Period::EVENING);
 
-        // TODO: $this->eventService()->getEventForDay()
         $day->getASS();
         return $day;
     }
@@ -191,7 +190,6 @@ class ItineraryService
     {
     }
 
-    // assessTrailForMorning?
     public function addTrailForMorning(Day $day)
     {
         if ($this->shouldAddTrail($day, Period::MORNING)) {
@@ -199,7 +197,6 @@ class ItineraryService
         }
     }
 
-    // assessTrailForAfternoon?
     public function addTrailForAfternoon(Day $day)
     {
         if ($this->shouldAddTrail($day, Period::AFTERNOON)) {
@@ -207,33 +204,10 @@ class ItineraryService
         }
     }
 
-    // assessTrailForEvening?
     public function addTrailForEvening(Day $day)
     {
-        $date = $day->date;
-        $dayNum = $day->dayNum;
-        $dayHasTrail = $day->hasTrail();
-        if ($this->getItinerary()->getAdventurousness() >= 0.7 || !$dayHasTrail) {
-            if (!$dayHasTrail) {
-                if (empty($day->periods[Period::EVENING]->getActivities())) {
-                    $trail = $this->trailService->getRandomTrailForPeriod(
-                        $day->getAreaId(),
-                        Period::EVENING,
-                        $this->getItinerary(),
-                        $this->getItinerary()->trailIds
-                    );
-                    if ($trail && !$this->getItinerary()->trailExists($trail)) {
-                        $this->getItinerary()->addActivity(
-                            $trail,
-                            ($date . ' 18:00:00'),
-                            $trail->calculateEndDate('18:00:00'),
-                            $dayNum,
-                            Period::EVENING,
-                            'hiking'
-                        );
-                    }
-                }
-            }
+        if ($this->shouldAddTrail($day, Period::EVENING)) {
+            $this->addRandomTrailToPeriod($day, Period::EVENING);
         }
     }
 
@@ -255,7 +229,7 @@ class ItineraryService
                 })->inRandomOrder()
                 ->first();
             if ($event) {
-                $this->getItinerary()->addActivity($event, $event->start_date, $event->end_date, $dayNum, Period::AFTERNOON, null);
+                $this->getItinerary()->addActivity($event, $event->start_date, $event->end_date, $dayNum, Period::AFTERNOON, 'event');
             }
         }
     }
@@ -282,13 +256,28 @@ class ItineraryService
                 })->inRandomOrder()
                 ->first();
             if ($event) {
-                $this->getItinerary()->addActivity($event, $event->start_date, $event->end_date, $dayNum, Period::EVENING, null);
+                $this->getItinerary()->addActivity($event, $event->start_date, $event->end_date, $dayNum, Period::EVENING, 'event');
             }
         }
     }
 
     public function addEventForNight(Day $day)
     {
+        if ($this->getItinerary()->getAdventurousness() < 0.5) {
+            return;
+        }
+        $dayNum = $day->dayNum;
+        if (empty($day->periods[Period::EVENING]->getActivities())) {
+            $event = Event::betweenDates($day->date . ' 22:00:00', $day->date . ' 23:59:59')
+                ->with('location')
+                ->whereHas('location', function($query) use ($day) {
+                    $query->where('area_id', $day->getAreaId());
+                })->inRandomOrder()
+                ->first();
+            if ($event) {
+                $this->getItinerary()->addActivity($event, $event->start_date, $event->end_date, $dayNum, Period::EVENING, 'event');
+            }
+        }
     }
 
     // TODO: assessMeal? Split into morning/afternoon/evening functions?
@@ -485,16 +474,45 @@ class ItineraryService
         return $days;
     }
 
+    public function isTooCold($day, $period, $activityType) {
+        if ($activityType === 'hiking') {
+            if (!Area::where('id', $day->getAreaId())->isHotterThan(0, Period::getStartTimeForActivities($period))->exists()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function isTooHot($day, $period, $activityType) {
+        if ($activityType === 'hiking') {
+            if (!Area::where('id', $day->getAreaId())->isColderThan(100, Period::getStartTimeForActivities($period))->exists()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Should we add a trail for the period to fill in the gaps? If they've already done a trail today, only add another
      * trail if their adventurousness is >= 0.7.
      */
     public function shouldAddTrail(Day $day, string $period): bool {
-        $dayHasTrail = $day->hasTrail();
-        if ($this->getItinerary()->getAdventurousness() >= 0.7 || !$dayHasTrail) {
-            if (empty($day->periods[$period]->getActivities())) {
-                return true;
-            }
+        switch ($period) {
+            case Period::NIGHT:
+                break;
+            case Period::MORNING:
+            case Period::AFTERNOON:
+            case Period::EVENING:
+            default:
+                if (!$this->isTooHot($day, $period, 'hiking')) {
+                    $dayHasTrail = $day->hasTrail();
+                    if ($this->getItinerary()->getAdventurousness() >= 0.7 || !$dayHasTrail) {
+                        if (empty($day->periods[$period]->getActivities())) {
+                            return true;
+                        }
+                    }
+                }
+                break;
         }
         return false;
     }

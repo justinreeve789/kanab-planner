@@ -46,6 +46,7 @@ class ItineraryController extends Controller
         $this->setupItinerary($request);
         $this->itineraryService->setItinerary($this->getItinerary());
         $days = $this->itineraryService->assignDaysForAreas($this->getItinerary()->getUseFirstDay(), $this->getItinerary()->getUseLastDay());
+        $this->shuffleDays();
         $this->getItinerary()->setTotalPossibleTrails($this->itineraryService->calculateTotalPossibleTrailsForTrip());
         foreach ($days as $dayNum => $day) {
             $day = $this->itineraryService->fillDay($day);
@@ -55,9 +56,8 @@ class ItineraryController extends Controller
         // TODO: If the user is visiting two or more national parks or monuments, or spending two or more days at the
         // same national park or monument, advise they purchase a national park pass.
 
-        // TODO: If we have a situation where the last days aren't as well-filled as earlier days, let's shuffle them around.
-        // For now, we'll shuffle them around regardless.
-        $this->shuffleDays();
+        // TODO: If we have a situation where the last days aren't as well-filled as earlier days, let's shuffle them
+        // around. Take into account days and hours that trails and locations are open.
 
         return response()->json($this->getItinerary());
     }
@@ -113,7 +113,7 @@ class ItineraryController extends Controller
         $tripPreference = $request->get('trip_preference');
 
         if ($request->get('base_area_id')) {
-            $area = Area::where('id', $request->get('base_area_id'))->first();
+            $area = Area::with('weather')->where('id', $request->get('base_area_id'))->first();
             if ($area) {
                 $this->getItinerary()->setBaseArea($area);
                 $this->getItinerary()->setBaseAreaId($request->get('base_area_id'));

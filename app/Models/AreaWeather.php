@@ -8,4 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class AreaWeather extends Model
 {
     use HasFactory;
+
+    protected $guarded = ['id'];
+    protected $hidden = ['source_type'];
 }

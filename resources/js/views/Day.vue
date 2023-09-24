@@ -28,16 +28,17 @@
         <div v-for="(period, periodType) in day.periods" :key="periodType">
             <div class="timeline"></div>
             <div :class="'day-content pt-4 period-' + period.type" v-for="(activity, index) in period.activities" :key="index">
+                <div class="mb-8" v-if="activity.activityType == 'event'">
+                    <Event :activity="activity" :day="day" />
+                </div>
                 <div class="mb-8" v-if="activity.activityType == 'dining'">
-                    <Restaurant :restaurant="activity.data" />
+                    <Restaurant :activity="activity" :day="day" />
                 </div>
                 <div class="mb-8" v-else-if="activity.activityType == 'hiking'">
                     <Trail :activity="activity" :day="day" />
                 </div>
                 <div class="mb-8" v-else>
-                    <h3 class="text-2xl">{{ activity.name }}</h3>
-                    <p>{{ activity.phrase }}</p>
-                    <p>{{ activity.description }}</p>
+                    <Task :activity="activity" :day="day" />
                 </div>
             </div>
         </div>
@@ -49,6 +50,7 @@
 import Event from './activities/Event.vue';
 import Location from './activities/Location.vue';
 import Restaurant from './activities/Restaurant.vue';
+import Task from './activities/Task.vue';
 import Trail from './activities/Trail.vue';
 
 export default {
@@ -56,6 +58,7 @@ export default {
     Event,
     Location,
     Restaurant,
+    Task,
     Trail,
   },
   mounted() {
