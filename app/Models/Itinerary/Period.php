@@ -16,6 +16,7 @@ class Period extends Model
     public const EVENING = 'evening';
     public const NIGHT = 'night';
 
+    protected $casts = ['activities'];
     protected $guarded = [];
 
     public $activities = [];

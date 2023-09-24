@@ -26,6 +26,7 @@
         "@headlessui/vue": "^1.7.16",
         "@vitejs/plugin-vue": "^4.3.4",
         "@vuepic/vue-datepicker": "^6.1.0",
+        "@vueuse/core": "^10.4.1",
         "@zoon/puphpeteer": "github:zoonru/puphpeteer",
         "bing-chat": "^0.2.3",
         "puppeteer": "^21.1.1",

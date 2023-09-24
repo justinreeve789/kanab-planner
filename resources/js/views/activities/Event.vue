@@ -30,11 +30,6 @@
                         <span class="amount pr-1">+{{ event.incline_ft }}</span>
                         <span class="measurement">ft</span>
                     </span>
-                    <span class="average-grade flex ml-3">
-                        <img class="icon pr-1 svg-anim" src="/images/icons/average-grade.svg" alt="Average Grade" />
-                        <span class="amount">{{ event.average_grade_pt * 100 }}</span>
-                        <span class="measurement">%</span>
-                    </span>
                 </div>
             </button>
         </div>

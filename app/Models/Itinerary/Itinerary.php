@@ -39,6 +39,19 @@ class Itinerary extends Model
     const WINTER = 'winter';
 
     protected $fillable = ['*'];
+    protected $casts = [
+        'activity_priorities' => 'json',
+        'event_ids' => 'json',
+        'interests' => 'json',
+        'location_ids' => 'json',
+        'priorities' => 'json',
+        'restaurant_ids' => 'json',
+        'solitariness' => 'json',
+        'strenuousness' => 'json',
+        'trail_ids' => 'json',
+        'trail_priorities' => 'json',
+        'trip_preference' => 'json',
+    ];
 
     public $accommodationPreference;
     public $activities;

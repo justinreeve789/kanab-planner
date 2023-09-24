@@ -18,6 +18,7 @@ class Day extends Model
     const DEFAULT_ARRIVAL_TIME = '16:00:00';
     const DEFAULT_DEPARTURE_TIME = '10:00:00';
 
+    protected $casts = ['stats'];
     protected $guarded = [];
 
     //    public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;

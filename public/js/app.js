@@ -20398,6 +20398,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _activities_Restaurant_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./activities/Restaurant.vue */ "./resources/js/views/activities/Restaurant.vue");
 /* harmony import */ var _activities_Task_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./activities/Task.vue */ "./resources/js/views/activities/Task.vue");
 /* harmony import */ var _activities_Trail_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./activities/Trail.vue */ "./resources/js/views/activities/Trail.vue");
+/* harmony import */ var vue3_touch_events__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! vue3-touch-events */ "./node_modules/vue3-touch-events/index.js");
+
 
 
 
@@ -20415,6 +20417,23 @@ var __default__ = {
   mounted: function mounted() {
     (0,flowbite__WEBPACK_IMPORTED_MODULE_0__.initAccordions)();
   },
+  methods: {
+    tap: function tap() {
+      alert('Tapped');
+    },
+    nextDay: function nextDay(item, i) {
+      return function (direction, mouseEvent) {
+        console.log("Swiped item ", i, ": ", item, " in direction ", direction);
+        alert("Swiped item " + i + ": " + item + " in direction " + direction);
+      };
+    },
+    previousDay: function previousDay(item, i) {
+      return function (direction, mouseEvent) {
+        console.log("Swiped item ", i, ": ", item, " in direction ", direction);
+        alert("Swiped item " + i + ": " + item + " in direction " + direction);
+      };
+    }
+  },
   props: {
     day: Object // The day data passed as a prop
   }
@@ -20431,6 +20450,7 @@ var __default__ = {
       Restaurant: _activities_Restaurant_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
       Task: _activities_Task_vue__WEBPACK_IMPORTED_MODULE_4__["default"],
       Trail: _activities_Trail_vue__WEBPACK_IMPORTED_MODULE_5__["default"],
+      Vue3TouchEvents: vue3_touch_events__WEBPACK_IMPORTED_MODULE_6__["default"],
       initAccordions: flowbite__WEBPACK_IMPORTED_MODULE_0__.initAccordions
     };
     Object.defineProperty(__returned__, '__isScriptSetup', {
@@ -20712,7 +20732,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _panels_Photo_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../panels/Photo.vue */ "./resources/js/views/panels/Photo.vue");
-/* harmony import */ var flowbite__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! flowbite */ "./node_modules/flowbite/lib/esm/index.js");
+/* harmony import */ var vue3_touch_events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue3-touch-events */ "./node_modules/vue3-touch-events/index.js");
+/* harmony import */ var flowbite__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! flowbite */ "./node_modules/flowbite/lib/esm/index.js");
+
 
 
 var __default__ = {
@@ -20720,7 +20742,7 @@ var __default__ = {
     Photo: _panels_Photo_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
   mounted: function mounted() {
-    (0,flowbite__WEBPACK_IMPORTED_MODULE_1__.initCarousels)();
+    (0,flowbite__WEBPACK_IMPORTED_MODULE_2__.initCarousels)();
   },
   props: {
     photos: Object
@@ -20733,7 +20755,8 @@ var __default__ = {
     expose();
     var __returned__ = {
       Photo: _panels_Photo_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
-      initCarousels: flowbite__WEBPACK_IMPORTED_MODULE_1__.initCarousels
+      Vue3TouchEvents: vue3_touch_events__WEBPACK_IMPORTED_MODULE_1__["default"],
+      initCarousels: flowbite__WEBPACK_IMPORTED_MODULE_2__.initCarousels
     };
     Object.defineProperty(__returned__, '__isScriptSetup', {
       enumerable: false,
@@ -20889,7 +20912,8 @@ var _hoisted_21 = {
   "class": "mb-8"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
+  var _directive_touch = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveDirective)("touch");
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
     id: 'day-heading-' + $props.day.dayNum,
     "class": "day-heading relative w-full",
     "aria-labelledby": 'day-heading-' + $props.day.dayNum
@@ -20922,21 +20946,35 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)('day-content pt-4 period-' + period.type),
         key: index
-      }, [activity.activityType == 'event' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Event"], {
+      }, [activity.activityType == 'event' ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Event"], {
         activity: activity,
         day: $props.day
-      }, null, 8 /* PROPS */, ["activity", "day"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), activity.activityType == 'dining' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_19, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Restaurant"], {
+      }, null, 8 /* PROPS */, ["activity", "day"])])), [[_directive_touch, _ctx.moveActivity, "drag", {
+        once: true
+      }]]) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), activity.activityType == 'dining' ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_19, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Restaurant"], {
         activity: activity,
         day: $props.day
-      }, null, 8 /* PROPS */, ["activity", "day"])])) : activity.activityType == 'hiking' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_20, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Trail"], {
+      }, null, 8 /* PROPS */, ["activity", "day"])])), [[_directive_touch, _ctx.moveActivity, "drag", {
+        once: true
+      }]]) : activity.activityType == 'hiking' ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_20, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Trail"], {
         activity: activity,
         day: $props.day
-      }, null, 8 /* PROPS */, ["activity", "day"])])) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_21, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Task"], {
+      }, null, 8 /* PROPS */, ["activity", "day"])])), [[_directive_touch, _ctx.moveActivity, "drag", {
+        once: true
+      }]]) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_21, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Task"], {
         activity: activity,
         day: $props.day
-      }, null, 8 /* PROPS */, ["activity", "day"])]))], 2 /* CLASS */);
+      }, null, 8 /* PROPS */, ["activity", "day"])])), [[_directive_touch, _ctx.moveActivity, "drag", {
+        once: true
+      }]])], 2 /* CLASS */);
     }), 128 /* KEYED_FRAGMENT */))]);
-  }), 128 /* KEYED_FRAGMENT */))], 8 /* PROPS */, _hoisted_16)]);
+  }), 128 /* KEYED_FRAGMENT */))], 8 /* PROPS */, _hoisted_16)])), [[_directive_touch, $options.previousDay, "swipe", {
+    left: true
+  }], [_directive_touch, $options.nextDay, "swipe", {
+    right: true
+  }], [_directive_touch, _ctx.moveDay, "drag", {
+    once: true
+  }]]);
 }
 
 /***/ }),
@@ -21038,39 +21076,25 @@ var _hoisted_17 = {
 var _hoisted_18 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
   "class": "measurement"
 }, "ft", -1 /* HOISTED */);
-var _hoisted_19 = {
-  "class": "average-grade flex ml-3"
-};
-var _hoisted_20 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
-  "class": "icon pr-1 svg-anim",
-  src: "/images/icons/average-grade.svg",
-  alt: "Average Grade"
-}, null, -1 /* HOISTED */);
-var _hoisted_21 = {
-  "class": "amount"
-};
-var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
-  "class": "measurement"
-}, "%", -1 /* HOISTED */);
-var _hoisted_23 = ["id", "aria-labelledby"];
-var _hoisted_24 = {
+var _hoisted_19 = ["id", "aria-labelledby"];
+var _hoisted_20 = {
   "class": "md:flex md:justify-between"
 };
-var _hoisted_25 = {
+var _hoisted_21 = {
   "class": "w-full md:w-2/3"
 };
-var _hoisted_26 = {
+var _hoisted_22 = {
   key: 0,
   "class": "mb-4"
 };
-var _hoisted_27 = {
+var _hoisted_23 = {
   key: 1,
   "class": "mb-4"
 };
-var _hoisted_28 = {
+var _hoisted_24 = {
   key: 2
 };
-var _hoisted_29 = {
+var _hoisted_25 = {
   key: 0,
   "class": "w-full md:w-1/3 mt-4 md:mt-0 md:pl-4"
 };
@@ -21090,15 +21114,15 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [_hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.event.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
     src: '/images/icons/difficulty-' + _ctx.event.difficulty + '.png',
     alt: _ctx.event.formattedDifficulty
-  }, null, 8 /* PROPS */, _hoisted_9)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_11, [_hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.event.distance_miles), 1 /* TEXT */), _hoisted_14]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_15, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, "+" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.event.incline_ft), 1 /* TEXT */), _hoisted_18]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_19, [_hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.event.average_grade_pt * 100), 1 /* TEXT */), _hoisted_22])])], 8 /* PROPS */, _hoisted_3)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  }, null, 8 /* PROPS */, _hoisted_9)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_11, [_hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.event.distance_miles), 1 /* TEXT */), _hoisted_14]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_15, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, "+" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.event.incline_ft), 1 /* TEXT */), _hoisted_18])])], 8 /* PROPS */, _hoisted_3)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     id: 'event-body-' + $props.activity.hash,
     "class": "hidden bg-gray-200 p-2",
     "aria-labelledby": 'event-heading-' + _ctx.event.id + '-day-' + $props.day.dayNum + '-activity-'
-  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [_ctx.event.description_alt ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.event.description_alt), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _ctx.event.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.event.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.activity.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_28, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), _ctx.event.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_29, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Side"], {
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_20, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_21, [_ctx.event.description_alt ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.event.description_alt), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _ctx.event.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.event.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.activity.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), _ctx.event.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Side"], {
     resource: _ctx.event,
     type: 'event',
     images: _ctx.event.images
-  }, null, 8 /* PROPS */, ["resource", "images"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])], 8 /* PROPS */, _hoisted_23)], 8 /* PROPS */, _hoisted_1);
+  }, null, 8 /* PROPS */, ["resource", "images"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])], 8 /* PROPS */, _hoisted_19)], 8 /* PROPS */, _hoisted_1);
 }
 
 /***/ }),
@@ -21163,39 +21187,25 @@ var _hoisted_17 = {
 var _hoisted_18 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
   "class": "measurement"
 }, "ft", -1 /* HOISTED */);
-var _hoisted_19 = {
-  "class": "average-grade flex ml-3"
-};
-var _hoisted_20 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
-  "class": "icon pr-1 svg-anim",
-  src: "/images/icons/average-grade.svg",
-  alt: "Average Grade"
-}, null, -1 /* HOISTED */);
-var _hoisted_21 = {
-  "class": "amount"
-};
-var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
-  "class": "measurement"
-}, "%", -1 /* HOISTED */);
-var _hoisted_23 = ["id", "aria-labelledby"];
-var _hoisted_24 = {
+var _hoisted_19 = ["id", "aria-labelledby"];
+var _hoisted_20 = {
   "class": "md:flex md:justify-between"
 };
-var _hoisted_25 = {
+var _hoisted_21 = {
   "class": "w-full md:w-2/3"
 };
-var _hoisted_26 = {
+var _hoisted_22 = {
   key: 0,
   "class": "mb-4"
 };
-var _hoisted_27 = {
+var _hoisted_23 = {
   key: 1,
   "class": "mb-4"
 };
-var _hoisted_28 = {
+var _hoisted_24 = {
   key: 2
 };
-var _hoisted_29 = {
+var _hoisted_25 = {
   key: 0,
   "class": "w-full md:w-1/3 mt-4 md:mt-0 md:pl-4"
 };
@@ -21215,15 +21225,15 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [_hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.restaurant.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
     src: '/images/icons/difficulty-' + _ctx.restaurant.difficulty + '.png',
     alt: _ctx.restaurant.formattedDifficulty
-  }, null, 8 /* PROPS */, _hoisted_9)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_11, [_hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.restaurant.distance_miles), 1 /* TEXT */), _hoisted_14]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_15, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, "+" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.restaurant.incline_ft), 1 /* TEXT */), _hoisted_18]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_19, [_hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.restaurant.average_grade_pt * 100), 1 /* TEXT */), _hoisted_22])])], 8 /* PROPS */, _hoisted_3)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  }, null, 8 /* PROPS */, _hoisted_9)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_11, [_hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.restaurant.distance_miles), 1 /* TEXT */), _hoisted_14]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_15, [_hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, "+" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.restaurant.incline_ft), 1 /* TEXT */), _hoisted_18])])], 8 /* PROPS */, _hoisted_3)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     id: 'restaurant-body-' + $props.activity.hash,
     "class": "hidden bg-gray-200 p-2",
     "aria-labelledby": 'restaurant-heading-' + _ctx.restaurant.id + '-day-' + $props.day.dayNum + '-activity-'
-  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [_ctx.restaurant.description_alt ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.restaurant.description_alt), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _ctx.restaurant.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.restaurant.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.activity.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_28, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), _ctx.restaurant.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_29, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Side"], {
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_20, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_21, [_ctx.restaurant.description_alt ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.restaurant.description_alt), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _ctx.restaurant.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.restaurant.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.activity.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), _ctx.restaurant.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Side"], {
     resource: _ctx.restaurant,
     type: 'restaurant',
     images: _ctx.restaurant.images
-  }, null, 8 /* PROPS */, ["resource", "images"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])], 8 /* PROPS */, _hoisted_23)], 8 /* PROPS */, _hoisted_1);
+  }, null, 8 /* PROPS */, ["resource", "images"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])], 8 /* PROPS */, _hoisted_19)], 8 /* PROPS */, _hoisted_1);
 }
 
 /***/ }),
@@ -21446,14 +21456,15 @@ var _hoisted_4 = ["src"];
 var _hoisted_5 = ["aria-label", "data-carousel-slide-to"];
 var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<button type=\"button\" class=\"absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none\" data-carousel-prev><span class=\"inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none\"><svg class=\"w-4 h-4 text-white dark:text-gray-800\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 6 10\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 1 1 5l4 4\"></path></svg><span class=\"sr-only\">Previous</span></span></button><button type=\"button\" class=\"absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none\" data-carousel-next><span class=\"inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none\"><svg class=\"w-4 h-4 text-white dark:text-gray-800\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 6 10\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 9 4-4-4-4\"></path></svg><span class=\"sr-only\">Next</span></span></button>", 2);
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return $props.photos.length ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Carousel wrapper "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.photos, function (photo, index) {
+  var _directive_touch = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveDirective)("touch");
+  return $props.photos.length ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Carousel wrapper "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.photos, function (photo, index) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: index
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
       src: photo.url,
       "class": "absolute block w-full h-full object-cover",
       alt: "..."
-    }, null, 8 /* PROPS */, _hoisted_4)])]);
+    }, null, 8 /* PROPS */, _hoisted_4), [[_directive_touch, _ctx.togglePhoto, "tap"]])])]);
   }), 128 /* KEYED_FRAGMENT */))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Slider indicators "), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.photos, function (photo, index) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       "class": "absolute z-30 flex space-x-3 -translate-x-1/2 bottom-5 left-1/2",
@@ -21465,7 +21476,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "aria-label": 'Slide ' + index,
       "data-carousel-slide-to": index
     }, null, 8 /* PROPS */, _hoisted_5)]);
-  }), 128 /* KEYED_FRAGMENT */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Slider controls "), _hoisted_6])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true);
+  }), 128 /* KEYED_FRAGMENT */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Slider controls "), _hoisted_6])), [[_directive_touch, _ctx.previousPhoto, "swipeLeft"], [_directive_touch, _ctx.nextImage, "swipeRight"]]) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true);
 }
 
 /***/ }),

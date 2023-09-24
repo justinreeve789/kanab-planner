@@ -1,5 +1,5 @@
 <template>
-  <div class="day" data-accordion="open">
+  <div class="day" data-accordion="open" v-touch:swipe.left="previousDay" v-touch:swipe.right="nextDay" v-touch:drag.once="moveDay">
     <h2 :id="'day-heading-' + day.dayNum" class="day-heading relative w-full" :aria-labelledby="'day-heading-' + day.dayNum">
         <button type="button" class="flex bg-white items-center justify-between w-full font-medium text-left text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800" :data-accordion-target="'#day-body-' + day.dayNum" aria-expanded="true" :aria-controls="'day-body-' + day.dayNum">
             <div class="day-title p-4 justify-end">
@@ -28,16 +28,16 @@
         <div v-for="(period, periodType) in day.periods" :key="periodType">
             <div class="timeline"></div>
             <div :class="'day-content pt-4 period-' + period.type" v-for="(activity, index) in period.activities" :key="index">
-                <div class="mb-8" v-if="activity.activityType == 'event'">
+                <div class="mb-8" v-if="activity.activityType == 'event'" v-touch:drag.once="moveActivity">
                     <Event :activity="activity" :day="day" />
                 </div>
-                <div class="mb-8" v-if="activity.activityType == 'dining'">
+                <div class="mb-8" v-if="activity.activityType == 'dining'" v-touch:drag.once="moveActivity">
                     <Restaurant :activity="activity" :day="day" />
                 </div>
-                <div class="mb-8" v-else-if="activity.activityType == 'hiking'">
+                <div class="mb-8" v-else-if="activity.activityType == 'hiking'" v-touch:drag.once="moveActivity">
                     <Trail :activity="activity" :day="day" />
                 </div>
-                <div class="mb-8" v-else>
+                <div class="mb-8" v-else v-touch:drag.once="moveActivity">
                     <Task :activity="activity" :day="day" />
                 </div>
             </div>
@@ -52,6 +52,8 @@ import Location from './activities/Location.vue';
 import Restaurant from './activities/Restaurant.vue';
 import Task from './activities/Task.vue';
 import Trail from './activities/Trail.vue';
+import Vue3TouchEvents from "vue3-touch-events";
+import { useSwipe } from '@vueuse/core';
 
 export default {
   components: {
@@ -63,6 +65,23 @@ export default {
   },
   mounted() {
     initAccordions();
+  },
+  methods: {
+    tap() {
+        alert('Tapped');
+    },
+    nextDay(item, i) {
+        return function(direction, mouseEvent) {
+            console.log("Swiped item ", i, ": ", item, " in direction ", direction);
+            alert("Swiped item " + i + ": " + item + " in direction " + direction);
+        };
+    },
+    previousDay(item, i) {
+        return function(direction, mouseEvent) {
+            console.log("Swiped item ", i, ": ", item, " in direction ", direction);
+            alert("Swiped item " + i + ": " + item + " in direction " + direction);
+        };
+    },
   },
   props: {
     day: Object, // The day data passed as a prop

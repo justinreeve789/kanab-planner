@@ -1,10 +1,10 @@
 <template>
-    <div class="relative w-full" data-carousel="static" v-if="photos.length">
+    <div class="relative w-full" data-carousel="static" v-if="photos.length" v-touch:swipeLeft="previousPhoto" v-touch:swipeRight="nextImage">
         <!-- Carousel wrapper -->
         <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
             <div v-for="(photo, index) in photos" :key="index">
                 <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                    <img :src="photo.url" class="absolute block w-full h-full object-cover" alt="...">
+                    <img :src="photo.url" class="absolute block w-full h-full object-cover" alt="..." v-touch:tap="togglePhoto">
                 </div>
             </div>
         </div>
@@ -48,6 +48,7 @@ export default {
 
 <script setup>
 import Photo from '../panels/Photo.vue'
+import Vue3TouchEvents from "vue3-touch-events";
 import {
     initCarousels,
 } from 'flowbite'

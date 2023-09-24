@@ -47,6 +47,11 @@ class Area extends Model
         return $this->hasTemperature($query, '>=', $temperature, $startDateTime, $endDateTime);
     }
 
+    public function scopeIsRaining(Builder $query, $startDateTime = null, $endDateTime = null)
+    {
+        return false;
+    }
+
     /**
      * If there's an area, we can determine the temperature. Use the min/max temp, depending on $greaterThanOrLessThen.
      * If $startDateTime and $endDateTime are null, use the current date and time.
