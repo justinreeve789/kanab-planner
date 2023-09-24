@@ -9,6 +9,7 @@ use App\Models\Itinerary\Period;
 use App\Models\Itinerary\Season;
 use App\Traits\Itinerary\Preferences;
 use App\Traits\ReturnAllProperties;
+use App\Traits\SnakeCaseAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,6 +18,7 @@ class Itinerary extends Model
     use HasFactory;
     use Preferences;
     use ReturnAllProperties;
+    use SnakeCaseAttributes;
 
     const DEFAULT_ADVENTUROUSNESS = 0.3;
     const DEFAULT_SOLITARINESS = 0.3;
@@ -59,6 +61,7 @@ class Itinerary extends Model
     public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
     public $thriftiness = self::DEFAULT_THRIFTINESS;
     public $arrivalDateTime;
+    public $averageHikingSpeed;
     public $baseArea;
     public $baseAreaId = self::DEFAULT_BASE_AREA_ID;
     public $checkInTime;
@@ -71,6 +74,7 @@ class Itinerary extends Model
     public $eventIds = [];
     public $homeLocationId;
     public $interests;
+    public $key;
     public $latitude;  // The latitude of the "base camp."
     public $locationIds = [];
     public $longitude; // The longitude of the "base camp."
@@ -90,6 +94,7 @@ class Itinerary extends Model
 
     public function __construct()
     {
+        $this->key = sha1(microtime(true));
         $this->days = [];
     }
 

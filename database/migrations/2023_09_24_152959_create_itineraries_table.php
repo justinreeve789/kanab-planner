@@ -13,16 +13,17 @@ return new class extends Migration
     {
         Schema::create('itineraries', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('key');
+            $table->string('key')->nullable();
             $table->integer('user_id')->unsigned()->default(0);
             $table->integer('base_area_id')->unsigned()->nullable();
             $table->dateTime('arrival_date_time')->nullable();
             $table->json('activity_priorities')->nullable();
             $table->decimal('adventurousness', 3, 2)->nullable();
+            $table->decimal('average_hiking_speed', 3, 1)->nullable();
             $table->time('check_in_time')->nullable();
             $table->time('check_out_time')->nullable();
             $table->dateTime('departure_date_time')->nullable();
-            $table->smallInteger('duration_days')->unsigned();
+            $table->smallInteger('duration_days')->unsigned()->nullable();
             $table->date('end_date')->nullable();
             $table->decimal('estimated_cost', 10, 2)->nullable();
             $table->json('event_ids')->nullable();

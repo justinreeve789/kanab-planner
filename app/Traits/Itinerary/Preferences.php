@@ -33,7 +33,7 @@ trait Preferences
 
     public function getCheckOut()
     {
-        return $this->checkOut;
+        return $this->checkOutTime;
     }
 
     public function getDurationDays(): ?int
@@ -137,7 +137,7 @@ trait Preferences
         if ($checkOutTime === null) {
             $checkOutTime = self::DEFAULT_CHECKOUT_TIME;
         }
-        $this->checkOut = $checkOutTime;
+        $this->checkOutTime = $checkOutTime;
     }
 
     public function setDates($arrivalDateTime, $departureDateTime)
