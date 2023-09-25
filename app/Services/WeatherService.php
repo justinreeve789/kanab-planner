@@ -25,7 +25,7 @@ class WeatherService
             "http" => [
                 "method" => "GET",
                 "header" => "Accept-language: en\r\n" .
-                    "User-Agent: (dev.visitkanab.org)\r\n"
+                    "User-Agent: (dev.visitkanab.org errors@visitkanab.org)\r\n"
             ]
         ];
 
