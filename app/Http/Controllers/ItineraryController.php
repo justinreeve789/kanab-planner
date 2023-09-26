@@ -204,12 +204,17 @@ class ItineraryController extends Controller
         throw new \Exception('Could not set dates: ' . print_r($this->getItinerary(), true));
     }
 
-    private function getRandomDateInMonth($month) {
+    private function getRandomDateInMonth($month, int $year = null) {
         // Get the current date
         $currentDate = new \DateTime();
 
         // Calculate the target year
-        $targetYear = (int)$currentDate->format('Y');
+        if ($year === null) {
+            $targetYear = (int)$currentDate->format('Y');
+        } else {
+            $targetYear = $year;
+        }
+
         if ($currentDate->format('n') > $month) {
             $targetYear++; // Move to the next year if the specified month is in the past
         }
@@ -223,11 +228,14 @@ class ItineraryController extends Controller
         $randomDate = new \DateTime("$targetYear-$month-$randomDay");
 
         // Check if the random date is at least 2 weeks ahead
-        if ($randomDate < $minimumDate) {
-            // If not, add 2 weeks to the random date
-            $randomDate->add(new \DateInterval('P2W'));
-        }
+        do {
+            $randomDate->add(new \DateInterval('P1D'));
+        } while ($randomDate < $minimumDate);
 
+        // Did we move outside the intended month? Let's try again, but this time jump forward a year.
+        if ((int)$randomDate->format('n') !== $month) {
+            $randomDate = new \DateTime($this->getRandomDateInMonth($month, $targetYear + 1));
+        }
         return $randomDate->format('Y-m-d');
     }
 }
