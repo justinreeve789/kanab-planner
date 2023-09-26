@@ -608,13 +608,17 @@ class ItineraryService
     {
         $totalMiles = 0;
         $baseArea = $this->getItinerary()->getBaseArea();
+        $baseAreaLat = $baseArea->latitude;
+        $baseAreaLon = $baseArea->longitude;
         $days = $this->getItinerary()->getDays();
         for ($i = 1; $i < count($days); $i++) {
             if ($i < count($days)) {
+                $areaLat = $days[$i]->area->latitude;
+                $areaLon = $days[$i]->area->longitude;
+
 //                $totalMiles += 2 * (AreaDistance::where('from_area_id', $baseArea->id)->where('to_area_id', $days[$i]->getAreaId())->pluck('driving_miles') ?? 0);
-                $areaLat = $baseArea->latitude;
-                $areaLon = $baseArea->longitude;
-                $totalMiles += 2 * $this->locationService->estimateDrivingDistance($areaLat, $areaLon, $days[$i]->area->latitude, $days[$i]->area->longitude);
+                $totalMiles += 2 * $this->locationService->estimateDrivingDistance($baseAreaLat, $baseAreaLon, $areaLat, $areaLon);
+
                 foreach (Period::getPeriodTypes() as $periodType) {
                     $activities = $days[$i]->periods[$periodType]->getActivities();
                     for ($j = 0; $j < count($activities); $j++) {
@@ -664,7 +668,7 @@ class ItineraryService
                 }
             }
         }
-        return round($totalMiles, 1);
+        return round($totalMiles);
     }
 
     private function incrementDate($date) {

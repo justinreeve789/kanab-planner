@@ -12,7 +12,7 @@ use App\Services\OpenAIService;
 class LocationService
 {
     const DEFAULT_MPH_FOR_ESTIMATE = 30;
-    const DEFAULT_MULTIPLIER_FOR_DRIVING_DISTANCE = 1.5;
+    const DEFAULT_MULTIPLIER_FOR_DRIVING_DISTANCE = 1.125;
 
     public function __construct()
     {

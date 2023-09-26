@@ -24,6 +24,7 @@ class ItineraryTest extends TestCase
 
     public function test_total_driving_distance_matches_adventurousness(): void
     {
+        // Track the average for different adventurousness levels.
         $this->assertTrue(true);
     }
 }
