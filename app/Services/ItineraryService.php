@@ -15,6 +15,7 @@ use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Models\Image;
 use App\Repositories\ItineraryRepository;
+use App\Services\LocationService;
 use Illuminate\Database\Eloquent\Model;
 
 class ItineraryService
@@ -23,6 +24,7 @@ class ItineraryService
 
     private $imageService;
     private $itinerary;
+    private $locationService;
     private $phraseService;
     private $repository;
     private $restaurantService;
@@ -33,6 +35,7 @@ class ItineraryService
     {
         $this->setItinerary($itinerary);
         $this->imageService = new ImageService();
+        $this->locationService = new LocationService();
         $this->phraseService = new PhraseService();
         $this->restaurantService = new RestaurantService();
         $this->trailService = new TrailService();
@@ -599,6 +602,69 @@ class ItineraryService
                 'hiking'
             );
         }
+    }
+
+    public function estimateTotalTravelDistance(): float
+    {
+        $totalMiles = 0;
+        $baseArea = $this->getItinerary()->getBaseArea();
+        $days = $this->getItinerary()->getDays();
+        for ($i = 1; $i < count($days); $i++) {
+            if ($i < count($days)) {
+//                $totalMiles += 2 * (AreaDistance::where('from_area_id', $baseArea->id)->where('to_area_id', $days[$i]->getAreaId())->pluck('driving_miles') ?? 0);
+                $areaLat = $baseArea->latitude;
+                $areaLon = $baseArea->longitude;
+                $totalMiles += 2 * $this->locationService->estimateDrivingDistance($areaLat, $areaLon, $days[$i]->area->latitude, $days[$i]->area->longitude);
+                foreach (Period::getPeriodTypes() as $periodType) {
+                    $activities = $days[$i]->periods[$periodType]->getActivities();
+                    for ($j = 0; $j < count($activities); $j++) {
+                        $distance = 0;
+                        $data1 = $activities[$j]->data;
+                        $lat1 = isset($data1->location) ? $data1->location->latitude : $data1->latitude;
+                        $lon1 = isset($data1->location) ? $data1->location->longitude : $data1->longitude;
+
+                        if (in_array(0, [$lat1, $lat1])) {
+                            continue;
+                        }
+
+                        if ($j === 0) {
+                            $distance = $this->locationService->estimateDrivingDistance(
+                                $areaLat,
+                                $areaLon,
+                                $lat1,
+                                $lon1,
+                            );
+                        }
+                        if ($j < count($activities) - 1) {
+                            $data2 = $activities[$j + 1]->data;
+                            $lat2 = isset($data2->location) ? $data2->location->latitude : $data2->latitude;
+                            $lon2 = isset($data2->location) ? $data2->location->longitude : $data2->longitude;
+
+                            if (in_array(0, [$lat2, $lat2])) {
+                                continue;
+                            }
+
+                            $distance = $this->locationService->estimateDrivingDistance(
+                                $lat1,
+                                $lon1,
+                                $lat2,
+                                $lon2,
+                            );
+                        }
+                        if ($j === count($activities)) {
+                            $distance = $this->locationService->estimateDrivingDistance(
+                                $lat1,
+                                $lon1,
+                                $areaLat,
+                                $areaLon,
+                            );
+                        }
+                        $totalMiles += $distance;
+                    }
+                }
+            }
+        }
+        return round($totalMiles, 1);
     }
 
     private function incrementDate($date) {

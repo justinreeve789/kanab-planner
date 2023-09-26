@@ -47,6 +47,16 @@ class Period extends Model
         return $this->areaId;
     }
 
+    public static function getPeriodTypes()
+    {
+        return [
+            Period::MORNING,
+            Period::AFTERNOON,
+            Period::EVENING,
+            Period::NIGHT,
+        ];
+    }
+
     public static function getStartTimeForActivities(string $period): ?string
     {
         switch ($period) {

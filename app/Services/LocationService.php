@@ -12,9 +12,17 @@ use App\Services\OpenAIService;
 class LocationService
 {
     const DEFAULT_MPH_FOR_ESTIMATE = 30;
+    const DEFAULT_MULTIPLIER_FOR_DRIVING_DISTANCE = 1.5;
 
     public function __construct()
     {
+    }
+
+    public function estimateDrivingDistance($fromLat, $fromLng, $toLat, $toLng): float
+    {
+        $distanceMiles = $this->haversineDistance($fromLat, $fromLng, $toLat, $toLng);
+        $distanceMiles *= self::DEFAULT_MULTIPLIER_FOR_DRIVING_DISTANCE;
+        return round($distanceMiles, 1);
     }
 
     public function estimateDrivingHours($fromLat, $fromLng, $toLat, $toLng): float
@@ -25,22 +33,17 @@ class LocationService
 
     private function haversineDistance($lat1, $lon1, $lat2, $lon2): float
     {
-        // Radius of the Earth in miles.
-        $earthRadius = 3958.8;
+        $radiusOfEarth = 3959;
+        $latitudeOne = deg2rad($lat1);
+        $longitudeOne = deg2rad($lon1);
+        $latitudeTwo = deg2rad($lat2);
+        $longitudeTwo = deg2rad($lon2);
 
-        // Convert latitude and longitude from degrees to radians.
-        $lat1 = deg2rad($lat1);
-        $lon1 = deg2rad($lon1);
-        $lat2 = deg2rad($lat2);
-        $lon2 = deg2rad($lon2);
-
-        // Haversine formula.
-        $deltaLat = $lat2 - $lat1;
-        $deltaLon = $lon2 - $lon1;
-        $a = sin($deltaLat / 2) ** 2 + cos($lat1) * cos($lat2) * sin($deltaLon / 2) ** 2;
-        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-        $distance = $earthRadius * $c;
-
+        $distanceLongitude = $longitudeTwo - $longitudeOne;
+        $distanceLatitude = $latitudeTwo - $latitudeOne;
+        $a = sin($distanceLatitude / 2) * sin($distanceLatitude/2) + cos($latitudeOne) * cos($latitudeTwo) * sin($distanceLongitude/2) * sin($distanceLongitude/2);
+        $c = 2 * asin(sqrt($a));
+        $distance = $radiusOfEarth * $c;
         return $distance;
     }
 }

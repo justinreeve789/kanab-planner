@@ -86,6 +86,7 @@ class Itinerary extends Model
     public $startDate;
     public $strenuousness = self::DEFAULT_STRENUOUSNESS;
     public $totalPossibleTrails = 0;
+    public $totalTravelDistance = 0;
     public $trailIds = [];
     public $trailPriorities;
     public $tripPreference;
@@ -225,9 +226,9 @@ class Itinerary extends Model
         return $this->totalPossibleTrails;
     }
 
-    public function setTotalPossibleTrails(int $totalPossibleTrails)
+    public function getTotalTravelDistance(): ?int
     {
-        $this->totalPossibleTrails = $totalPossibleTrails;
+        return $this->totalTravelDistance;
     }
 
     public function hasMeal($date, $period): bool
@@ -326,5 +327,15 @@ class Itinerary extends Model
     public function setDays(array $days)
     {
         $this->days = $days;
+    }
+
+    public function setTotalPossibleTrails(int $totalPossibleTrails)
+    {
+        $this->totalPossibleTrails = $totalPossibleTrails;
+    }
+
+    public function setTotalTravelDistance(int $totalTravelDistance)
+    {
+        $this->totalTravelDistance = $totalTravelDistance;
     }
 }

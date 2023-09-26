@@ -13,6 +13,7 @@ use App\Traits\ActivityData;
 use App\Services\ConversionService;
 use App\Services\EventService;
 use App\Services\ItineraryService;
+use App\Services\LocationService;
 use Illuminate\Http\Request;
 
 class ItineraryController extends Controller
@@ -25,11 +26,13 @@ class ItineraryController extends Controller
     private $conversionService;
     private $itinerary;
     private $itineraryService;
+    private $locationService;
 
     public function __construct()
     {
         $this->conversionService = new ConversionService();
         $this->itineraryService = new ItineraryService();
+        $this->locationService = new LocationService();
     }
 
     public function index(Request $request)
@@ -59,7 +62,9 @@ class ItineraryController extends Controller
         // TODO: If we have a situation where the last days aren't as well-filled as earlier days, let's shuffle them
         // around. Take into account days and hours that trails and locations are open.
 
-        $this->getItinerary()->save();
+        $this->getItinerary()->setTotalTravelDistance($this->itineraryService->estimateTotalTravelDistance());
+
+//        $this->getItinerary()->save();
 
         return response()->json($this->getItinerary());
     }
