@@ -21,4 +21,9 @@ class ItineraryTest extends TestCase
         // For example, base area is Grand Canyon, traveling to Bryce Canyon for a morning hike.
         $this->assertTrue(true);
     }
+
+    public function test_total_driving_distance_matches_adventurousness(): void
+    {
+        $this->assertTrue(true);
+    }
 }
