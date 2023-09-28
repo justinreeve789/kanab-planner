@@ -1,15 +1,15 @@
 <template>
-    <div class="relative w-full" data-carousel="static" v-if="photos.length" v-touch:swipeLeft="previousPhoto" v-touch:swipeRight="nextImage">
+    <div class="relative w-full" data-carousel="static" v-if="images.length" v-touch:swipeLeft="previousimage" v-touch:swipeRight="nextImage">
         <!-- Carousel wrapper -->
         <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
-            <div v-for="(photo, index) in photos" :key="index">
+            <div v-for="(image, index) in images" :key="index">
                 <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                    <img :src="photo.url" class="absolute block w-full h-full object-cover" alt="..." v-touch:tap="togglePhoto">
+                    <img :src="image.url" class="absolute block w-full h-full object-cover" alt="..." v-touch:tap="toggleimage">
                 </div>
             </div>
         </div>
         <!-- Slider indicators -->
-        <div class="absolute z-30 flex space-x-3 -translate-x-1/2 bottom-5 left-1/2" v-for="(photo, index) in photos" :key="index">
+        <div class="absolute z-30 flex space-x-3 -translate-x-1/2 bottom-5 left-1/2" v-for="(image, index) in images" :key="index">
             <button type="button" class="w-3 h-3 rounded-full" aria-current="true" :aria-label="'Slide ' + index" :data-carousel-slide-to="index"></button>
         </div>
         <!-- Slider controls -->
@@ -35,20 +35,17 @@
 <script>
 export default {
   components: {
-    Photo,
   },
   mounted() {
     initCarousels();
   },
   props: {
-    photos: Object,
+    images: Object,
   },
 };
 </script>
 
 <script setup>
-import Photo from '../panels/Photo.vue'
-import Vue3TouchEvents from "vue3-touch-events";
 import {
     initCarousels,
 } from 'flowbite'

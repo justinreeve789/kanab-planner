@@ -41,8 +41,8 @@
                     <p class="mb-4" v-if="event.description">{{ event.description }}</p>
                     <p v-if="activity.phrase"><em>{{ activity.phrase }}</em></p>
                 </div>
-                <div class="w-full md:w-1/3 mt-4 md:mt-0 md:pl-4" v-if="event.images">
-                    <Side :resource="event" :type="'event'" :images="event.images" />
+                <div class="w-full md:w-1/3 mt-4 md:mt-0 md:pl-4" v-if="event.location.images">
+                    <Side :resource="event" :type="'event'" :images="event.location.images" />
                 </div>
             </div>
         </div>

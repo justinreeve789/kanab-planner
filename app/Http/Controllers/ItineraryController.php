@@ -59,7 +59,9 @@ class ItineraryController extends Controller
         // TODO: If we have a situation where the last days aren't as well-filled as earlier days, let's shuffle them
         // around. Take into account days and hours that trails and locations are open.
 
-        $this->getItinerary()->setTotalTravelDistance($this->itineraryService->estimateTotalTravelDistance());
+        $this->itineraryService->adjustDays();
+
+//        $this->getItinerary()->setTotalTravelDistance($this->itineraryService->estimateTotalTravelDistance());
 
 //        $this->getItinerary()->save();
 

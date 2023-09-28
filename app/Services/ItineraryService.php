@@ -97,11 +97,11 @@ class ItineraryService
      *
      * A combioned less adventurous and more solitary setting will avoid taking them too far, such as St. George or Page.
      */
-    public function fillDay(Day $day)
+    public function fillDay(Day $day, $pass = false)
     {
         // TODO: getEventPriorities()
 
-        $curTime = $day->startTime;
+//        $curTime = $day->startTime;
         $date = $day->date;
         $dayNum = $day->dayNum;
         $durationDays = $this->getItinerary()->getDurationDays();
@@ -142,7 +142,7 @@ class ItineraryService
         // to eat in the morning if they want to start on time. They should eat at home.
         if (isset($trail) && isset($trailPeriod) && $trailPeriod === Period::MORNING && $trail->area_id == Area::ZION) {
             $task = new Task([
-                'name' > 'Breakfast',
+                'name' => 'Breakfast',
                 'description' => 'Eat breakfast at home to make sure you can get to the trail at an early hour. Ideally you\'ll reach the trail by 8:00am to avoid larger crowds.',
             ]);
             $this->getItinerary()->addActivity($task, ($day->date . ' 06:30'), ($date . ' 07:30'), $dayNum, $trailPeriod, 'cooking');
@@ -177,8 +177,49 @@ class ItineraryService
         $this->addMeal($day, Period::AFTERNOON);
         $this->addMeal($day, Period::EVENING);
 
+        $this->addPreamble($day);
+
         $day->getASS();
         return $day;
+    }
+
+    /**
+     * Do a second pass through the itinerary, and make sure everything makes sense.
+     */
+    public function adjustDays()
+    {
+        return;
+        $baseArea = $this->getItinerary()->getBaseArea();
+        $days = $this->getItinerary()->getDays();
+        $durationDays = $this->getItinerary()->getDurationDays();
+        foreach ($days as $index => $day) {
+            $date = $day->date;
+            $dayNum = $day->dayNum;
+            if ($dayNum === 0 || $dayNum === $durationDays - 1) {
+                continue;
+            }
+
+            // If someone is visiting another area and there's no events/locations/trails, change to the base area.
+            // TODO: People may be foodies and want to try restaurants in different areas. Accommodate this.
+            if ($day->area_id !== $baseArea->id && !$day->hasEvent() && !$day->hasLocation() && !$day->hasTrail()) {
+                unset($days[$index]);
+                $day = new Day($date, $baseArea, $dayNum);
+                $day = $this->fillDay($day, true);
+                $days[$index] = $day;
+            }
+        }
+        $this->getItinerary()->setDays($days);
+    }
+
+    /**
+     * Look at what's happening in the day, and add some extra text, if appropriate.
+     */
+    public function addPreamble(Day $day)
+    {
+        $baseArea = $this->getItinerary()->getBaseArea();
+        if ($day->area->id === $baseArea->id && !$day->hasEvent() && !$day->hasLocation() && !$day->hasTrail()) {
+            $day->setPreamble($this->phraseService->getPhraseForRelaxing());
+        }
     }
 
     /**
@@ -613,8 +654,14 @@ class ItineraryService
         $days = $this->getItinerary()->getDays();
         for ($i = 1; $i < count($days); $i++) {
             if ($i < count($days)) {
-                $areaLat = $days[$i]->area->latitude;
-                $areaLon = $days[$i]->area->longitude;
+                try {
+                    $areaLat = $days[$i]->area->latitude;
+                    $areaLon = $days[$i]->area->longitude;
+                } catch (\Throwable $e) {
+                    echo '<pre>'; print_r($days); echo '</pre>';
+                    echo '<pre>'; print_r($e); echo '</pre>';
+                    die;
+                }
 
 //                $totalMiles += 2 * (AreaDistance::where('from_area_id', $baseArea->id)->where('to_area_id', $days[$i]->getAreaId())->pluck('driving_miles') ?? 0);
                 $totalMiles += 2 * $this->locationService->estimateDrivingDistance($baseAreaLat, $baseAreaLon, $areaLat, $areaLon);

@@ -30,17 +30,20 @@ class Day extends Model
 //    public $solitariness = self::DEFAULT_SOLITARINESS;
 //    public $strenuousness = self::DEFAULT_STRENUOUSNESS;
     public $endTime = '22:00';
+    public $formattedAbbrMonthDay;
     public $formattedDate;
     public $formattedDayOfWeek;
     public $formattedMonthDay;
     public $formattedYear;
     public $periods;
+    public $preamble;
     public $startTime = '07:00';
     public $stats;
 
     public function __construct($date, $area, ?int $dayNum)
     {
         $this->date = $date;
+        $this->formattedAbbrMonthDay = date('M j', strtotime($this->date));
         $this->formattedDate = date('l, F j, Y', strtotime($this->date));
         $this->formattedDayOfWeek = date('l', strtotime($this->date));
         $this->formattedMonthDay = date('F j', strtotime($this->date));
@@ -133,6 +136,11 @@ class Day extends Model
         return $this->activities;
     }
 
+    public function getPreamble(): string
+    {
+        return $this->preamble;
+    }
+
     public function hasActivityType($activityType): bool
     {
         foreach ($this->periods as $period) {
@@ -217,5 +225,10 @@ class Day extends Model
     public function setAreaId(int $areaId)
     {
         $this->areaId = $areaId;
+    }
+
+    public function setPreamble(string $preamble): void
+    {
+        $this->preamble = $preamble;
     }
 }

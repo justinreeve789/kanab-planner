@@ -451,4 +451,61 @@ class PhraseService
         ];
         return $phrases[array_rand($phrases)];
     }
+
+    public function getPhraseForRelaxing()
+    {
+        $phrases = [
+            "Enjoy a day of pure relaxation and tranquility.",
+            "Take a break from your busy schedule and unwind.",
+            "Indulge in a day of serenity and peace.",
+            "Savor the moment and let your worries melt away.",
+            "Find your inner calm and recharge your spirit.",
+            "Give yourself the gift of a peaceful and leisurely day.",
+            "Embrace the art of doing nothing and simply relax.",
+            "Take a deep breath and soak in the soothing atmosphere.",
+            "Let the gentle rhythm of the day lull you into relaxation.",
+            "Reconnect with yourself and find inner harmony.",
+            "Create space for mindfulness and quiet contemplation.",
+            "Escape the hustle and bustle for a day of quiet serenity.",
+            "Unplug from technology and embrace the simplicity of the moment.",
+            "Find a cozy spot and lose yourself in a good book.",
+            "Relaxation is an art; practice it with intention today.",
+            "Nourish your body and soul with rest and relaxation.",
+            "Find a shady spot and take a peaceful afternoon nap.",
+            "Gently sway in a hammock and let time stand still.",
+            "Appreciate the beauty of nature and its calming effect.",
+            "Create your own oasis of calm and rejuvenation.",
+            "Let the soothing sounds of nature be your soundtrack today.",
+            "Sink into a state of blissful relaxation.",
+            "Release tension and embrace a sense of tranquility.",
+            "Allow yourself to be fully present in the moment.",
+            "Discover the magic of stillness and inner peace.",
+            "Immerse yourself in the luxury of doing nothing at all.",
+            "Cherish the gift of time and use it to relax and recharge.",
+            "Find solace in the gentle rhythm of the day.",
+            "Let relaxation be your guiding principle today.",
+            "Take a break and let the world pass you by for a while.",
+            "Embrace the serenity that comes with letting go.",
+            "Savor the beauty of a day without plans or obligations.",
+            "Relaxation is a state of mind; cultivate it today.",
+            "Treat yourself to a day of rest and rejuvenation.",
+            "Embrace the simplicity of a leisurely day.",
+            "Experience the joy of doing absolutely nothing.",
+            "Let relaxation wash over you like a gentle wave.",
+            "Appreciate the beauty of silence and solitude.",
+            "Unwind and let go of stress and tension.",
+            "Discover the art of relaxation in its purest form.",
+            "Give yourself permission to be lazy and carefree today.",
+            "Reconnect with your inner peace and tranquility.",
+            "Find a moment of stillness in the chaos of life.",
+            "Embrace the serenity of a day well spent in relaxation.",
+            "Release the need to be productive and simply be.",
+            "Discover the healing power of a day dedicated to relaxation.",
+            "Let your worries fade away as you bask in tranquility.",
+            "Create a haven of calm and serenity for yourself today.",
+            "Find joy in the simple pleasure of a day at ease.",
+            "Savor the sweetness of doing nothing and feeling content."
+        ];
+        return $phrases[array_rand($phrases)];
+    }
 }

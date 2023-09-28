@@ -2,3 +2,20 @@
   border-bottom-left-radius: 0.75em;
   border-bottom-right-radius: 0.75em;
 }
+
+.collapse > input[type="checkbox"], .collapse > input[type="radio"] {
+  height: 100%;
+  width: 100%;
+}
+
+.activity-stats {
+  margin-right: 30px;
+
+  img {
+    width: 24px;
+  }
+}
+
+.resource-details .title .icon img {
+  width: 24px;
+}

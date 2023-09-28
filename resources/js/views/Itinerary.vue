@@ -19,9 +19,9 @@
 </template>
 
 <script>
-import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue';
 import axios from 'axios';
 import Day from './Day.vue';
+import Select from './components/Select.vue';
 
 export default {
   data() {
@@ -58,4 +58,9 @@ export default {
     Day,
   },
 };
+</script>
+
+<script setup>
+import { onMounted } from 'vue'
+import Side from './panels/Side.vue'
 </script>

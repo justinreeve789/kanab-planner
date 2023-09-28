@@ -1,57 +1,48 @@
 <template>
-    <div class="resource-details bg-gray-200" data-accordion="collapse" data-type="trail" :data-id="trail.id">
-        <div class="md:flex md:justify-between">
-            <button :id="'trail-heading-' + activity.hash"
-                class="flex items-center p-2 justify-between w-full"
-                data-active-classes="bg-blue-100 dark:bg-gray-800 text-blue-600 dark:text-white"
-                :data-accordion-target="'#trail-body-' + activity.hash"
-                aria-expanded="false"
-                :aria-controls="'trail-body-' + trail.id">
-                <div class="title flex items-center space-x-2">
-                    <div class="icon"><img src="/images/icons/hiking.svg" alt="Hiking"></div>
-                    <div class="arrow">
-                        <svg data-accordion-icon class="w-3 h-3 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
-                        </svg>
-                    </div>
-                    <div class="text-xl text-left">{{ trail.name }}</div>
-                    <div class="difficulty hidden">
-                        <img :src="'/images/icons/difficulty-' + trail.difficulty + '.png'" :alt="trail.formattedDifficulty">
-                    </div>
-                </div>
-                <div class="stats flex items-center text-right">
-                    <span class="distance flex">
-                        <img class="icon pr-1 svg-anim" src="/images/icons/distance.svg" alt="Distance" />
-                        <span class="amount pr-1">{{ trail.distance_miles }}</span>
-                        <span class="measurement">mi</span>
-                    </span>
-                    <span class="incline flex ml-3">
-                        <img class="icon pr-1 svg-anim" src="/images/icons/mountain.svg" alt="Elevation Gain" />
-                        <span class="amount pr-1">+{{ trail.incline_ft }}</span>
-                        <span class="measurement">ft</span>
-                    </span>
-                    <span class="average-grade flex ml-3">
-                        <img class="icon pr-1 svg-anim" src="/images/icons/average-grade.svg" alt="Average Grade" />
-                        <span class="amount">{{ trail.average_grade_pt * 100 }}</span>
-                        <span class="measurement">%</span>
-                    </span>
-                </div>
-            </button>
+  <div class="resource-details collapse collapse-arrow" data-type="trail" :data-id="trail.id">
+    <input type="checkbox" />
+    <div class="collapse-title flex items-center p-2 justify-between w-full bg-gradient-to-r from-orange-100 to-red-100">
+        <div class="title flex items-center space-x-2">
+          <div class="icon pr-1">
+            <img src="/images/icons/hiking.svg" alt="Hiking">
+          </div>
+          <div class="text-xl text-left">{{ trail.name }}</div>
+          <div class="difficulty hidden">
+            <img :src="'/images/icons/difficulty-' + trail.difficulty + '.png'" :alt="trail.formattedDifficulty">
+          </div>
         </div>
-
-        <div :id="'trail-body-' + activity.hash" class="hidden bg-gray-200 p-2" :aria-labelledby="'trail-heading-' + trail.id + '-day-' + day.dayNum + '-activity-'">
-            <div class="md:flex md:justify-between">
-                <div class="w-full md:w-2/3">
-                    <p class="mb-4" v-if="trail.description_alt">{{ trail.description_alt }}</p>
-                    <p class="mb-4" v-if="trail.description">{{ trail.description }}</p>
-                    <p v-if="activity.phrase"><em>{{ activity.phrase }}</em></p>
-                </div>
-                <div class="w-full md:w-1/3 mt-4 md:mt-0 md:pl-4" v-if="trail.images">
-                    <Side :resource="trail" :type="'trail'" :images="trail.images" />
-                </div>
-            </div>
+        <div class="activity-stats flex items-center justify-end text-right flex-wrap">
+            <span class="distance flex">
+              <img class="icon pr-1 svg-anim" src="/images/icons/distance.svg" alt="Distance">
+              <span class="amount pr-1">2.1</span>
+              <span class="measurement">mi</span>
+            </span>
+            <span class="incline flex justify-end ml-3 order-3 md:order-2">
+              <img class="icon pr-1 svg-anim" src="/images/icons/mountain.svg" alt="Elevation Gain">
+              <span class="amount pr-1">+700</span>
+              <span class="measurement">ft</span>
+            </span>
+            <span class="average-grade flex ml-3 order-2 md:order-3">
+              <img class="icon pr-1 svg-anim" src="/images/icons/average-grade.svg" alt="Average Grade">
+              <span class="amount">12</span>
+              <span class="measurement">%</span>
+            </span>
         </div>
     </div>
+
+    <div class="collapse-content bg-gray-200 p-2 bg-gradient-to-r from-white to-red-50">
+        <div class="md:flex md:justify-between">
+          <div class="w-full md:w-2/3">
+            <p class="mb-4" v-if="trail.description_alt">{{ trail.description_alt }}</p>
+            <p class="mb-4" v-if="trail.description">{{ trail.description }}</p>
+            <p v-if="activity.phrase"><em>{{ activity.phrase }}</em></p>
+          </div>
+          <div class="w-full md:w-1/3 mt-4 md:mt-0 md:pl-4" v-if="trail.images">
+            <Side :resource="trail" :hash="activity.hash" :type="'trail'" :images="trail.images" />
+          </div>
+        </div>
+    </div>
+  </div>
 <!--
     <div class="trail-map">
         <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d96522.36423741286!2d-112.9271579498936!3d37.29713303136258!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zN7CsMTUwJzE3LjEiTiAxMTLCsDQyJzA2LjMiVw!5e0!3m2!1sen!2sus!4v1628604616011!5m2!1sen!2sus" width="400" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
@@ -61,7 +52,11 @@
 
 <script>
 export default {
+  components: {
+    CarouselGallery,
+  },
   created() {
+    console.log(this.activity.hash);
     this.trail = this.activity.data;
   },
   props: {
@@ -73,13 +68,6 @@ export default {
 
 <script setup>
 import { onMounted } from 'vue'
-import {
-    initAccordions,
-} from 'flowbite'
+import CarouselGallery from '../components/CarouselGallery.vue'
 import Side from '../panels/Side.vue'
-
-// initialize components based on data attribute selectors
-onMounted(() => {
-    initAccordions();
-})
 </script>

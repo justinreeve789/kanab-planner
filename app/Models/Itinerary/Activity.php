@@ -32,7 +32,7 @@ class Activity extends Model
     {
         $this->phraseService = new PhraseService();
 
-        $this->hash = md5(microtime(true));
+        $this->hash = substr(md5(microtime(true)), 0, 8);
         $this->data = $resource;
         $this->name = $resource->name;
         $this->description = $resource->description;
