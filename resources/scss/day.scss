@@ -16,6 +16,8 @@
   }
 }
 
-.resource-details .title .icon img {
-  width: 24px;
+.resource-details {
+  .icon img, img.icon {
+    width: 24px;
+  }
 }

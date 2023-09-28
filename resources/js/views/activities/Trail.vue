@@ -3,13 +3,18 @@
     <input type="checkbox" />
     <div class="collapse-title flex items-center p-2 justify-between w-full bg-gradient-to-r from-orange-100 to-red-100">
         <div class="title flex items-center space-x-2">
-          <div class="icon pr-1">
+          <div class="icon pr-1 shrink-0">
             <img src="/images/icons/hiking.svg" alt="Hiking">
           </div>
           <div class="text-xl text-left">{{ trail.name }}</div>
           <div class="difficulty hidden">
             <img :src="'/images/icons/difficulty-' + trail.difficulty + '.png'" :alt="trail.formattedDifficulty">
           </div>
+        </div>
+        <div class="activity-actions flex items-center justify-end text-right relative z-10">
+          <a class="shrink-0" href="#">
+            <img class="icon" src="/images/icons/map.svg" alt="Map">
+          </a>
         </div>
         <div class="activity-stats flex items-center justify-end text-right flex-wrap">
             <span class="distance flex">

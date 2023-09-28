@@ -20443,15 +20443,15 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "day-heading relative w-full"
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_7, "Day " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.dayNum + 1), 1 /* TEXT */), _hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.area.name), 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [$props.day.stats ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_11, [$props.day.stats.adventurousness ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
-    "class": "gradient-line adventurousness",
+    "class": "gradient-line adventurousness relative z-10",
     style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)('height: ' + $props.day.stats.adventurousness * 100 + '%;')
   }, null, 4 /* STYLE */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.day.stats.solitariness ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 1,
-    "class": "gradient-line solitariness",
+    "class": "gradient-line solitariness relative z-10",
     style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)('height: ' + $props.day.stats.solitariness * 100 + '%;')
   }, null, 4 /* STYLE */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.day.stats.strenuousness ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 2,
-    "class": "gradient-line strenuousness",
+    "class": "gradient-line strenuousness relative z-10",
     style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)('height: ' + $props.day.stats.strenuousness * 100 + '%;')
   }, null, 4 /* STYLE */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.formattedDayOfWeek), 1 /* TEXT */), _hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.formattedAbbrMonthDay), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.formattedMonthDay), 1 /* TEXT */), _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_18, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.formattedYear), 1 /* TEXT */)])])], 8 /* PROPS */, _hoisted_4)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     id: 'day-body-' + $props.day.dayNum,
@@ -20857,35 +20857,42 @@ var _hoisted_3 = {
 var _hoisted_4 = {
   "class": "title flex items-center space-x-2"
 };
-var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_5 = {
   "class": "icon pr-1"
-}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+};
+var _hoisted_6 = {
+  key: 0,
+  src: "/images/icons/dining.svg",
+  alt: "Task"
+};
+var _hoisted_7 = {
+  key: 1,
   src: "/images/icons/thumbs-up.svg",
   alt: "Task"
-})], -1 /* HOISTED */);
-var _hoisted_6 = {
+};
+var _hoisted_8 = {
   "class": "text-xl text-left"
 };
-var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "activity-stats flex items-center justify-end text-right flex-wrap"
 }, null, -1 /* HOISTED */);
-var _hoisted_8 = {
+var _hoisted_10 = {
   "class": "collapse-content bg-gray-200 p-2 bg-gradient-to-r from-white to-cyan-100"
 };
-var _hoisted_9 = {
+var _hoisted_11 = {
   "class": "md:flex md:justify-between"
 };
-var _hoisted_10 = {
+var _hoisted_12 = {
   "class": "w-full md:w-2/3"
 };
-var _hoisted_11 = {
+var _hoisted_13 = {
   key: 0,
   "class": "mb-4"
 };
-var _hoisted_12 = {
+var _hoisted_14 = {
   key: 1
 };
-var _hoisted_13 = {
+var _hoisted_15 = {
   key: 0,
   "class": "w-full md:w-1/3 mt-4 md:mt-0 md:pl-4"
 };
@@ -20894,7 +20901,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "resource-details collapse collapse-arrow",
     "data-type": "task",
     "data-activity-hash": $props.activity.hash
-  }, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [_hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.name), 1 /* TEXT */)]), _hoisted_7]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [$props.activity.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.activity.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), $props.activity.location ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_13)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])], 8 /* PROPS */, _hoisted_1);
+  }, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [$props.activity.activityType == 'cooking' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("img", _hoisted_6)) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("img", _hoisted_7))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.name), 1 /* TEXT */)]), _hoisted_9]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [$props.activity.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.activity.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), $props.activity.location ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_15)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])], 8 /* PROPS */, _hoisted_1);
 }
 
 /***/ }),
@@ -20923,7 +20930,7 @@ var _hoisted_4 = {
   "class": "title flex items-center space-x-2"
 };
 var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-  "class": "icon pr-1"
+  "class": "icon pr-1 shrink-0"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
   src: "/images/icons/hiking.svg",
   alt: "Hiking"
@@ -20935,28 +20942,28 @@ var _hoisted_7 = {
   "class": "difficulty hidden"
 };
 var _hoisted_8 = ["src", "alt"];
-var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"activity-stats flex items-center justify-end text-right flex-wrap\"><span class=\"distance flex\"><img class=\"icon pr-1 svg-anim\" src=\"/images/icons/distance.svg\" alt=\"Distance\"><span class=\"amount pr-1\">2.1</span><span class=\"measurement\">mi</span></span><span class=\"incline flex justify-end ml-3 order-3 md:order-2\"><img class=\"icon pr-1 svg-anim\" src=\"/images/icons/mountain.svg\" alt=\"Elevation Gain\"><span class=\"amount pr-1\">+700</span><span class=\"measurement\">ft</span></span><span class=\"average-grade flex ml-3 order-2 md:order-3\"><img class=\"icon pr-1 svg-anim\" src=\"/images/icons/average-grade.svg\" alt=\"Average Grade\"><span class=\"amount\">12</span><span class=\"measurement\">%</span></span></div>", 1);
-var _hoisted_10 = {
+var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"activity-actions flex items-center justify-end text-right relative z-10\"><a class=\"shrink-0\" href=\"#\"><img class=\"icon\" src=\"/images/icons/map.svg\" alt=\"Map\"></a></div><div class=\"activity-stats flex items-center justify-end text-right flex-wrap\"><span class=\"distance flex\"><img class=\"icon pr-1 svg-anim\" src=\"/images/icons/distance.svg\" alt=\"Distance\"><span class=\"amount pr-1\">2.1</span><span class=\"measurement\">mi</span></span><span class=\"incline flex justify-end ml-3 order-3 md:order-2\"><img class=\"icon pr-1 svg-anim\" src=\"/images/icons/mountain.svg\" alt=\"Elevation Gain\"><span class=\"amount pr-1\">+700</span><span class=\"measurement\">ft</span></span><span class=\"average-grade flex ml-3 order-2 md:order-3\"><img class=\"icon pr-1 svg-anim\" src=\"/images/icons/average-grade.svg\" alt=\"Average Grade\"><span class=\"amount\">12</span><span class=\"measurement\">%</span></span></div>", 2);
+var _hoisted_11 = {
   "class": "collapse-content bg-gray-200 p-2 bg-gradient-to-r from-white to-red-50"
 };
-var _hoisted_11 = {
+var _hoisted_12 = {
   "class": "md:flex md:justify-between"
 };
-var _hoisted_12 = {
+var _hoisted_13 = {
   "class": "w-full md:w-2/3"
 };
-var _hoisted_13 = {
+var _hoisted_14 = {
   key: 0,
   "class": "mb-4"
 };
-var _hoisted_14 = {
+var _hoisted_15 = {
   key: 1,
   "class": "mb-4"
 };
-var _hoisted_15 = {
+var _hoisted_16 = {
   key: 2
 };
-var _hoisted_16 = {
+var _hoisted_17 = {
   key: 0,
   "class": "w-full md:w-1/3 mt-4 md:mt-0 md:pl-4"
 };
@@ -20968,7 +20975,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [_hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.trail.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
     src: '/images/icons/difficulty-' + _ctx.trail.difficulty + '.png',
     alt: _ctx.trail.formattedDifficulty
-  }, null, 8 /* PROPS */, _hoisted_8)])]), _hoisted_9]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [_ctx.trail.description_alt ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.trail.description_alt), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _ctx.trail.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.trail.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.activity.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_15, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), _ctx.trail.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Side"], {
+  }, null, 8 /* PROPS */, _hoisted_8)])]), _hoisted_9]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [_ctx.trail.description_alt ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.trail.description_alt), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _ctx.trail.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.trail.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.activity.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), _ctx.trail.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Side"], {
     resource: _ctx.trail,
     hash: $props.activity.hash,
     type: 'trail',

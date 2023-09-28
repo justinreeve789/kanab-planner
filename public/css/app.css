@@ -3167,6 +3167,9 @@ details.collapse summary::-webkit-details-marker {
 .shrink-0 {
   flex-shrink: 0;
 }
+.shrink {
+  flex-shrink: 1;
+}
 .-translate-x-1\/2 {
   --tw-translate-x: -50%;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
@@ -3732,7 +3735,7 @@ h1, h2 {
   width: 24px;
 }
 
-.resource-details .title .icon img {
+.resource-details .icon img, .resource-details img.icon {
   width: 24px;
 }
 

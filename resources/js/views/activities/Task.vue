@@ -4,7 +4,8 @@
     <div class="collapse-title flex items-center p-2 justify-between w-full bg-gradient-to-r from-blue-100 to-cyan-200">
       <div class="title flex items-center space-x-2">
         <div class="icon pr-1">
-          <img src="/images/icons/thumbs-up.svg" alt="Task">
+          <img src="/images/icons/dining.svg" alt="Task" v-if="activity.activityType == 'cooking'">
+          <img src="/images/icons/thumbs-up.svg" alt="Task" v-else>
         </div>
         <div class="text-xl text-left">{{ activity.name }}</div>
       </div>
