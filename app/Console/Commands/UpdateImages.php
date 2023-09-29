@@ -50,14 +50,32 @@ class UpdateImages extends Command
 
     protected function doLocations()
     {
-        $locations = Location::whereDoesntHave('images')->get();
-        foreach ($locations as $loc) {
-            $images = $this->imageService->getPhotos($loc->name . ' ' . $loc->address);
-            foreach ($images as $image) {
-                try {
-                    LocationImage::updateOrCreate(['location_id' => $loc->id, 'url' => $image->url]);
-                } catch (\Illuminate\Database\QueryException $e) {
-                    $this->error('Skipped ' . $image->url);
+//        $locations = Location::whereDoesntHave('images')->get();
+//        foreach ($locations as $loc) {
+//            $images = $this->imageService->getPhotos($loc->name . ' ' . $loc->address);
+//            foreach ($images as $image) {
+//                try {
+//                    LocationImage::updateOrCreate(['location_id' => $loc->id, 'url' => $image->url]);
+//                } catch (\Illuminate\Database\QueryException $e) {
+//                    $this->error('Skipped ' . $image->url);
+//                }
+//            }
+//        }
+
+        $locations = Location::whereHas('images')->get();
+        foreach ($locations as $item) {
+            foreach ($item->images as $image) {
+                if (!str_contains($image->local_url, 'visitkanab/images')) {
+                    $imageFile = $this->imageService->storeImage($image->url);
+                    if ($imageFile) {
+                        $image->local_url = $imageFile['path'];
+                        $image->size = $imageFile['size'];
+                        $image->save();
+                    } else if ($imageFile === false) {
+                        echo 'Deleting ' . $image->url . '
+';
+                        $image->delete();
+                    }
                 }
             }
         }
@@ -65,15 +83,33 @@ class UpdateImages extends Command
 
     protected function doTrails()
     {
-        $trails = Trail::whereDoesntHave('images')->get();
+//        $trails = Trail::whereDoesntHave('images')->get();
+//        foreach ($trails as $item) {
+//            $area = Area::where('id', $item->area_id)->first();
+//            $images = $this->imageService->getPhotos($area->name . ' ' . $item->name . ' trail');
+//            foreach ($images as $image) {
+//                try {
+//                    TrailImage::updateOrCreate(['trail_id' => $item->id, 'url' => $image->url]);
+//                } catch (\Illuminate\Database\QueryException $e) {
+//                    $this->error('Skipped ' . $image->url);
+//                }
+//            }
+//        }
+
+        $trails = Trail::whereHas('images')->get();
         foreach ($trails as $item) {
-            $area = Area::where('id', $item->area_id)->first();
-            $images = $this->imageService->getPhotos($area->name . ' ' . $item->name . ' trail');
-            foreach ($images as $image) {
-                try {
-                    TrailImage::updateOrCreate(['trail_id' => $item->id, 'url' => $image->url]);
-                } catch (\Illuminate\Database\QueryException $e) {
-                    $this->error('Skipped ' . $image->url);
+            foreach ($item->images as $image) {
+                if (!str_contains($image->local_url, 'visitkanab/images')) {
+                    $imageFile = $this->imageService->storeImage($image->url);
+                    if ($imageFile) {
+                        $image->local_url = $imageFile['path'];
+                        $image->size = $imageFile['size'];
+                        $image->save();
+                    } else if ($imageFile === false) {
+                        echo 'Deleting ' . $image->url . '
+';
+                        $image->delete();
+                    }
                 }
             }
         }

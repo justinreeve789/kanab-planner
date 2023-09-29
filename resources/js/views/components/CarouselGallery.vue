@@ -1,7 +1,7 @@
 <template>
-  <swiper-container :class="'flex justify-between space-x-2'" slides-per-view="4" loop="false" v-if="photos.length">
-    <swiper-slide v-for="(photo, index) in photos" :key="index">
-      <div class="bg-cover" :style="'background-image: url(' + photo.url + '); min-height: 160px; width: 160px;'" alt="..." />
+  <swiper-container slides-per-view="4" loop="false" v-if="images.length">
+    <swiper-slide v-for="(image, index) in images" :key="index" style="height: 320px; width: 320px;">
+      <img :src="image.url" style="height: 320px;" alt="...">
     </swiper-slide>
   </swiper-container>
 </template>
@@ -9,14 +9,12 @@
 <script>
 export default {
   components: {
-    Photo,
   },
   props: {
-    photos: Object,
+    images: Object,
   },
 };
 </script>
 
 <script setup>
-import Photo from '../panels/Photo.vue'
 </script>

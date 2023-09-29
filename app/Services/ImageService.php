@@ -1,26 +1,9 @@
 <?php
-/**
- * ddg-image-search - search for images on DuckDuckGo and download them.
- *
- * Copyright (C) 2019 Wolfgang Frisch
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 namespace App\Services;
 
 use DuckDuckGoImages\Client;
+use Illuminate\Support\Facades\Storage;
 
 class ImageService
 {
@@ -28,14 +11,65 @@ class ImageService
     // Make sure GD is enabled in your PHP configuration.
 
     private $client;
+    private $conversionService;
     private $images = [];
+    private $s3;
 
     public function __construct() {
         $this->client = new Client();
+        $this->conversionService = new ConversionService();
+        $this->s3 = Storage::disk('do');
     }
 
     public function search($query) {
         return $this->client->getImages($query);
+    }
+
+    public function storeImage($url) {
+        $newFileName = storage_path('images/' . pathinfo(md5($url), PATHINFO_FILENAME));
+        echo 'Searching ' . $newFileName . '
+';
+        if (!file_exists($newFileName . '.jpg') && !file_exists($newFileName . '.png')) {
+            echo 'Downloading ' . $url . '
+';
+            $tempFile = $this->conversionService->downloadFile($url);
+            if (!$tempFile) {
+                return false;
+            }
+
+            // Hash it based on the URL, and rename it with the correct file extension.
+            $newFileName = storage_path('images/' . str_replace('file_', '', pathinfo(md5($url), PATHINFO_FILENAME)) . $this->getFileExtension($tempFile));
+            rename($tempFile, $newFileName);
+        } else {
+            $newFileName = $this->resolveFile($newFileName);
+            echo 'Found ' . $newFileName . '
+';
+        }
+
+        // Store to the cloud.
+        $filePath = getenv('DO_FOLDER') . '/' . pathinfo($newFileName, PATHINFO_BASENAME);
+        echo 'Uploading to ' . $filePath . '
+';
+        if (!$this->s3->put($filePath, file_get_contents($newFileName))) {
+            return null;
+        }
+
+        return ['path' => $filePath, 'size' => filesize($newFileName)];
+    }
+
+    public function getFileExtension($file) {
+        $mime = mime_content_type($file);
+        switch ($mime) {
+            case 'image/png':
+                return '.png';
+            case 'image/gif':
+                return '.gif';
+            case 'image/bmp':
+                return '.bmp';
+            case 'image/jpeg':
+            default:
+                return '.jpg';
+        }
     }
 
     public function getPhotos($query) {
@@ -52,5 +86,38 @@ class ImageService
         }
         $this->images[$query] = $photos;
         return $photos;
+    }
+
+    private function resolveFile($name) {
+        // reads informations over the path
+        $info = pathinfo($name);
+        if (!empty($info['extension'])) {
+            // if the file already contains an extension returns it
+            return $name;
+        }
+        $filename = $info['filename'];
+        $len = strlen($filename);
+        // open the folder
+        $dh = opendir($info['dirname']);
+        if (!$dh) {
+            return false;
+        }
+        // scan each file in the folder
+        while (($file = readdir($dh)) !== false) {
+            if (strncmp($file, $filename, $len) === 0) {
+                if (strlen($name) > $len) {
+                    // if name contains a directory part
+                    $name = substr($name, 0, strlen($name) - $len) . $file;
+                } else {
+                    // if the name is at the path root
+                    $name = $file;
+                }
+                closedir($dh);
+                return $name;
+            }
+        }
+        // file not found
+        closedir($dh);
+        return false;
     }
 }

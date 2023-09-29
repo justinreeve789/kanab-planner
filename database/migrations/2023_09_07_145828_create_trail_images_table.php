@@ -15,8 +15,11 @@ return new class extends Migration
             $table->increments('id');
             $table->integer('trail_id')->unsigned();
             $table->string('url')->nullable();
+            $table->string('local_url')->nullable();
             $table->string('size')->nullable();
             $table->timestamps();
+            $table->unique(['trail_id', 'url']);
+            $table->unique(['trail_id', 'local_url']);
             $table->foreign('trail_id')->references('id')->on('trails')->onDelete('cascade');
         });
 

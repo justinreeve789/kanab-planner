@@ -1,0 +1,74 @@
+:root {
+  --slider-width: 300px;
+  --slider-height: 30px;
+}
+
+.activity-stats {
+  span.name {
+    overflow: hidden;
+    width: 140px;
+  }
+
+  span.value {
+    width: 40px;
+  }
+
+  input[type="range"] {
+    border-radius: calc(var(--slider-height) / 2);
+    cursor: ew-resize;
+    overflow: hidden;
+
+    &.adventurousness, &.solitariness, &.strenuousness {
+      background: none;
+    }
+
+    &.adventurousness::-webkit-slider-thumb {
+      box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #FF5733, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #FF8C46, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #FFC300;
+    }
+
+    &.solitariness::-webkit-slider-thumb {
+      background: linear-gradient(to right, #33FF57, #33FFEC);
+      box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #33FF57, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #33FF9E, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #33FFEC;
+    }
+
+    &.strenuousness::-webkit-slider-thumb {
+      background: linear-gradient(to right, #5733FF, #C833FF);
+      box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #5733FF, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #8C33FF, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #C833FF;
+    }
+  }
+
+  @media screen and (-webkit-min-device-pixel-ratio: 0) {
+    input[type='range'] {
+      width: var(--slider-width);
+      -webkit-appearance: none;
+      background-color: transparent;
+    }
+
+    input[type='range']::-webkit-slider-runnable-track {
+      height: var(--slider-height);
+      -webkit-appearance: none;
+      color: #13bba4;
+      margin-top: -1px;
+    }
+
+    input[type='range']::-webkit-slider-thumb {
+      width: 0px;
+      -webkit-appearance: none;
+      height: var(--slider-height);
+      box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #FF5733, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #FF8C46, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #FFC300;
+      filter: blur(20px);
+    }
+  }
+
+  input[type="range"]::-moz-range-progress {
+    background-color: #43e5f7;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    height: var(--slider-height);
+    width: 0;
+    border: none;
+    box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #FF5733, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #FF8C46, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #FFC300;
+    box-sizing: border-box;
+  }
+}

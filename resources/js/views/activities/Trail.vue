@@ -46,6 +46,9 @@
             <Side :resource="trail" :hash="activity.hash" :type="'trail'" :images="trail.images" />
           </div>
         </div>
+      <div class="resource-footer relative">
+        <Footer class="absolute" :images="trail.images" />
+      </div>
     </div>
   </div>
 <!--
@@ -58,7 +61,6 @@
 <script>
 export default {
   components: {
-    CarouselGallery,
   },
   created() {
     console.log(this.activity.hash);
@@ -72,7 +74,6 @@ export default {
 </script>
 
 <script setup>
-import { onMounted } from 'vue'
-import CarouselGallery from '../components/CarouselGallery.vue'
+import Footer from '../panels/Footer.vue'
 import Side from '../panels/Side.vue'
 </script>

@@ -15,9 +15,11 @@ return new class extends Migration
             $table->increments('id');
             $table->integer('location_id')->unsigned();
             $table->string('url')->nullable();
+            $table->string('local_url')->nullable();
             $table->string('size')->nullable();
             $table->timestamps();
             $table->unique(['location_id', 'url']);
+            $table->unique(['location_id', 'local_url']);
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });
 

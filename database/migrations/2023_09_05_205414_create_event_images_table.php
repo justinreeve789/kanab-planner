@@ -15,8 +15,11 @@ return new class extends Migration
             $table->increments('id');
             $table->integer('event_id')->unsigned();
             $table->string('url')->nullable();
+            $table->string('local_url')->nullable();
             $table->string('size')->nullable();
             $table->timestamps();
+            $table->unique(['event_id', 'url']);
+            $table->unique(['event_id', 'local_url']);
             $table->foreign('event_id')->references('id')->on('events')->onDelete('cascade');
         });
     }

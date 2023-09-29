@@ -10,11 +10,11 @@
             <span class="area font-large md:inline text-md md:text-3xl md:inline-block block">{{ day.area.name }}</span>
           </div>
           <div class="flex-1 p-4 items-start justify-end">
-            <div class="graph" v-if="day.stats">
+            <label :for="'day-stats-' + day.dayNum" class="graph" v-if="day.stats">
               <div class="gradient-line adventurousness relative z-10" v-if="day.stats.adventurousness" :style="'height: ' + (day.stats.adventurousness * 100) + '%;'"></div>
               <div class="gradient-line solitariness relative z-10" v-if="day.stats.solitariness" :style="'height: ' + (day.stats.solitariness * 100) + '%;'"></div>
               <div class="gradient-line strenuousness relative z-10" v-if="day.stats.strenuousness" :style="'height: ' + (day.stats.strenuousness * 100) + '%;'"></div>
-            </div>
+            </label>
           </div>
           <div class="p-4 justify-end text-md text-right">
             <span class="date-day-of-week hidden md:inline">{{ day.formattedDayOfWeek }}</span>
@@ -90,7 +90,7 @@ export default {
     },
   },
   props: {
-    day: Object, // The day data passed as a prop
+    day: Object,
   },
 };
 </script>
