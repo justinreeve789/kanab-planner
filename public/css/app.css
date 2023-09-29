@@ -3166,6 +3166,9 @@ details.collapse summary::-webkit-details-marker {
 .order-3 {
   order: 3;
 }
+.order-4 {
+  order: 4;
+}
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -3758,31 +3761,36 @@ h1, h2 {
 
 .modal {
   position: fixed;
+  background-color: transparent;
+  height: 100%;
+  width: 100%;
+  z-index: 999;
+}
+.modal .modal-container {
+  position: fixed;
   background-color: #ffffff;
   border-radius: 15px;
   border: solid 5px #d0e0f0;
-  height: 95%;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 95%;
   z-index: 1000;
 }
-.modal span.close {
+.modal .modal-container span.close {
   position: absolute;
   cursor: pointer;
   font-size: 36px;
   right: 10px;
   top: 0;
 }
-.modal .modal-box {
-  min-height: 600px;
+.modal .modal-container .modal-box {
+  min-height: 200px;
+  width: 100%;
 }
-.modal .modal-content {
+.modal .modal-container .modal-content {
   padding: 30px 20px 20px 20px;
 }
-
-.modal-backdrop {
+.modal .modal-backdrop {
   position: absolute;
   background-color: #000000;
   height: 100%;
@@ -3797,45 +3805,45 @@ h1, h2 {
   --slider-height: 30px;
 }
 
-.activity-stats span.name {
+.ass span.name {
   overflow: hidden;
   width: 140px;
 }
-.activity-stats span.value {
+.ass span.value {
   width: 40px;
 }
-.activity-stats input[type=range] {
+.ass input[type=range] {
   border-radius: calc(var(--slider-height) / 2);
   cursor: ew-resize;
   overflow: hidden;
 }
-.activity-stats input[type=range].adventurousness, .activity-stats input[type=range].solitariness, .activity-stats input[type=range].strenuousness {
+.ass input[type=range].adventurousness, .ass input[type=range].solitariness, .ass input[type=range].strenuousness {
   background: none;
 }
-.activity-stats input[type=range].adventurousness::-webkit-slider-thumb {
+.ass input[type=range].adventurousness::-webkit-slider-thumb {
   box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #FF5733, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #FF8C46, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #FFC300;
 }
-.activity-stats input[type=range].solitariness::-webkit-slider-thumb {
+.ass input[type=range].solitariness::-webkit-slider-thumb {
   background: linear-gradient(to right, #33FF57, #33FFEC);
   box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #33FF57, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #33FF9E, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #33FFEC;
 }
-.activity-stats input[type=range].strenuousness::-webkit-slider-thumb {
+.ass input[type=range].strenuousness::-webkit-slider-thumb {
   background: linear-gradient(to right, #5733FF, #C833FF);
   box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #5733FF, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #8C33FF, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #C833FF;
 }
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
-  .activity-stats input[type=range] {
+  .ass input[type=range] {
     width: var(--slider-width);
     -webkit-appearance: none;
     background-color: transparent;
   }
-  .activity-stats input[type=range]::-webkit-slider-runnable-track {
+  .ass input[type=range]::-webkit-slider-runnable-track {
     height: var(--slider-height);
     -webkit-appearance: none;
     color: #13bba4;
     margin-top: -1px;
   }
-  .activity-stats input[type=range]::-webkit-slider-thumb {
+  .ass input[type=range]::-webkit-slider-thumb {
     width: 0px;
     -webkit-appearance: none;
     height: var(--slider-height);
@@ -3843,10 +3851,10 @@ h1, h2 {
     filter: blur(20px);
   }
 }
-.activity-stats input[type=range]::-moz-range-progress {
+.ass input[type=range]::-moz-range-progress {
   background-color: #43e5f7;
 }
-.activity-stats input[type=range]::-moz-range-thumb {
+.ass input[type=range]::-moz-range-thumb {
   height: var(--slider-height);
   width: 0;
   border: none;

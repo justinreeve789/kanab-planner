@@ -70,11 +70,14 @@ class Area extends Model
             $endDateTime = date('Y-m-d H:i:s', strtotime($startDateTime . ' +3 hours'));
         }
 
-        return $query->whereHas('weather', function($query) use ($greaterThanOrLessThanOrAbout, $temperature, $startDateTime, $endDateTime, $tolerance) {
+        return $query->whereDoesntHave('weather', function($query) use ($startDateTime, $endDateTime) {
+            $query->where('start', '>=', $startDateTime)
+                ->where('end', '<=', $endDateTime);
+        })->orWhereHas('weather', function($query) use ($greaterThanOrLessThanOrAbout, $temperature, $startDateTime, $endDateTime, $tolerance) {
             if ($greaterThanOrLessThanOrAbout === '~') {
                 $query->where(function($query) use ($temperature, $tolerance) {
                     $query->where('temperature', '>=', $temperature - $tolerance)
-                    ->orWhere('temperature', '<=', $temperature + $tolerance);
+                        ->orWhere('temperature', '<=', $temperature + $tolerance);
                 });
             } else {
                 $query->where('temperature', $greaterThanOrLessThanOrAbout, $temperature)

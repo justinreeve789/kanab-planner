@@ -3,6 +3,7 @@
 namespace App\Models\Itinerary;
 
 use App\Models\Area;
+use App\Models\AreaWeather;
 use App\Traits\ReturnAllProperties;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -39,6 +40,7 @@ class Day extends Model
     public $preamble;
     public $startTime = '07:00';
     public $stats;
+    public $temperatures;
 
     public function __construct($date, $area, ?int $dayNum)
     {
@@ -68,6 +70,7 @@ class Day extends Model
             Period::EVENING => new Period(Period::EVENING, $this->areaId),
             Period::NIGHT => new Period(Period::NIGHT, $this->areaId),
         ];
+        $this->temperatures = $this->getTemperatures();
     }
 
     public function periods()
@@ -139,6 +142,31 @@ class Day extends Model
     public function getPreamble(): string
     {
         return $this->preamble;
+    }
+
+    public function getTemperatures()
+    {
+        $weather = AreaWeather::where('area_id', $this->areaId)
+            ->where('start', '>=', $this->date . ' 00:00:00')
+            ->where('end', '<=', $this->date . ' 23:59:59')
+            ->select(
+                \DB::raw('MAX(temperature) as max_temperature'),
+                \DB::raw('MIN(temperature) as min_temperature')
+            )->first();
+
+        if ($weather) {
+            $maxTemperature = $weather->max_temperature;
+            $minTemperature = $weather->min_temperature;
+        } else {
+            // Handle the case where no weather data is found for the given date and area
+            $maxTemperature = null;
+            $minTemperature = null;
+        }
+
+        return [
+            'high' => $maxTemperature,
+            'low' => $minTemperature,
+        ];
     }
 
     public function hasActivityType($activityType): bool

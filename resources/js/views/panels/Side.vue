@@ -1,5 +1,5 @@
 <template>
-  <Gallery :images="images" v-if="images" />
+  <Gallery :images="images" :type="type" v-if="images" />
   <Map :hash="hash" />
 <!--    <div class="container mt-8">-->
 <!--        <div class="tabs tabs-full-width">-->

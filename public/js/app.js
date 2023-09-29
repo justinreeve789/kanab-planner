@@ -19797,6 +19797,17 @@ __webpack_require__.r(__webpack_exports__);
     Task: _activities_Task_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
     Trail: _activities_Trail_vue__WEBPACK_IMPORTED_MODULE_4__["default"]
   },
+  computed: {
+    adventurousness: function adventurousness() {
+      return Math.max(0.01, Math.min(100, Math.round(this.day.stats.adventurousness * 100)));
+    },
+    solitariness: function solitariness() {
+      return Math.max(0.01, Math.min(100, Math.round(this.day.stats.solitariness * 100)));
+    },
+    strenuousness: function strenuousness() {
+      return Math.max(0.01, Math.min(100, Math.round(this.day.stats.strenuousness * 100)));
+    }
+  },
   methods: {
     abbreviateMonth: function abbreviateMonth(month) {
       return month.substr(0, 3);
@@ -20118,9 +20129,17 @@ __webpack_require__.r(__webpack_exports__);
 
 var __default__ = {
   components: {},
-  created: function created() {
-    console.log(this.activity.hash);
-    this.trail = this.activity.data;
+  computed: {
+    average_grade_pt: function average_grade_pt() {
+      return Math.round(this.trail.average_grade_pt * 100);
+    }
+  },
+  methods: {},
+  created: function created() {},
+  data: function data() {
+    return {
+      trail: this.activity.data
+    };
   },
   props: {
     activity: Object,
@@ -20181,11 +20200,19 @@ __webpack_require__.r(__webpack_exports__);
 
 var __default__ = {
   components: {},
+  data: function data() {
+    return {
+      imageUrls: []
+    };
+  },
   mounted: function mounted() {
+    this.imageUrls = this.images;
+    console.log(this.imageUrls);
     (0,flowbite__WEBPACK_IMPORTED_MODULE_0__.initCarousels)();
   },
   props: {
-    images: Object
+    images: Object,
+    type: String
   }
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/*#__PURE__*/Object.assign(__default__, {
@@ -20503,18 +20530,18 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     key: 0,
     "for": 'day-stats-' + $props.day.dayNum,
     "class": "graph"
-  }, [$props.day.stats.adventurousness ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+  }, [$options.adventurousness ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
     "class": "gradient-line adventurousness relative z-10",
-    style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)('height: ' + $props.day.stats.adventurousness * 100 + '%;')
-  }, null, 4 /* STYLE */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.day.stats.solitariness ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+    style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)('height: ' + $options.adventurousness + '%;')
+  }, null, 4 /* STYLE */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $options.solitariness ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 1,
     "class": "gradient-line solitariness relative z-10",
-    style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)('height: ' + $props.day.stats.solitariness * 100 + '%;')
-  }, null, 4 /* STYLE */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.day.stats.strenuousness ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+    style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)('height: ' + $options.solitariness + '%;')
+  }, null, 4 /* STYLE */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $options.strenuousness ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 2,
     "class": "gradient-line strenuousness relative z-10",
-    style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)('height: ' + $props.day.stats.strenuousness * 100 + '%;')
+    style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)('height: ' + $options.strenuousness + '%;')
   }, null, 4 /* STYLE */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 8 /* PROPS */, _hoisted_11)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.formattedDayOfWeek), 1 /* TEXT */), _hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.formattedAbbrMonthDay), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.formattedMonthDay), 1 /* TEXT */), _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_18, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.formattedYear), 1 /* TEXT */)])])], 8 /* PROPS */, _hoisted_4)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     id: 'day-body-' + $props.day.dayNum,
     "class": "collapse-content bg-white w-full"
@@ -21015,50 +21042,104 @@ var _hoisted_7 = {
   "class": "difficulty hidden"
 };
 var _hoisted_8 = ["src", "alt"];
-var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"activity-actions flex items-center justify-end text-right relative z-10\"><a class=\"shrink-0\" href=\"#\"><img class=\"icon\" src=\"/images/icons/map.svg\" alt=\"Map\"></a></div><div class=\"activity-stats flex items-center justify-end text-right flex-wrap\"><span class=\"distance flex\"><img class=\"icon pr-1 svg-anim\" src=\"/images/icons/distance.svg\" alt=\"Distance\"><span class=\"amount pr-1\">2.1</span><span class=\"measurement\">mi</span></span><span class=\"incline flex justify-end ml-3 order-3 md:order-2\"><img class=\"icon pr-1 svg-anim\" src=\"/images/icons/mountain.svg\" alt=\"Elevation Gain\"><span class=\"amount pr-1\">+700</span><span class=\"measurement\">ft</span></span><span class=\"average-grade flex ml-3 order-2 md:order-3\"><img class=\"icon pr-1 svg-anim\" src=\"/images/icons/average-grade.svg\" alt=\"Average Grade\"><span class=\"amount\">12</span><span class=\"measurement\">%</span></span></div>", 2);
-var _hoisted_11 = {
+var _hoisted_9 = {
+  "class": "activity-stats flex items-center justify-end text-right flex-wrap"
+};
+var _hoisted_10 = {
+  "class": "distance flex"
+};
+var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+  "class": "icon pr-1 svg-anim",
+  src: "/images/icons/distance.svg",
+  alt: "Distance"
+}, null, -1 /* HOISTED */);
+var _hoisted_12 = {
+  "class": "amount pr-1"
+};
+var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "measurement"
+}, "mi", -1 /* HOISTED */);
+var _hoisted_14 = {
+  "class": "incline flex justify-end ml-3 order-3 md:order-2"
+};
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+  "class": "icon pr-1 svg-anim",
+  src: "/images/icons/mountain.svg",
+  alt: "Elevation Gain"
+}, null, -1 /* HOISTED */);
+var _hoisted_16 = {
+  "class": "amount pr-1"
+};
+var _hoisted_17 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "measurement"
+}, "ft", -1 /* HOISTED */);
+var _hoisted_18 = {
+  "class": "average-grade flex ml-3 order-2 md:order-3"
+};
+var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+  "class": "icon pr-1 svg-anim",
+  src: "/images/icons/average-grade.svg",
+  alt: "Average Grade"
+}, null, -1 /* HOISTED */);
+var _hoisted_20 = {
+  "class": "amount"
+};
+var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "measurement"
+}, "%", -1 /* HOISTED */);
+var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "activity-actions flex ml-3 order-4 relative z-10"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+  "class": "shrink-0",
+  href: "#"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+  "class": "icon",
+  src: "/images/icons/map.svg",
+  alt: "Map"
+})])], -1 /* HOISTED */);
+var _hoisted_23 = {
   "class": "collapse-content bg-gray-200 p-2 bg-gradient-to-r from-white to-red-50"
 };
-var _hoisted_12 = {
+var _hoisted_24 = {
   "class": "md:flex md:justify-between"
 };
-var _hoisted_13 = {
+var _hoisted_25 = {
   "class": "w-full md:w-2/3"
 };
-var _hoisted_14 = {
+var _hoisted_26 = {
   key: 0,
   "class": "mb-4"
 };
-var _hoisted_15 = {
+var _hoisted_27 = {
   key: 1,
   "class": "mb-4"
 };
-var _hoisted_16 = {
+var _hoisted_28 = {
   key: 2
 };
-var _hoisted_17 = {
+var _hoisted_29 = {
   key: 0,
   "class": "w-full md:w-1/3 mt-4 md:mt-0 md:pl-4"
 };
-var _hoisted_18 = {
+var _hoisted_30 = {
   "class": "resource-footer relative"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     "class": "resource-details collapse collapse-arrow",
     "data-type": "trail",
-    "data-id": _ctx.trail.id
-  }, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [_hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.trail.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
-    src: '/images/icons/difficulty-' + _ctx.trail.difficulty + '.png',
-    alt: _ctx.trail.formattedDifficulty
-  }, null, 8 /* PROPS */, _hoisted_8)])]), _hoisted_9]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [_ctx.trail.description_alt ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.trail.description_alt), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _ctx.trail.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.trail.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.activity.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), _ctx.trail.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Side"], {
-    resource: _ctx.trail,
+    "data-id": $data.trail.id
+  }, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [_hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.trail.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+    src: '/images/icons/difficulty-' + $data.trail.difficulty + '.png',
+    alt: $data.trail.formattedDifficulty
+  }, null, 8 /* PROPS */, _hoisted_8)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_10, [_hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.trail.distance_miles), 1 /* TEXT */), _hoisted_13]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_14, [_hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_16, "+" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.trail.incline_ft), 1 /* TEXT */), _hoisted_17]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_18, [_hoisted_19, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.average_grade_pt), 1 /* TEXT */), _hoisted_21]), _hoisted_22])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [$data.trail.description_alt ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_26, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.trail.description_alt), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.trail.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.trail.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.activity.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_28, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), $data.trail.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_29, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Side"], {
+    resource: $data.trail,
     hash: $props.activity.hash,
     type: 'trail',
-    images: _ctx.trail.images
-  }, null, 8 /* PROPS */, ["resource", "hash", "images"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Footer"], {
+    images: $data.trail.images
+  }, null, 8 /* PROPS */, ["resource", "hash", "images"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_30, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Footer"], {
     "class": "absolute",
-    images: _ctx.trail.images
+    images: $data.trail.images
   }, null, 8 /* PROPS */, ["images"])])])], 8 /* PROPS */, _hoisted_1), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("\n    <div class=\"trail-map\">\n        <iframe src=\"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d96522.36423741286!2d-112.9271579498936!3d37.29713303136258!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zN7CsMTUwJzE3LjEiTiAxMTLCsDQyJzA2LjMiVw!5e0!3m2!1sen!2sus!4v1628604616011!5m2!1sen!2sus\" width=\"400\" height=\"300\" style=\"border:0;\" allowfullscreen=\"\" loading=\"lazy\"></iframe>\n    </div>\n")], 2112 /* STABLE_FRAGMENT, DEV_ROOT_FRAGMENT */);
 }
 
@@ -21145,11 +21226,11 @@ var _hoisted_5 = ["aria-label", "data-carousel-slide-to"];
 var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<button type=\"button\" class=\"absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none\" data-carousel-prev><span class=\"inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none\"><svg class=\"w-4 h-4 text-white dark:text-gray-800\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 6 10\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 1 1 5l4 4\"></path></svg><span class=\"sr-only\">Previous</span></span></button><button type=\"button\" class=\"absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none\" data-carousel-next><span class=\"inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none\"><svg class=\"w-4 h-4 text-white dark:text-gray-800\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 6 10\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 9 4-4-4-4\"></path></svg><span class=\"sr-only\">Next</span></span></button>", 2);
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _directive_touch = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveDirective)("touch");
-  return $props.images.length ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Carousel wrapper "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($props.images, function (image, index) {
+  return $props.images.length ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Carousel wrapper "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($data.imageUrls, function (imageUrl, index) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: index
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
-      src: image.url,
+      src: '/image/' + $props.type + '/' + imageUrl.id,
       "class": "absolute block w-full h-full object-cover",
       alt: "..."
     }, null, 8 /* PROPS */, _hoisted_4), [[_directive_touch, _ctx.toggleimage, "tap"]])])]);
@@ -21207,42 +21288,46 @@ var _hoisted_2 = {
   "class": "modal"
 };
 var _hoisted_3 = {
-  "class": "modal-box activity-stats"
+  "class": "modal-container"
 };
 var _hoisted_4 = {
+  "class": "modal-box ass"
+};
+var _hoisted_5 = {
   "class": "flex mb-4"
 };
-var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
   "class": "name text-right"
 }, "Adventurousness", -1 /* HOISTED */);
-var _hoisted_6 = {
+var _hoisted_7 = {
   "class": "value badge badge-neutral badge-md"
 };
-var _hoisted_7 = {
+var _hoisted_8 = {
   "class": "flex mb-4"
 };
-var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
   "class": "name text-right"
 }, "Solitariness", -1 /* HOISTED */);
-var _hoisted_9 = {
+var _hoisted_10 = {
   "class": "value badge badge-neutral badge-md"
 };
-var _hoisted_10 = {
+var _hoisted_11 = {
   "class": "flex mb-4"
 };
-var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
   "class": "name text-right"
 }, "Strenuousness", -1 /* HOISTED */);
-var _hoisted_12 = {
+var _hoisted_13 = {
   "class": "value badge badge-neutral badge-md"
 };
-var _hoisted_13 = ["for"];
+var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"\"><p class=\"mb-4\">Adjust the sliders and this day will automatically update with activities as close to your specifications as possible.</p><ul><li class=\"mb-2\"><strong>Adventurousness</strong> is the uniqueness of the experience, and how outside an average person&#39;s comfort zone it is. Set this higher if you&#39;re feeling like exploring, spending more time outdoors, or maybe trying something new.</li><li class=\"mb-2\"><strong>Solitariness</strong> is how much weight you place on less-crowded areas or non-human-interacting experiences would enjoy it. Set this higher if you want to be alone, or lower if you enjoy the interaction.</li><li class=\"mb-2\"><strong>Strenuousness</strong> is a measure of how physically exerting the experience is. Set this higher if you want more challenging hikes or you&#39;re the sporty type.</li></ul></div>", 1);
+var _hoisted_15 = ["for"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "checkbox",
     id: 'day-stats-' + $props.day.dayNum,
     "class": "modal-toggle"
-  }, null, 8 /* PROPS */, _hoisted_1), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("      <input class=\"adventurousness absolute bottom-20 left-0 origin-top -rotate-90\" type=\"range\" orient=\"vertical\" min=\"0\" max=\"100\" :value=\"adventurousness\" />"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("      <input class=\"solitariness absolute bottom-20 left-20 origin-top -rotate-90\" type=\"range\" min=\"0\" max=\"100\" orient=\"vertical\" :value=\"solitariness\" />"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("      <input class=\"strenuousness absolute bottom-20 left-40 origin-top -rotate-90\" type=\"range\" orient=\"vertical\" min=\"0\" max=\"100\" :value=\"strenuousness\" />"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [_hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  }, null, 8 /* PROPS */, _hoisted_1), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("      <input class=\"adventurousness absolute bottom-20 left-0 origin-top -rotate-90\" type=\"range\" orient=\"vertical\" min=\"0\" max=\"100\" :value=\"adventurousness\" />"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("      <input class=\"solitariness absolute bottom-20 left-20 origin-top -rotate-90\" type=\"range\" min=\"0\" max=\"100\" orient=\"vertical\" :value=\"solitariness\" />"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("      <input class=\"strenuousness absolute bottom-20 left-40 origin-top -rotate-90\" type=\"range\" orient=\"vertical\" min=\"0\" max=\"100\" :value=\"strenuousness\" />"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [_hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     "class": "adventurousness ml-2 mr-2",
     type: "range",
     min: "0",
@@ -21250,7 +21335,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
       return $data.adventurousness = $event;
     })
-  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.adventurousness]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.adventurousness) + "%", 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [_hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.adventurousness]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.adventurousness) + "%", 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [_hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     "class": "solitariness ml-2 mr-2",
     type: "range",
     min: "0",
@@ -21258,7 +21343,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "onUpdate:modelValue": _cache[1] || (_cache[1] = function ($event) {
       return $data.solitariness = $event;
     })
-  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.solitariness]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.solitariness) + "%", 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [_hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.solitariness]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.solitariness) + "%", 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [_hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     "class": "strenuousness ml-2 mr-2",
     type: "range",
     min: "0",
@@ -21266,10 +21351,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
       return $data.strenuousness = $event;
     })
-  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.strenuousness]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.strenuousness) + "%", 1 /* TEXT */)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.strenuousness]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.strenuousness) + "%", 1 /* TEXT */)]), _hoisted_14])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
     "class": "modal-backdrop",
     "for": 'day-stats-' + $props.day.dayNum
-  }, "Close", 8 /* PROPS */, _hoisted_13)])], 64 /* STABLE_FRAGMENT */);
+  }, null, 8 /* PROPS */, _hoisted_15)])], 64 /* STABLE_FRAGMENT */);
 }
 
 /***/ }),
@@ -21329,8 +21414,9 @@ __webpack_require__.r(__webpack_exports__);
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [$props.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)($setup["Gallery"], {
     key: 0,
-    images: $props.images
-  }, null, 8 /* PROPS */, ["images"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Map"], {
+    images: $props.images,
+    type: $props.type
+  }, null, 8 /* PROPS */, ["images", "type"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Map"], {
     hash: $props.hash
   }, null, 8 /* PROPS */, ["hash"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("    <div class=\"container mt-8\">"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("        <div class=\"tabs tabs-full-width\">"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          <ul class=\"tab-list\">"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("            <li v-for=\"(tab, index) in tabs\" :key=\"index\" :class=\"{ active: index === activeTab }\">"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("              <a @click=\"setActiveTab(index)\">{{ tab.label }}</a>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("            </li>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          </ul>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          <div class=\"tab-content\">"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("            <div v-for=\"(tab, index) in tabs\" :key=\"index\" :class=\"{ active: index === activeTab }\">"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("              <slot :name=\"tab.id\"></slot>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("            </div>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          </div>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("        </div>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("    </div>")], 64 /* STABLE_FRAGMENT */);
 }

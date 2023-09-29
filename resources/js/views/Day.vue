@@ -11,9 +11,9 @@
           </div>
           <div class="flex-1 p-4 items-start justify-end">
             <label :for="'day-stats-' + day.dayNum" class="graph" v-if="day.stats">
-              <div class="gradient-line adventurousness relative z-10" v-if="day.stats.adventurousness" :style="'height: ' + (day.stats.adventurousness * 100) + '%;'"></div>
-              <div class="gradient-line solitariness relative z-10" v-if="day.stats.solitariness" :style="'height: ' + (day.stats.solitariness * 100) + '%;'"></div>
-              <div class="gradient-line strenuousness relative z-10" v-if="day.stats.strenuousness" :style="'height: ' + (day.stats.strenuousness * 100) + '%;'"></div>
+              <div class="gradient-line adventurousness relative z-10" v-if="adventurousness" :style="'height: ' + adventurousness + '%;'"></div>
+              <div class="gradient-line solitariness relative z-10" v-if="solitariness" :style="'height: ' + solitariness + '%;'"></div>
+              <div class="gradient-line strenuousness relative z-10" v-if="strenuousness" :style="'height: ' + strenuousness + '%;'"></div>
             </label>
           </div>
           <div class="p-4 justify-end text-md text-right">
@@ -68,6 +68,17 @@ export default {
     Restaurant,
     Task,
     Trail,
+  },
+  computed: {
+    adventurousness() {
+      return Math.max(0.01, Math.min(100, Math.round(this.day.stats.adventurousness * 100)));
+    },
+    solitariness() {
+      return Math.max(0.01, Math.min(100, Math.round(this.day.stats.solitariness * 100)));
+    },
+    strenuousness() {
+      return Math.max(0.01, Math.min(100, Math.round(this.day.stats.strenuousness * 100)));
+    },
   },
   methods: {
     abbreviateMonth(month) {

@@ -11,26 +11,26 @@
             <img :src="'/images/icons/difficulty-' + trail.difficulty + '.png'" :alt="trail.formattedDifficulty">
           </div>
         </div>
-        <div class="activity-actions flex items-center justify-end text-right relative z-10">
-          <a class="shrink-0" href="#">
-            <img class="icon" src="/images/icons/map.svg" alt="Map">
-          </a>
-        </div>
         <div class="activity-stats flex items-center justify-end text-right flex-wrap">
             <span class="distance flex">
               <img class="icon pr-1 svg-anim" src="/images/icons/distance.svg" alt="Distance">
-              <span class="amount pr-1">2.1</span>
+              <span class="amount pr-1">{{ trail.distance_miles }}</span>
               <span class="measurement">mi</span>
             </span>
             <span class="incline flex justify-end ml-3 order-3 md:order-2">
               <img class="icon pr-1 svg-anim" src="/images/icons/mountain.svg" alt="Elevation Gain">
-              <span class="amount pr-1">+700</span>
+              <span class="amount pr-1">+{{ trail.incline_ft }}</span>
               <span class="measurement">ft</span>
             </span>
             <span class="average-grade flex ml-3 order-2 md:order-3">
               <img class="icon pr-1 svg-anim" src="/images/icons/average-grade.svg" alt="Average Grade">
-              <span class="amount">12</span>
+              <span class="amount">{{ average_grade_pt }}</span>
               <span class="measurement">%</span>
+            </span>
+            <span class="activity-actions flex ml-3 order-4 relative z-10">
+              <a class="shrink-0" href="#">
+                <img class="icon" src="/images/icons/map.svg" alt="Map">
+              </a>
             </span>
         </div>
     </div>
@@ -62,9 +62,19 @@
 export default {
   components: {
   },
+  computed: {
+    average_grade_pt() {
+      return Math.round(this.trail.average_grade_pt * 100);
+    }
+  },
+  methods: {
+  },
   created() {
-    console.log(this.activity.hash);
-    this.trail = this.activity.data;
+  },
+  data() {
+    return {
+      trail: this.activity.data,
+    }
   },
   props: {
     activity: Object,

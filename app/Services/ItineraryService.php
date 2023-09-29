@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Area;
 use App\Models\AreaDistance;
+use App\Models\AreaWeather;
 use App\Models\Event;
 use App\Models\Itinerary\Activity;
 use App\Models\Itinerary\Day;

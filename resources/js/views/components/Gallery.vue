@@ -2,9 +2,9 @@
     <div class="relative w-full" data-carousel="static" v-if="images.length" v-touch:swipeLeft="previousimage" v-touch:swipeRight="nextImage">
         <!-- Carousel wrapper -->
         <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
-            <div v-for="(image, index) in images" :key="index">
+            <div v-for="(imageUrl, index) in imageUrls" :key="index">
                 <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                    <img :src="image.url" class="absolute block w-full h-full object-cover" alt="..." v-touch:tap="toggleimage">
+                    <img :src="'/image/' + type + '/' + imageUrl.id" class="absolute block w-full h-full object-cover" alt="..." v-touch:tap="toggleimage">
                 </div>
             </div>
         </div>
@@ -36,11 +36,19 @@
 export default {
   components: {
   },
+  data() {
+    return {
+      imageUrls: [],
+    };
+  },
   mounted() {
+    this.imageUrls = this.images;
+    console.log(this.imageUrls);
     initCarousels();
   },
   props: {
     images: Object,
+    type: String,
   },
 };
 </script>
