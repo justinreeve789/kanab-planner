@@ -1,0 +1,49 @@
+.carousel {
+  .left-arrow, .right-arrow {
+    opacity: 0;
+  }
+  .left-arrow {
+    animation: slide-arrow-left 1s ease-in-out infinite, fade 15s linear infinite;
+  }
+  .right-arrow {
+    animation: slide-arrow-right 1s ease-in-out infinite, fade 15s linear infinite;
+  }
+}
+
+@keyframes fade {
+  0%, 100% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-arrow-left {
+  0%, 100% {
+    transform: scale(0.75, 3.5) translate(0, 0);
+  }
+
+  50% {
+    transform: scale(0.75, 3.5) translate(10px, 0);
+  }
+}
+
+@keyframes slide-arrow-right {
+  0%, 100% {
+    transform: scale(0.75, 3.5) translate(10px, 0);
+  }
+
+  50% {
+    transform: scale(0.75, 3.5) translate(0, 0);
+  }
+}

@@ -63,13 +63,5 @@ export default {
 
 <script setup>
 import { onMounted } from 'vue'
-import {
-    initAccordions,
-} from 'flowbite'
 import Side from '../panels/Side.vue'
-
-// initialize components based on data attribute selectors
-onMounted(() => {
-    initAccordions();
-})
 </script>

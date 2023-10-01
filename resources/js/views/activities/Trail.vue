@@ -36,13 +36,13 @@
     </div>
 
     <div class="collapse-content bg-gray-200 p-2 bg-gradient-to-r from-white to-red-50">
-        <div class="md:flex md:justify-between">
-          <div class="w-full md:w-2/3">
+        <div class="lg:flex lg:justify-between">
+          <div class="w-full lg:w-2/3">
             <p class="mb-4" v-if="trail.description_alt">{{ trail.description_alt }}</p>
             <p class="mb-4" v-if="trail.description">{{ trail.description }}</p>
             <p v-if="activity.phrase"><em>{{ activity.phrase }}</em></p>
           </div>
-          <div class="w-full md:w-1/3 mt-4 md:mt-0 md:pl-4" v-if="trail.images">
+          <div class="w-full lg:w-1/3 mt-4 lg:mt-0 lg:pl-4" v-if="trail.images">
             <Side :resource="trail" :hash="activity.hash" :type="'trail'" :images="trail.images" />
           </div>
         </div>

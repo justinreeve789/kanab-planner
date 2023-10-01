@@ -3,6 +3,12 @@
   --slider-height: 30px;
 }
 
+@media screen and (max-width: 480px) {
+  :root {
+    --slider-width: 150px;
+  }
+}
+
 .ass {
   span.name {
     overflow: hidden;
