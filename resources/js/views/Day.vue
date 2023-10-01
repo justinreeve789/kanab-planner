@@ -59,7 +59,6 @@ import Location from './activities/Location.vue';
 import Restaurant from './activities/Restaurant.vue';
 import Task from './activities/Task.vue';
 import Trail from './activities/Trail.vue';
-import { useSwipe } from '@vueuse/core';
 
 export default {
   components: {

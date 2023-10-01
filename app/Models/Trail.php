@@ -53,6 +53,15 @@ class Trail extends Resource
         return $this->average_hours;
     }
 
+    public function getGeoJsonData()
+    {
+        $file = storage_path('geojson/' . $this->id . '-' . $this->source_id . '.geojson');
+        if (file_exists($file)) {
+            return file_get_contents($file);
+        }
+        return null;
+    }
+
     public function getGpxData()
     {
         $file = storage_path('gpx/' . $this->id . '-' . $this->source_id . '.gpx');

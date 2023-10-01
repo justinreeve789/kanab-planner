@@ -17,6 +17,25 @@ class TrailController extends Controller
         return Trail::with(['area', 'data'])->where('id', $id)->first();
     }
 
+    public function getGeoJsonData(Request $request, int $id)
+    {
+        $trail = Trail::where('id', $id)->first();
+        if ($trail) {
+            return $trail->getGeoJsonData();
+        }
+    }
+
+    public function downloadGeoJson(Request $request, int $id)
+    {
+        $trail = Trail::where('id', $id)->first();
+        if ($trail) {
+            $geoJsonFile = storage_path('geojson/' . $trail->id . '-' . $trail->source_id . '.geojson');
+            if (file_exists($geoJsonFile)) {
+                return response()->download($geoJsonFile, pathinfo($geoJsonFile, PATHINFO_BASENAME));
+            }
+        }
+    }
+
     public function getGpxData(Request $request, int $id)
     {
         $trail = Trail::where('id', $id)->first();
