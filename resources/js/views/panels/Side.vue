@@ -6,7 +6,6 @@
 <script>
 export default {
   components: {
-    CarouselGallery,
     Gallery,
     Map,
   },
@@ -33,7 +32,6 @@ export default {
 </script>
 
 <script setup>
-import CarouselGallery from '../components/CarouselGallery.vue'
 import Gallery from '../components/Gallery.vue'
 import Map from '../panels/Map.vue'
 </script>

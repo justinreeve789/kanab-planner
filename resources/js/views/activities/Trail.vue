@@ -29,7 +29,7 @@
             </span>
             <span class="activity-actions flex ml-3 order-4 relative z-10">
               <a class="shrink-0" href="#">
-                <img class="icon" src="/images/icons/map.svg" alt="Map">
+                <img class="icon" src="/images/icons/edit.svg" alt="Change Activity">
               </a>
             </span>
         </div>
@@ -41,14 +41,14 @@
             <p class="mb-4" v-if="trail.description_alt">{{ trail.description_alt }}</p>
             <p class="mb-4" v-if="trail.description">{{ trail.description }}</p>
             <p v-if="activity.phrase"><em>{{ activity.phrase }}</em></p>
+            <ActivityFooter type="trail" />
           </div>
           <div class="w-full lg:w-1/3 mt-4 lg:mt-0 lg:pl-4" v-if="trail.images">
             <Side :resource="trail" :hash="activity.hash" :type="'trail'" :images="trail.images" />
           </div>
         </div>
-      <div class="resource-footer relative">
-        <Footer class="absolute" :images="trail.images" />
-      </div>
+        <div class="resource-footer relative">
+        </div>
     </div>
   </div>
 <!--
@@ -61,9 +61,10 @@
 <script>
 export default {
   components: {
+    ActivityFooter,
   },
   computed: {
-    average_grade_pt() {
+      average_grade_pt() {
       return Math.round(this.trail.average_grade_pt * 100);
     }
   },
@@ -84,6 +85,6 @@ export default {
 </script>
 
 <script setup>
-import Footer from '../panels/Footer.vue'
+import ActivityFooter from '../panels/ActivityFooter'
 import Side from '../panels/Side.vue'
 </script>

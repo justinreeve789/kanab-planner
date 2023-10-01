@@ -1,3 +1,5 @@
+const defaultTheme = require('tailwindcss/defaultTheme');
+
 module.exports = {
     content: [
       "./resources/**/*.blade.php",
@@ -9,6 +11,10 @@ module.exports = {
     ],
     theme: {
       extend: {},
+      screens: {
+          'xs': '480px',
+          ...defaultTheme.screens,
+      },
     },
     plugins: [
         require('daisyui')

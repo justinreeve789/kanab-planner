@@ -653,6 +653,12 @@ html {
 .container {
   width: 100%;
 }
+@media (min-width: 480px) {
+
+  .container {
+    max-width: 480px;
+  }
+}
 @media (min-width: 640px) {
 
   .container {
@@ -2033,17 +2039,8 @@ details.collapse summary::-webkit-details-marker {
 .bottom-0 {
   bottom: 0px;
 }
-.bottom-20 {
-  bottom: 5rem;
-}
 .left-0 {
   left: 0px;
-}
-.left-20 {
-  left: 5rem;
-}
-.left-40 {
-  left: 10rem;
 }
 .left-5 {
   left: 1.25rem;
@@ -2091,6 +2088,9 @@ details.collapse summary::-webkit-details-marker {
 .mb-2 {
   margin-bottom: 0.5rem;
 }
+.mb-20 {
+  margin-bottom: 5rem;
+}
 .mb-4 {
   margin-bottom: 1rem;
 }
@@ -2114,6 +2114,9 @@ details.collapse summary::-webkit-details-marker {
 }
 .mr-2\.5 {
   margin-right: 0.625rem;
+}
+.mt-24 {
+  margin-top: 6rem;
 }
 .mt-4 {
   margin-top: 1rem;
@@ -2178,8 +2181,11 @@ details.collapse summary::-webkit-details-marker {
 .shrink-0 {
   flex-shrink: 0;
 }
-.origin-top {
-  transform-origin: top;
+.origin-center {
+  transform-origin: center;
+}
+.origin-right {
+  transform-origin: right;
 }
 .-translate-x-full {
   --tw-translate-x: -100%;
@@ -2193,8 +2199,19 @@ details.collapse summary::-webkit-details-marker {
   --tw-rotate: -90deg;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
+.rotate-45 {
+  --tw-rotate: 45deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.rotate-90 {
+  --tw-rotate: 90deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
 .transform {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.cursor-ns-resize {
+  cursor: ns-resize;
 }
 .grid-cols-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2289,6 +2306,42 @@ details.collapse summary::-webkit-details-marker {
   --tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
+.from-green-400 {
+  --tw-gradient-from: #4ade80 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(74 222 128 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.from-red-400 {
+  --tw-gradient-from: #f87171 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(248 113 113 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.from-orange-200 {
+  --tw-gradient-from: #fed7aa var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(254 215 170 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.from-orange-400 {
+  --tw-gradient-from: #fb923c var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(251 146 60 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.via-green-500 {
+  --tw-gradient-to: rgb(34 197 94 / 0)  var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), #22c55e var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+.via-red-500 {
+  --tw-gradient-to: rgb(239 68 68 / 0)  var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), #ef4444 var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+.via-orange-300 {
+  --tw-gradient-to: rgb(253 186 116 / 0)  var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), #fdba74 var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+.via-orange-500 {
+  --tw-gradient-to: rgb(249 115 22 / 0)  var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), #f97316 var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
 .to-cyan-100 {
   --tw-gradient-to: #cffafe var(--tw-gradient-to-position);
 }
@@ -2306,6 +2359,18 @@ details.collapse summary::-webkit-details-marker {
 }
 .to-red-50 {
   --tw-gradient-to: #fef2f2 var(--tw-gradient-to-position);
+}
+.to-green-600 {
+  --tw-gradient-to: #16a34a var(--tw-gradient-to-position);
+}
+.to-red-600 {
+  --tw-gradient-to: #dc2626 var(--tw-gradient-to-position);
+}
+.to-orange-400 {
+  --tw-gradient-to: #fb923c var(--tw-gradient-to-position);
+}
+.to-orange-600 {
+  --tw-gradient-to: #ea580c var(--tw-gradient-to-position);
 }
 .object-cover {
   -o-object-fit: cover;
@@ -2402,6 +2467,9 @@ details.collapse summary::-webkit-details-marker {
 }
 .underline {
   text-decoration-line: underline;
+}
+.opacity-90 {
+  opacity: 0.9;
 }
 .transition-transform {
   transition-property: transform;
@@ -2558,7 +2626,6 @@ h1, h2 {
 }
 .ass input[type=range] {
   border-radius: calc(var(--slider-height) / 2);
-  cursor: ew-resize;
   overflow: hidden;
 }
 .ass input[type=range].adventurousness, .ass input[type=range].solitariness, .ass input[type=range].strenuousness {
@@ -2671,16 +2738,16 @@ h1, h2 {
 }
 
 @media screen and (max-width: 768px) {
-  .resource-details .icon {
+  .resource-details .title .icon {
     position: absolute;
     filter: invert(100%);
     left: 50%;
     opacity: 0.1;
     padding: 5px;
     transform: scale(1.375) translateX(-50%);
-    z-index: 1;
+    z-index: 0;
   }
-  .resource-details .icon:before {
+  .resource-details .title .icon:before {
     position: absolute;
     background-color: #a0a0a0;
     border-radius: 50%;
@@ -2801,6 +2868,10 @@ hiking-project-map iframe {
   background-color: rgb(229 231 235 / var(--tw-bg-opacity));
 }
 
+.hover\:bg-gradient-to-br:hover {
+  background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
+}
+
 .hover\:text-blue-700:hover {
   --tw-text-opacity: 1;
   color: rgb(29 78 216 / var(--tw-text-opacity));
@@ -2838,6 +2909,26 @@ hiking-project-map iframe {
 .focus\:ring-gray-200:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(229 231 235 / var(--tw-ring-opacity));
+}
+
+.focus\:ring-green-300:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(134 239 172 / var(--tw-ring-opacity));
+}
+
+.focus\:ring-red-300:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(252 165 165 / var(--tw-ring-opacity));
+}
+
+.focus\:ring-orange-100:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(255 237 213 / var(--tw-ring-opacity));
+}
+
+.focus\:ring-orange-300:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(253 186 116 / var(--tw-ring-opacity));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -2900,6 +2991,47 @@ hiking-project-map iframe {
   .dark\:focus\:ring-gray-700:focus {
     --tw-ring-opacity: 1;
     --tw-ring-color: rgb(55 65 81 / var(--tw-ring-opacity));
+  }
+
+  .dark\:focus\:ring-green-800:focus {
+    --tw-ring-opacity: 1;
+    --tw-ring-color: rgb(22 101 52 / var(--tw-ring-opacity));
+  }
+
+  .dark\:focus\:ring-red-800:focus {
+    --tw-ring-opacity: 1;
+    --tw-ring-color: rgb(153 27 27 / var(--tw-ring-opacity));
+  }
+
+  .dark\:focus\:ring-orange-600:focus {
+    --tw-ring-opacity: 1;
+    --tw-ring-color: rgb(234 88 12 / var(--tw-ring-opacity));
+  }
+
+  .dark\:focus\:ring-orange-800:focus {
+    --tw-ring-opacity: 1;
+    --tw-ring-color: rgb(154 52 18 / var(--tw-ring-opacity));
+  }
+}
+
+@media (min-width: 480px) {
+
+  .xs\:my-0 {
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
+
+  .xs\:mb-4 {
+    margin-bottom: 1rem;
+  }
+
+  .xs\:rotate-0 {
+    --tw-rotate: 0deg;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+  }
+
+  .xs\:cursor-ew-resize {
+    cursor: ew-resize;
   }
 }
 
@@ -2973,6 +3105,10 @@ hiking-project-map iframe {
     font-size: 1.125rem;
     line-height: 1.75rem;
   }
+
+  .md\:opacity-25 {
+    opacity: 0.25;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -2999,5 +3135,12 @@ hiking-project-map iframe {
 
   .lg\:pl-4 {
     padding-left: 1rem;
+  }
+}
+
+@media (min-width: 1280px) {
+
+  .xl\:opacity-75 {
+    opacity: 0.75;
   }
 }

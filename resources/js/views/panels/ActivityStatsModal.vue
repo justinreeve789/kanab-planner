@@ -3,23 +3,22 @@
   <div class="modal">
     <div class="modal-container">
       <div class="modal-box ass">
-<!--      <input class="adventurousness absolute bottom-20 left-0 origin-top -rotate-90" type="range" orient="vertical" min="0" max="100" :value="adventurousness" />-->
-<!--      <input class="solitariness absolute bottom-20 left-20 origin-top -rotate-90" type="range" min="0" max="100" orient="vertical" :value="solitariness" />-->
-<!--      <input class="strenuousness absolute bottom-20 left-40 origin-top -rotate-90" type="range" orient="vertical" min="0" max="100" :value="strenuousness" />-->
-        <div class="flex mb-4">
-          <span class="name text-right">Adventurousness</span>
-          <input class="adventurousness ml-2 mr-2" type="range" min="0" max="100" v-model="adventurousness" />
-          <span class="value badge badge-neutral badge-md">{{ adventurousness }}%</span>
-        </div>
-        <div class="flex mb-4">
-          <span class="name text-right">Solitariness</span>
-          <input class="solitariness ml-2 mr-2" type="range" min="0" max="100" v-model="solitariness" />
-          <span class="value badge badge-neutral badge-md">{{ solitariness }}%</span>
-        </div>
-        <div class="flex mb-4">
-          <span class="name text-right">Strenuousness</span>
-          <input class="strenuousness ml-2 mr-2" type="range" min="0" max="100" v-model="strenuousness" />
-          <span class="value badge badge-neutral badge-md">{{ strenuousness }}%</span>
+        <div class="sliders -rotate-90 xs:rotate-0 origin-center mt-24 mb-20 xs:my-0">
+          <div class="flex mb-8 xs:mb-4">
+            <span class="name text-right rotate-45 xs:rotate-0 origin-right">Adventurousness</span>
+            <input class="adventurousness ml-2 mr-2 cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="100" v-model="adventurousness" />
+            <span class="value badge badge-neutral badge-md rotate-90 xs:rotate-0">{{ adventurousness }}%</span>
+          </div>
+          <div class="flex mb-8 xs:mb-4">
+            <span class="name text-right rotate-45 xs:rotate-0 origin-right">Solitariness</span>
+            <input class="solitariness ml-2 mr-2 cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="100" v-model="solitariness" />
+            <span class="value badge badge-neutral badge-md rotate-90 xs:rotate-0">{{ solitariness }}%</span>
+          </div>
+          <div class="flex xs:mb-4">
+            <span class="name text-right rotate-45 xs:rotate-0 origin-right">Strenuousness</span>
+            <input class="strenuousness ml-2 mr-2 cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="100" v-model="strenuousness" />
+            <span class="value badge badge-neutral badge-md rotate-90 xs:rotate-0">{{ strenuousness }}%</span>
+          </div>
         </div>
         <div class="">
           <p class="mb-4">Adjust the sliders and this day will automatically update with activities as close to your specifications as possible.</p>
