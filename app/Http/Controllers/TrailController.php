@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Trail;
+use App\Models\TrailGeoJson;
 use Illuminate\Http\Request;
 
 class TrailController extends Controller
@@ -19,20 +20,17 @@ class TrailController extends Controller
 
     public function getGeoJsonData(Request $request, int $id)
     {
-        $trail = Trail::where('id', $id)->first();
-        if ($trail) {
-            return $trail->getGeoJsonData();
+        $trailGeoJson = TrailGeoJson::where('trail_id', $id)->first();
+        if ($trailGeoJson) {
+            return $trailGeoJson->geojson;
         }
     }
 
     public function downloadGeoJson(Request $request, int $id)
     {
-        $trail = Trail::where('id', $id)->first();
-        if ($trail) {
-            $geoJsonFile = storage_path('geojson/' . $trail->id . '-' . $trail->source_id . '.geojson');
-            if (file_exists($geoJsonFile)) {
-                return response()->download($geoJsonFile, pathinfo($geoJsonFile, PATHINFO_BASENAME));
-            }
+        $json = $this->getGeoJsonData($request, $id);
+        if ($json) {
+            return response()->download($json, $id . '.geojson');
         }
     }
 

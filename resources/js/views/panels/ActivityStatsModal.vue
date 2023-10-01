@@ -39,15 +39,6 @@ export default {
   components: {
   },
   computed: {
-    //adventurousness() {
-    //  return Math.round(this.adventurousness / 100, 2);
-    //},
-    //solitariness() {
-    //  return Math.round(this.solitariness / 100, 2);
-    //},
-    //strenuousness() {
-    //  return Math.round(this.strenuousness / 100, 2);
-    //},
   },
   data() {
     return {

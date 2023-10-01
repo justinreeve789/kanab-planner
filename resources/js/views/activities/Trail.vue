@@ -1,6 +1,6 @@
 <template>
   <div class="resource-details collapse collapse-arrow" data-type="trail" :data-id="trail.id">
-    <input type="checkbox" />
+    <input type="checkbox" v-model="expanded" />
     <div class="collapse-title flex items-center p-2 justify-between w-full bg-gradient-to-r from-orange-100 to-red-100">
         <div class="title flex items-center space-x-2">
           <div class="icon pr-1 shrink-0">
@@ -35,7 +35,7 @@
         </div>
     </div>
 
-    <div class="collapse-content bg-gray-200 p-2 bg-gradient-to-r from-white to-red-50">
+    <div class="collapse-content bg-gray-200 p-2 bg-gradient-to-r from-white to-red-50" v-if="expanded">
         <div class="lg:flex lg:justify-between">
           <div class="w-full lg:w-2/3 lg:flex lg:flex-col">
               <div class="lg:order-2">
@@ -53,12 +53,7 @@
         </div>
     </div>
   </div>
-<!--
-    <div class="trail-map">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d96522.36423741286!2d-112.9271579498936!3d37.29713303136258!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zN7CsMTUwJzE3LjEiTiAxMTLCsDQyJzA2LjMiVw!5e0!3m2!1sen!2sus!4v1628604616011!5m2!1sen!2sus" width="400" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-    </div>
--->
-  <MapModal :activity="activity" :hash="activity.hash"/>
+  <MapModal :activity="activity" :hash="activity.hash" />
 </template>
 
 <script>
@@ -78,6 +73,7 @@ export default {
   },
   data() {
     return {
+      expanded: false,
       trail: this.activity.data,
     }
   },

@@ -23,10 +23,12 @@ export default {
   data() {
     return {
       geoOptions: {
-        // GPX options (optional, adjust as needed)
-        color: 'red', // Line color
-        weight: 3, // Line weight
-        opacity: 0.7, // Line opacity
+        className: 'trail-path',
+        color: '#ff0080', // Replace with your gradient colors
+        weight: 5, // Adjust the line thickness
+        opacity: 0.8, // Adjust the opacity
+        shadowBlur: 15, // Add a blur effect for the glow
+        shadowColor: '#bb0080', // Set the glow color to match your gradient
       },
       geoJson: {},
       zoom: 14,
@@ -39,7 +41,6 @@ export default {
           })
           .then((response) => {
             this.geoJson = response.data;
-            console.log(this.geoJson);
           })
           .catch((error) => {
             console.error('Error fetching geoJson data:', error);

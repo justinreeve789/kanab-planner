@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\TrailService;
 use App\Traits\ActivityData;
 use App\Traits\Proximity;
+use App\Traits\Usable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Trail extends Resource
@@ -12,6 +13,7 @@ class Trail extends Resource
     use ActivityData;
     use HasFactory;
     use Proximity;
+    use Usable;
 
     protected $guarded = ['id'];
     protected $hidden = ['raw_data'];
@@ -31,6 +33,11 @@ class Trail extends Resource
     public function data()
     {
         return $this->hasMany(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'trails');
+    }
+
+    public function geoJson()
+    {
+        return $this->hasOne(TrailGeoJson::class, 'trail_id', 'id');
     }
 
     public function images()
