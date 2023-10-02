@@ -109,6 +109,60 @@ class ImageService
         }
     }
 
+    public function getLatLng($file): ?array {
+        if ($this->conversionService->isUrl($file)) {
+            $filename = $this->conversionService->downloadFile($file);
+        } else {
+            $filename = $file;
+        }
+
+        try {
+            $exif = exif_read_data($filename);
+        } catch (\Throwable $e) {
+            return null;
+        }
+
+        if ($this->conversionService->isUrl($file)) {
+            $this->conversionService->deleteFiles($filename);
+        }
+
+        try {
+            $lat = $this->getGps($exif["GPSLatitude"], $exif['GPSLatitudeRef']);
+            $lng = $this->getGps($exif["GPSLongitude"], $exif['GPSLongitudeRef']);
+            if ($lat && !$lng) {
+                return ['latitude' => $lat, 'longitude' => $lng];
+            }
+        } catch (\Throwable $e) {
+        }
+
+        return null;
+    }
+
+    private function getGps($exifCoord, $hemi) {
+
+        $degrees = count($exifCoord) > 0 ? $this->gps2Num($exifCoord[0]) : 0;
+        $minutes = count($exifCoord) > 1 ? $this->gps2Num($exifCoord[1]) : 0;
+        $seconds = count($exifCoord) > 2 ? $this->gps2Num($exifCoord[2]) : 0;
+
+        $flip = ($hemi == 'W' or $hemi == 'S') ? -1 : 1;
+
+        return $flip * ($degrees + $minutes / 60 + $seconds / 3600);
+
+    }
+
+    private function gps2Num($coordPart) {
+
+        $parts = explode('/', $coordPart);
+
+        if (count($parts) <= 0)
+            return 0;
+
+        if (count($parts) == 1)
+            return $parts[0];
+
+        return floatval($parts[0]) / floatval($parts[1]);
+    }
+
     public function getPhotos($query) {
         $response = $this->client->getImages($query);
         $photos = [];

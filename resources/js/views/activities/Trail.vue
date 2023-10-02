@@ -11,35 +11,21 @@
             <img :src="'/images/icons/difficulty-' + trail.difficulty + '.png'" :alt="trail.formattedDifficulty">
           </div>
         </div>
-        <div class="activity-stats flex items-center justify-end text-right flex-wrap">
-            <span class="distance flex">
-              <img class="icon pr-1 svg-anim" src="/images/icons/distance.svg" alt="Distance">
-              <span class="amount pr-1">{{ trail.distance_miles }}</span>
-              <span class="measurement">mi</span>
-            </span>
-            <span class="incline flex justify-end ml-3 order-3 md:order-2">
-              <img class="icon pr-1 svg-anim" src="/images/icons/mountain.svg" alt="Elevation Gain">
-              <span class="amount pr-1">+{{ trail.incline_ft }}</span>
-              <span class="measurement">ft</span>
-            </span>
-            <span class="average-grade flex ml-3 order-2 md:order-3">
-              <img class="icon pr-1 svg-anim" src="/images/icons/average-grade.svg" alt="Average Grade">
-              <span class="amount">{{ average_grade_pt }}</span>
-              <span class="measurement">%</span>
-            </span>
-            <span class="activity-actions flex ml-3 order-4 relative z-10">
-              <a class="shrink-0" href="#">
-                <img class="icon" src="/images/icons/edit.svg" alt="Change Activity">
-              </a>
-            </span>
-        </div>
+        <ActivityStats :trail="trail" :align="'right'" class="hidden lg:flex" />
     </div>
 
     <div class="collapse-content bg-gray-200 p-2 bg-gradient-to-r from-white to-red-50" v-if="expanded">
         <div class="lg:flex lg:justify-between">
           <div class="w-full lg:w-2/3 lg:flex lg:flex-col">
               <div class="lg:order-2">
-                <ActivityButtons class="text-right my-4 lg:text-left" type="trail" :hash="activity.hash" />
+                <div class="flex justify-between">
+                  <div class="flex-auto text-left lg:hidden">
+                    <ActivityStats :trail="trail" :align="'left'" class="pt-4" />
+                  </div>
+                  <div class="flex-auto text-left">
+                    <ActivityButtons class="text-right my-4 lg:text-left" type="trail" :hash="activity.hash" />
+                  </div>
+                </div>
               </div>
               <div class="lg:order-1">
                 <p class="mb-4" v-if="trail.description_alt">{{ trail.description_alt }}</p>
@@ -60,16 +46,8 @@
 export default {
   components: {
     ActivityButtons,
+    ActivityStats,
     MapModal,
-  },
-  computed: {
-      average_grade_pt() {
-      return Math.round(this.trail.average_grade_pt * 100);
-    }
-  },
-  methods: {
-  },
-  created() {
   },
   data() {
     return {
@@ -86,6 +64,7 @@ export default {
 
 <script setup>
 import ActivityButtons from '../panels/ActivityButtons.vue'
+import ActivityStats from '../panels/ActivityStats.vue'
 import MapModal from '../panels/MapModal.vue'
 import Side from '../panels/Side.vue'
 </script>

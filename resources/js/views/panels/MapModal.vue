@@ -4,7 +4,7 @@
     <div class="modal-box p-2 max-w-none w-full" style="height: 100%;">
       <Map :activity="activity" />
       <label :for="'activity-' + hash + '-map'">
-        <span class="btn btn-md text-2xl text-white bg-green-700 p-2 bg-gradient-to-r from-green-600 to-green-800 btn-circle btn-ghost absolute right-2 top-2" style="z-index: 5000;">X</span>
+        <span class="btn btn-md btn-ghost bg-transparent border-green-800 text-2xl text-green-800 absolute right-2 top-2" style="z-index: 5000;">X</span>
       </label>
 <!--      <div class="progress w-full h-screen flex justify-center items-center text-6xl relative">-->
 <!--        <span class="text text-center text-6xl text-white font-bold relative">-->

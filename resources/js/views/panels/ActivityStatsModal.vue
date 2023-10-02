@@ -20,7 +20,7 @@
             <span class="value badge badge-neutral badge-md rotate-90 xs:rotate-0">{{ strenuousness }}%</span>
           </div>
         </div>
-        <div class="">
+        <div class="text-sm md:text-base">
           <p class="mb-4">Adjust the sliders and this day will automatically update with activities as close to your specifications as possible.</p>
           <ul>
             <li class="mb-2"><strong>Adventurousness</strong> is the uniqueness of the experience, and how outside an average person's comfort zone it is. Set this higher if you're feeling like exploring, spending more time outdoors, or maybe trying something new.</li>

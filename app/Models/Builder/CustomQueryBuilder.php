@@ -54,13 +54,16 @@ class CustomQueryBuilder extends Builder
             }
             $index++;
         }
-        $query = $this->join('resource_data', function($join) use ($table) {
-            $join->on('resource_table', '=', \DB::raw('"' . $table . '"'));
-            $join->on('resource_id', '=', \DB::raw($table . '.id'));
+
+        $query = $this->select($table . '.*')
+            ->join('resource_data', function($join) use ($table) {
+                $join->on($table . '.id', '=', 'resource_data.id');
         });
+
         if ($order != '') {
             $query->orderByRaw($order);
         }
+
         return $query;
     }
 

@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('url')->nullable();
             $table->string('local_url')->nullable();
             $table->string('size')->nullable();
+            $table->float('latitude', 10, 7)->nullable();
+            $table->float('longitude', 10, 7)->nullable();
             $table->timestamps();
             $table->unique(['event_id', 'url']);
             $table->unique(['event_id', 'local_url']);

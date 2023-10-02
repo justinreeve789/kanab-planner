@@ -99,6 +99,19 @@ class UpdateImages extends Command
         $trails = Trail::whereHas('images')->get();
         foreach ($trails as $item) {
             foreach ($item->images as $image) {
+                // Extract GPS data.
+                $latLng = $this->imageService->getLatLng($image->url);
+                if (!$latLng) {
+                    continue;
+                } else {
+                    echo '<pre>'; print_r($latLng); echo '</pre>';
+                    TrailImage::updateOrCreate(['id' => $image->id], [
+                        'latitude' => $latLng['latitude'],
+                        'longitude' => $latLng['longitude'],
+                    ]);
+                }
+
+                // Store in the cloud.
                 if (!str_contains($image->local_url, 'visitkanab/images')) {
                     $imageFile = $this->imageService->storeImage($image->url);
                     if ($imageFile) {

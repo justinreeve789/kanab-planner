@@ -34,7 +34,7 @@ class Itinerary extends Model
     const DEFAULT_DURATION_DAYS = 5;
     const DEFAULT_PRIORITIES = ['trails', 'events', 'locations', 'restaurants'];
     const DEFAULT_SEASON = 'summer';
-    const DEFAULT_TRAIL_PRIORITIES = [216];
+    const DEFAULT_TRAIL_PRIORITIES = [];
     const FALL = 'fall';
     const SPRING = 'spring';
     const SUMMER = 'summer';
