@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Services\TrailService;
 use App\Traits\ActivityData;
 use App\Traits\Proximity;
-use App\Traits\Usable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Trail extends Resource
@@ -13,7 +12,6 @@ class Trail extends Resource
     use ActivityData;
     use HasFactory;
     use Proximity;
-    use Usable;
 
     protected $guarded = ['id'];
     protected $hidden = ['source_type', 'source_id', 'raw_data'];
@@ -21,7 +19,7 @@ class Trail extends Resource
 
     public function __construct()
     {
-//        $this->setActivityType(self::DEFAULT_ACTIVITY_TYPE);
+        parent::__construct();
         $this->trailService = new TrailService();
     }
 

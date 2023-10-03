@@ -20292,7 +20292,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       id: 'slide-' + $props.unique + '-' + index,
       "class": "carousel-item relative w-full"
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
-      src: '/image/' + $props.type + '/' + imageUrl.id,
+      src: '/image/' + $props.type + '/' + imageUrl.id + '?size=medium',
       "class": "w-full object-cover"
     }, null, 8 /* PROPS */, _hoisted_3), $data.imageUrls.length > 1 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
       href: '#slide-' + $props.unique + '-' + Math.max(0, index - 1),
@@ -20352,7 +20352,7 @@ var _hoisted_5 = {
   "class": "title flex items-center space-x-2 text-left"
 };
 var _hoisted_6 = {
-  "class": "icon pr-1 shrink-0"
+  "class": "pr-1 shrink-0"
 };
 var _hoisted_7 = ["src"];
 var _hoisted_8 = {
@@ -20409,7 +20409,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "data-type": "trail",
       "data-id": resource.id
     }, [_hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
-      src: '/featured-resource-image/trail/' + resource.id + '?thumb=1',
+      src: '/featured-resource-image/trail/' + resource.id + '?size=thumbnail',
       alt: ""
     }, null, 8 /* PROPS */, _hoisted_7)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(resource.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
       src: '/images/icons/difficulty-' + resource.difficulty + '.png',

@@ -127,15 +127,29 @@ class UpdateImages extends Command
                     }
                 }
 
-                // Create a thumbnail.
+                // Create a 64x64 thumbnail.
                 if (str_contains($image->local_url, 'visitkanab/images') && !str_contains($image->thumbnail_local_url, 'visitkanab/images')) {
-                    $resizedImageFile = $this->imageService->resizeImage(getenv('APP_URL') . '/image/trail/' . $image->id);
+                    $resizedImageFile = $this->imageService->resizeImage(getenv('APP_URL') . '/image/trail/' . $image->id, 64, 64);
                     if ($resizedImageFile) {
-                        $imageFile = $this->imageService->storeThumbnail($resizedImageFile, 'thumb_' . pathinfo($image->local_url, PATHINFO_BASENAME));
+                        $imageFile = $this->imageService->putImageInStorage($resizedImageFile, 'thumb_' . pathinfo($image->local_url, PATHINFO_BASENAME));
                         if ($imageFile) {
                             unlink($resizedImageFile);
                             $image->thumbnail_local_url = $imageFile['path'];
                             $image->thumbnail_size = $imageFile['size'];
+                            $image->save();
+                        }
+                    }
+                }
+
+                // Create a 720x480 image.
+                if (str_contains($image->local_url, 'visitkanab/images') && !str_contains($image->medium_local_url, 'visitkanab/images')) {
+                    $resizedImageFile = $this->imageService->resizeImage(getenv('APP_URL') . '/image/trail/' . $image->id, 720, 480);
+                    if ($resizedImageFile) {
+                        $imageFile = $this->imageService->putImageInStorage($resizedImageFile, 'medium_' . pathinfo($image->local_url, PATHINFO_BASENAME));
+                        if ($imageFile) {
+                            unlink($resizedImageFile);
+                            $image->medium_local_url = $imageFile['path'];
+                            $image->medium_size = $imageFile['size'];
                             $image->save();
                         }
                     }

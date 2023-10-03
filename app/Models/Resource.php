@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Models\Builder\CustomQueryBuilder;
+use App\Traits\Usable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Resource extends Model
 {
     use HasFactory;
+    use Usable;
 
     /**
      * @return \App\Models\Builder\CustomQueryBuilder

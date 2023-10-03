@@ -18,6 +18,10 @@ return new class extends Migration
             $table->primary(['trail_id', 'tag']);
             $table->foreign('trail_id')->references('id')->on('trails')->onDelete('cascade');
         });
+
+        if (file_exists('./database/dumps/trail_tags.sql')) {
+            DB::unprepared(file_get_contents('./database/dumps/trail_tags.sql'));
+        }
     }
 
     /**

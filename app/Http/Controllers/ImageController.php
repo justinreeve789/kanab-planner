@@ -22,8 +22,8 @@ class ImageController extends Controller
         echo '<pre>'; print_r($response); echo '</pre>';
     }
 
-    public function getUrl(Request $request, string $type, int $id, bool $thumbnail = false) {
-        $thumbnail = (bool)$request->get('thumb') || (bool)$request->get('thumbnail');
+    public function getUrl(Request $request, string $type, string $id, bool $thumbnail = false) {
+        $size = $request->get('size');
 
         switch ($type) {
             case 'event':
@@ -43,11 +43,17 @@ class ImageController extends Controller
         if ($model) {
             $image = $model::where('id', $id)->first();
             if ($image) {
-                $url = $this->imageService->getSignedUrlForImage($image, $thumbnail);
+                $url = $this->imageService->getSignedUrlForImage($image, $size);
                 if ($url) {
                     return redirect()->away($url);
                 }
             }
+            if ($size === 'thumbnail') {
+                return redirect()->away(getenv('APP_URL') . '/images/trail-64x64.jpg');
+            } else if ($size === 'medium') {
+                return redirect()->away(getenv('APP_URL') . '/images/trail-720x720.jpg');
+            }
+            abort(404);
         } else {
             abort(404);
         }

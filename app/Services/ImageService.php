@@ -44,15 +44,30 @@ class ImageService
         return $this->client->getImages($query);
     }
 
-    public function getSignedUrlForImage($obj, $thumbnail = false): ?string
+    public function getSignedUrlForImage($obj, $size = null): ?string
     {
+        switch ($size) {
+            case 'medium':
+                $url = $obj->medium_local_url ?? $obj->local_url;
+                break;
+            case 'thumbnail':
+                $url = $obj->thumbnail_local_url;
+                break;
+            default:
+                $url = $obj->local_url;
+        }
+
+        if (!$url) {
+            return null;
+        }
+
         switch (get_class($obj)) {
             case 'App\\Models\\EventImage':
             case 'App\\Models\\LocationImage':
             case 'App\\Models\\TrailImage':
                 $cmd = $this->getS3Client()->getCommand('GetObject', [
                     'Bucket' => getenv('DO_BUCKET'),
-                    'Key' => ($thumbnail === false) ? $obj->local_url : $obj->thumbnail_local_url,
+                    'Key' => $url,
                 ]);
 
                 $request = $this->getS3Client()->createPresignedRequest($cmd, '+' . getenv('DO_EXPIRE_SIGNED_URLS') . ' minutes');
@@ -97,7 +112,7 @@ class ImageService
     /**
      * Abstract storeImage() and use it instead of this function, so we're not duplicating code.
      */
-    public function storeThumbnail($file, $filename) {
+    public function putImageInStorage($file, $filename) {
         $filePath = getenv('DO_FOLDER') . '/' . $filename;
         echo 'Uploading to ' . $filePath . '
 ';
@@ -186,7 +201,7 @@ class ImageService
         return $photos;
     }
 
-    public function resizeImage($file) {
+    public function resizeImage($file, int $newWidth, int $newHeight) {
         if ($this->conversionService->isUrl($file)) {
             echo 'Downloading ' . $file . '
 ';
@@ -201,9 +216,14 @@ class ImageService
         try {
             $originalImage = \imagecreatefromjpeg($filename);
         } catch (\Throwable $e) {
-            echo 'Skipping ' . $filename . '
+            try {
+                $originalImage = \imagecreatefrompng($filename);
+            }
+            catch (\Throwable $e) {
+                echo 'Skipping ' . $filename . '
 ';
-            return null;
+                return null;
+            }
         }
 
         // Get the original image's width and height.
@@ -212,10 +232,6 @@ class ImageService
 
         // Calculate the aspect ratio of the original image.
         $aspectRatio = $originalWidth / $originalHeight;
-
-        // Define the desired width and height for the cropped image (64x64).
-        $newWidth = 64;
-        $newHeight = 64;
 
         // Calculate the crop dimensions to maintain aspect ratio.
         if ($aspectRatio > 1) {

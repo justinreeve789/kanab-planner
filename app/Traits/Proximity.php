@@ -12,15 +12,15 @@ use App\Models\Trail;
 
 trait Proximity
 {
-    public function calculateDistance($lat1, $lon1, $lat2, $lon2) {
+    public function calculateDistance($lat, $lon) {
         // Radius of the Earth in miles (mean value).
         $earthRadius = 3959;
 
         // Convert latitude and longitude from degrees to radians.
-        $lat1 = deg2rad($lat1);
-        $lon1 = deg2rad($lon1);
-        $lat2 = deg2rad($lat2);
-        $lon2 = deg2rad($lon2);
+        $lat1 = deg2rad($this->latitude);
+        $lon1 = deg2rad($this->longitude);
+        $lat2 = deg2rad($lat);
+        $lon2 = deg2rad($lon);
 
         // Haversine formula.
         $dlat = $lat2 - $lat1;

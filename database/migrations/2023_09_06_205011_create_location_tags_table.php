@@ -18,6 +18,10 @@ return new class extends Migration
             $table->primary(['location_id', 'tag']);
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });
+
+        if (file_exists('./database/dumps/location_tags.sql')) {
+            DB::unprepared(file_get_contents('./database/dumps/location_tags.sql'));
+        }
     }
 
     /**

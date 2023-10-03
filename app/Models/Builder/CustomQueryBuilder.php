@@ -68,7 +68,7 @@ class CustomQueryBuilder extends Builder
     }
 
     /**
-     * Calculate the proximity to the latitude/longtitude coordinates using the Haversine formula.
+     * Calculate the proximity to the latitude/longitude coordinates using the Haversine formula.
      * This should come after other where() statements, both native and custom.
      */
     public function whereProximity($latitude, $longitude, $maxDistance, $orderBy = false)

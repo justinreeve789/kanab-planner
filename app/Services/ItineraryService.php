@@ -482,6 +482,11 @@ class ItineraryService
             // into account other preferences like maximum distance they want to travel.
             $query = Area::inRandomOrder();
 
+            // If the user's adventurousness is high (>= 0.9), only pick any area besides Kanab, Zion, and Bryce once,
+            // unless it's their base area.
+            if ($this->getItinerary()->getAdventurousness() < 0.9) {
+            }
+
             // If the user's adventurousness is really low (< 0.2), we won't pick areas that are too far from their base area.
             if ($this->getItinerary()->getAdventurousness() < 0.2) {
                 $query->whereProximity($this->getItinerary()->getBaseArea()->latitude, $this->getItinerary()->getBaseArea()->longitude, 40);
@@ -511,7 +516,7 @@ class ItineraryService
             $days[$dayNum++] = $day;
             $date = $this->incrementDate($date);
             $areaIds[] = $areaId;
-        } while (count($days) < $durationDays); // Note that when
+        } while (count($days) < $durationDays);
         ksort($days);
 
         $this->getItinerary()->setDays($days);

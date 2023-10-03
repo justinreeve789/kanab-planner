@@ -5,8 +5,8 @@
       <input type="radio" name="trails" />
       <div class="collapse-title flex items-center justify-between w-full bg-gradient-to-r from-orange-100 to-red-100">
         <div class="title flex items-center space-x-2 text-left">
-          <div class="icon pr-1 shrink-0">
-            <img :src="'/featured-resource-image/trail/' + resource.id + '?thumb=1'" alt="">
+          <div class="pr-1 shrink-0">
+            <img :src="'/featured-resource-image/trail/' + resource.id + '?size=thumbnail'" alt="">
           </div>
           <div class="name">{{ resource.name }}</div>
           <div class="difficulty hidden">

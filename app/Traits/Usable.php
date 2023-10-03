@@ -2,12 +2,11 @@
 
 namespace App\Traits;
 
-use App\Scopes\UsableScope;
+use App\Models\Scopes\UsableScope;
 
 trait Usable
 {
-    protected static function booted()
-    {
+    protected static function booted(): void {
         static::addGlobalScope(new UsableScope);
     }
 }

@@ -16,8 +16,11 @@ return new class extends Migration
             $table->integer('event_id')->unsigned();
             $table->string('url')->nullable();
             $table->string('local_url')->nullable();
+            $table->string('medium_local_url')->nullable();
             $table->string('thumbnail_local_url')->nullable();
-            $table->string('size')->nullable();
+            $table->integer('size')->unsigned()->nullable();
+            $table->integer('medium_size')->unsigned()->nullable();
+            $table->integer('thumbnail_size')->unsigned()->nullable();
             $table->float('latitude', 10, 7)->nullable();
             $table->float('longitude', 10, 7)->nullable();
             $table->timestamps();
@@ -25,6 +28,10 @@ return new class extends Migration
             $table->unique(['event_id', 'local_url']);
             $table->foreign('event_id')->references('id')->on('events')->onDelete('cascade');
         });
+
+        if (file_exists('./database/dumps/event_images.sql')) {
+            DB::unprepared(file_get_contents('./database/dumps/event_images.sql'));
+        }
     }
 
     /**
