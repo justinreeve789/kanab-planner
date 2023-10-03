@@ -27,4 +27,10 @@ class ItineraryTest extends TestCase
         // Track the average for different adventurousness levels.
         $this->assertTrue(true);
     }
+
+    public function test_assortment_of_areas(): void
+    {
+        // Try different adventurousness, solitariness, and strenuousness settings and assign each area as a base area,
+        // to make sure sensible areas come up on the itinerary.
+    }
 }

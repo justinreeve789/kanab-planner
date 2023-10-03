@@ -429,28 +429,32 @@ class ItineraryService
      */
     public function assignDaysForAreas(bool $useFirstDay = false, bool $useLastDay = false): array
     {
+        $adventurousness = $this->getItinerary()->getAdventurousness();
+        $baseArea = $this->getItinerary()->getBaseArea();
         $durationDays = $this->getItinerary()->getDurationDays();
         $dayNum = 0;
         $areaIds = [];
+        $allAreaIds = Area::all()->pluck('id')->toArray();
+        $allAreaIds = array_combine($allAreaIds, $allAreaIds);
 
         // Default to the user's accommodation area for the first day, if $useFirstDay is false.
         $date = $this->getItinerary()->getStartDate();
         if ($useFirstDay === false) {
-            $day = new Day($date, $this->getItinerary()->getBaseAreaId(), $dayNum);
+            $day = new Day($date, $baseArea->id, $dayNum);
             $day->startTime = Day::DEFAULT_ARRIVAL_TIME;
             $days[$dayNum++] = $day;
             $date = $this->incrementDate($date);
-            $areaIds[] = $this->getItinerary()->getBaseAreaId();
+            $areaIds[] = $baseArea->id;
         } else {
             $days = [];
         }
 
         // Do the same for the last day.
         if ($useLastDay === false) {
-            $day = new Day($date, $this->getItinerary()->getBaseAreaId(), $durationDays - 1);
+            $day = new Day($date, $baseArea->id, $durationDays - 1);
             $day->endTime = Day::DEFAULT_DEPARTURE_TIME;
             $days[$durationDays - 1] = $day;
-            $areaIds[] = $this->getItinerary()->getBaseAreaId();
+            $areaIds[] = $baseArea->id;
         }
 
         $activityPriorities = $this->getItinerary()->getActivityPriorities();
@@ -482,34 +486,61 @@ class ItineraryService
             // into account other preferences like maximum distance they want to travel.
             $query = Area::inRandomOrder();
 
-            // If the user's adventurousness is high (>= 0.9), only pick any area besides Kanab, Zion, and Bryce once,
-            // unless it's their base area.
-            if ($this->getItinerary()->getAdventurousness() < 0.9) {
+            // If the user's adventurousness is low (< 0.3, < 0.4), we won't pick areas that are too far from their base area.
+            switch ($adventurousness) {
+                case $adventurousness < 0.3:
+                    $maxDistance = 40;
+                    break;
+                case $adventurousness < 0.4:
+                    $maxDistance = 60;
+                    break;
+                default:
+                    $maxDistance = null;
             }
 
-            // If the user's adventurousness is really low (< 0.2), we won't pick areas that are too far from their base area.
-            if ($this->getItinerary()->getAdventurousness() < 0.2) {
-                $query->whereProximity($this->getItinerary()->getBaseArea()->latitude, $this->getItinerary()->getBaseArea()->longitude, 40);
+            if ($maxDistance) {
+                $query->whereProximity($baseArea->latitude, $baseArea->longitude, $maxDistance);
+            }
 
-                // If they're in Zion, let's focus on Kanab, and not St. George.
-                if ($this->getItinerary()->getBaseAreaId() === Area::ZION) {
+            // If the user's adventurousness is low (< 0.4), let's focus on Kanab, and not St. George.
+            if ($adventurousness < 0.4) {
+                if ($baseArea->id === Area::ZION) {
                     $query->whereNot('id', Area::ST_GEORGE);
                 }
             }
 
-            // If the user's adventurousness is < 0.4, we'll only include non-base areas once per 7 days of the trip.
-            if ($this->getItinerary()->getAdventurousness() < 0.4) {
-                $numPossible = ceil($this->getItinerary()->durationDays / 7);
+            // If the user's adventurousness is < 0.8, only pick any area besides Kanab or Zion once, unless it's their base area.
+            if ($adventurousness < 0.8) {
+                $numPossible = 1;
                 $areaCounts = array_count_values($areaIds);
-                $filteredAreaIds = array_filter($areaIds, function($item) use ($areaCounts, $numPossible) {
-                    return $areaCounts[$item] <= $numPossible;
+                $filteredAreaIds = array_filter($areaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
+                    return (
+                        $areaId !== Area::KANAB &&
+                        $areaId !== $baseArea->id &&
+                        $areaId !== Area::ZION &&
+                        $areaCounts[$areaId] <= $numPossible
+                    );
                 });
-                $query->whereNotIn('id',$filteredAreaIds);
+                $query->whereNotIn('id', $filteredAreaIds);
+            }
+
+            // If the user's adventurousness is < 0.9, only pick the remaining non-base area(s) once per 10 days of the trip.
+            if ($adventurousness < 0.9) {
+                $numPossible = ceil($this->getItinerary()->durationDays / 10);
+                $areaCounts = array_count_values($areaIds);
+                $filteredAreaIds = array_filter($allAreaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
+                    return (
+                        $areaId !== $baseArea->id &&
+                        isset($areaCounts[$areaId]) &&
+                        $areaCounts[$areaId] >= $numPossible
+                    );
+                });
+                $query->whereNotIn('id', $filteredAreaIds);
             }
 
             $areaId = $query->value('id');
             if (!$areaId) {
-                $areaId = $this->getItinerary()->getBaseAreaId();
+                $areaId = $baseArea->id;
             }
 
             $day = new Day($date, $areaId, $dayNum);
