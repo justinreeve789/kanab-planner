@@ -1,9 +1,9 @@
 <template>
-  <div v-if="type == 'restaurant' || type == 'trail'">
-    <label :for="'activity-' + hash + '-menu'" v-if="type == 'restaurant'">
+  <div class="flex" v-if="type == 'restaurant' || type == 'trail'">
+    <label :for="'resource-' + unique + '-menu'" v-if="type == 'restaurant'">
       <span class="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">View menu</span>
     </label>
-    <label :for="'activity-' + hash + '-map'" v-if="type == 'trail'">
+    <label :for="'resource-' + unique + '-map'" v-if="type == 'trail'">
       <span class="text-white bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-orange-300 dark:focus:ring-orange-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">View map</span>
     </label>
   </div>
@@ -16,7 +16,7 @@ export default {
   data() {
   },
   props: {
-    hash: String,
+    unique: String,
     type: String,
   },
 };

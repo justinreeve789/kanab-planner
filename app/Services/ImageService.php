@@ -44,7 +44,7 @@ class ImageService
         return $this->client->getImages($query);
     }
 
-    public function getSignedUrlForImage($obj): ?string
+    public function getSignedUrlForImage($obj, $thumbnail = false): ?string
     {
         switch (get_class($obj)) {
             case 'App\\Models\\EventImage':
@@ -52,7 +52,7 @@ class ImageService
             case 'App\\Models\\TrailImage':
                 $cmd = $this->getS3Client()->getCommand('GetObject', [
                     'Bucket' => getenv('DO_BUCKET'),
-                    'Key' => $obj->local_url,
+                    'Key' => ($thumbnail === false) ? $obj->local_url : $obj->thumbnail_local_url,
                 ]);
 
                 $request = $this->getS3Client()->createPresignedRequest($cmd, '+' . getenv('DO_EXPIRE_SIGNED_URLS') . ' minutes');
@@ -94,6 +94,20 @@ class ImageService
         return ['path' => $filePath, 'size' => filesize($newFileName)];
     }
 
+    /**
+     * Abstract storeImage() and use it instead of this function, so we're not duplicating code.
+     */
+    public function storeThumbnail($file, $filename) {
+        $filePath = getenv('DO_FOLDER') . '/' . $filename;
+        echo 'Uploading to ' . $filePath . '
+';
+        if (!$this->s3->put($filePath, file_get_contents($file))) {
+            return null;
+        }
+
+        return ['path' => $filePath, 'size' => filesize($file)];
+    }
+
     public function getFileExtension($file) {
         $mime = mime_content_type($file);
         switch ($mime) {
@@ -117,7 +131,7 @@ class ImageService
         }
 
         try {
-            $exif = exif_read_data($filename);
+            $exif = exif_read_data($filename, 0, true);
         } catch (\Throwable $e) {
             return null;
         }
@@ -126,16 +140,117 @@ class ImageService
             $this->conversionService->deleteFiles($filename);
         }
 
-        try {
-            $lat = $this->getGps($exif["GPSLatitude"], $exif['GPSLatitudeRef']);
-            $lng = $this->getGps($exif["GPSLongitude"], $exif['GPSLongitudeRef']);
-            if ($lat && !$lng) {
-                return ['latitude' => $lat, 'longitude' => $lng];
-            }
-        } catch (\Throwable $e) {
+        if (!isset($exif['GPS']) || !isset($exif['GPS']['GPSLatitude'])) {
+            return null;
+        }
+
+        $info = $exif['GPS'];
+
+        $lat_degrees_fraction = explode('/', $info['GPSLatitude'][0]);
+        $lat_minutes_fraction = explode('/', $info['GPSLatitude'][1]);
+        $lat_seconds_fraction = explode('/', $info['GPSLatitude'][2]);
+        $lng_degrees_fraction = explode('/', $info['GPSLongitude'][0]);
+        $lng_minutes_fraction = explode('/', $info['GPSLongitude'][1]);
+        $lng_seconds_fraction = explode('/', $info['GPSLongitude'][2]);
+
+        $lat_degrees = floatval($lat_degrees_fraction[0]) / floatval($lat_degrees_fraction[1]);
+        $lat_minutes = floatval($lat_minutes_fraction[0]) / floatval($lat_minutes_fraction[1]);
+        $lat_seconds = floatval($lat_seconds_fraction[0]) / floatval($lat_seconds_fraction[1]);
+        $lng_degrees = floatval($lng_degrees_fraction[0]) / floatval($lng_degrees_fraction[1]);
+        $lng_minutes = floatval($lng_minutes_fraction[0]) / floatval($lng_minutes_fraction[1]);
+        $lng_seconds = floatval($lng_seconds_fraction[0]) / floatval($lng_seconds_fraction[1]);
+
+        $lat = floatval($lat_degrees+((($lat_minutes*60)+($lat_seconds))/3600));
+        $lng = floatval($lng_degrees+((($lng_minutes*60)+($lng_seconds))/3600));
+
+        if ($lat && $lng) {
+            return ['latitude' => $lat, 'longitude' => $lng];
         }
 
         return null;
+    }
+
+    public function getPhotos($query) {
+        $response = $this->client->getImages($query);
+        $photos = [];
+        foreach ($response['results'] as $index => $photo) {
+            if ($index > 10) {
+                break;
+            }
+            $photos[] = (object) [
+                'id' => $photo['image_token'],
+                'url' => $photo['image'],
+            ];
+        }
+        $this->images[$query] = $photos;
+        return $photos;
+    }
+
+    public function resizeImage($file) {
+        if ($this->conversionService->isUrl($file)) {
+            echo 'Downloading ' . $file . '
+';
+            $filename = $this->conversionService->downloadFile($file);
+        } else {
+            $filename = $file;
+        }
+
+        echo 'Processing ' . $filename . '
+';
+        // Create a new image from the original.
+        try {
+            $originalImage = \imagecreatefromjpeg($filename);
+        } catch (\Throwable $e) {
+            echo 'Skipping ' . $filename . '
+';
+            return null;
+        }
+
+        // Get the original image's width and height.
+        $originalWidth = \imagesx($originalImage);
+        $originalHeight = \imagesy($originalImage);
+
+        // Calculate the aspect ratio of the original image.
+        $aspectRatio = $originalWidth / $originalHeight;
+
+        // Define the desired width and height for the cropped image (64x64).
+        $newWidth = 64;
+        $newHeight = 64;
+
+        // Calculate the crop dimensions to maintain aspect ratio.
+        if ($aspectRatio > 1) {
+            // Landscape orientation (wider than tall).
+            $cropWidth = $originalHeight * $aspectRatio;
+            $cropHeight = $originalHeight;
+        } else {
+            // Portrait orientation (taller than wide).
+            $cropWidth = $originalWidth;
+            $cropHeight = $originalWidth / $aspectRatio;
+        }
+
+        // Calculate the crop position to center the image.
+        $cropX = ($originalWidth - $cropWidth) / 2;
+        $cropY = ($originalHeight - $cropHeight) / 2;
+
+        // Create a new blank image with the desired dimensions.
+        $newImage = \imagecreatetruecolor($newWidth, $newHeight);
+
+        // Crop and resize the original image to fit the new dimensions.
+        \imagecopyresampled($newImage, $originalImage, 0, 0, $cropX, $cropY, $newWidth, $newHeight, $cropWidth, $cropHeight);
+
+        // Save or display the cropped and resized image (here, we're saving it as a new file).
+        $resizedImagePath = storage_path('temp/' . md5($filename) . '.jpg');
+        \imagejpeg($newImage, $resizedImagePath);
+
+        // Clean up resources.
+        \imagedestroy($originalImage);
+        \imagedestroy($newImage);
+
+        if ($this->conversionService->isUrl($file)) {
+            $this->conversionService->deleteFiles($filename);
+        }
+
+        return $resizedImagePath;
     }
 
     private function getGps($exifCoord, $hemi) {
@@ -161,22 +276,6 @@ class ImageService
             return $parts[0];
 
         return floatval($parts[0]) / floatval($parts[1]);
-    }
-
-    public function getPhotos($query) {
-        $response = $this->client->getImages($query);
-        $photos = [];
-        foreach ($response['results'] as $index => $photo) {
-            if ($index > 10) {
-                break;
-            }
-            $photos[] = (object) [
-                'id' => $photo['image_token'],
-                'url' => $photo['image'],
-            ];
-        }
-        $this->images[$query] = $photos;
-        return $photos;
     }
 
     private function resolveFile($name) {

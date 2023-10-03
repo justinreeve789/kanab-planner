@@ -42,7 +42,7 @@
             <Restaurant :activity="activity" :day="day" />
           </div>
           <div class="mb-8" v-else-if="activity.activityType == 'hiking'">
-            <Trail :activity="activity" :day="day" />
+            <Trail :unique="activity.hash" :phrase="activity.phrase" :resource="activity.data" />
           </div>
           <div class="mb-8" v-else>
             <Task :activity="activity" :day="day" />

@@ -20,3 +20,4 @@ Route::get('/', function () {
 
 Route::get('/itinerary', 'App\Http\Controllers\ItineraryController@create');
 Route::get('/image/{type}/{id}', [ImageController::class, 'getUrl']);
+Route::get('/featured-resource-image/{type}/{resourceId}', [ImageController::class, 'getFeaturedImageUrl']);

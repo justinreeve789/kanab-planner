@@ -17,7 +17,7 @@ class UpdateImages extends Command
      *
      * @var string
      */
-    protected $signature = 'update:images {--events} {--locations} {--trails}';
+    protected $signature = 'update:images {--events} {--locations} {--trails} {--gps}';
 
     /**
      * The console command description.
@@ -36,6 +36,7 @@ class UpdateImages extends Command
         $doEvents = $this->option('events');
         $doLocations = $this->option('locations');
         $doTrails = $this->option('trails');
+        $doGps = $this->option('gps');
 
         $this->imageService = new ImageService();
 
@@ -44,7 +45,7 @@ class UpdateImages extends Command
         }
 
         if ($doTrails !== false) {
-            $this->doTrails();
+            $this->doTrails($doGps);
         }
     }
 
@@ -81,7 +82,7 @@ class UpdateImages extends Command
         }
     }
 
-    protected function doTrails()
+    protected function doTrails($gps = false)
     {
 //        $trails = Trail::whereDoesntHave('images')->get();
 //        foreach ($trails as $item) {
@@ -100,15 +101,16 @@ class UpdateImages extends Command
         foreach ($trails as $item) {
             foreach ($item->images as $image) {
                 // Extract GPS data.
-                $latLng = $this->imageService->getLatLng($image->url);
-                if (!$latLng) {
-                    continue;
-                } else {
-                    echo '<pre>'; print_r($latLng); echo '</pre>';
-                    TrailImage::updateOrCreate(['id' => $image->id], [
-                        'latitude' => $latLng['latitude'],
-                        'longitude' => $latLng['longitude'],
-                    ]);
+                if ($gps === true) {
+                    $latLng = $this->imageService->getLatLng($image->url);
+                    if (!$latLng) {
+                        continue;
+                    } else {
+                        TrailImage::updateOrCreate(['id' => $image->id], [
+                            'latitude' => $latLng['latitude'],
+                            'longitude' => $latLng['longitude'],
+                        ]);
+                    }
                 }
 
                 // Store in the cloud.
@@ -122,6 +124,20 @@ class UpdateImages extends Command
                         echo 'Deleting ' . $image->url . '
 ';
                         $image->delete();
+                    }
+                }
+
+                // Create a thumbnail.
+                if (str_contains($image->local_url, 'visitkanab/images') && !str_contains($image->thumbnail_local_url, 'visitkanab/images')) {
+                    $resizedImageFile = $this->imageService->resizeImage(getenv('APP_URL') . '/image/trail/' . $image->id);
+                    if ($resizedImageFile) {
+                        $imageFile = $this->imageService->storeThumbnail($resizedImageFile, 'thumb_' . pathinfo($image->local_url, PATHINFO_BASENAME));
+                        if ($imageFile) {
+                            unlink($resizedImageFile);
+                            $image->thumbnail_local_url = $imageFile['path'];
+                            $image->thumbnail_size = $imageFile['size'];
+                            $image->save();
+                        }
                     }
                 }
             }

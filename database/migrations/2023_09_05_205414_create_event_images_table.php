@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('event_id')->unsigned();
             $table->string('url')->nullable();
             $table->string('local_url')->nullable();
+            $table->string('thumbnail_local_url')->nullable();
             $table->string('size')->nullable();
             $table->float('latitude', 10, 7)->nullable();
             $table->float('longitude', 10, 7)->nullable();

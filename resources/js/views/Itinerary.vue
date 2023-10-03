@@ -23,11 +23,14 @@
   <div v-if="itineraryData" v-for="(day, index) in itineraryData.days" :key="index">
     <ActivityStatsModal :day="day" v-if="day.stats" />
   </div>
+
+  <ListModal :type="'trail'" />
 </template>
 
 <script>
 import axios from 'axios';
 import Day from './Day.vue';
+import ListModal from './panels/ListModal.vue';
 import Select from './components/Select.vue';
 
 export default {

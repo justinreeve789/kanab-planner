@@ -1,9 +1,9 @@
 <template>
-  <input type="checkbox" :id="'activity-' + hash + '-map'" class="modal-toggle" v-model="expanded" />
-  <div class="modal" :id="'activity-' + hash + '-map'">
+  <input type="checkbox" :id="'resource-' + unique + '-map'" class="modal-toggle" v-model="expanded" />
+  <div class="modal" :id="'resource-' + unique + '-map-modal'">
     <div class="modal-box p-2 max-w-none w-full" style="height: 100%;">
-      <Map :activity="activity" />
-      <label :for="'activity-' + hash + '-map'">
+      <Map :resource="resource" />
+      <label :for="'resource-' + unique + '-map'">
         <span class="btn btn-md btn-ghost bg-transparent border-green-800 text-2xl text-green-800 absolute right-2 top-2" style="z-index: 5000;">X</span>
       </label>
 <!--      <div class="progress w-full h-screen flex justify-center items-center text-6xl relative">-->
@@ -14,9 +14,7 @@
 <!--      </div>-->
     </div>
   </div>
-  <label :for="'activity-' + hash + '-map'">
-    <div class="modal-backdrop"></div>
-  </label>
+  <label :for="'activity-' + hash + '-map'" class="modal-backdrop"></label>
 </template>
 
 <script>
@@ -32,8 +30,8 @@ export default {
     };
   },
   props: {
-    activity: Object,
-    hash: String,
+    resource: Object,
+    unique: String,
   },
 };
 </script>

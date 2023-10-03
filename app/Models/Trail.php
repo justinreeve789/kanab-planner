@@ -16,7 +16,7 @@ class Trail extends Resource
     use Usable;
 
     protected $guarded = ['id'];
-    protected $hidden = ['raw_data'];
+    protected $hidden = ['source_type', 'source_id', 'raw_data'];
     public $trailService;
 
     public function __construct()

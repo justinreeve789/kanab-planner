@@ -21,11 +21,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('v1')->group(function() {
     Route::prefix('area')->group(function() {
         Route::get('/', 'App\Http\Controllers\AreaController@index');
+        Route::get('/{id}/trail', 'App\Http\Controllers\AreaController@getTrails');
         Route::get('/{areaId}', 'App\Http\Controllers\AreaController@getArea');
         Route::get('/{areaId}/event', 'App\Http\Controllers\EventController@getEventsInArea');
         Route::get('/{areaId}/location', 'App\Http\Controllers\LocationController@getLocationsInArea');
         Route::get('/{areaId}/restaurant', 'App\Http\Controllers\RestaurantController@getRestaurantsInArea');
-        Route::get('/{areaId}/trail', 'App\Http\Controllers\TrailController@getTrailsInArea');
     });
 
     Route::prefix('event')->group(function() {

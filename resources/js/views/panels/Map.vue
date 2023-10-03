@@ -1,5 +1,5 @@
 <template>
-  <l-map ref="map" v-model:zoom="zoom" :center="[activity.data.latitude, activity.data.longitude]">
+  <l-map ref="map" v-model:zoom="zoom" :center="[resource.latitude, resource.longitude]">
     <l-tile-layer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         layer-type="base"
@@ -31,13 +31,13 @@ export default {
         shadowColor: '#bb0080', // Set the glow color to match your gradient
       },
       geoJson: {},
-      zoom: 14,
+      zoom: 15,
     };
   },
   methods: {
     getGeoJson() {
       axios
-          .get('/api/v1/trail/' + this.activity.data.id + '/geojson', {
+          .get('/api/v1/trail/' + this.resource.id + '/geojson', {
           })
           .then((response) => {
             this.geoJson = response.data;
@@ -51,7 +51,7 @@ export default {
     this.getGeoJson();
   },
   props: {
-    activity: Object,
+    resource: Object,
   },
 };
 </script>

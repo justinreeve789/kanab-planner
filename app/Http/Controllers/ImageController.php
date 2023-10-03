@@ -22,7 +22,9 @@ class ImageController extends Controller
         echo '<pre>'; print_r($response); echo '</pre>';
     }
 
-    public function getUrl(Request $request, string $type, int $id) {
+    public function getUrl(Request $request, string $type, int $id, bool $thumbnail = false) {
+        $thumbnail = (bool)$request->get('thumb') || (bool)$request->get('thumbnail');
+
         switch ($type) {
             case 'event':
                 $model = 'App\\Models\\EventImage';
@@ -41,7 +43,7 @@ class ImageController extends Controller
         if ($model) {
             $image = $model::where('id', $id)->first();
             if ($image) {
-                $url = $this->imageService->getSignedUrlForImage($image);
+                $url = $this->imageService->getSignedUrlForImage($image, $thumbnail);
                 if ($url) {
                     return redirect()->away($url);
                 }
@@ -49,5 +51,32 @@ class ImageController extends Controller
         } else {
             abort(404);
         }
+    }
+
+    public function getFeaturedImageUrl(Request $request, string $type, int $resourceId)
+    {
+        switch ($type) {
+            case 'event':
+                $model = 'App\\Models\\EventImage';
+                break;
+            case 'location':
+            case 'restaurant':
+                $model = 'App\\Models\\LocationImage';
+                break;
+            case 'trail':
+                $model = 'App\\Models\\TrailImage';
+                break;
+            default:
+                $model = null;
+        }
+
+        if ($model) {
+            $image = $model::where($type . '_id', $resourceId)->first();
+            if ($image) {
+                return $this->getUrl($request, $type, $image->id);
+            }
+        }
+
+        abort(404);
     }
 }
