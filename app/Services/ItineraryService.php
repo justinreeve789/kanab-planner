@@ -484,7 +484,7 @@ class ItineraryService
         do {
             // TODO: Don't be so random about the area. Get an area with other events they'd be interested in. Also take
             // into account other preferences like maximum distance they want to travel.
-            $query = Area::inRandomOrder();
+            $query = Area::inWeightedRandomOrder($adventurousness);
 
             // If the user's adventurousness is low (< 0.3, < 0.4), we won't pick areas that are too far from their base area.
             switch ($adventurousness) {

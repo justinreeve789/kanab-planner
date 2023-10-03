@@ -27,9 +27,41 @@ class Area extends Model
         return new CustomQueryBuilder($query);
     }
 
+    /**
+     * A lower delta will make the relative distance between each area less, which decreases the randomness.
+     */
+    public static function getAreaWeights($delta = 1) {
+        return [
+            Area::BRYCE => 100 * $delta,
+            Area::NORTH_RIM => 50 * $delta,
+            Area::KANAB => 80 * $delta,
+            Area::LAKE_POWELL => 30 * $delta,
+            Area::PAGE_AZ => 40 * $delta,
+            Area::ST_GEORGE => 20 * $delta,
+            Area::ZION => 150 * $delta,
+        ];
+    }
+
     public function weather()
     {
         return $this->hasMany(AreaWeather::class, 'area_id', 'id');
+    }
+
+    public function scopeInWeightedRandomOrder(Builder $query, $delta = 1)
+    {
+        // Calculate the total weight.
+        $totalWeight = array_sum($this->getAreaWeights());
+
+        // Generate a random number within the total weight.
+        $rand = mt_rand(1, $totalWeight);
+
+        // Iterate through the weights to find the selected weight.
+        foreach ($this->getAreaWeights() as $areaId => $weight) {
+            $rand -= $weight;
+            if ($rand <= 0) {
+               return $query->where('id', $areaId);
+            }
+        }
     }
 
     public function scopeTemperatureIsAbout(Builder $query, $temperature, $startDateTime = null, $endDateTime = null, $tolerance = 10)
