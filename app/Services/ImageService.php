@@ -214,16 +214,11 @@ class ImageService
 ';
         // Create a new image from the original.
         try {
-            $originalImage = \imagecreatefromjpeg($filename);
+            $originalImage = \imagecreatefromstring(file_get_contents($filename));
         } catch (\Throwable $e) {
-            try {
-                $originalImage = \imagecreatefrompng($filename);
-            }
-            catch (\Throwable $e) {
-                echo 'Skipping ' . $filename . '
+                    echo 'Skipping ' . $filename . '
 ';
-                return null;
-            }
+                    return null;
         }
 
         // Get the original image's width and height.
