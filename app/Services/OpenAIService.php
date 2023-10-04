@@ -29,6 +29,21 @@ class OpenAIService
         return shell_exec($cmd);
     }
 
+    public function rewriteTextWithOpenAI(string $text): ?string {
+        $result = OpenAI::chat()->create([
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [[
+                'role' => 'system',
+                'content' => 'You are a helpful assistant rewriting and re-summarizing text for a travel web site about southern Utah and northern Arizona.',
+            ],[
+                'role' => 'user',
+                'content' => 'Summarize, rewrite, fix misspellings, remove the title, and format as a JSON string containing five fields: new_text_plain, new_text_html, summarized_text_plain, summarized_text_html, additional_info: ' . $text,
+            ]],
+            'max_tokens' => 2000,
+        ]);
+        return $result['choices'][0]['message']['content'];
+    }
+
     public function cleanTextWithOpenAI(string $text): ?string {
         $result = OpenAI::chat()->create([
             'model' => 'gpt-3.5-turbo',

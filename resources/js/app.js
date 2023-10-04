@@ -3,7 +3,11 @@ register();
 
 import { createApp } from 'vue'
 import App from './views/App.vue'
+import { createPinia } from 'pinia';
 
-const app = createApp(App)
+const app = createApp(App);
+const pinia = createPinia();
 
-app.mount('#app')
+app.use(pinia);
+
+app.mount('#app');

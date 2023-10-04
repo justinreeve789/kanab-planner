@@ -2,8 +2,8 @@
 
 namespace App\Repositories;
 
-use App\Models\Event;
 use Illuminate\Database\Connection;
+use Illuminate\Support\Facades\DB;
 
 class ResourceRepository
 {
@@ -13,5 +13,24 @@ class ResourceRepository
     public function model()
     {
         return ResourceRepository::class;
+    }
+
+    public function combineResources($table, $primary = null, $secondary = null) {
+        if (!$primary || !$secondary) {
+            return false;
+        }
+        $columnNames = DB::getSchemaBuilder()->getColumnListing($table);
+        $fieldUpdates = [];
+
+        foreach ($columnNames as $columnName) {
+            if ($columnName !== 'id') { // Exclude the primary key column
+                $fieldUpdates[] = "`primary`.$columnName = COALESCE(`primary`.$columnName, secondary.$columnName)";
+            }
+        }
+
+        $updateQuery = "UPDATE trails AS `primary`, trails AS secondary
+                        SET " . implode(', ', $fieldUpdates) . "
+                        WHERE `primary`.id = ? AND secondary.id = ?";
+        DB::update($updateQuery, [$primary->id, $secondary->id]);
     }
 }

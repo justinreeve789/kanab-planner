@@ -63,7 +63,11 @@ export default {
   },
   methods: {
     select() {
-      //this.$root.$emit('select-trail', this.activity);
+      this.sendResource();
+    },
+    sendResource() {
+      const store = useListStore();
+      store.setResource(this.resource);
     },
   },
   props: {
@@ -77,6 +81,7 @@ export default {
 
 <script setup>
 import { ref, onMounted, onUnmounted, defineProps, watch } from 'vue';
+import { useListStore } from '../../stores/list.js';
 import ActivityButtons from '../panels/ActivityButtons.vue'
 import ActivityStats from '../panels/ActivityStats.vue'
 import MapModal from '../panels/MapModal.vue'

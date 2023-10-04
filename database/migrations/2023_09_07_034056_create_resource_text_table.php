@@ -15,6 +15,7 @@ return new class extends Migration
             $table->increments('id');
             $table->string('resource_table', 16);
             $table->integer('resource_id');
+            $table->string('type', 16);
             $table->text('raw')->nullable();
             $table->text('clean')->nullable();
             $table->timestamps();

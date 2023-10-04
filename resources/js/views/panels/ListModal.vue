@@ -3,7 +3,7 @@
   <div class="modal" v-if="expanded">
     <div class="modal-container w-11/12 xl:w-9/12">
       <div class="modal-box p-4 max-w-none w-full">
-        <TrailList />
+        <TrailList :selected="selectedResource"/>
         <label :for="type + '-list'">
           <span class="btn btn-md btn-ghost bg-transparent border-green-800 text-2xl text-green-800 absolute right-2 top-2" style="z-index: 5000;">X</span>
         </label>
@@ -15,6 +15,12 @@
 
 <script>
 export default {
+  computed: {
+    selectedResource() {
+      const store = useListStore();
+      return store.resource;
+    },
+  },
   created() {
     //this.$root.$on('select-' + this.type, (activity) => {
     //  this.activity = activity;
@@ -33,5 +39,6 @@ export default {
 </script>
 
 <script setup>
+import { useListStore } from '../../stores/list.js';
 import TrailList from '../lists/TrailList.vue';
 </script>

@@ -57,7 +57,7 @@ export default {
   methods: {
     fetch() {
       axios
-        .get('/api/v1/area/2/trail')
+        .get('/api/v1/area/' + this.selected.area_id + '/trail')
         .then((response) => {
           this.resources = response.data;
         })
@@ -68,6 +68,9 @@ export default {
   },
   mounted() {
     this.fetch();
+  },
+  props: {
+    selected: Object,
   },
 };
 </script>
