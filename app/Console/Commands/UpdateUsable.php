@@ -48,7 +48,7 @@ class UpdateUsable extends Command
             if ($trail->latitude && $trail->longitude) {
                 if ($trail->area->id !== Area::NORTH_RIM) {
                     $distanceMiles = $trail->calculateDistance($trail->area->latitude, $trail->area->longitude);
-                    if ($distanceMiles >= 40) {
+                    if ($distanceMiles >= 40 || ($trail->area->id === Area::ZION && $trail->longitude < -113.2722)) {
                         $trail->is_usable = 0;
                         $trail->save();
                     }

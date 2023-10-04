@@ -35,8 +35,8 @@ class Area extends Model
             Area::BRYCE => 100 * $delta,
             Area::NORTH_RIM => 50 * $delta,
             Area::KANAB => 80 * $delta,
-            Area::LAKE_POWELL => 30 * $delta,
-            Area::PAGE_AZ => 40 * $delta,
+            Area::LAKE_POWELL => 25 * $delta,
+            Area::PAGE_AZ => 30 * $delta,
             Area::ST_GEORGE => 20 * $delta,
             Area::ZION => 150 * $delta,
         ];
