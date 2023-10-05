@@ -106,7 +106,7 @@ class OCRService
         return $text;
     }
 
-    public function convertPdfToText($pdfPath): ?string
+    public function convertPdfToText($pdfPath)
     {
         if (env('OCR')) {
             $ocrOptions = explode(',', env('OCR'));
@@ -116,10 +116,13 @@ class OCRService
         }
         switch ($ocr) {
             case self::GOOGLE_CLOUD_VISION:
-                $imagePath = $this->conversionService->convertPdfToImage($pdfPath);
-                $text = $this->convertImageToTextWithGoogleCloudVision($imagePath);
-                echo $text;
-                $this->conversionService->deleteFiles($imagePath);
+                $imagePaths = $this->conversionService->convertPdfToImage($pdfPath, true, 'png');
+                $texts = [];
+                foreach ($imagePaths as $imagePath) {
+                    $texts[] = $this->convertImageToTextWithGoogleCloudVision($imagePath);
+                }
+                $text = implode(' \n\n ', $texts);
+                $this->conversionService->deleteFiles($imagePaths);
                 break;
             case self::OCR_SPACE:
                 $text = $this->convertPdfToTextWithOCRSpace($pdfPath);

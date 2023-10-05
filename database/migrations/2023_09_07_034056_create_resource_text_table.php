@@ -16,8 +16,9 @@ return new class extends Migration
             $table->string('resource_table', 16);
             $table->integer('resource_id');
             $table->string('type', 16);
-            $table->text('raw')->nullable();
-            $table->text('clean')->nullable();
+            $table->string('source_url')->nullable();
+            $table->mediumText('raw')->nullable();
+            $table->mediumText('clean')->nullable();
             $table->timestamps();
             $table->index(['resource_table', 'resource_id']);
         });

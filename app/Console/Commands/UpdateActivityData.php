@@ -30,7 +30,6 @@ class UpdateActivityData extends Command
     protected $description = 'Updates activity data information';
 
     private $openAIService;
-    private $restaurantService;
 
     /**
      * Execute the console command.
@@ -53,7 +52,7 @@ class UpdateActivityData extends Command
         }
 
         if ($doTrails) {
-//            $this->processTrails();
+            $this->processTrails();
         }
     }
 
@@ -65,7 +64,6 @@ class UpdateActivityData extends Command
      */
     protected function processEvents()
     {
-        $defaultActivityId = Activity::where('name', 'event')->pluck('id')->first();
         $events = Event::whereHas('data', function($query) {
             $query->whereNull('activity_id');
         })->with('data')->get();
@@ -110,7 +108,7 @@ class UpdateActivityData extends Command
     {
         $trails = Trail::with('data')->get();
         foreach ($trails as $item) {
-            foreach (['bicycling', 'hiking', 'offroading'] as $activityType) {
+            foreach (['hiking'] as $activityType) {
                 $item->setActivityType($activityType);
                 $this->update('trails', $item);
             }

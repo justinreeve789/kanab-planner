@@ -26,7 +26,7 @@ return new class extends Migration
 
         DB::table('activities')->insert([
             ['name' => 'bicycling', 'adventurousness' => 0.5, 'solitariness' => 0.7, 'strenuousness' => 0.6],
-            ['name' => 'boating', 'adventurousness' => 0.7, 'solitariness' => 0.3, 'strenuousness' => 0.4],
+            ['name' => 'watersports', 'adventurousness' => 0.7, 'solitariness' => 0.3, 'strenuousness' => 0.4],
             ['name' => 'concert', 'adventurousness' => 0.5, 'solitariness' => 0.1, 'strenuousness' => 0.2],
             ['name' => 'conferences-and-conventions', 'adventurousness' => 0.0, 'solitariness' => 0.0, 'strenuousness' => 0.0],
             ['name' => 'dining', 'adventurousness' => 0.1, 'solitariness' => 0.2, 'strenuousness' => 0],
@@ -44,6 +44,7 @@ return new class extends Migration
             ['name' => 'stargazing', 'adventurousness' => 0.1, 'solitariness' => 0.7, 'strenuousness' => 0],
             ['name' => 'swimming', 'adventurousness' => 0.2, 'solitariness' => 0.2, 'strenuousness' => 0.1],
             ['name' => 'tour', 'adventurousness' => 0.5, 'solitariness' => 0.1, 'strenuousness' => 0.2],
+            ['name' => 'fishing', 'adventurousness' => 0.2, 'solitariness' => 0.9, 'strenuousness' => 0.1],
             ['name' => 'unknown', 'adventurousness' => 0.4, 'solitariness' => 0.3, 'strenuousness' => 0.2],
         ]);
     }

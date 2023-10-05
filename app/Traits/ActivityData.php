@@ -46,6 +46,7 @@ trait ActivityData
     public function setActivityType(string $activityType): void
     {
         $this->activityType = $activityType;
+        $this->activityId = $this->activity($activityType);
     }
 
     public function getBusyness(): float
@@ -100,6 +101,7 @@ trait ActivityData
                 if (!$this->getActivityType()) {
                     $this->setActivityType('hiking');
                 }
+                break;
             case 'App\\Models\\Event':
                 if (isset($this->data[0])) {
                     $busynessAdj = -($this->data[0]->solitariness);
@@ -248,6 +250,12 @@ trait ActivityData
             $strenuousness += (0.4 * (1 - exp(-0.2 * $this->average_hours)) - 0.2) / 2;
         }
 
-        return $this->activity($activityType)->strenuousness + $strenuousness;
+        try {
+            return $this->activity($activityType)->strenuousness + $strenuousness;
+        } catch (\Throwable $e) {
+            echo 'Could not calculate strenuousness for ' . $activityType . ' ' . $this->id . ' ' . $this->name . '
+';
+            return 0;
+        }
     }
 }

@@ -47,21 +47,36 @@ class ConversionService
         return $text;
     }
 
-    public function convertPdfToImage($pdfPath, $fileType = 'png'): ?string
+    public function convertPdfToImage($pdfPath, $multipleFiles = false, $fileType = 'png')
     {
         if ($this->isUrl($pdfPath)) {
             $pdfPath = $this->downloadFile($pdfPath);
+            rename($pdfPath, $pdfPath . '.pdf');
         }
 
-        $temp = storage_path('temp/' . $fileType . '_' . sha1(microtime()) . '.' . $fileType);
-        try {
-            $cmd = 'convert "' . $pdfPath . '" -append "' . $temp . '"';
-            @exec($cmd);
-        } catch (\Exception $e) {
-            // TODO: Error-handling.
-        }
-        if (file_exists($temp)) {
-            return $temp;
+        if ($multipleFiles === true) {
+            $temp = storage_path('temp/' . $fileType . '_' . sha1(microtime()));
+            try {
+                $cmd = 'convert -density 150 "' . $pdfPath . '" -quality 90 "' . $temp . '-%02d.' . $fileType . '"';
+                @exec($cmd);
+                $files = glob($temp . '*');
+                if ($files !== false) {
+                    return $files;
+                }
+            } catch (\Exception $e) {
+                // TODO: Error-handling.
+            }
+        } else {
+            $temp = storage_path('temp/' . $fileType . '_' . sha1(microtime()) . '.' . $fileType);
+            try {
+                $cmd = 'convert "' . $pdfPath . '" -append "' . $temp . '"';
+                @exec($cmd);
+            } catch (\Exception $e) {
+                // TODO: Error-handling.
+            }
+            if (file_exists($temp)) {
+                return $temp;
+            }
         }
         return null;
     }

@@ -17,6 +17,7 @@ class CreateLocationsTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->integer('area_id')->unsigned();
+            $table->text('description')->nullable();
             $table->float('latitude', 10, 7)->nullable();
             $table->float('longitude', 10, 7)->nullable();
             $table->string('address')->nullable();
