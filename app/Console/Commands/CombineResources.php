@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Laz\Writing\Services\Resource;
 use App\Models\Event;
 use App\Models\Location;
 use App\Models\Scopes\UsableScope;
@@ -48,11 +47,14 @@ class CombineResources extends Command
         }
 
         if ($doTrails !== false) {
-            $this->processTrails(Trail::class, 'trails');
+            $this->processTrails();
         }
     }
 
     private function calculateSimilarity($str1, $str2) {
+        $str1 = str_replace(['Kanab', 'Restaurant', 'Trail'], '', $str1);
+        $str2 = str_replace(['Kanab', 'Restaurant', 'Trail'], '', $str2);
+
         // Calculate the Levenshtein distance between the two strings
         $levenshteinDistance = levenshtein($str1, $str2);
 
@@ -63,46 +65,81 @@ class CombineResources extends Command
         return round($similarity, 5);
     }
 
-    protected function processTrails($model, $table)
+    protected function processEvents() {
+        $this->processResources(Event::class, 'events');
+    }
+
+    protected function processLocations() {
+        $this->processResources(Location::class, 'locations', 0.5, 0.5);
+        $this->processResources(Location::class, 'locations', 0.05, 0.35);
+    }
+
+    protected function processTrails() {
+        $this->processResources(Trail::class, 'trails', 5, 0.75);
+        $this->processResources(Trail::class, 'trails', 0.1, 0.3);
+    }
+
+    protected function processResources($model, $table, $maxDistance, $minSimilarity)
     {
-        $distance = 0.1;
         do {
+            $matches = [];
+
             $resources = $model::withoutGlobalScope(UsableScope::class)
-                ->selectRaw($table . '.id, ' . $table . '.source_type AS source, ' . $table . '.source_id, ' . $table . '.name, ' . $table . '.latitude, ' . $table . '.longitude, other_resource.id AS other_id, other_resource.source_type AS other_source_type, other_resource.name AS other_name')
+                ->selectRaw($table . '.id, ' . $table . '.name, ' . $table . '.latitude, ' . $table . '.longitude, other_resource.id AS other_id, other_resource.name AS other_name')
                 ->from($table)
                 ->crossJoin($table . ' as other_resource')
                 ->where($table . '.is_usable', 1)
                 ->where('other_resource.is_usable', 1)
                 ->whereRaw($table . '.id != other_resource.id')
-                ->whereRaw($table . '.source_type != other_resource.source_type')
-                ->whereRaw($table . '.source_id != other_resource.source_id')
                 ->whereRaw('
                     (6371 * ACOS(
                         COS(RADIANS(' . $table . '.latitude)) * COS(RADIANS(other_resource.latitude)) * COS(RADIANS(' . $table . '.longitude - other_resource.longitude)) +
                         SIN(RADIANS(' . $table . '.latitude)) * SIN(RADIANS(other_resource.latitude))
-                    )) * 0.621371 <= ?', [$distance])
+                    )) * 0.621371 <= ?', [$maxDistance])
                 ->distinct()
                 ->get();
 
-            $matches = [];
             foreach ($resources as $resource) {
                 $matches[] = (object) [
                     'id_1' => $resource->id,
                     'name_1' => $resource->name,
                     'id_2' => $resource->other_id,
                     'name_2' => $resource->other_name,
-                    'similarity' => $this->calculateSimilarity(str_replace('Trail', '', $resource->name), str_replace('Trail', '', $resource->other_name)),
+                    'similarity' => $this->calculateSimilarity($resource->name, $resource->other_name),
                 ];
             }
+
+            $resources = $model::withoutGlobalScope(UsableScope::class)
+                ->selectRaw($table . '.id, ' . $table . '.name, ' . $table . '.address, other_resource.id AS other_id, other_resource.name AS other_name, other_resource.address AS other_address')
+                ->from($table)
+                ->crossJoin($table . ' as other_resource')
+                ->where($table . '.is_usable', 1)
+                ->where('other_resource.is_usable', 1)
+                ->whereRaw($table . '.id != other_resource.id')
+                ->whereRaw($table . '.name = other_resource.name')
+                ->distinct()
+                ->get();
+
+            foreach ($resources as $resource) {
+                $matches[] = (object) [
+                    'id_1' => $resource->id,
+                    'name_1' => $resource->name,
+                    'id_2' => $resource->other_id,
+                    'name_2' => $resource->other_name,
+                    'similarity' => $this->calculateSimilarity($resource->address, $resource->other_address, 0.9),
+                ];
+            }
+
             usort($matches, function($a, $b) {
                 return strnatcmp($b->similarity, $a->similarity);
             });
 
             $match = $matches[0];
-            if ($match->similarity > 0.3) {
+            if ($match->similarity > $minSimilarity) {
+                echo '<pre>'; print_r($match); echo '</pre>';
                 $this->info('Combining ' . $match->id_1 . ' ' . $match->name_1 . ' | ' . $match->id_2 . ' ' . $match->name_2);
-                $this->resourceService->combineTrails($match->id_1, $match->id_2);
+                $this->resourceService->combineResources($match->id_1, $match->id_2, $model);
             }
-        } while ($matches[0]->similarity > 0.3);
+        } while ($matches[0]->similarity > $minSimilarity);
     }
 }

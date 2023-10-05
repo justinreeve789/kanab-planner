@@ -9,6 +9,7 @@ use App\Models\ResourceData;
 use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Services\EventService;
+use App\Services\OpenAIService;
 use App\Services\RestaurantService;
 use Illuminate\Console\Command;
 
@@ -28,6 +29,7 @@ class UpdateActivityData extends Command
      */
     protected $description = 'Updates activity data information';
 
+    private $openAIService;
     private $restaurantService;
 
     /**
@@ -35,6 +37,8 @@ class UpdateActivityData extends Command
      */
     public function handle()
     {
+        $this->openAIService = new OpenAIService();
+
         $doEvents = $this->option('events');
         $doRestaurants = $this->option('restaurants');
         $doTrails = $this->options('trails');
@@ -45,11 +49,11 @@ class UpdateActivityData extends Command
         }
 
         if ($doRestaurants) {
-            $this->processRestaurants();
+//            $this->processRestaurants();
         }
 
         if ($doTrails) {
-            $this->processTrails();
+//            $this->processTrails();
         }
     }
 
@@ -62,14 +66,28 @@ class UpdateActivityData extends Command
     protected function processEvents()
     {
         $defaultActivityId = Activity::where('name', 'event')->pluck('id')->first();
-        $events = Event::with('data')->get();
+        $events = Event::whereHas('data', function($query) {
+            $query->whereNull('activity_id');
+        })->with('data')->get();
         foreach ($events as $item) {
+            // Use AI to determine the type of event.
+            $guessType = $this->openAIService->identifyActivityTypeWithOpenAI($item->name . ' ' . $item->description);
+            $activityType = Activity::where('name', $guessType)->first();
+            if ($activityType) {
+                $resourceData = ResourceData::updateOrCreate(['resource_table' => 'events', 'resource_id' => $item->id], ['activity_id' => $activityType->id]);
+                $this->info('Assigned ' . $guessType . ' to ' . $item->name);
+            } else {
+                $this->info('Cannot assign ' . $guessType . ' to ' . $item->name);
+            }
+            continue;
+
+            // Add attributes.
             if (!isset($item->data[0])) {
                 $data = $this->eventService->calculateResourceData($item);
                 if ($data) {
                     echo 'Processing ' . $item->id . ' - ' . $item->name . ' - ' . implode(', ', $data) . '
 ';
-                    ResourceData::updateOrCreate(['resource_table' => 'events', 'resource_id' => $item->id, 'activity_id' => $defaultActivityId], [
+                    ResourceData::updateOrCreate(['resource_table' => 'events', 'resource_id' => $item->id], [
                         'adventurousness' => $data['adventurousness'],
                         'solitariness' => $data['solitariness'],
                         'strenuousness' => $data['strenuousness'],

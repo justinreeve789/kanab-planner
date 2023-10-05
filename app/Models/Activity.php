@@ -10,5 +10,5 @@ class Activity extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
-    protected $table = 'tag';
+    protected $table = 'activities';
 }

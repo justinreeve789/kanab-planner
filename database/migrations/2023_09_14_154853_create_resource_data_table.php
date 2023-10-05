@@ -16,12 +16,12 @@ return new class extends Migration
             $table->increments('id');
             $table->string('resource_table', 16);
             $table->integer('resource_id')->unsigned();
-            $table->integer('activity_id')->unsigned();
-            $table->decimal('adventurousness', 3, 2);
-            $table->decimal('solitariness', 3, 2);
-            $table->decimal('strenuousness', 3, 2);
+            $table->integer('activity_id')->unsigned()->nullable();
+            $table->decimal('adventurousness', 3, 2)->nullable();
+            $table->decimal('solitariness', 3, 2)->nullable();
+            $table->decimal('strenuousness', 3, 2)->nullable();
             $table->timestamps();
-            $table->unique(['resource_table', 'resource_id', 'activity_id']);
+//            $table->unique(['resource_table', 'resource_id', 'activity_id']);
             $table->index('resource_table');
             $table->index('activity_id');
             $table->index(['resource_table', 'activity_id']);

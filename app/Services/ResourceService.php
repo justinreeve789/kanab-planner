@@ -31,9 +31,17 @@ class ResourceService
         return $this->repository;
     }
 
-    public function combineResources($resource1, $resource2) {
+    public function combineResources($resource1, $resource2, $model = null) {
         if (!$resource1 || !$resource2) {
             return false;
+        }
+
+        if (!is_object($resource1)) {
+            $resource1 = $model::withoutGlobalScope(UsableScope::class)->where('id', $resource1)->first();
+        }
+
+        if (!is_object($resource2)) {
+            $resource2 = $model::withoutGlobalScope(UsableScope::class)->where('id', $resource2)->first();
         }
 
         if (get_class($resource1) !== get_class($resource2)) {
@@ -41,6 +49,9 @@ class ResourceService
         }
 
         switch (get_class($resource1)) {
+            case 'App\\Models\\Location':
+                $this->combineLocations($resource1, $resource2);
+                break;
             case 'App\\Models\\Trail':
                 $this->combineTrails($resource1, $resource2);
                 break;
@@ -48,15 +59,48 @@ class ResourceService
         }
     }
 
+    public function combineLocations($resource1, $resource2) {
+        $primary = $resource1;
+        $secondary = $resource2;
+
+        // Use ChatGPT to create a new description if both have description text.
+        $resourceText = ResourceText::where('resource_table', 'locations')->where('resource_id', $primary->id)->first();
+        if (!$resourceText) {
+            if (($primary->description && $secondary->description) || ($primary->description_alt && $secondary->description_alt)) {
+                $raw = $primary->name . ' ' . $primary->description . ' ' . $primary->description_alt . ' ' .
+                    $secondary->description . ' ' . $secondary->description_alt;
+                $clean = $this->openAIService->rewriteTextWithOpenAI($raw);
+                $json = json_decode($clean);
+                if ($json) {
+                    $json->combined_primary = $primary->id;
+                    $json->combined_secondary = $secondary->id;
+                    $clean = json_encode($json);
+
+                    $resourceText = new ResourceText([
+                        'resource_table' => 'locations',
+                        'resource_id' => $primary->id,
+                        'type' => 'combine',
+                        'raw' => $raw,
+                        'clean' => $clean,
+                    ]);
+                    $resourceText->save();
+                }
+            }
+        }
+
+        // Combine/coalesce the records.
+        $this->getRepository()->combineResources('locations', $primary, $secondary);
+        $secondary->is_usable = 0;
+        $secondary->save();
+
+        // Update images.
+        foreach ($secondary->images as $image) {
+            $image->location_id = $primary->id;
+            $image->updateOrInsert(['location_id' => $primary->id]);
+        }
+    }
+
     public function combineTrails($resource1, $resource2) {
-        if (!is_object($resource1)) {
-            $resource1 = Trail::withoutGlobalScope(UsableScope::class)->where('id', $resource1)->first();
-        }
-
-        if (!is_object($resource2)) {
-            $resource2 = Trail::withoutGlobalScope(UsableScope::class)->where('id', $resource2)->first();
-        }
-
         // Use whichever trail has the GeoJSON data as the primary.
         $geoJson = TrailGeoJson::whereIn('trail_id', [$resource1->id, $resource2->id])->first();
         if ($geoJson) {

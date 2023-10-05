@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Activity;
 use App\Models\Event;
 use App\Models\Location;
 use App\Models\Restaurant;
@@ -27,6 +28,22 @@ class OpenAIService
         $cmd = 'wgpt "Clean up, fix misspellings and grammar, and format the following text for a travel web site about Kanab and southern Utah, with information about hiking trails in the area: ';
         $cmd .= str_replace('"', '', $text) . '"';
         return shell_exec($cmd);
+    }
+
+    public function identifyActivityTypeWithOpenAI(string $text): ?string {
+        $activityTypes = implode(', ', Activity::get()->pluck('name')->toArray());
+        $result = OpenAI::chat()->create([
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [[
+                'role' => 'system',
+                'content' => 'You are a helpful assistant categorizing events and activities for a travel web site about southern Utah and northern Arizona.',
+            ],[
+                'role' => 'user',
+                'content' => 'In one word, what type of activity is this from the following options: {' . $activityTypes . '}: ' . $text,
+            ]],
+            'max_tokens' => 2000,
+        ]);
+        return strtolower($result['choices'][0]['message']['content']);
     }
 
     public function rewriteTextWithOpenAI(string $text): ?string {

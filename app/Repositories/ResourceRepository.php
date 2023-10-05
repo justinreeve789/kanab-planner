@@ -28,7 +28,7 @@ class ResourceRepository
             }
         }
 
-        $updateQuery = "UPDATE trails AS `primary`, trails AS secondary
+        $updateQuery = "UPDATE " . $table . " AS `primary`, " . $table . " AS secondary
                         SET " . implode(', ', $fieldUpdates) . "
                         WHERE `primary`.id = ? AND secondary.id = ?";
         DB::update($updateQuery, [$primary->id, $secondary->id]);
