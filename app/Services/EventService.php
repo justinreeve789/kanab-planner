@@ -34,7 +34,7 @@ class EventService
 
     public function calculateResourceData(Event $event): ?array
     {
-        $prompt = "Direct answers only. In three numbers from 0.0 to 1.0, make assumptions where necessary. Adventurousness: Calculate how unique, adventurousness, and out of the average person's comfort zone the event is. Socialization: Calculate how likely I'll have to interact with strangers or be around large crowds at the event. Strenuousness: Calculate how physically exerting the event is. Here's the event: ";
+        $prompt = "Direct answers only. Create JSON with 3 fields: adventurousness, solitariness, strenuousness. Each is a number from 0.0 to 1.0. Calculate a rating for the event/activity. Adventurousness: Calculate how unique, adventurousness, and out of the average person's comfort zone the event is. Socialization: Calculate how likely I'll have to interact with strangers or be around large crowds at the event. Strenuousness: Calculate how physically exerting the event is. Here's the event: ";
         $prompt .= $event->name . " " . $event->description;
 //        \Log::info(print_r($prompt, true));
         $response = $this->getOpenAIService()->query($prompt, 50);

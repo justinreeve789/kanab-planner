@@ -12,4 +12,18 @@ class ResourceData extends Model
     protected $guarded = ['id'];
     protected $hidden = ['resource_table', 'resource_id', 'created_at', 'updated_at'];
     protected $table = 'resource_data';
+
+    public function activity_type()
+    {
+        return $this->hasOne(Activity::class, 'id', 'activity_id');
+    }
+
+    public static function getRankingProps(): array
+    {
+        return [
+            'adventurousness',
+            'solitariness',
+            'strenuousness',
+        ];
+    }
 }

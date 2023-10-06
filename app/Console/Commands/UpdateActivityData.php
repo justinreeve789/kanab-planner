@@ -64,34 +64,37 @@ class UpdateActivityData extends Command
      */
     protected function processEvents()
     {
-        $events = Event::whereHas('data', function($query) {
-            $query->whereNull('activity_id');
-        })->with('data')->get();
-        foreach ($events as $item) {
-            // Use AI to determine the type of event.
-            $guessType = $this->openAIService->identifyActivityTypeWithOpenAI($item->name . ' ' . $item->description);
-            $activityType = Activity::where('name', $guessType)->first();
-            if ($activityType) {
-                $resourceData = ResourceData::updateOrCreate(['resource_table' => 'events', 'resource_id' => $item->id], ['activity_id' => $activityType->id]);
-                $this->info('Assigned ' . $guessType . ' to ' . $item->name);
-            } else {
-                $this->info('Cannot assign ' . $guessType . ' to ' . $item->name);
-            }
-            continue;
-
-            // Add attributes.
-            if (!isset($item->data[0])) {
-                $data = $this->eventService->calculateResourceData($item);
-                if ($data) {
-                    echo 'Processing ' . $item->id . ' - ' . $item->name . ' - ' . implode(', ', $data) . '
-';
-                    ResourceData::updateOrCreate(['resource_table' => 'events', 'resource_id' => $item->id], [
-                        'adventurousness' => $data['adventurousness'],
-                        'solitariness' => $data['solitariness'],
-                        'strenuousness' => $data['strenuousness'],
-                    ]);
+        if (1 === 2) {
+            $events = Event::whereHas('data', function ($query) {
+                $query->whereNull('activity_id');
+            })->with('data')->get();
+            foreach ($events as $item) {
+                // Use AI to determine the type of event.
+                $guessType =
+                    $this->openAIService->identifyActivityTypeWithOpenAI($item->name . ' ' . $item->description);
+                $activityType = Activity::where('name', $guessType)->first();
+                if ($activityType) {
+                    $resourceData = ResourceData::updateOrCreate(
+                        ['resource_table' => 'events', 'resource_id' => $item->id],
+                        ['activity_id' => $activityType->id]
+                    );
+                    $this->info('Assigned ' . $guessType . ' to ' . $item->name);
+                } else {
+                    $this->info('Cannot assign ' . $guessType . ' to ' . $item->name);
                 }
             }
+        }
+
+        $resourceData = ResourceData::with('activity_type')
+            ->where('resource_table', 'events')
+            ->whereNotNull('activity_id')
+            ->whereNull(['adventurousness', 'solitariness', 'strenuousness'])
+            ->get();
+        foreach ($resourceData as $item) {
+            $item->adventurousness = $item->activity_type->adventurousness;
+            $item->solitariness = $item->activity_type->solitariness;
+            $item->strenuousness = $item->activity_type->strenuousness;
+            $item->save();
         }
     }
 

@@ -3,14 +3,14 @@
 namespace App\Models;
 
 use App\Models\Builder\CustomQueryBuilder;
-use App\Traits\Usable;
+use App\Traits\ResourceScopes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Resource extends Model
 {
     use HasFactory;
-    use Usable;
+    use ResourceScopes;
 
     /**
      * @return \App\Models\Builder\CustomQueryBuilder
@@ -18,6 +18,46 @@ class Resource extends Model
     public function newEloquentBuilder($query)
     {
         return new CustomQueryBuilder($query);
+    }
+
+    /**
+     * We want to get as close to all the properties as we can. For example, if adventurousness is 0.1 and strenuousness
+     * is 0.9, we should weigh adv 0.2/str 0.8 higher than adv 0.5/str 0.5. We should evaluate the total deviation
+     * rather than an average of the properties.
+     * TODO: We may want to make this logarithmic, so preferences with higher values weigh heavier than lower values.
+     * If a user has set a high adventurousness, it would make sense they'd want to see more events like this, even
+     * if the deviation of the other properties skews the total out of place.
+     *
+     * @param array $userPropValues This contains adventurousness/solitariness/strenuousness as the key, followed by the user's settings for that property, e.g. ['adventurousness' => 0.5, 'solitariness' => 0.3, 'strenuousness' => 0.7]
+     * @param array $weightValues This contains adventurousness/solitariness/strenuousness as the key, followed by a relative numerical weight for that property, e.g. ['adventurousness' => 12, 'solitariness' => 7, 'strenuousness' => 25]
+     * @param int $activityTypeId Right now this corresponds to App\Models\Activity, but this will be renamed to App\Models\ActivityType in the future.
+     */
+    public function scopeSortByDeviation(CustomQueryBuilder $builder, array $userPropValues, array $weights, int $activityTypeId = null) {
+        $table = $this->getModel()->getTable();
+
+        $order = '';
+        $index = 0;
+        foreach ($userPropValues as $prop => $value) {
+            $order .= 'POW(' . $weights[$prop] . ', ABS(COALESCE(resource_data.' . $prop . ', 0) - ' . $value . '))';
+            if ($index < count($userPropValues) - 1) {
+                $order .= ' + ';
+            }
+            $index++;
+        }
+
+        // Round to the nearest 0.25.
+        $order = '(ROUND(4 * ' . $order . ') / 4), RAND()';
+
+        $query = $this->select($table . '.*')
+            ->join('resource_data', function($join) use ($table) {
+                $join->on('resource_data.resource_table', '=', \DB::raw("'" . $table . "'"))->on($table . '.id', '=', 'resource_data.resource_id');
+            });
+
+        if ($order != '') {
+            $query->orderByRaw($order);
+        }
+
+        return $query;
     }
 
     public function isEvent() {

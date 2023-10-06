@@ -21,11 +21,21 @@ class TrailService
             $trails = $trails->where('distance_miles', '<=', '1.5');
         }
         if ($itinerary !== null) {
-            $trails = $trails->sortByDeviation(['adventurousness', 'solitariness', 'strenuousness'])->take(5)->inRandomOrder();
+            $trails = $trails->sortByDeviation([
+                'adventurousness' => $itinerary->getAdventurousness(),
+                'solitariness' => $itinerary->getSolitariness(),
+                'strenuousness' => $itinerary->getStrenuousness()], [
+                'adventurousness' => 12,
+                'solitariness' => 7,
+                'strenuousness' => 25,
+            ])->take(10)->inRandomOrder();
         } else {
             $trails = $trails->inRandomOrder();
         }
+        \DB::enableQueryLog();
         $trails = $trails->get();
+        echo '<pre>'; print_r(\DB::getQueryLog()); echo '</pre>';
+        \DB::disableQueryLog();
         foreach ($trails as $trail) {
             $p = $this->getBestPeriodOfDayForTrail($trail);
             if ($p == $period) {
