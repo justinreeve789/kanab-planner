@@ -64,10 +64,10 @@ class UpdateActivityData extends Command
      */
     protected function processEvents()
     {
-        if (1 === 2) {
+        if (1 === 1) {
             $events = Event::whereHas('data', function ($query) {
                 $query->whereNull('activity_id');
-            })->with('data')->get();
+            })->orWhereDoesntHave('data')->with('data')->get();
             foreach ($events as $item) {
                 // Use AI to determine the type of event.
                 $guessType =

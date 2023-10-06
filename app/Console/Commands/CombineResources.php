@@ -8,6 +8,7 @@ use App\Models\Scopes\UsableScope;
 use App\Models\Trail;
 use App\Services\ResourceService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Schema;
 
 class CombineResources extends Command
 {
@@ -84,50 +85,75 @@ class CombineResources extends Command
         do {
             $matches = [];
 
-            $resources = $model::withoutGlobalScope(UsableScope::class)
-                ->selectRaw($table . '.id, ' . $table . '.name, ' . $table . '.latitude, ' . $table . '.longitude, other_resource.id AS other_id, other_resource.name AS other_name')
-                ->from($table)
-                ->crossJoin($table . ' as other_resource')
-                ->where($table . '.is_usable', 1)
-                ->where('other_resource.is_usable', 1)
-                ->whereRaw($table . '.id != other_resource.id')
-                ->whereRaw('
-                    (6371 * ACOS(
-                        COS(RADIANS(' . $table . '.latitude)) * COS(RADIANS(other_resource.latitude)) * COS(RADIANS(' . $table . '.longitude - other_resource.longitude)) +
-                        SIN(RADIANS(' . $table . '.latitude)) * SIN(RADIANS(other_resource.latitude))
-                    )) * 0.621371 <= ?', [$maxDistance])
-                ->distinct()
-                ->get();
+            if ($model === 'App\\Models\\Location' || $model === 'App\\Models\\Trail') {
+                $resources = $model::withoutGlobalScope(UsableScope::class)
+                    ->selectRaw(
+                        $table . '.id, ' . $table . '.name, ' . $table . '.latitude, ' . $table .
+                        '.longitude, other_resource.id AS other_id, other_resource.name AS other_name'
+                    )
+                    ->from($table)
+                    ->crossJoin($table . ' as other_resource')
+                    ->where($table . '.is_usable', 1)
+                    ->where('other_resource.is_usable', 1)
+                    ->whereRaw(Schema::connection('mysql')->hasColumn($table, 'source_type') ? $table . '.source_type != other_resource.source_type' : '1 = 1')
+                    ->whereRaw($table . '.id != other_resource.id')
+                    ->whereRaw(
+                        '
+                        (6371 * ACOS(
+                            COS(RADIANS(' . $table .
+                        '.latitude)) * COS(RADIANS(other_resource.latitude)) * COS(RADIANS(' . $table . '.longitude - other_resource.longitude)) +
+                            SIN(RADIANS(' . $table . '.latitude)) * SIN(RADIANS(other_resource.latitude))
+                        )) * 0.621371 <= ?',
+                        [$maxDistance]
+                    )
+                    ->distinct()
+                    ->get();
 
-            foreach ($resources as $resource) {
-                $matches[] = (object) [
-                    'id_1' => $resource->id,
-                    'name_1' => $resource->name,
-                    'id_2' => $resource->other_id,
-                    'name_2' => $resource->other_name,
-                    'similarity' => $this->calculateSimilarity($resource->name, $resource->other_name),
-                ];
+                foreach ($resources as $resource) {
+                    $matches[] = (object)[
+                        'id_1' => $resource->id,
+                        'name_1' => $resource->name,
+                        'id_2' => $resource->other_id,
+                        'name_2' => $resource->other_name,
+                        'similarity' => $this->calculateSimilarity($resource->name, $resource->other_name),
+                    ];
+                }
             }
 
-            $resources = $model::withoutGlobalScope(UsableScope::class)
-                ->selectRaw($table . '.id, ' . $table . '.name, ' . $table . '.address, other_resource.id AS other_id, other_resource.name AS other_name, other_resource.address AS other_address')
-                ->from($table)
-                ->crossJoin($table . ' as other_resource')
-                ->where($table . '.is_usable', 1)
-                ->where('other_resource.is_usable', 1)
-                ->whereRaw($table . '.id != other_resource.id')
-                ->whereRaw($table . '.name = other_resource.name')
-                ->distinct()
-                ->get();
+            if ($model === 'App\\Models\\Location') {
+                $resources = $model::withoutGlobalScope(UsableScope::class)
+                    ->selectRaw(
+                        $table . '.id, ' . $table . '.name, ' . $table .
+                        '.address, other_resource.id AS other_id, other_resource.name AS other_name, other_resource.address AS other_address'
+                    )
+                    ->from($table)
+                    ->crossJoin($table . ' as other_resource')
+                    ->whereRaw(
+                        'COALESCE(
+                        (6371 * ACOS(
+                            COS(RADIANS(' . $table .
+                        '.latitude)) * COS(RADIANS(other_resource.latitude)) * COS(RADIANS(' . $table . '.longitude - other_resource.longitude)) +
+                            SIN(RADIANS(' . $table . '.latitude)) * SIN(RADIANS(other_resource.latitude))
+                        )) * 0.621371, 0) <= ?',
+                        [$maxDistance]
+                    )
+                    ->where($table . '.is_usable', 1)
+                    ->where('other_resource.is_usable', 1)
+//                    ->whereRaw($table . '.source_type != other_resource.source_type')
+                    ->whereRaw($table . '.id != other_resource.id')
+                    ->whereRaw($table . '.name = other_resource.name')
+                    ->distinct()
+                    ->get();
 
-            foreach ($resources as $resource) {
-                $matches[] = (object) [
-                    'id_1' => $resource->id,
-                    'name_1' => $resource->name,
-                    'id_2' => $resource->other_id,
-                    'name_2' => $resource->other_name,
-                    'similarity' => $this->calculateSimilarity($resource->address, $resource->other_address, 0.9),
-                ];
+                foreach ($resources as $resource) {
+                    $matches[] = (object)[
+                        'id_1' => $resource->id,
+                        'name_1' => $resource->name,
+                        'id_2' => $resource->other_id,
+                        'name_2' => $resource->other_name,
+                        'similarity' => $this->calculateSimilarity($resource->address, $resource->other_address),
+                    ];
+                }
             }
 
             usort($matches, function($a, $b) {

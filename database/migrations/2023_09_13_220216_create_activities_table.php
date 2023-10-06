@@ -44,6 +44,7 @@ return new class extends Migration
             ['name' => 'swimming', 'adventurousness' => 0.2, 'solitariness' => 0.2, 'strenuousness' => 0.1],
             ['name' => 'tour', 'adventurousness' => 0.4, 'solitariness' => 0.2, 'strenuousness' => 0.2],
             ['name' => 'fishing', 'adventurousness' => 0.2, 'solitariness' => 0.9, 'strenuousness' => 0.1],
+            ['name' => 'games-and-entertainment', 'adventurousness' => 0.4, 'solitariness' => 0.1, 'strenuousness' => 0.1],
             ['name' => 'unknown', 'adventurousness' => 0.4, 'solitariness' => 0.3, 'strenuousness' => 0.2],
         ]);
     }
