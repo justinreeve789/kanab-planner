@@ -150,16 +150,6 @@ trait ActivityData
     }
 
     /**
-     * The higher the average price, the more adventurous the restaurant (+/ 0.2).
-     * 0.2 * tanh(0.1 * (x - 15))
-     */
-    private function calculateAdventurousnessForRestaurant(): float
-    {
-        $activityType = $this->getActivityType();
-        return $this->activity($activityType)->adventurousness + 0.2 * tanh(0.1 * ($this->getAveragePrice() - 15));
-    }
-
-    /**
      * The resource data for events is calculated in EventService and populated with "php artisan import:data --events."
      */
     private function getSolitarinessForEvent(): float
@@ -172,12 +162,29 @@ trait ActivityData
     {}
 
     /**
-     * The more "unique" the trail, the higher the adventurousness.
+     * The higher the average price, the more adventurous the restaurant (+/ 0.2).
+     * 0.2 * tanh(0.1 * (x - 15))
+     */
+    private function calculateAdventurousnessForRestaurant(): float
+    {
+        $activityType = $this->getActivityType();
+        return $this->activity($activityType)->adventurousness + 0.2 * tanh(0.1 * ($this->getAveragePrice() - 15));
+    }
+
+    /**
+     * The more "unique" the trail, the higher the adventurousness (e.g. the Narrows has you wading through water,
+     * Angels Landing involves a steep precarious ledge). The longer the duration of the trail, the higher the
+     * adventurousness, since they'll be spending more time outdoors. The more remote the trail, the higher the
+     * adventurousness.
      */
     private function calculateAdventurousnessForTrail(): float
     {
         $activityType = $this->getActivityType();
-        return $this->activity($activityType)->adventurousness;
+        $adventurousness = $this->activity($activityType)->adventurousness;
+        if ($this->unique === 1) {
+            $adventurousness = min(1.5 * $adventurousness, 1);
+        }
+        return $adventurousness;
     }
 
     /**

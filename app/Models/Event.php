@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Traits\ActivityData;
+use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Event extends Resource
 {
     use ActivityData;
     use HasFactory;
+    use Searchable;
 
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'location_id'];

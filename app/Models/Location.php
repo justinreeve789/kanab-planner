@@ -6,11 +6,13 @@ use App\Models\LocationHour;
 use App\Traits\Proximity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Location extends Resource
 {
     use HasFactory;
     use Proximity;
+    use Searchable;
 
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'area_id'];

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\TrailService;
 use App\Traits\ActivityData;
 use App\Traits\Proximity;
+use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Trail extends Resource
@@ -12,6 +13,7 @@ class Trail extends Resource
     use ActivityData;
     use HasFactory;
     use Proximity;
+    use Searchable;
 
     protected $guarded = ['id'];
     protected $hidden = ['source_type', 'source_id', 'raw_data'];
@@ -41,6 +43,11 @@ class Trail extends Resource
     public function images()
     {
         return $this->hasMany(TrailImage::class, 'trail_id', 'id');
+    }
+
+    public function text()
+    {
+        return $this->hasMany(ResourceText::class, 'resource_id', 'id')->where('resource_table', 'trails');
     }
 
     public function calculateEndDate(string $startDateTime)

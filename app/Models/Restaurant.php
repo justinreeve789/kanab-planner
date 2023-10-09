@@ -7,12 +7,15 @@ use App\Traits\ActivityData;
 use App\Traits\ResourceScopes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
+
 
 class Restaurant extends Resource
 {
     use ActivityData;
     use HasFactory;
     use ResourceScopes;
+    use Searchable;
 
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'location_id'];

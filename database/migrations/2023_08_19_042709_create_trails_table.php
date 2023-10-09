@@ -20,6 +20,7 @@ class CreateTrailsTable extends Migration
             $table->string('source_type');
             $table->string('source_id');
             $table->integer('area_id')->unsigned();
+            $table->boolean('unique')->default(false)->comment('A flag that indicates whether this will rank higher on the "adventurousness" scale.');
             $table->text('description')->nullable();
             $table->text('description_alt')->nullable();
             $table->text('directions')->nullable();

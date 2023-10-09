@@ -1,10 +1,12 @@
 /.phpunit.cache
+/data.ms
 /drivers
 /node_modules
 /public/build
 /public/hot
 /public/storage
 /public/temp
+/search
 /storage/
 /storage/*.key
 /vendor

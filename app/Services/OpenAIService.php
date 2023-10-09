@@ -46,6 +46,21 @@ class OpenAIService
         return strtolower($result['choices'][0]['message']['content']);
     }
 
+    public function createShortDescriptionForResourceWithWithOpenAI(string $text): ?string {
+        $result = OpenAI::chat()->create([
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [[
+                'role' => 'system',
+                'content' => 'You are a helpful assistant summarizing hiking trails for a travel web site about southern Utah and northern Arizona.',
+            ],[
+                'role' => 'user',
+                'content' => 'Based on this trail description, using an active voice (NOT passive voice), without using the word "hikers", in one complete sentence, write this as an itinerary line item and explain what the hikers will see: ' . $text,
+            ]],
+            'max_tokens' => 500,
+        ]);
+        return $result['choices'][0]['message']['content'];
+    }
+
     public function rewriteTextWithOpenAI(string $text): ?string {
         $result = OpenAI::chat()->create([
             'model' => 'gpt-3.5-turbo',
