@@ -30,11 +30,6 @@ class Trail extends Resource
         return $this->belongsTo(Area::class, 'area_id', 'id');
     }
 
-    public function data()
-    {
-        return $this->hasMany(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'trails');
-    }
-
     public function geoJson()
     {
         return $this->hasOne(TrailGeoJson::class, 'trail_id', 'id');
@@ -43,11 +38,6 @@ class Trail extends Resource
     public function images()
     {
         return $this->hasMany(TrailImage::class, 'trail_id', 'id');
-    }
-
-    public function text()
-    {
-        return $this->hasMany(ResourceText::class, 'resource_id', 'id')->where('resource_table', 'trails');
     }
 
     public function calculateEndDate(string $startDateTime)

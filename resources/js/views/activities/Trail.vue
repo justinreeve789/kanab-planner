@@ -35,9 +35,9 @@
                 </div>
               </div>
               <div class="lg:order-1">
-                <p class="mb-4" v-if="resource.description_alt">{{ resource.description_alt }}</p>
-                <p class="mb-4" v-if="resource.description">{{ resource.description }}</p>
-                <p v-if="phrase"><em>{{ phrase }}</em></p>
+                <p class="mb-4" v-if="resource.description_short">{{ resource.description_short }}</p>
+                <p class="mb-4" v-if="!resource.description_short || (resource.description && resource.description.length > resource.description_short.length + 25)">{{ resource.description }}</p>
+                <p class="mb-4" v-if="resource.description_alt || phrase"><em>{{ resource.description_alt }} <span v-if="phrase">{{ phrase }}</span></em></p>
               </div>
           </div>
           <div class="w-full lg:w-1/3 mt-4 lg:mt-0 lg:pl-4" v-if="resource.images">

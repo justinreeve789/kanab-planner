@@ -22,11 +22,6 @@ class Location extends Resource
         return $this->belongsTo(Area::class, 'area_id', 'id');
     }
 
-    public function data()
-    {
-        return $this->hasMany(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'locations');
-    }
-
     public function hours()
     {
         return $this->hasMany(LocationHour::class, 'location_id', 'id');
@@ -35,11 +30,6 @@ class Location extends Resource
     public function images()
     {
         return $this->hasMany(LocationImage::class, 'location_id', 'id');
-    }
-
-    public function text()
-    {
-        return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'locations');
     }
 
     public function isOpen($dateTime)

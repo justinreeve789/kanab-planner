@@ -130,7 +130,7 @@ class ItineraryService
 
         // Using the trail priorities for the day's area, determine when the user should best start the trail.
         foreach ($this->getItinerary()->getTrailPriorities(true) as $trailId) {
-            $trail = Trail::with('images')->where('id', $trailId)->whereNotNull('distance_miles')->first();
+            $trail = Trail::where('id', $trailId)->whereNotNull('distance_miles')->first();
             if ($trail) {
                 if ($trail->area_id == $day->getAreaId() && !$this->getItinerary()->trailExists($trail)) {
                     $trailPeriod = $this->trailService->getBestPeriodOfDayForTrail($trail);

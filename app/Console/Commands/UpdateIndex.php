@@ -26,12 +26,12 @@ class UpdateIndex extends Command
      */
     public function handle()
     {
-        Artisan::call('scout:index App\\Models\\Event');
-        Artisan::call('scout:index App\\Models\\Location');
-        Artisan::call('scout:index App\\Models\\ResourceText');
-        Artisan::call('scout:index App\\Models\\Restaurant');
-        Artisan::call('scout:index App\\Models\\Tour');
-        Artisan::call('scout:index App\\Models\\Trail');
+        Artisan::call('scout:index "App\\Models\\Event"');
+        Artisan::call('scout:index "App\\Models\\Location"');
+        Artisan::call('scout:index "App\\Models\\ResourceText"');
+        Artisan::call('scout:index "App\\Models\\Restaurant"');
+        Artisan::call('scout:index "App\\Models\\Tour"');
+        Artisan::call('scout:index "App\\Models\\Trail"');
 
         $doEvents = $this->option('events');
         $doLocations = $this->option('locations');

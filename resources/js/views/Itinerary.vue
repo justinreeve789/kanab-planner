@@ -1,4 +1,13 @@
 <template>
+<!--  <div class="itinerary-view-switch flex pl-4 pt-4 align-left" title="Toggle detailed view">-->
+<!--    <div class="form-control">-->
+<!--      <label class="label cursor-pointer">-->
+<!--        <span class="label-text text-white">Detailed view</span>-->
+<!--        <input type="checkbox" class="toggle" checked />-->
+<!--      </label>-->
+<!--    </div>-->
+<!--  </div>-->
+
   <div class="itinerary-stats flex justify-end space-x-1 pr-4 pt-4 align-right text-white" title="Estimated total driving distance" v-if="itineraryData && itineraryData.totalTravelDistance">
       <img class="icon mr-1" src="/images/icons/car.svg" alt="Distance">
       <span class="amount">

@@ -20,9 +20,9 @@ class Restaurant extends Resource
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'location_id'];
 
-    public function data()
+    public function images()
     {
-        return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'restaurant');
+        return $this->hasMany(LocationImage::class, 'location_id', 'location_id');
     }
 
     public function location()
@@ -39,6 +39,11 @@ class Restaurant extends Resource
     {
         // TODO: Use busyness and popularity rankings.
         return date('Y-m-d H:i:s', strtotime($startDateTime) + (90 * 60));
+    }
+
+    public function getImagesAttribute()
+    {
+        return $this->location->images;
     }
 
     public function getAveragePrice()

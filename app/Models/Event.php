@@ -15,11 +15,6 @@ class Event extends Resource
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'location_id'];
 
-    public function data()
-    {
-        return $this->hasMany(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'events');
-    }
-
     public function dates()
     {
         return $this->hasMany(EventDate::class, 'event_id', 'id');
@@ -33,10 +28,5 @@ class Event extends Resource
     public function location()
     {
         return $this->belongsTo(Location::class, 'location_id', 'id');
-    }
-
-    public function text()
-    {
-        return $this->hasOne(ResourceData::class, 'resource_id', 'id')->where('resource_table', 'events');
     }
 }

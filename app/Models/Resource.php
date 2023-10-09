@@ -12,12 +12,35 @@ class Resource extends Model
     use HasFactory;
     use ResourceScopes;
 
+    protected $appends = ['description_short'];
+    protected $with = ['data', 'images', 'text'];
+
     /**
      * @return \App\Models\Builder\CustomQueryBuilder
      */
     public function newEloquentBuilder($query)
     {
         return new CustomQueryBuilder($query);
+    }
+
+    public function data()
+    {
+        return $this->hasMany(ResourceData::class, 'resource_id', 'id')->where('resource_table', $this->getTable());
+    }
+
+    public function text()
+    {
+        return $this->hasMany(ResourceText::class, 'resource_id', 'id')->where('resource_table', $this->getTable());
+    }
+
+    public function getDescriptionShortAttribute()
+    {
+        if (isset($this->text)) {
+            $text = $this->text->keyBy('type');
+            if (isset($text['short'])) {
+                return $text['short']->clean;
+            }
+        }
     }
 
     /**

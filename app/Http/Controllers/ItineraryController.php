@@ -94,8 +94,8 @@ class ItineraryController extends Controller
 
     private function getEvents()
     {
-        $query = Event::betweenDates($this->itinerary->getStartDate(), $this->getItinerary()->getEndDate())
-            ->with('data');
+        $query = Event::betweenDates($this->itinerary->getStartDate(), $this->getItinerary()->getEndDate());
+//            ->with('data');
         $deviations = $this->getDeviations();
         if (!empty($deviations)) {
             $query = $query->sortByDeviation($deviations);
