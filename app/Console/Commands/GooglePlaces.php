@@ -28,7 +28,7 @@ class GooglePlaces extends Command
      *
      * @var string
      */
-    protected $signature = 'import:googleplaces';
+    protected $signature = 'import:googleplaces {--events} {--locations} {--restaurants} {--trails}';
 
     /**
      * The console command description.
@@ -49,19 +49,37 @@ class GooglePlaces extends Command
      */
     public function handle()
     {
+        $doEvents = $this->option('events');
+        $doLocations = $this->option('locations');
+        $doRestaurants = $this->option('restaurants');
+        $doTrails = $this->option('trails');
+
         $this->restaurantService = new RestaurantService();
         $areas = Area::all();
+
         foreach ($areas as $area) {
-            $restaurants = $this->getRestaurantsForArea($area);
-            foreach ($restaurants as $item) {
-                $this->parseRestaurantResult($item);
+            if ($doLocations) {
+                $types = ['aquarium', 'museum', 'tourist_attraction', 'zoo'];
+                foreach ($types as $type) {
+                    $items = $this->getPlacesForArea($area, $type);
+                    foreach ($items as $item) {
+                        $this->parseLocationResult($item);
+                    }
+                }
+            }
+
+            if ($doRestaurants) {
+                $restaurants = $this->getRestaurantsForArea($area);
+                foreach ($restaurants as $item) {
+                    $this->parseRestaurantResult($item);
+                }
             }
         }
     }
 
-    protected function parseRestaurantResult($result)
+    protected function parseResult($result)
     {
-        if ($result['business_status'] !== 'OPERATIONAL') {
+        if (isset($result['business_status']) && $result['business_status'] !== 'OPERATIONAL') {
             return;
         }
 
@@ -99,7 +117,33 @@ class GooglePlaces extends Command
         }
 
         $result['details'] = $details;
-        $rawData = json_encode($result);
+
+        return [
+            'address' => $address,
+            'city' => $city,
+            'curbsidePickup' => $curbsidePickup,
+            'description' => $description,
+            'dineIn' => $dineIn,
+            'email' => $email,
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+            'name' => $name,
+            'openingHours' => $openingHours,
+            'phone' => $phone,
+            'photos' => $photos,
+            'placeId' => $placeId,
+            'priceLevel' => $priceLevel,
+            'reservable' => $reservable,
+            'types' => $types,
+            'url' => $url,
+        ];
+    }
+
+    protected function addLocation($data)
+    {
+        foreach ($data as $key => $value) {
+            $$key = $value;
+        }
 
         $location = Location::search(['name' => $name, 'address' => $address]) ??
             Location::search(['address' => $address, 'city' => $city]) ??
@@ -117,11 +161,20 @@ class GooglePlaces extends Command
                 'zip' => null,
                 'phone' => $phone,
                 'email' => $email,
-                'url' => $url,
+                'url' => substr($url, 0, 255),
                 'latitude' => $latitude,
                 'longitude' => $longitude,
+                'raw_data' => json_encode($data),
             ]);
             $location->save();
+        }
+        return $location;
+    }
+
+    protected function addOpeningHours($location, $data)
+    {
+        foreach ($data as $key => $value) {
+            $$key = $value;
         }
 
         if ($openingHours) {
@@ -145,30 +198,56 @@ class GooglePlaces extends Command
                 die;
             }
         }
+    }
 
-//        foreach ($photos as $photo) {
-//            LocationImage::updateOrCreate(['location_id' => $location->id, 'url' => $rst->imgpath]);
-//        }
+    protected function addLocationTags($location, $data)
+    {
+        foreach ($data as $key => $value) {
+            $$key = $value;
+        }
 
         foreach ($types as $type) {
             LocationTag::updateOrCreate(['location_id' => $location->id, 'tag' => $type]);
         }
+    }
 
-        Restaurant::updateOrCreate(['location_id' => $location->id], [
-            'name' => $name,
-            'source_type' => self::SOURCE_TYPE,
-            'source_id' => $placeId,
-            'description' => $description,
-            'average_price' => $this->restaurantService->calculateAveragePriceForPriceLevel($priceLevel),
-            'curbside_pickup' => $curbsidePickup,
-            'dine_in' => $dineIn,
-            'reservable' => $reservable,
-            'raw_data' => $rawData,
-        ]);
+    protected function parseLocationResult($result)
+    {
+        $data = $this->parseResult($result);
+        if ($data) {
+            foreach ($data as $key => $value) {
+                $$key = $value;
+            }
+            $location = $this->addLocation($data);
+            $this->addLocationTags($location, $data);
+            $this->addOpeningHours($location, $data);
+        }
+    }
 
-        $restaurant = new Restaurant([
+    protected function parseRestaurantResult($result)
+    {
+        $data = $this->parseResult($result);
+        $rawData = json_encode($data);
+        if ($data) {
+            foreach ($data as $key => $value) {
+                $$key = $value;
+            }
+            $location = $this->addLocation($data);
+            $this->addLocationTags($location, $data);
+            $this->addOpeningHours($location, $data);
 
-        ]);
+            Restaurant::updateOrCreate(['location_id' => $location->id], [
+                'name' => $name,
+                'source_type' => self::SOURCE_TYPE,
+                'source_id' => $placeId,
+                'description' => $description,
+                'average_price' => $this->restaurantService->calculateAveragePriceForPriceLevel($priceLevel),
+                'curbside_pickup' => $curbsidePickup,
+                'dine_in' => $dineIn,
+                'reservable' => $reservable,
+                'raw_data' => $rawData,
+            ]);
+        }
     }
 
     protected function getDetailsForPlace($placeId)
@@ -190,14 +269,23 @@ class GooglePlaces extends Command
         return $detailsData['result'];
     }
 
+    protected function getPlacesForArea($area, $type)
+    {
+        return $this->getPlacesForLatLng($area->latitude, $area->longitude, $type, 30000);
+    }
+
     protected function getRestaurantsForArea($area)
     {
-        $location = $area->latitude . ',' . $area->longitude;
-        $radius = 30000; // 30 kilometers
+        return $this->getPlacesForLatLng($area->latitude, $area->longitude, 'restaurant', 30000);
+    }
+
+    protected function getPlacesForLatLng(float $lat, float $lng, string $type, $radiusMeters = 30000)
+    {
+        $location = $lat . ',' . $lng;
 
         // Set up the Google Places API endpoint
         $api_url =
-            "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$location&radius=$radius&type=restaurant&fields=opening_hours&key=" . getenv('GOOGLE_API_KEY');
+            "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$location&radius=$radiusMeters&type=$type&fields=opening_hours&key=" . getenv('GOOGLE_API_KEY');
 
         // Send a GET request to the Google Places API
         $response = file_get_contents($api_url);

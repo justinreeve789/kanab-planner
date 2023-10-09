@@ -24,7 +24,7 @@ class TrailService
                 'strenuousness' => 25,
             ])->take(10)->inRandomOrder();
         } else {
-            $trails = $trails->inRandomOrder();
+            $trails->inRandomOrder();
         }
         $trails->where('area_id', $areaId)
             ->whereNotNull('distance_miles')
@@ -32,10 +32,8 @@ class TrailService
         if ($period === Period::EVENING) {
             $trails->where('distance_miles', '<=', '1.5');
         }
-        $trails = $trails->with(['area', 'images']);
-        \DB::enableQueryLog();
+        $trails->with(['area', 'images']);
         $trails = $trails->get();
-        \DB::disableQueryLog();
         foreach ($trails as $trail) {
             $p = $this->getBestPeriodOfDayForTrail($trail);
             if ($p == $period) {

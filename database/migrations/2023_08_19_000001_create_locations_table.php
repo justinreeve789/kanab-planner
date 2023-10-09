@@ -28,6 +28,7 @@ class CreateLocationsTable extends Migration
             $table->string('email')->nullable();
             $table->string('url')->nullable();
             $table->boolean('is_usable')->default(true);
+            $table->text('raw_data')->nullable();
             $table->timestamps();
             $table->foreign('area_id')->references('id')->on('areas')->onDelete('cascade');
         });
