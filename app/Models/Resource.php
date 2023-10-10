@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Builder\CustomQueryBuilder;
 use App\Traits\ResourceScopes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,7 +13,7 @@ class Resource extends Model
     use HasFactory;
     use ResourceScopes;
 
-    protected $appends = ['description_short'];
+    protected $appends = ['description_short', 'adventurousness', 'solitariness', 'strenuousness'];
     protected $with = ['data', 'images', 'text'];
 
     /**
@@ -38,6 +39,22 @@ class Resource extends Model
         return $this->hasMany(ResourceText::class, 'resource_id', 'id')->where('resource_table', $this->getTable());
     }
 
+    private function getASS($attr)
+    {
+        if (isset($this->data)) {
+            $data = $this->data->keyBy('activity_id')->toArray();
+            if ($data) {
+                return reset($data)[$attr];
+            }
+        }
+        return null;
+    }
+
+    public function getAdventurousnessAttribute()
+    {
+        return $this->getASS('adventurousness');
+    }
+
     public function getDescriptionShortAttribute()
     {
         if (isset($this->text)) {
@@ -46,6 +63,16 @@ class Resource extends Model
                 return $text['short']->clean;
             }
         }
+    }
+
+    public function getSolitarinessAttribute()
+    {
+        return $this->getASS('solitariness');
+    }
+
+    public function getStrenuousnessAttribute()
+    {
+        return $this->getASS('strenuousness');
     }
 
     /**

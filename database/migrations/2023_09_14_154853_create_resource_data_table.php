@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('resource_table', 16);
             $table->integer('resource_id')->unsigned();
             $table->integer('activity_id')->unsigned()->nullable();
+            $table->integer('activity_type_id')->unsigned()->nullable();
             $table->decimal('adventurousness', 3, 2)->nullable();
             $table->decimal('solitariness', 3, 2)->nullable();
             $table->decimal('strenuousness', 3, 2)->nullable();

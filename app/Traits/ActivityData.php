@@ -6,6 +6,7 @@ use App\Models\Activity;
 use App\Models\Event;
 use App\Models\EventTag;
 use App\Models\Location;
+use App\Models\ResourceBusy;
 use App\Models\ResourceData;
 use App\Models\Restaurant;
 use App\Models\Trail;
@@ -51,6 +52,13 @@ trait ActivityData
 
     public function getBusyness(): float
     {
+        $averagePercentage = ResourceBusy::where('resource_table', $this->getTable())
+            ->where('resource_id', $this->id)
+            ->groupBy('resource_id')
+            ->avg('percentage');
+        if ($averagePercentage) {
+            return round($averagePercentage / 100, 2);
+        }
         return $this->busyness;
     }
 
@@ -89,7 +97,7 @@ trait ActivityData
      */
     public function solitariness($activityType = null)
     {
-        $busynessAdj = ($this->getBusyness() - 0.5);
+        $busynessAdj = $this->getBusyness();
         switch (static::class) {
             // We don't care so much about solitariness at a restaurant.
             case 'App\\Models\\Restaurant':
