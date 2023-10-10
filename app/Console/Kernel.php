@@ -12,6 +12,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        // Run update:busy every 2 weeks.
+        $schedule->command('update:busy')->weekly()->mondays()
+            ->when(function () {
+                return date('W') % 2;
+            })->at("06:00");
         $schedule->command('update:weather')->hourly();
     }
 

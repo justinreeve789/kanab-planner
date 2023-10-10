@@ -31,9 +31,6 @@ class ResourceService
         return $this->repository;
     }
 
-    public function getPopularTimes($resource) {
-    }
-
     public function combineResources($resource1, $resource2, $model = null) {
         if (!$resource1 || !$resource2) {
             return false;

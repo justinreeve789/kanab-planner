@@ -23,6 +23,11 @@ class Resource extends Model
         return new CustomQueryBuilder($query);
     }
 
+    public function busy()
+    {
+        return $this->hasMany(ResourceBusy::class, 'resource_id', 'id')->where('resource_table', $this->getTable());
+    }
+
     public function data()
     {
         return $this->hasMany(ResourceData::class, 'resource_id', 'id')->where('resource_table', $this->getTable());

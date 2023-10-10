@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('location_hours', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('location_id')->unsigned();
-            $table->smallInteger('day_of_week')->unsigned();
+            $table->tinyInteger('day_of_week')->unsigned();
             $table->time('time_open');
             $table->time('time_close');
             $table->timestamps();
