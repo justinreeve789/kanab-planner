@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('activities', function (Blueprint $table) {
+        Schema::create('activity_types', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->decimal('adventurousness', 3, 2)->comment('The uniqueness of the experience, and how outside an average person\'s comfort zone it is');
@@ -24,7 +24,7 @@ return new class extends Migration
 //            $table->decimal('noisiness', 3, 2)->nullable();
         });
 
-        DB::table('activities')->insert([
+        DB::table('activity_types')->insert([
             ['name' => 'bicycling', 'adventurousness' => 0.5, 'solitariness' => 0.7, 'strenuousness' => 0.6],
             ['name' => 'watersports', 'adventurousness' => 0.7, 'solitariness' => 0.3, 'strenuousness' => 0.4],
             ['name' => 'concert', 'adventurousness' => 0.5, 'solitariness' => 0.1, 'strenuousness' => 0.2],
@@ -54,6 +54,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('activities');
+        Schema::dropIfExists('activity_types');
     }
 };

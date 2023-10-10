@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('itinerary_periods', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('dayid')->unsigned();
+            $table->integer('day_id')->unsigned();
             $table->string('type');
             $table->json('activities')->nullable();
-            $table->foreign('dayId')->references('id')->on('itinerary_days')->onDelete('cascade');
+            $table->foreign('day_id')->references('id')->on('itinerary_days')->onDelete('cascade');
             $table->timestamps();
         });
     }

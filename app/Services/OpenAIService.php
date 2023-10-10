@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Activity;
+use App\Models\ActivityType;
 use App\Models\Event;
 use App\Models\Location;
 use App\Models\Restaurant;
@@ -31,7 +31,7 @@ class OpenAIService
     }
 
     public function identifyActivityTypeWithOpenAI(string $text): ?string {
-        $activityTypes = implode(', ', Activity::get()->pluck('name')->toArray());
+        $activityTypes = implode(', ', ActivityType::get()->pluck('name')->toArray());
         $result = OpenAI::chat()->create([
             'model' => 'gpt-3.5-turbo',
             'messages' => [[

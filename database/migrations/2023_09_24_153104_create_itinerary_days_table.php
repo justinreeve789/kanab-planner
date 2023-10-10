@@ -14,18 +14,18 @@ return new class extends Migration
         Schema::create('itinerary_days', function (Blueprint $table) {
             $table->increments('id');
             $table->string('date');
-            $table->integer('itineraryId')->unsigned();
-            $table->integer('areaId')->unsigned();
-            $table->smallInteger('dayNum')->unsigned();
-            $table->time('startTime');
-            $table->time('endTime');
-            $table->string('formattedDate');
-            $table->string('formattedDayOfWeek');
-            $table->string('formattedMonthDay');
-            $table->string('formattedYear');
+            $table->integer('itinerary_id')->unsigned();
+            $table->integer('area_id')->unsigned();
+            $table->smallInteger('day_num')->unsigned();
+            $table->time('start_time');
+            $table->time('end_time');
+            $table->string('formatted_date');
+            $table->string('formatted_day_of_week');
+            $table->string('formatted_month_day');
+            $table->string('formatted_year');
             $table->json('stats')->nullable();
-            $table->foreign('itineraryId')->references('id')->on('itineraries')->onDelete('cascade');
-            $table->foreign('areaId')->references('id')->on('areas')->onDelete('cascade');
+            $table->foreign('itinerary_id')->references('id')->on('itineraries')->onDelete('cascade');
+            $table->foreign('area_id')->references('id')->on('areas')->onDelete('cascade');
             $table->timestamps();
         });
     }

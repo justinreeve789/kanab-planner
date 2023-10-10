@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Activity;
+use App\Models\ActivityType;
 use App\Models\Event;
 use App\Models\Location;
 use App\Models\ResourceData;
@@ -72,7 +72,7 @@ class UpdateActivityData extends Command
                 // Use AI to determine the type of event.
                 $guessType =
                     $this->openAIService->identifyActivityTypeWithOpenAI($item->name . ' ' . $item->description);
-                $activityType = Activity::where('name', $guessType)->first();
+                $activityType = ActivityType::where('name', $guessType)->first();
                 if ($activityType) {
                     $resourceData = ResourceData::updateOrCreate(
                         ['resource_table' => 'events', 'resource_id' => $item->id],

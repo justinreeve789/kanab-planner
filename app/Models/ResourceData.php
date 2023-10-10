@@ -15,7 +15,7 @@ class ResourceData extends Model
 
     public function activity_type()
     {
-        return $this->hasOne(Activity::class, 'id', 'activity_id');
+        return $this->hasOne(ActivityType::class, 'id', 'activity_id');
     }
 
     public static function getRankingProps(): array

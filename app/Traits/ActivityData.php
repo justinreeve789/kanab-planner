@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Models\Activity;
+use App\Models\ActivityType;
 use App\Models\Event;
 use App\Models\EventTag;
 use App\Models\Location;
@@ -22,10 +22,10 @@ trait ActivityData
     private string $activityType;
     private float $busyness = 0.5;
 
-    public function activity($name): ?Activity
+    public function getActivityTypeByName($name): ?ActivityType
     {
         if (!isset($this->activities)) {
-            $this->activities = Activity::all()->keyBy('name');
+            $this->activities = ActivityType::all()->keyBy('name');
         }
         try {
             return $this->activities[$name];
@@ -47,7 +47,7 @@ trait ActivityData
     public function setActivityType(string $activityType): void
     {
         $this->activityType = $activityType;
-        $this->activityId = $this->activity($activityType);
+        $this->activityTypeId = $this->getActivityTypeByName($activityType)->id;
     }
 
     public function getBusyness(): float
@@ -120,7 +120,7 @@ trait ActivityData
             default:
                 $busynessAdj = $busynessAdj / 1.5;
         }
-        $solitariness = ($this->activity($activityType)->solitariness ?? 0.5) - $busynessAdj;
+        $solitariness = ($this->getActivityTypeByName($activityType)->solitariness ?? 0.5) - $busynessAdj;
         return round($solitariness, 2);
     }
 
@@ -176,7 +176,7 @@ trait ActivityData
     private function calculateAdventurousnessForRestaurant(): float
     {
         $activityType = $this->getActivityType();
-        return $this->activity($activityType)->adventurousness + 0.2 * tanh(0.1 * ($this->getAveragePrice() - 15));
+        return $this->getActivityTypeByName($activityType)->adventurousness + 0.2 * tanh(0.1 * ($this->getAveragePrice() - 15));
     }
 
     /**
@@ -188,7 +188,7 @@ trait ActivityData
     private function calculateAdventurousnessForTrail(): float
     {
         $activityType = $this->getActivityType();
-        $adventurousness = $this->activity($activityType)->adventurousness;
+        $adventurousness = $this->getActivityTypeByName($activityType)->adventurousness;
         if ($this->unique === 1) {
             $adventurousness = min(1.5 * $adventurousness, 1);
         }
@@ -266,7 +266,7 @@ trait ActivityData
         }
 
         try {
-            return $this->activity($activityType)->strenuousness + $strenuousness;
+            return $this->getActivityTypeByName($activityType)->strenuousness + $strenuousness;
         } catch (\Throwable $e) {
             echo 'Could not calculate strenuousness for ' . $activityType . ' ' . $this->id . ' ' . $this->name . '
 ';

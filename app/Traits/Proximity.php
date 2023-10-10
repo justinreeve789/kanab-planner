@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-use App\Models\Activity;
 use App\Models\Event;
 use App\Models\EventTag;
 use App\Models\Location;

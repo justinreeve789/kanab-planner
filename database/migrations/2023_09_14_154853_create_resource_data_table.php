@@ -24,9 +24,9 @@ return new class extends Migration
             $table->timestamps();
 //            $table->unique(['resource_table', 'resource_id', 'activity_id']);
             $table->index('resource_table');
-            $table->index('activity_id');
-            $table->index(['resource_table', 'activity_id']);
-            $table->foreign('activity_id')->references('id')->on('activities')->onDelete('cascade');
+            $table->index('activity_type_id');
+            $table->index(['resource_table', 'activity_type_id']);
+            $table->foreign('activity_type_id')->references('id')->on('activity_types')->onDelete('cascade');
         });
 
         if (file_exists('./database/dumps/resource_data.sql')) {
