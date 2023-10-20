@@ -78,7 +78,7 @@ trait Preferences
 
     public function getStartDate()
     {
-        return $this->startDate;
+        return $this->start_date;
     }
 
     public function getStrenuousness(): ?float

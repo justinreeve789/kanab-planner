@@ -55,48 +55,25 @@ class Itinerary extends Model
         'trip_preference' => 'json',
     ];
 
-    public $accommodationPreference;
-    public $activities;
-    public $activityPriorities;
-    public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
-    public $thriftiness = self::DEFAULT_THRIFTINESS;
-    public $arrivalDateTime;
-    public $averageHikingSpeed;
-    public $baseArea;
-    public $baseAreaId = self::DEFAULT_BASE_AREA_ID;
-    public $checkInTime;
-    public $checkOutTime;
-    public $days;
-    public $departureDateTime;
-    public $durationDays;
-    public $endDate;
-    public $estimatedCost;
-    public $eventIds = [];
-    public $homeLocationId;
-    public $interests;
-    public $key;
-    public $latitude;  // The latitude of the "base camp."
-    public $locationIds = [];
-    public $longitude; // The longitude of the "base camp."
-    public $month;
-    public $priorities;
-    public $restaurantIds = [];
-    public $season;
-    public $solitariness = self::DEFAULT_SOLITARINESS;
-    public $startDate;
-    public $strenuousness = self::DEFAULT_STRENUOUSNESS;
-    public $totalPossibleTrails = 0;
-    public $totalTravelDistance = 0;
-    public $trailIds = [];
-    public $trailPriorities;
-    public $tripPreference;
-    public $useFirstDay;
-    public $useLastDay;
-
     public function __construct()
     {
         $this->key = sha1(microtime(true));
         $this->days = [];
+        $this->activities = [];
+        $this->adventurousness = self::DEFAULT_ADVENTUROUSNESS;
+        $this->arrival_date_time = date('Y-m-d H:i:s', strtotime($this->getStartDate() . ' ' . self::DEFAULT_ARRIVAL_TIME));
+        $this->thriftiness = self::DEFAULT_THRIFTINESS;
+        $this->base_area_id = self::DEFAULT_BASE_AREA_ID;
+        $this->event_ids = [];
+        $this->location_ids = [];
+        $this->restaurant_ids = [];
+        $this->solitariness = self::DEFAULT_SOLITARINESS;
+        $this->strenuousness = self::DEFAULT_STRENUOUSNESS;
+        $this->total_possible_trails = 0;
+        $this->total_travel_distance = 0;
+        $this->trail_ids = [];
+
+        parent::__construct();
     }
 
     /**
