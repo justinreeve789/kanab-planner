@@ -8,7 +8,7 @@ trait Preferences
 {
     public function getActivityPriorities(): ?array
     {
-        return $this->activityPriorities;
+        return $this->activity_priorities;
     }
 
     public function getAdventurousness(): ?float
@@ -16,34 +16,34 @@ trait Preferences
         return $this->adventurousness;
     }
 
-    public function getAverageHikingSpeed(): ?float
+    public function getAverageHikingspeed(): ?float
     {
-        return $this->averageHikingSpeed;
+        return $this->average_hiking_speed;
     }
 
     public function getBaseAreaId(): int
     {
-        return $this->baseAreaId;
+        return $this->base_area_id;
     }
 
     public function getCheckIn()
     {
-        return $this->checkInTime;
+        return $this->check_in_time;
     }
 
     public function getCheckOut()
     {
-        return $this->checkOutTime;
+        return $this->check_out_time;
     }
 
     public function getDurationDays(): ?int
     {
-        return $this->durationDays;
+        return $this->duration_days;
     }
 
     public function getEndDate()
     {
-        return $this->endDate;
+        return $this->end_date;
     }
 
     public function getLatitude(): ?float
@@ -89,9 +89,9 @@ trait Preferences
     public function getTrailPriorities($random = false): ?array
     {
         if ($random === true) {
-            return $this->shuffleArray($this->trailPriorities);
+            return $this->shuffleArray($this->trail_priorities);
         } else {
-            return $this->trailPriorities;
+            return $this->trail_priorities;
         }
     }
 
@@ -102,7 +102,7 @@ trait Preferences
         if (!is_array($priorities)) {
             $priorities = explode(',', $priorities);
         }
-        $this->activityPriorities = $priorities;
+        $this->activity_priorities = $priorities;
     }
 
     public function setAdventurousness(?float $adventurousness)
@@ -111,9 +111,9 @@ trait Preferences
         $this->adventurousness = $adventurousness;
     }
 
-    public function setAverageHikingSpeed(?float $averageHikingSpeed)
+    public function setAverageHikingspeed(?float $average_hiking_speed)
     {
-        $this->averageHikingSpeed = $averageHikingSpeed ?? self::DEFAULT_AVERAGE_HIKING_SPEED;
+        $this->average_hiking_speed = $average_hiking_speed ?? self::DEFAULT_AVERAGE_HIKING_SPEED;
     }
 
     public function setBaseAreaId(?int $baseAreaId)
@@ -121,42 +121,42 @@ trait Preferences
         if ($baseAreaId === null) {
             $baseAreaId = self::DEFAULT_BASE_AREA_ID;
         }
-        $this->baseAreaId = $baseAreaId;
+        $this->base_area_id = $baseAreaId;
     }
 
-    public function setCheckInTime(?string $checkInTime)
+    public function setCheckIntime(?string $check_in_time)
     {
-        if ($checkInTime === null) {
-            $checkInTime = self::DEFAULT_CHECKIN_TIME;
+        if ($check_in_time === null) {
+            $check_in_time = self::DEFAULT_CHECKIN_TIME;
         }
-        $this->checkInTime = $checkInTime;
+        $this->check_in_time = $check_in_time;
     }
 
-    public function setCheckOutTime(?string $checkOutTime)
+    public function setCheckOutTime(?string $check_out_time)
     {
-        if ($checkOutTime === null) {
-            $checkOutTime = self::DEFAULT_CHECKOUT_TIME;
+        if ($check_out_time === null) {
+            $check_out_time = self::DEFAULT_CHECKOUT_TIME;
         }
-        $this->checkOutTime = $checkOutTime;
+        $this->check_out_time = $check_out_time;
     }
 
     public function setDates($arrivalDateTime, $departureDateTime)
     {
         $this->arrivalDateTime = $arrivalDateTime;
-        $this->departureDateTime = $departureDateTime;
+        $this->departure_date_time = $departureDateTime;
     }
 
-    public function setDurationDays(?int $durationDays)
+    public function setDurationDays(?int $duration_days)
     {
-        if ($durationDays === null) {
-            $durationDays = self::DEFAULT_DURATION_DAYS;
+        if ($duration_days === null) {
+            $duration_days = self::DEFAULT_DURATION_DAYS;
         }
-        $this->durationDays = $durationDays;
+        $this->durationDays = $duration_days;
     }
 
     public function setEndDate($endDate)
     {
-        $this->endDate = $endDate;
+        $this->end_date = $endDate;
     }
 
     public function setLatitude(?float $latitude)
@@ -206,7 +206,7 @@ trait Preferences
 
     public function setStartDate($startDate)
     {
-        $this->startDate = $startDate;
+        $this->start_date = $startDate;
     }
 
     public function setStrenuousness(?float $strenuousness)
@@ -222,7 +222,7 @@ trait Preferences
         if (!is_array($priorities)) {
             $priorities = explode(',', $priorities);
         }
-        $this->trailPriorities = $priorities;
+        $this->trail_priorities = $priorities;
     }
 
     protected function shuffleArray($array) {

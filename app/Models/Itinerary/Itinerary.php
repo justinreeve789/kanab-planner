@@ -17,7 +17,6 @@ class Itinerary extends Model
 {
     use HasFactory;
     use Preferences;
-    use ReturnAllProperties;
     use SnakeCaseAttributes;
 
     const DEFAULT_ADVENTUROUSNESS = 0.3;
@@ -55,6 +54,13 @@ class Itinerary extends Model
         'trip_preference' => 'json',
     ];
 
+    public $activities;
+    public $days;
+    public $event_ids;
+    public $location_ids;
+    public $restaurant_ids;
+    public $trail_ids;
+
     public function __construct()
     {
         $this->key = sha1(microtime(true));
@@ -64,6 +70,7 @@ class Itinerary extends Model
         $this->arrival_date_time = date('Y-m-d H:i:s', strtotime($this->getStartDate() . ' ' . self::DEFAULT_ARRIVAL_TIME));
         $this->thriftiness = self::DEFAULT_THRIFTINESS;
         $this->base_area_id = self::DEFAULT_BASE_AREA_ID;
+        $this->duration_days = self::DEFAULT_DURATION_DAYS;
         $this->event_ids = [];
         $this->location_ids = [];
         $this->restaurant_ids = [];
@@ -101,13 +108,13 @@ class Itinerary extends Model
         }
 
         if ($resource->isEvent()) {
-            $this->eventIds[] = $resource->id;
+            $this->event_ids[] = $resource->id;
         } else if ($resource->isLocation()) {
-            $this->locationIds[] = $resource->id;
+            $this->location_ids[] = $resource->id;
         } else if ($resource->isRestaurant()) {
-            $this->restaurantIds[] = $resource->id;
+            $this->restaurant_ids[] = $resource->id;
         } else if ($resource->isTrail()) {
-            $this->trailIds[] = $resource->id;
+            $this->trail_ids[] = $resource->id;
         }
     }
 
@@ -173,8 +180,8 @@ class Itinerary extends Model
 
     public function getBaseArea(): ?Area
     {
-        if ($this->baseArea === null && $this->baseAreaId !== null) {
-            $this->baseArea = Area::where('id', $this->baseAreaId)->first();
+        if ($this->baseArea === null && $this->base_area_id !== null) {
+            $this->baseArea = Area::where('id', $this->base_area_id)->first();
         }
         return $this->baseArea;
     }
@@ -191,21 +198,21 @@ class Itinerary extends Model
 
     public function getDepartureDateTime()
     {
-        if (isset($this->departureDateTime)) {
-            return $this->departureDateTime;
+        if (isset($this->departure_date_time)) {
+            return $this->departure_date_time;
         }
-        $this->departureDateTime = date('Y-m-d H:i:s', strtotime($this->endDate . ' ' . self::DEFAULT_DEPARTURE_TIME));
-        return $this->departureDateTime;
+        $this->departure_date_time = date('Y-m-d H:i:s', strtotime($this->end_date . ' ' . self::DEFAULT_DEPARTURE_TIME));
+        return $this->departure_date_time;
     }
 
     public function getTotalPossibleTrails(): ?int
     {
-        return $this->totalPossibleTrails;
+        return $this->total_possible_trails;
     }
 
     public function getTotalTravelDistance(): ?int
     {
-        return $this->totalTravelDistance;
+        return $this->total_travel_distance;
     }
 
     public function hasMeal($date, $period): bool
@@ -264,41 +271,41 @@ class Itinerary extends Model
 
     public function eventExists($event): bool
     {
-        return in_array($event->id, $this->eventIds);
+        return in_array($event->id, $this->event_ids);
     }
 
     public function locationExists($location): bool
     {
-        return in_array($location->id, $this->locationIds);
+        return in_array($location->id, $this->location_ids);
     }
 
     public function restaurantExists($restaurant): bool
     {
-        return in_array($restaurant->id, $this->restaurantIds);
+        return in_array($restaurant->id, $this->restaurant_ids);
     }
 
     public function trailExists($trail): bool
     {
-        return in_array($trail->id, $this->trailIds);
+        return in_array($trail->id, $this->trail_ids);
     }
 
     public function getUseFirstDay(): bool
     {
         $a = strtotime($this->getArrivalDateTime());
-        $b = strtotime($this->startDate . ' ' . self::DEFAULT_ARRIVAL_TIME);
+        $b = strtotime($this->start_date . ' ' . self::DEFAULT_ARRIVAL_TIME);
         return $a < $b - 3600;
     }
 
     public function getUseLastDay(): bool
     {
         $a = strtotime($this->getDepartureDateTime());
-        $b = strtotime($this->endDate . ' ' . self::DEFAULT_DEPARTURE_TIME);
+        $b = strtotime($this->end_date . ' ' . self::DEFAULT_DEPARTURE_TIME);
         return $a > $b + 3600;
     }
 
     public function setBaseArea($area)
     {
-        $this->baseArea = $area;
+        $this->base_area = $area;
     }
 
     public function setDays(array $days)
@@ -308,11 +315,11 @@ class Itinerary extends Model
 
     public function setTotalPossibleTrails(int $totalPossibleTrails)
     {
-        $this->totalPossibleTrails = $totalPossibleTrails;
+        $this->total_possible_trails = $totalPossibleTrails;
     }
 
     public function setTotalTravelDistance(int $totalTravelDistance)
     {
-        $this->totalTravelDistance = $totalTravelDistance;
+        $this->total_travel_distance = $totalTravelDistance;
     }
 }

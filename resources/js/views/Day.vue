@@ -5,7 +5,7 @@
       <h2 :id="'day-heading-' + day.dayNum" class="day-heading relative w-full">
         <div class="flex bg-white items-center justify-between w-full font-medium text-left text-gray-500">
           <div class="day-title p-4 justify-end">
-            <span class="day md:inline font-large text-3xl">Day {{ day.dayNum + 1 }}</span>
+            <span class="day md:inline font-large text-3xl">Day {{ day.day_num + 1 }}</span>
             <span class="separator hidden md:inline md:text-lg"> - </span>
             <span class="area font-large md:inline text-md md:text-3xl md:inline-block block">{{ day.area.name }}</span>
           </div>
@@ -17,12 +17,12 @@
             </label>
           </div>
           <div class="p-4 justify-end text-md text-right">
-            <span class="date-day-of-week hidden md:inline">{{ day.formattedDayOfWeek }}</span>
+            <span class="date-day-of-week hidden md:inline">{{ day.formatted_day_of_week }}</span>
             <span class="pr-1 hidden md:inline">,</span>
-            <span class="date-month-day sm:hidden">{{ day.formattedAbbrMonthDay }}</span>
-            <span class="date-month-day hidden sm:inline">{{ day.formattedMonthDay }}</span>
+            <span class="date-month-day sm:hidden">{{ day.formatted_abbr_month_day }}</span>
+            <span class="date-month-day hidden sm:inline">{{ day.formatted_month_day }}</span>
             <span class="pr-1 hidden md:inline">,</span>
-            <span class="date-year block md:inline">{{ day.formattedYear }}</span>
+            <span class="date-year block md:inline">{{ day.formatted_year }}</span>
           </div>
         </div>
       </h2>

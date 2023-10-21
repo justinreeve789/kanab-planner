@@ -103,6 +103,9 @@ class ItineraryController extends Controller
         return $query->get();
     }
 
+    /**
+     * @return Itinerary
+     */
     private function getItinerary()
     {
         return $this->itinerary;

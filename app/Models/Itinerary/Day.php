@@ -14,61 +14,52 @@ use Illuminate\Database\Eloquent\Model;
 class Day extends Model
 {
     use HasFactory;
-    use ReturnAllProperties;
 
     const DEFAULT_ARRIVAL_TIME = '16:00:00';
     const DEFAULT_DEPARTURE_TIME = '10:00:00';
 
-    protected $casts = ['stats'];
+    protected $casts = ['stats' => 'json'];
     protected $guarded = [];
 
-    //    public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
+//    public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
     public $activities;
-    public $areaId;
     public $area;
     public $date;
-    public $dayNum;
 //    public $solitariness = self::DEFAULT_SOLITARINESS;
 //    public $strenuousness = self::DEFAULT_STRENUOUSNESS;
-    public $endTime = '22:00';
-    public $formattedAbbrMonthDay;
-    public $formattedDate;
-    public $formattedDayOfWeek;
-    public $formattedMonthDay;
-    public $formattedYear;
     public $periods;
     public $preamble;
-    public $startTime = '07:00';
-    public $stats;
     public $temperatures;
 
     public function __construct($date, $area, ?int $dayNum)
     {
         $this->date = $date;
-        $this->formattedAbbrMonthDay = date('M j', strtotime($this->date));
-        $this->formattedDate = date('l, F j, Y', strtotime($this->date));
-        $this->formattedDayOfWeek = date('l', strtotime($this->date));
-        $this->formattedMonthDay = date('F j', strtotime($this->date));
-        $this->formattedYear = date('Y', strtotime($this->date));
+        $this->end_time = '22:00';
+        $this->formatted_abbr_month_day = date('M j', strtotime($this->date));
+        $this->formatted_date = date('l, F j, Y', strtotime($this->date));
+        $this->formatted_day_of_week = date('l', strtotime($this->date));
+        $this->formatted_month_day = date('F j', strtotime($this->date));
+        $this->formatted_year = date('Y', strtotime($this->date));
+        $this->start_time = '07:00';
 
         if ($area !== null) {
             if (is_integer($area)) {
                 $area = Area::where('id', $area)->first();
             }
-            $this->areaId = $area->id;
+            $this->area_id = $area->id;
             $this->area = $area;
         }
 
         if ($dayNum !== null) {
-            $this->dayNum = $dayNum;
+            $this->day_num = $dayNum;
         }
 
         $this->activities = [];
         $this->periods = [
-            Period::MORNING => new Period(Period::MORNING, $this->areaId),
-            Period::AFTERNOON => new Period(Period::AFTERNOON, $this->areaId),
-            Period::EVENING => new Period(Period::EVENING, $this->areaId),
-            Period::NIGHT => new Period(Period::NIGHT, $this->areaId),
+            Period::MORNING => new Period(Period::MORNING, $this->area_id),
+            Period::AFTERNOON => new Period(Period::AFTERNOON, $this->area_id),
+            Period::EVENING => new Period(Period::EVENING, $this->area_id),
+            Period::NIGHT => new Period(Period::NIGHT, $this->area_id),
         ];
         $this->temperatures = $this->getTemperatures();
     }
@@ -146,7 +137,7 @@ class Day extends Model
 
     public function getTemperatures()
     {
-        $weather = AreaWeather::where('area_id', $this->areaId)
+        $weather = AreaWeather::where('area_id', $this->area_id)
             ->where('start', '>=', $this->date . ' 00:00:00')
             ->where('end', '<=', $this->date . ' 23:59:59')
             ->select(
@@ -247,12 +238,12 @@ class Day extends Model
 
     public function getAreaId(): int
     {
-        return $this->areaId;
+        return $this->area_id;
     }
 
-    public function setAreaId(int $areaId)
+    public function setAreaId(int $area_id)
     {
-        $this->areaId = $areaId;
+        $this->area_id = $area_id;
     }
 
     public function setPreamble(string $preamble): void

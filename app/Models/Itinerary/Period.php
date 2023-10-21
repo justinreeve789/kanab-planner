@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 class Period extends Model
 {
     use HasFactory;
-    use ReturnAllProperties;
 
     public const MORNING = 'morning';
     public const AFTERNOON = 'afternoon';
@@ -20,8 +19,6 @@ class Period extends Model
     protected $guarded = [];
 
     public $activities = [];
-    public $areaId;
-    public $type;
 
     public function __construct(?string $type, ?int $areaId) {
         if ($type !== null) {
@@ -44,7 +41,7 @@ class Period extends Model
 
     public function getAreaId(): int
     {
-        return $this->areaId;
+        return $this->area_id;
     }
 
     public static function getPeriodTypes()
@@ -139,8 +136,8 @@ class Period extends Model
         return $this->type;
     }
 
-    public function setAreaId(int $areaId) {
-        $this->areaId = $areaId;
+    public function setAreaId(int $area_id) {
+        $this->area_id = $area_id;
     }
 
     public function setType(string $type) {

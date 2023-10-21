@@ -104,7 +104,7 @@ class ItineraryService
 
 //        $curTime = $day->startTime;
         $date = $day->date;
-        $dayNum = $day->dayNum;
+        $dayNum = $day->day_num;
         $durationDays = $this->getItinerary()->getDurationDays();
 
         // If this is the first day and they're arriving at a normal late time, let's not plan any activities. Just
@@ -150,7 +150,7 @@ class ItineraryService
             $this->getItinerary()->addActivity($trail,
                 $date . ' 08:00',
                 $trail->calculateEndDate('08:00'),
-                $day->dayNum,
+                $day->day_num,
                 $trailPeriod,
                 'hiking'
             );
@@ -265,7 +265,7 @@ class ItineraryService
         if ($this->getItinerary()->getAdventurousness() < 0.5) {
             return;
         }
-        $dayNum = $day->dayNum;
+        $dayNum = $day->day_num;
         if (empty($day->periods[Period::AFTERNOON]->getActivities())) {
             $event = Event::betweenDates($day->date . ' 12:00:00', $day->date . ' 16:00:00')
                 ->with('location')
@@ -284,7 +284,7 @@ class ItineraryService
         if ($this->getItinerary()->getAdventurousness() < 0.5) {
             return;
         }
-        $dayNum = $day->dayNum;
+        $dayNum = $day->day_num;
         if (empty($day->periods[Period::EVENING]->getActivities())) {
 //            $event = Event::betweenDates($day->date . ' 17:00:00', $day->date . ' 22:00:00')
 //                ->with('location')
@@ -311,7 +311,7 @@ class ItineraryService
         if ($this->getItinerary()->getAdventurousness() < 0.5) {
             return;
         }
-        $dayNum = $day->dayNum;
+        $dayNum = $day->day_num;
         if (empty($day->periods[Period::EVENING]->getActivities())) {
             $event = Event::betweenDates($day->date . ' 22:00:00', $day->date . ' 23:59:59')
                 ->with('location')
@@ -329,7 +329,7 @@ class ItineraryService
     public function addMeal(Day $day, string $period)
     {
         $date = $day->date;
-        $dayNum = $day->dayNum;
+        $dayNum = $day->day_num;
         $mealTime = Period::getTimesForMeals($period);
         $startTime = $mealTime['startTime'];
         $endTime = $mealTime['endTime'];
@@ -338,7 +338,7 @@ class ItineraryService
         if ($this->shouldAddDining($day, $period)) {
             $restaurant = Restaurant::with(['location' => function($query) {
                 $query->with('images');
-            }])->whereNotIn('restaurants.id', $this->getItinerary()->restaurantIds)
+            }])->whereNotIn('restaurants.id', $this->getItinerary()->restaurant_ids)
                 ->whereIsOpen($date . ' ' . $mealTime['startTime'])->whereHas('location', function($query) use ($day) {
                     $query->where('area_id', $day->getAreaId());
                 })->inRandomOrder()->first();
@@ -441,7 +441,7 @@ class ItineraryService
         $date = $this->getItinerary()->getStartDate();
         if ($useFirstDay === false) {
             $day = new Day($date, $baseArea->id, $dayNum);
-            $day->startTime = Day::DEFAULT_ARRIVAL_TIME;
+            $day->start_time = Day::DEFAULT_ARRIVAL_TIME;
             $days[$dayNum++] = $day;
             $date = $this->incrementDate($date);
             $areaIds[] = $baseArea->id;
@@ -452,7 +452,7 @@ class ItineraryService
         // Do the same for the last day.
         if ($useLastDay === false) {
             $day = new Day($date, $baseArea->id, $durationDays - 1);
-            $day->endTime = Day::DEFAULT_DEPARTURE_TIME;
+            $day->end_time = Day::DEFAULT_DEPARTURE_TIME;
             $days[$durationDays - 1] = $day;
             $areaIds[] = $baseArea->id;
         }
@@ -630,14 +630,14 @@ class ItineraryService
             return false;
         }
 
-        if ($day->areaId !== $this->getItinerary()->getBaseAreaId()) {
+        if ($day->area_id !== $this->getItinerary()->getBaseAreaId()) {
             switch ($period) {
                 case Period::MORNING:
                     return true;
                 case Period::EVENING:
                     $activities = $day->getPeriods()[Period::AFTERNOON]->getActivities();
                     $areaDistance = AreaDistance::where([
-                        'from_area_id' => $day->areaId,
+                        'from_area_id' => $day->area_id,
                         'to_area_id' => $this->getItinerary()->getBaseAreaId(),
                     ])->first();
                     if ($areaDistance) {
@@ -664,10 +664,10 @@ class ItineraryService
     public function addRandomTrailToPeriod(Day $day, string $period)
     {
         $trail = $this->trailService->getRandomTrailForPeriod(
-            $day->areaId,
+            $day->area_id,
             $period,
             $this->getItinerary(),
-            $this->getItinerary()->trailIds
+            $this->getItinerary()->trail_ids
         );
         if ($trail && !$this->getItinerary()->trailExists($trail)) {
             $startTime = Period::getStartTimeForActivities($period);
@@ -675,7 +675,7 @@ class ItineraryService
                 $trail,
                 ($day->date . ' ' . $startTime),
                 $trail->calculateEndDate($day->date . ' ' . $startTime),
-                $day->dayNum,
+                $day->day_num,
                 $period,
                 'hiking'
             );
