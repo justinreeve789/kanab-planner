@@ -142,7 +142,7 @@ trait Preferences
 
     public function setDates($arrivalDateTime, $departureDateTime)
     {
-        $this->arrivalDateTime = $arrivalDateTime;
+        $this->arrival_date_time = $arrivalDateTime;
         $this->departure_date_time = $departureDateTime;
     }
 
@@ -151,7 +151,7 @@ trait Preferences
         if ($duration_days === null) {
             $duration_days = self::DEFAULT_DURATION_DAYS;
         }
-        $this->durationDays = $duration_days;
+        $this->duration_days = $duration_days;
     }
 
     public function setEndDate($endDate)

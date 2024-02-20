@@ -2,7 +2,7 @@
   <div class="collapse collapse-arrow bg-white">
     <input type="checkbox" />
     <div class="collapse-title text-xl font-medium">
-      <h2 :id="'day-heading-' + day.dayNum" class="day-heading relative w-full">
+      <h2 :id="'day-heading-' + day.day_num" class="day-heading relative w-full">
         <div class="flex bg-white items-center justify-between w-full font-medium text-left text-gray-500">
           <div class="day-title p-4 justify-end">
             <span class="day md:inline font-large text-3xl">Day {{ day.day_num + 1 }}</span>
@@ -10,7 +10,7 @@
             <span class="area font-large md:inline text-md md:text-3xl md:inline-block block">{{ day.area.name }}</span>
           </div>
           <div class="flex-1 p-4 items-start justify-end">
-            <label :for="'day-stats-' + day.dayNum" class="graph" v-if="day.stats">
+            <label :for="'day-stats-' + day.day_num" class="graph" v-if="day.stats">
               <div class="gradient-line adventurousness relative z-10" v-if="adventurousness" :style="'height: ' + adventurousness + '%;'"></div>
               <div class="gradient-line solitariness relative z-10" v-if="solitariness" :style="'height: ' + solitariness + '%;'"></div>
               <div class="gradient-line strenuousness relative z-10" v-if="strenuousness" :style="'height: ' + strenuousness + '%;'"></div>
@@ -28,7 +28,7 @@
       </h2>
     </div>
 
-    <div :id="'day-body-' + day.dayNum" class="collapse-content bg-white w-full">
+    <div :id="'day-body-' + day.day_num" class="collapse-content bg-white w-full">
       <div v-if="day.preamble">
         <p class="mb-8">{{ day.preamble }}</p>
       </div>

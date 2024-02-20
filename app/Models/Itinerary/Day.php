@@ -14,12 +14,14 @@ use Illuminate\Database\Eloquent\Model;
 class Day extends Model
 {
     use HasFactory;
+    use ReturnAllProperties;
 
     const DEFAULT_ARRIVAL_TIME = '16:00:00';
     const DEFAULT_DEPARTURE_TIME = '10:00:00';
 
     protected $casts = ['stats' => 'json'];
     protected $guarded = [];
+    protected $table = 'itinerary_days';
 
 //    public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
     public $activities;
@@ -31,15 +33,21 @@ class Day extends Model
     public $preamble;
     public $temperatures;
 
-    public function __construct($date, $area, ?int $dayNum)
+    public function __construct(array $attributes = [])
     {
-        $this->date = $date;
+        parent::__construct();
+
+        $date = $attributes['date'] ?? null;
+        // $this->date = $date;
+        $area = $attributes['base_area'] ?? null;
+        $dayNum = $attributes['day_num'] ?? null;
+
         $this->end_time = '22:00';
-        $this->formatted_abbr_month_day = date('M j', strtotime($this->date));
-        $this->formatted_date = date('l, F j, Y', strtotime($this->date));
-        $this->formatted_day_of_week = date('l', strtotime($this->date));
-        $this->formatted_month_day = date('F j', strtotime($this->date));
-        $this->formatted_year = date('Y', strtotime($this->date));
+        $this->formatted_abbr_month_day = date('M j', strtotime($date));
+        $this->formatted_date = date('l, F j, Y', strtotime($date));
+        $this->formatted_day_of_week = date('l', strtotime($date));
+        $this->formatted_month_day = date('F j', strtotime($date));
+        $this->formatted_year = date('Y', strtotime($date));
         $this->start_time = '07:00';
 
         if ($area !== null) {
@@ -64,9 +72,19 @@ class Day extends Model
         $this->temperatures = $this->getTemperatures();
     }
 
+    public function set($date, $area, ?int $dayNum)
+    {
+        $this->date = $date;
+    }
+
     public function periods()
     {
         return $this->hasMany(Period::class, 'day_id', 'id');
+    }
+
+    public function saveAll()
+    {
+        $this->periods->each()->save();
     }
 
     public function addActivity($resource, $activityType = null, $startTime = null, $endTime = null)

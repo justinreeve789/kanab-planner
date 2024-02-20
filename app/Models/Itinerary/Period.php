@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class Period extends Model
 {
     use HasFactory;
+    use ReturnAllProperties;
 
     public const MORNING = 'morning';
     public const AFTERNOON = 'afternoon';
@@ -22,11 +23,13 @@ class Period extends Model
 
     public function __construct(?string $type, ?int $areaId) {
         if ($type !== null) {
-            $this->setType($type);
+            $this->type = $type;
         }
         if ($areaId !== null) {
-            $this->setAreaId($areaId);
+            $this->area_id = $areaId;
         }
+
+        parent::__construct();
     }
 
     public function addActivity($resource, $activityType = null, $startTime = null, $endTime = null)
@@ -129,18 +132,5 @@ class Period extends Model
     public function hasTrail(): bool
     {
         return $this->hasResourceClass('App\\Models\\Trail');
-    }
-
-    public function getType(): string
-    {
-        return $this->type;
-    }
-
-    public function setAreaId(int $area_id) {
-        $this->area_id = $area_id;
-    }
-
-    public function setType(string $type) {
-        $this->type = $type;
     }
 }

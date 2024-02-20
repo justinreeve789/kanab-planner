@@ -30,6 +30,8 @@ class Activity extends Model
 
     public function __construct($resource, $activityType = null, $startTime = null, $endTime = null)
     {
+        parent::__construct();
+
         $this->phraseService = new PhraseService();
 
         $this->hash = substr(md5(microtime(true)), 0, 8);

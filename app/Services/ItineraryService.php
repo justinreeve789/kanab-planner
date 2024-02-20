@@ -195,7 +195,7 @@ class ItineraryService
         $durationDays = $this->getItinerary()->getDurationDays();
         foreach ($days as $index => $day) {
             $date = $day->date;
-            $dayNum = $day->dayNum;
+            $dayNum = $day->day_num;
             if ($dayNum === 0 || $dayNum === $durationDays - 1) {
                 continue;
             }
@@ -204,7 +204,7 @@ class ItineraryService
             // TODO: People may be foodies and want to try restaurants in different areas. Accommodate this.
             if ($day->area_id !== $baseArea->id && !$day->hasEvent() && !$day->hasLocation() && !$day->hasTrail()) {
                 unset($days[$index]);
-                $day = new Day($date, $baseArea, $dayNum);
+                $day = new Day(['date' => $date, 'base_area' => $baseArea, 'day_num' => $dayNum]);
                 $day = $this->fillDay($day, true);
                 $days[$index] = $day;
             }
@@ -440,7 +440,7 @@ class ItineraryService
         // Default to the user's accommodation area for the first day, if $useFirstDay is false.
         $date = $this->getItinerary()->getStartDate();
         if ($useFirstDay === false) {
-            $day = new Day($date, $baseArea->id, $dayNum);
+            $day = new Day(['date' => $date, 'base_area' => $baseArea, 'day_num' => $dayNum]);
             $day->start_time = Day::DEFAULT_ARRIVAL_TIME;
             $days[$dayNum++] = $day;
             $date = $this->incrementDate($date);
@@ -451,7 +451,7 @@ class ItineraryService
 
         // Do the same for the last day.
         if ($useLastDay === false) {
-            $day = new Day($date, $baseArea->id, $durationDays - 1);
+            $day = new Day(['date' => $date, 'base_area' => $baseArea, 'day_num' => $durationDays - 1]);
             $day->end_time = Day::DEFAULT_DEPARTURE_TIME;
             $days[$durationDays - 1] = $day;
             $areaIds[] = $baseArea->id;
@@ -474,7 +474,7 @@ class ItineraryService
         $modifier = $useLastDay ? 0 : -1;
         foreach ($trailAreaIds as $areaId => $tai) {
             if (count($days) < $durationDays + $modifier) {
-                $day = new Day($date, $areaId, $dayNum);
+                $day = new Day(['date' => $date, 'base_area' => $baseArea, 'day_num' => $dayNum]);
                 $days[$dayNum++] = $day;
                 $date = $this->incrementDate($date);
             }
@@ -543,7 +543,7 @@ class ItineraryService
                 $areaId = $baseArea->id;
             }
 
-            $day = new Day($date, $areaId, $dayNum);
+            $day = new Day(['date' => $date, 'base_area' => $baseArea, 'day_num' => $dayNum]);
             $days[$dayNum++] = $day;
             $date = $this->incrementDate($date);
             $areaIds[] = $areaId;
