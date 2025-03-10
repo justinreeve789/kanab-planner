@@ -63,7 +63,7 @@ class ItineraryController extends Controller
 
         $this->getItinerary()->setTotalTravelDistance($this->itineraryService->estimateTotalTravelDistance());
 
-//        $this->getItinerary()->save();
+        $this->getItinerary()->save();
 
         return response()->json($this->getItinerary());
     }
@@ -206,7 +206,7 @@ class ItineraryController extends Controller
                 }
             }
         }
-        throw new \Exception('Could not set dates: ' . print_r($this->getItinerary(), true));
+//        throw new \Exception('Could not set dates: ' . print_r($this->getItinerary(), true));
     }
 
     private function getRandomDateInMonth($month, int $year = null) {

@@ -17,7 +17,8 @@ class Itinerary extends Model
 {
     use HasFactory;
     use Preferences;
-    use SnakeCaseAttributes;
+    use ReturnAllProperties;
+//    use SnakeCaseAttributes;
 
     const DEFAULT_ADVENTUROUSNESS = 0.3;
     const DEFAULT_SOLITARINESS = 0.3;
@@ -55,6 +56,7 @@ class Itinerary extends Model
     ];
 
     public $activities;
+    public $base_area;
     public $days;
     public $event_ids;
     public $location_ids;
@@ -63,7 +65,9 @@ class Itinerary extends Model
 
     public function __construct()
     {
-        $this->key = sha1(microtime(true));
+        parent::__construct();
+
+        $this->key = \Session::getId();
         $this->days = [];
         $this->activities = [];
         $this->adventurousness = self::DEFAULT_ADVENTUROUSNESS;
@@ -79,8 +83,6 @@ class Itinerary extends Model
         $this->total_possible_trails = 0;
         $this->total_travel_distance = 0;
         $this->trail_ids = [];
-
-        parent::__construct();
     }
 
     /**
@@ -96,6 +98,23 @@ class Itinerary extends Model
     public function days()
     {
         return $this->hasMany(Day::class, 'itinerary_id', 'id');
+    }
+
+    public function save(array $options = [])
+    {
+        return \DB::transaction(function () use ($options) {
+            $this->load('days');
+            parent::save($options);
+            if ($this->relationLoaded('days')) {
+                echo '<pre>'; print_r($this->days()); echo '</pre>';
+                $this->days()->saveMany($this->getRelation('days'));
+            }
+        });
+    }
+
+    public function saveAll()
+    {
+        $this->days->each()->saveAll();
     }
 
     public function addActivity($resource, $startDateTime, $endDateTime, int $dayNum, $period = null, $activityType = null)
@@ -171,19 +190,19 @@ class Itinerary extends Model
 
     public function getArrivalDateTime()
     {
-        if (isset($this->arrivalDateTime)) {
-            return $this->arrivalDateTime;
+        if (isset($this->arrival_date_time)) {
+            return $this->arrival_date_time;
         }
-        $this->arrivalDateTime = date('Y-m-d H:i:s', strtotime($this->startDate . ' ' . self::DEFAULT_ARRIVAL_TIME));
-        return $this->arrivalDateTime;
+        $this->arrival_date_time = date('Y-m-d H:i:s', strtotime($this->start_date . ' ' . self::DEFAULT_ARRIVAL_TIME));
+        return $this->arrival_date_time;
     }
 
     public function getBaseArea(): ?Area
     {
-        if ($this->baseArea === null && $this->base_area_id !== null) {
-            $this->baseArea = Area::where('id', $this->base_area_id)->first();
+        if ($this->base_area === null && $this->base_area_id !== null) {
+            $this->base_area = Area::where('id', $this->base_area_id)->first();
         }
-        return $this->baseArea;
+        return $this->base_area;
     }
 
     public function getDay(int $index = 0): Day
@@ -305,7 +324,7 @@ class Itinerary extends Model
 
     public function setBaseArea($area)
     {
-        $this->base_area = $area;
+        $this->base_area_id = $area;
     }
 
     public function setDays(array $days)
