@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ImageController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Socialite\Facades\Socialite;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,15 @@ Route::get('/', function () {
     return view('app');
 })->name('application');
 
+Route::get('/auth/redirect', function () {
+    return Socialite::driver('google')->redirect();
+});
+
+Route::get('/auth/callback', function () {
+    $user = Socialite::driver('google')->user();
+
+    // $user->token
+});
 Route::get('/itinerary', 'App\Http\Controllers\ItineraryController@create');
 Route::get('/image/{type}/{id}', [ImageController::class, 'getUrl']);
 Route::get('/featured-resource-image/{type}/{resourceId}', [ImageController::class, 'getFeaturedImageUrl']);

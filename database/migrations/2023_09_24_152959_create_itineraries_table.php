@@ -36,9 +36,11 @@ return new class extends Migration
             $table->json('priorities')->nullable();
             $table->json('restaurant_ids')->nullable();
             $table->string('season')->nullable();
-            $table->json('solitariness')->nullable();
+            $table->decimal('solitariness', 3, 2)->nullable();
             $table->date('start_date')->nullable();
-            $table->json('strenuousness')->nullable();
+            $table->decimal('strenuousness', 3, 2)->nullable();
+            $table->decimal('thriftiness', 3, 2)->nullable();
+            $table->integer('total_travel_distance')->nullable();
             $table->integer('total_possible_trails')->nullable();
             $table->json('trail_ids')->nullable();
             $table->json('trail_priorities')->nullable();
