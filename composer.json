@@ -12,6 +12,7 @@
         "google/cloud-vision": "^1.7",
         "guzzlehttp/guzzle": "^7.2",
         "ivopetkov/html5-dom-document-php": "2.*",
+        "laravel/breeze": "^2.3",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/scout": "^10.4",
