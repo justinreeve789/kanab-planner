@@ -324,7 +324,7 @@ class Itinerary extends Model
 
     public function setBaseArea($area)
     {
-        $this->base_area_id = $area;
+        $this->base_area = $area;
     }
 
     public function setDays(array $days)
