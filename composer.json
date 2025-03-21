@@ -12,8 +12,9 @@
         "google/cloud-vision": "^1.7",
         "guzzlehttp/guzzle": "^7.2",
         "ivopetkov/html5-dom-document-php": "2.*",
-        "laravel/breeze": "^2.3",
+        "laravel/fortify": "^1.25",
         "laravel/framework": "^12.0",
+        "laravel/horizon": "^5.31",
         "laravel/sanctum": "^4.0",
         "laravel/scout": "^10.4",
         "laravel/tinker": "^2.10",
@@ -25,6 +26,7 @@
         "spatie/browsershot": "^5.0",
         "spatie/pdf-to-text": "^1.52",
         "symfony/http-client": "^6.3",
+        "thecodingmachine/safe": "^2.0",
         "thiagoalessio/tesseract_ocr": "^2.12"
     },
     "require-dev": {
@@ -38,7 +40,7 @@
         "phpunit/phpunit": "^11.5.3",
         "spatie/laravel-ignition": "^2.0",
         "symfony/panther": "^2.1",
-        "zoon/puphpeteer": "^2.1"
+        "zoon/puphpeteer": "^2.3"
     },
     "autoload": {
         "psr-4": {

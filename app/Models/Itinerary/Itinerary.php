@@ -3,7 +3,7 @@
 namespace App\Models\Itinerary;
 
 use App\Models\Area;
-use App\Models\Itinerary\Activity;
+use App\Models\Itinerary\ItineraryActivity;
 use App\Models\Itinerary\Day;
 use App\Models\Itinerary\Period;
 use App\Models\Itinerary\Season;
@@ -119,7 +119,7 @@ class Itinerary extends Model
 
     public function addActivity($resource, $startDateTime, $endDateTime, int $dayNum, $period = null, $activityType = null)
     {
-        $activity = new Activity($resource, $activityType, $startDateTime, $endDateTime);
+        $activity = new ItineraryActivity($resource, $activityType, $startDateTime, $endDateTime);
         $this->activities[] = $activity;
         $this->getDay($dayNum)->addActivity($resource, $activityType, date('H:i:s', strtotime($startDateTime)), date('H:i:s', strtotime($endDateTime)));
         if ($period) {

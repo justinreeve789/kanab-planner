@@ -34,7 +34,7 @@ class Period extends Model
 
     public function addActivity($resource, $activityType = null, $startTime = null, $endTime = null)
     {
-        $this->activities[] = new Activity($resource, $activityType, $startTime, $endTime);
+        $this->activities[] = new ItineraryActivity($resource, $activityType, $startTime, $endTime);
     }
 
     public function getActivities(): array

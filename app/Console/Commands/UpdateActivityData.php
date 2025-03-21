@@ -120,7 +120,7 @@ class UpdateActivityData extends Command
 
     protected function update($resourceTable, $item)
     {
-        ResourceData::updateOrCreate(['resource_table' => $resourceTable, 'resource_id' => $item->id, 'activity_id' => $item->activity($item->getActivityType())->id], [
+        ResourceData::updateOrCreate(['resource_table' => $resourceTable, 'resource_id' => $item->id, 'activity_type_id' => $item->getActivityType()->id], [
             'adventurousness' => $item->adventurousness($item->getActivityType()),
             'solitariness' => $item->solitariness($item->getActivityType()),
             'strenuousness' => $item->strenuousness($item->getActivityType()),

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 
-class Deviation implements Scope
+class DeviationScope implements Scope
 {
     /**
      * We want to get as close to all the properties as we can. For example, if adventurousness is 0.1 and strenuousness

@@ -78,7 +78,7 @@ class OpenAIService
 
     public function cleanTextWithOpenAI(string $text): ?string {
         $result = OpenAI::chat()->create([
-            'model' => 'gpt-3.5-turbo',
+            'model' => 'gpt-4.0-mini',
             'messages' => [[
                 'role' => 'system',
                 'content' => 'You are a helpful assistant transcribing scanned text and re-summarizing it for a travel web site about southern Utah and northern Arizona.',

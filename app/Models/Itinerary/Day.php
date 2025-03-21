@@ -89,7 +89,7 @@ class Day extends Model
 
     public function addActivity($resource, $activityType = null, $startTime = null, $endTime = null)
     {
-        $this->activities[] = new Activity($resource, $activityType, $startTime, $endTime);
+        $this->activities[] = new ItineraryActivity($resource, $activityType, $startTime, $endTime);
     }
 
     public function getPeriods(): array
@@ -129,9 +129,9 @@ class Day extends Model
 //                $stats['strenuousness'] += $strModifier * isset($activity->data->data[0]) ??
 //                    $activity->data->data[0]->strenuousness ??
 //                    $activity->strenuousness() ?? Activity::DEFAULT_STRENUOUSNESS;
-                $stats['adventurousness'] += $advModifier * $activity->data->data[0]->adventurousness ?? Activity::DEFAULT_ADVENTUROUSNESS;
-                $stats['solitariness'] += $solModifier * $activity->data->data[0]->solitariness ?? Activity::DEFAULT_SOLITARINESS;
-                $stats['strenuousness'] += $strModifier * $activity->data->data[0]->strenuousness ?? Activity::DEFAULT_STRENUOUSNESS;
+                $stats['adventurousness'] += $advModifier * $activity->data->data[0]->adventurousness ?? ItineraryActivity::DEFAULT_ADVENTUROUSNESS;
+                $stats['solitariness'] += $solModifier * $activity->data->data[0]->solitariness ?? ItineraryActivity::DEFAULT_SOLITARINESS;
+                $stats['strenuousness'] += $strModifier * $activity->data->data[0]->strenuousness ?? ItineraryActivity::DEFAULT_STRENUOUSNESS;
             }
         }
         if ($count > 0) {

@@ -6,7 +6,7 @@ use App\Models\Area;
 use App\Models\AreaDistance;
 use App\Models\AreaWeather;
 use App\Models\Event;
-use App\Models\Itinerary\Activity;
+use App\Models\Itinerary\ItineraryActivity;
 use App\Models\Itinerary\Day;
 use App\Models\Itinerary\Itinerary;
 use App\Models\Itinerary\Period;

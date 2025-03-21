@@ -20,6 +20,11 @@ class Event extends Resource
         return $this->hasMany(EventDate::class, 'event_id', 'id');
     }
 
+    public function images()
+    {
+        return $this->hasMany(EventImage::class, 'event_id', 'id');
+    }
+
     public function links()
     {
         return $this->hasMany(EventLink::class, 'event_id', 'id');

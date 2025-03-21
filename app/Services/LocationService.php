@@ -11,7 +11,7 @@ use App\Services\OCRService;
 use App\Services\OpenAIService;
 use Symfony\Component\Process\Process;
 
- class LocationService
+class LocationService
 {
     const DEFAULT_MPH_FOR_ESTIMATE = 30;
     const DEFAULT_MULTIPLIER_FOR_DRIVING_DISTANCE = 1.125;
@@ -51,6 +51,7 @@ use Symfony\Component\Process\Process;
         }
 
         $output = $process->getOutput();
+
         $pattern = '/Day: (\w+), Popular Times: \[([\d\s,]+)\]/';
         preg_match_all($pattern, $output, $matches, PREG_SET_ORDER);
         $currentDate = date('Y-m-d');

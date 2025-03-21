@@ -11,19 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::dropIfExists('resource_activities');
-        Schema::create('resource_activities', function (Blueprint $table) {
+        Schema::dropIfExists('resource_activity_types');
+        Schema::create('resource_activity_types', function (Blueprint $table) {
             $table->string('resource_table', 16);
-            $table->integer('resource_id');
-            $table->integer('activity_id');
+            $table->integer('resource_id')->unsigned();
+            $table->integer('activity_type_id')->unsigned();
             $table->timestamps();
             $table->index(['resource_table', 'resource_id']);
-            $table->index('activity_id');
-            $table->unique(['resource_table', 'resource_id', 'activity_id'], 'rt_ri_ai');
+            $table->index('activity_type_id');
+            $table->unique(['resource_table', 'resource_id', 'activity_type_id'], 'rt_ri_ati');
+            $table->foreign('activity_type_id')->references('id')->on('activity_types')->onDelete('cascade');
+//            $table->foreign('resource_id')->references('id')->on('resources')->onDelete('cascade');
         });
 
-        if (file_exists('./database/dumps/resource_activities.sql')) {
-            DB::unprepared(file_get_contents('./database/dumps/resource_activities.sql'));
+        if (file_exists('./database/dumps/resource_activity_types.sql')) {
+            DB::unprepared(file_get_contents('./database/dumps/resource_activity_types.sql'));
         }
     }
 
@@ -32,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('resource_activities');
+        Schema::dropIfExists('resource_activity_types');
     }
 };
