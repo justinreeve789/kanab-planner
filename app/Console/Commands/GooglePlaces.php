@@ -153,6 +153,8 @@ class GooglePlaces extends Command
         if (!$location) {
             $location = new Location([
                 'name' => $name,
+                'source_type' => self::SOURCE_TYPE,
+                'source_id' => $placeId,
                 'description' => $description,
                 'area_id' => ($latitude !== null && $longitude !== null) ? Area::getAreaForLatLng($latitude, $longitude)->id : 0,
                 'address' => $address,

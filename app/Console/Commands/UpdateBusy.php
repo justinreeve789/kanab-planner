@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\UpdateBusyJob;
 use App\Models\Location;
 use App\Services\LocationService;
 use Illuminate\Console\Command;
@@ -37,7 +38,7 @@ class UpdateBusy extends Command
         $doTrails = $this->option('trails');
 
         if ($doLocations) {
-            $this->processLocations();
+            UpdateBusyJob::dispatch();
         }
     }
 
@@ -45,7 +46,7 @@ class UpdateBusy extends Command
     {
         $locations = Location::where('source_type', 'googleplaces')->where('is_usable', 1)->get();
         foreach ($locations as $location) {
-            $this->locationService->getBusynessForLocation($location);
+            $this->locationService->updateBusynessForLocation($location);
         }
     }
 }

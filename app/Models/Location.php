@@ -38,6 +38,17 @@ class Location extends Resource
         $time = date('H:i:s', strtotime($dateTime));
     }
 
+    public function restaurant()
+    {
+        return $this->hasOne(Restaurant::class, 'location_id', 'id');
+    }
+
+    public function getSourceIdAttribute()
+    {
+        // Return the Location's source_id or fallback to the Restaurant's source_id if available
+        return $this->source_id ?? optional($this->restaurant)->source_id;
+    }
+
     static public function search($params = []): ?Location {
         if (!empty($params)) {
             foreach ($params as $key => $value) {

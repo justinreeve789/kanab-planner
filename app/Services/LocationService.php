@@ -9,6 +9,7 @@ use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Services\OCRService;
 use App\Services\OpenAIService;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\Process\Process;
 
 class LocationService
@@ -33,7 +34,7 @@ class LocationService
         return round($distanceMiles / self::DEFAULT_MPH_FOR_ESTIMATE, 1);
     }
 
-    public function getBusynessForLocation($location)
+    public function updateBusynessForLocation($location)
     {
         if (is_numeric($location)) {
             $location = Location::where('id', $location)->first();
@@ -46,7 +47,7 @@ class LocationService
         $process = new Process(["python3", 'populartimes.js', $location->source_id]);
         $process->run();
         if (!$process->isSuccessful()) {
-            $this->error('Error: ' . $process->getErrorOutput());
+            Log::error(__CLASS__ . ': ' . $process->getErrorOutput());
             return null;
         }
 
@@ -88,7 +89,7 @@ class LocationService
 
         $distanceLongitude = $longitudeTwo - $longitudeOne;
         $distanceLatitude = $latitudeTwo - $latitudeOne;
-        $a = sin($distanceLatitude / 2) * sin($distanceLatitude/2) + cos($latitudeOne) * cos($latitudeTwo) * sin($distanceLongitude/2) * sin($distanceLongitude/2);
+        $a = sin($distanceLatitude / 2) * sin($distanceLatitude / 2) + cos($latitudeOne) * cos($latitudeTwo) * sin($distanceLongitude / 2) * sin($distanceLongitude / 2);
         $c = 2 * asin(sqrt($a));
         $distance = $radiusOfEarth * $c;
         return $distance;
