@@ -20,7 +20,7 @@ return new class extends Migration
             $table->index(['resource_table', 'resource_id']);
             $table->index('activity_type_id');
             $table->unique(['resource_table', 'resource_id', 'activity_type_id'], 'rt_ri_ati');
-            $table->foreign('activity_type_id')->references('id')->on('activity_types')->onDelete('cascade');
+//            $table->foreign('activity_type_id')->references('id')->on('activity_types')->onDelete('cascade');
 //            $table->foreign('resource_id')->references('id')->on('resources')->onDelete('cascade');
         });
 
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('resource_activity_types');
+        Schema::dropIfExists('resource_activities');
     }
 };

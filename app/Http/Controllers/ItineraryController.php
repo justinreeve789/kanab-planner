@@ -46,7 +46,7 @@ class ItineraryController extends Controller
         $this->setupItinerary($request);
         $this->itineraryService->setItinerary($this->getItinerary());
         $days = $this->itineraryService->assignDaysForAreas($this->getItinerary()->getUseFirstDay(), $this->getItinerary()->getUseLastDay());
-s//        $this->shuffleDays();
+//        $this->shuffleDays();
         $this->getItinerary()->setTotalPossibleTrails($this->itineraryService->calculateTotalPossibleTrailsForTrip());
         foreach ($days as $dayNum => $day) {
             $day = $this->itineraryService->fillDay($day);

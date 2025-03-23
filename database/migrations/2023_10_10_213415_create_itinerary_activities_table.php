@@ -23,7 +23,7 @@ return new class extends Migration
             $table->time('start_time');
             $table->time('end_time');
             $table->string('period')->nullable();
-            $table->string('resource_type')->nullable();
+            $table->string('resource_table')->nullable();
             $table->integer('resource_id')->unsigned()->nullable();
             $table->timestamps();
             $table->unique(['itinerary_id', 'hash']);

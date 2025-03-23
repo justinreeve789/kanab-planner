@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Itinerary\Itinerary;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -41,4 +42,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function itineraries() {
+        return $this->hasManyThrough(Itinerary::class, UserItinerary::class, 'itinerary_id', 'id', 'id', 'user_id');
+    }
 }

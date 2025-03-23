@@ -6,7 +6,7 @@ use App\Models\Area;
 use App\Models\AreaDistance;
 use App\Models\AreaWeather;
 use App\Models\Event;
-use App\Models\Itinerary\ItineraryActivity;
+use App\Models\Itinerary\Activity;
 use App\Models\Itinerary\Day;
 use App\Models\Itinerary\Itinerary;
 use App\Models\Itinerary\Period;
@@ -114,7 +114,7 @@ class ItineraryService
                 'name' => 'Arrival',
                 'description' => $this->phraseService->getPhraseForCheckingIn() . ' ' . $this->phraseService->getPhraseForArrivingLateFood(),
             ]);
-            $this->getItinerary()->addActivity($task, ($date . ' ' . Day::DEFAULT_ARRIVAL_TIME), ($date . ' 23:59:59'), $dayNum, Period::EVENING, 'checking-in');
+            $this->getItinerary()->addActivity($task, 'checking-in', ($date . ' ' . Day::DEFAULT_ARRIVAL_TIME), ($date . ' 23:59:59'), $dayNum, Period::EVENING);
             return;
         }
 
@@ -124,7 +124,7 @@ class ItineraryService
                 'name' => 'Departure',
                 'description' => $this->phraseService->getPhraseForCheckingOut(),
             ]);
-            $this->getItinerary()->addActivity($task, ($date . ' ' . Day::DEFAULT_DEPARTURE_TIME), ($date . ' 23:59:59'), $dayNum, Period::MORNING, 'checking-out');
+            $this->getItinerary()->addActivity($task, 'checking-out', ($date . ' ' . Day::DEFAULT_DEPARTURE_TIME), ($date . ' 23:59:59'), $dayNum, Period::MORNING);
             return;
         }
 
@@ -146,13 +146,13 @@ class ItineraryService
                 'name' => 'Breakfast',
                 'description' => 'Eat breakfast at home to make sure you can get to the trail at an early hour. Ideally you\'ll reach the trail by 8:00am to avoid larger crowds.',
             ]);
-            $this->getItinerary()->addActivity($task, ($day->date . ' 06:30'), ($date . ' 07:30'), $dayNum, $trailPeriod, 'cooking');
+            $this->getItinerary()->addActivity($task, 'cooking', ($day->date . ' 06:30'), ($date . ' 07:30'), $dayNum, $trailPeriod);
             $this->getItinerary()->addActivity($trail,
+                'hiking',
                 $date . ' 08:00',
                 $trail->calculateEndDate('08:00'),
                 $day->day_num,
-                $trailPeriod,
-                'hiking'
+                $trailPeriod
             );
         }
 
@@ -189,7 +189,6 @@ class ItineraryService
      */
     public function adjustDays()
     {
-        return;
         $baseArea = $this->getItinerary()->getBaseArea();
         $days = $this->getItinerary()->getDays();
         $durationDays = $this->getItinerary()->getDurationDays();
@@ -274,7 +273,7 @@ class ItineraryService
                 })->inRandomOrder()
                 ->first();
             if ($event) {
-                $this->getItinerary()->addActivity($event, $event->start_date, $event->end_date, $dayNum, Period::AFTERNOON, 'event');
+                $this->getItinerary()->addActivity($event, 'event', $event->start_date, $event->end_date, $dayNum, Period::AFTERNOON);
             }
         }
     }
@@ -301,7 +300,7 @@ class ItineraryService
                 })->inRandomOrder()
                 ->first();
             if ($event) {
-                $this->getItinerary()->addActivity($event, $event->start_date, $event->end_date, $dayNum, Period::EVENING, 'event');
+                $this->getItinerary()->addActivity($event, 'event', $event->start_date, $event->end_date, $dayNum, Period::EVENING);
             }
         }
     }
@@ -320,7 +319,7 @@ class ItineraryService
                 })->inRandomOrder()
                 ->first();
             if ($event) {
-                $this->getItinerary()->addActivity($event, $event->start_date, $event->end_date, $dayNum, Period::EVENING, 'event');
+                $this->getItinerary()->addActivity($event, 'event', $event->start_date, $event->end_date, $dayNum, Period::EVENING);
             }
         }
     }
@@ -345,11 +344,11 @@ class ItineraryService
             if ($restaurant && !$this->getItinerary()->restaurantExists($restaurant)) {
                 $this->getItinerary()->addActivity(
                     $restaurant,
+                    'dining',
                     ($date . ' ' . $startTime),
                     $restaurant->calculateEndDate($startTime),
                     $dayNum,
-                    $period,
-                    'dining'
+                    $period
                 );
             }
         }
@@ -390,11 +389,11 @@ class ItineraryService
 
                 $this->getItinerary()->addActivity(
                     $task,
+                    'cooking',
                     ($date . ' ' . $startTime),
                     ($date . ' ' . $startTime),
                     $dayNum,
-                    $period,
-                    'cooking'
+                    $period
                 );
             }
         }
@@ -413,11 +412,11 @@ class ItineraryService
                 if ($restaurant && !$this->getItinerary()->restaurantExists($restaurant)) {
                     $this->getItinerary()->addActivity(
                         $restaurant,
+                        'dining',
                         ($date . ' ' . $startTime),
                         $restaurant->calculateEndDate($startTime),
                         $dayNum,
-                        $period,
-                        'dining'
+                        $period
                     );
                 }
             }
@@ -440,7 +439,7 @@ class ItineraryService
         // Default to the user's accommodation area for the first day, if $useFirstDay is false.
         $date = $this->getItinerary()->getStartDate();
         if ($useFirstDay === false) {
-            $day = new Day(['date' => $date, 'base_area' => $baseArea, 'day_num' => $dayNum]);
+            $day = new Day(['date' => $date, 'area' => $baseArea, 'day_num' => $dayNum]);
             $day->start_time = Day::DEFAULT_ARRIVAL_TIME;
             $days[$dayNum++] = $day;
             $date = $this->incrementDate($date);
@@ -451,7 +450,7 @@ class ItineraryService
 
         // Do the same for the last day.
         if ($useLastDay === false) {
-            $day = new Day(['date' => $date, 'base_area' => $baseArea, 'day_num' => $durationDays - 1]);
+            $day = new Day(['date' => $date, 'area' => $baseArea, 'day_num' => $durationDays - 1]);
             $day->end_time = Day::DEFAULT_DEPARTURE_TIME;
             $days[$durationDays - 1] = $day;
             $areaIds[] = $baseArea->id;
@@ -459,6 +458,10 @@ class ItineraryService
 
         $activityPriorities = $this->getItinerary()->getActivityPriorities();
         $trailPriorities = $this->getItinerary()->getTrailPriorities();
+
+        $this->getItinerary()->setDays($days);
+
+        return $days;
 
         // Get the areas for the trails. Weight the areas that appear the most so they are first in the array.
         // TODO: Make sure the trails are actually open on the date.
@@ -673,11 +676,11 @@ class ItineraryService
             $startTime = Period::getStartTimeForActivities($period);
             $this->getItinerary()->addActivity(
                 $trail,
+                'hiking',
                 ($day->date . ' ' . $startTime),
                 $trail->calculateEndDate($day->date . ' ' . $startTime),
                 $day->day_num,
-                $period,
-                'hiking'
+                $period
             );
         }
     }

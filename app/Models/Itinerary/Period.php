@@ -16,8 +16,10 @@ class Period extends Model
     public const EVENING = 'evening';
     public const NIGHT = 'night';
 
+
     protected $casts = ['activities'];
     protected $guarded = [];
+    protected $table = 'itinerary_periods';
 
     public $activities = [];
 
@@ -34,7 +36,7 @@ class Period extends Model
 
     public function addActivity($resource, $activityType = null, $startTime = null, $endTime = null)
     {
-        $this->activities[] = new ItineraryActivity($resource, $activityType, $startTime, $endTime);
+        $this->activities[] = new Activity($resource, $activityType, $startTime, $endTime);
     }
 
     public function getActivities(): array

@@ -3,10 +3,12 @@
 namespace App\Models\Itinerary;
 
 use App\Models\Area;
-use App\Models\Itinerary\ItineraryActivity;
+use App\Models\Itinerary\Activity;
 use App\Models\Itinerary\Day;
 use App\Models\Itinerary\Period;
 use App\Models\Itinerary\Season;
+use App\Models\User;
+use App\Models\UserItinerary;
 use App\Traits\Itinerary\Preferences;
 use App\Traits\ReturnAllProperties;
 use App\Traits\SnakeCaseAttributes;
@@ -17,7 +19,7 @@ class Itinerary extends Model
 {
     use HasFactory;
     use Preferences;
-    use ReturnAllProperties;
+//    use ReturnAllProperties;
 //    use SnakeCaseAttributes;
 
     const DEFAULT_ADVENTUROUSNESS = 0.3;
@@ -57,29 +59,29 @@ class Itinerary extends Model
 
     public $activities;
     public $base_area;
-    public $days;
+//    public $days;
     public $event_ids;
     public $location_ids;
     public $restaurant_ids;
     public $trail_ids;
 
-    public function __construct()
+    public function __construct(array $attributes = [])
     {
-        parent::__construct();
+        parent::__construct($attributes);
 
         $this->key = \Session::getId();
         $this->days = [];
         $this->activities = [];
-        $this->adventurousness = self::DEFAULT_ADVENTUROUSNESS;
+        $this->adventurousness = $this->adventurousness ?? self::DEFAULT_ADVENTUROUSNESS;
         $this->arrival_date_time = date('Y-m-d H:i:s', strtotime($this->getStartDate() . ' ' . self::DEFAULT_ARRIVAL_TIME));
-        $this->thriftiness = self::DEFAULT_THRIFTINESS;
-        $this->base_area_id = self::DEFAULT_BASE_AREA_ID;
-        $this->duration_days = self::DEFAULT_DURATION_DAYS;
+        $this->base_area_id = $this->base_area_id ?? self::DEFAULT_BASE_AREA_ID;
+        $this->duration_days = $this->duration_days ?? self::DEFAULT_DURATION_DAYS;
         $this->event_ids = [];
         $this->location_ids = [];
         $this->restaurant_ids = [];
-        $this->solitariness = self::DEFAULT_SOLITARINESS;
-        $this->strenuousness = self::DEFAULT_STRENUOUSNESS;
+        $this->solitariness = $this->solitariness ?? self::DEFAULT_SOLITARINESS;
+        $this->strenuousness = $this->strenuousness ?? self::DEFAULT_STRENUOUSNESS;
+        $this->thriftiness = $this->thriftiness ?? self::DEFAULT_THRIFTINESS;
         $this->total_possible_trails = 0;
         $this->total_travel_distance = 0;
         $this->trail_ids = [];
@@ -100,6 +102,11 @@ class Itinerary extends Model
         return $this->hasMany(Day::class, 'itinerary_id', 'id');
     }
 
+    public function user()
+    {
+        return $this->hasOneThrough(User::class, UserItinerary::class, 'user_id', 'id', 'id', 'itinerary_id');
+    }
+
     public function save(array $options = [])
     {
         return \DB::transaction(function () use ($options) {
@@ -117,9 +124,14 @@ class Itinerary extends Model
         $this->days->each()->saveAll();
     }
 
-    public function addActivity($resource, $startDateTime, $endDateTime, int $dayNum, $period = null, $activityType = null)
+    public function addActivity($resource, $activityType, $startDateTime, $endDateTime, int $dayNum, $period = null)
     {
-        $activity = new ItineraryActivity($resource, $activityType, $startDateTime, $endDateTime);
+        $activity = new Activity([
+            'resource' => $resource,
+            'activity_type' => $activityType,
+            'start_date_time' => $startDateTime,
+            'end_date_time' => $endDateTime
+        ]);
         $this->activities[] = $activity;
         $this->getDay($dayNum)->addActivity($resource, $activityType, date('H:i:s', strtotime($startDateTime)), date('H:i:s', strtotime($endDateTime)));
         if ($period) {

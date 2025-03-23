@@ -122,6 +122,7 @@ class CitySparkService
         ]);
 
         EventDate::where('event_id', $event->id)->delete();
+
         foreach ($data->Occurances as $date) {
             // Skip dates in the past.
             if (strtotime($date->Start) >= time()) {
@@ -188,9 +189,7 @@ class CitySparkService
                 Location::search(['address' => $locAddress, 'city' => $locCity]) ??
                 Location::search(['name' => $locName, 'city' => $locCity]) ??
                 Location::search(['name' => $locName, 'address' => $locAddress]);
-            if ($location) {
-                $evtObj->location_id = $location->id;
-            } else {
+            if (!$location) {
                 $location = new Location([
                     'name' => $locName,
                     'area_id' => $areaId,
@@ -205,8 +204,8 @@ class CitySparkService
                     'longitude' => $locLng,
                 ]);
                 $location->save();
-                $evtObj->location_id = $location->id;
             }
+            $evtObj->location_id = $location->id;
             $evtObj->save();
 
             $imageUrls = $this->conversionService->extractImagesFromHtml($event->Description);
@@ -220,9 +219,6 @@ class CitySparkService
                     ]);
                 }
             }
-
-            Log::info($evtObj);
-            Log::debug($evtObj);
         }
     }
 }

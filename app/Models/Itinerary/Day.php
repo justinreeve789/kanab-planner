@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Model;
 class Day extends Model
 {
     use HasFactory;
-    use ReturnAllProperties;
 
     const DEFAULT_ARRIVAL_TIME = '16:00:00';
     const DEFAULT_DEPARTURE_TIME = '10:00:00';
@@ -25,8 +24,6 @@ class Day extends Model
 
 //    public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
     public $activities;
-    public $area;
-    public $date;
 //    public $solitariness = self::DEFAULT_SOLITARINESS;
 //    public $strenuousness = self::DEFAULT_STRENUOUSNESS;
     public $periods;
@@ -35,47 +32,45 @@ class Day extends Model
 
     public function __construct(array $attributes = [])
     {
-        parent::__construct();
+        parent::__construct($attributes);
 
-        $date = $attributes['date'] ?? null;
-        // $this->date = $date;
-        $area = $attributes['base_area'] ?? null;
-        $dayNum = $attributes['day_num'] ?? null;
-
-        $this->end_time = '22:00';
-        $this->formatted_abbr_month_day = date('M j', strtotime($date));
-        $this->formatted_date = date('l, F j, Y', strtotime($date));
-        $this->formatted_day_of_week = date('l', strtotime($date));
-        $this->formatted_month_day = date('F j', strtotime($date));
-        $this->formatted_year = date('Y', strtotime($date));
-        $this->start_time = '07:00';
-
-        if ($area !== null) {
-            if (is_integer($area)) {
-                $area = Area::where('id', $area)->first();
-            }
-            $this->area_id = $area->id;
-            $this->area = $area;
-        }
-
-        if ($dayNum !== null) {
-            $this->day_num = $dayNum;
-        }
-
-        $this->activities = [];
-        $this->periods = [
-            Period::MORNING => new Period(Period::MORNING, $this->area_id),
-            Period::AFTERNOON => new Period(Period::AFTERNOON, $this->area_id),
-            Period::EVENING => new Period(Period::EVENING, $this->area_id),
-            Period::NIGHT => new Period(Period::NIGHT, $this->area_id),
-        ];
-        $this->temperatures = $this->getTemperatures();
+        $this->area = $attributes['area'] ?? null;  // Activities could potentially occur outside the day's area, such as eating dinner close to the home area after spending time in other areas, if the location is stil in a reasonable proximity, but generally all activities should occur in the same area.
+//        $this->day_num = $attributes['day_num'] ?? null;
+//        $this->end_time = '22:00';
+//
+//        if ($attributes['date']) {
+//            $this->date = $attributes['date'] ?? null;
+//            $this->setAttribute('date', $attributes['date']);
+//            $this->formatted_abbr_month_day = date('M j', strtotime($this->date));
+//            $this->formatted_date = date('l, F j, Y', strtotime($this->date));
+//            $this->formatted_day_of_week = date('l', strtotime($this->date));
+//            $this->formatted_month_day = date('F j', strtotime($this->date));
+//            $this->formatted_year = date('Y', strtotime($this->date));
+//        }
+//
+//        $this->start_time = '07:00';
+//
+//        if (is_integer($this->area)) {
+//            $this->area = Area::where('id', $this->area)->first();
+//        }
+//
+//        echo '<pre>'; print_r($this->toArray()); echo '</pre>';
+//
+//        $this->activities = [];
+//        $this->periods = [
+//            Period::MORNING => new Period(Period::MORNING, $this->area->id),
+//            Period::AFTERNOON => new Period(Period::AFTERNOON, $this->area->id),
+//            Period::EVENING => new Period(Period::EVENING, $this->area->id),
+//            Period::NIGHT => new Period(Period::NIGHT, $this->area->id),
+//        ];
+//        $this->temperatures = $this->getTemperatures();
+//
     }
 
-    public function set($date, $area, ?int $dayNum)
-    {
-        $this->date = $date;
-    }
+//    public function set($date, $area, ?int $dayNum)
+//    {
+//        $this->date = $date;
+//    }
 
     public function periods()
     {
@@ -89,7 +84,7 @@ class Day extends Model
 
     public function addActivity($resource, $activityType = null, $startTime = null, $endTime = null)
     {
-        $this->activities[] = new ItineraryActivity($resource, $activityType, $startTime, $endTime);
+        $this->activities[] = new Activity($resource, $activityType, $startTime, $endTime);
     }
 
     public function getPeriods(): array
@@ -129,9 +124,9 @@ class Day extends Model
 //                $stats['strenuousness'] += $strModifier * isset($activity->data->data[0]) ??
 //                    $activity->data->data[0]->strenuousness ??
 //                    $activity->strenuousness() ?? Activity::DEFAULT_STRENUOUSNESS;
-                $stats['adventurousness'] += $advModifier * $activity->data->data[0]->adventurousness ?? ItineraryActivity::DEFAULT_ADVENTUROUSNESS;
-                $stats['solitariness'] += $solModifier * $activity->data->data[0]->solitariness ?? ItineraryActivity::DEFAULT_SOLITARINESS;
-                $stats['strenuousness'] += $strModifier * $activity->data->data[0]->strenuousness ?? ItineraryActivity::DEFAULT_STRENUOUSNESS;
+                $stats['adventurousness'] += $advModifier * $activity->data->data[0]->adventurousness ?? Activity::DEFAULT_ADVENTUROUSNESS;
+                $stats['solitariness'] += $solModifier * $activity->data->data[0]->solitariness ?? Activity::DEFAULT_SOLITARINESS;
+                $stats['strenuousness'] += $strModifier * $activity->data->data[0]->strenuousness ?? Activity::DEFAULT_STRENUOUSNESS;
             }
         }
         if ($count > 0) {
@@ -155,7 +150,7 @@ class Day extends Model
 
     public function getTemperatures()
     {
-        $weather = AreaWeather::where('area_id', $this->area_id)
+        $weather = AreaWeather::where('area_id', $this->area->id)
             ->where('start', '>=', $this->date . ' 00:00:00')
             ->where('end', '<=', $this->date . ' 23:59:59')
             ->select(
@@ -256,13 +251,13 @@ class Day extends Model
 
     public function getAreaId(): int
     {
-        return $this->area_id;
+        return $this->area->id;
     }
 
-    public function setAreaId(int $area_id)
-    {
-        $this->area_id = $area_id;
-    }
+//    public function setAreaId(int $area_id)
+//    {
+//        $this->area->id = $area_id;
+//    }
 
     public function setPreamble(string $preamble): void
     {
