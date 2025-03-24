@@ -126,6 +126,11 @@ class Itinerary extends Model
 
     public function addActivity($resource, $activityType, $startDateTime, $endDateTime, int $dayNum, $period = null)
     {
+        $activity = new Activity();
+        $activity->resource = $resource;
+        $activity->firstName = 'teST';
+        echo $activity->firstName;
+        die;
         $activity = new Activity([
             'resource' => $resource,
             'activity_type' => $activityType,

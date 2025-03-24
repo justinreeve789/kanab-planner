@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 class Task extends Resource
 {
     use HasFactory;
-    use ReturnAllProperties;
 
     protected $guarded = [];
 }

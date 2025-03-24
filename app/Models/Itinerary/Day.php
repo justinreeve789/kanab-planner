@@ -204,22 +204,22 @@ class Day extends Model
 
     public function hasEvent(): bool
     {
-        return $this->hasResourceClass('App\\Models\\Event');
+        return $this->hasResourceClass(ResourceEnum::EVENTS_CLASS);
     }
 
     public function hasLocation(): bool
     {
-        return $this->hasResourceClass('App\\Models\\Location');
+        return $this->hasResourceClass(ResourceEnum::LOCATIONS_CLASS);
     }
 
     public function hasRestaurant(): bool
     {
-        return $this->hasResourceClass('App\\Models\\Restaurant');
+        return $this->hasResourceClass(ResourceEnum::RESTAURANTS_CLASS);
     }
 
     public function hasTrail(): bool
     {
-        return $this->hasResourceClass('App\\Models\\Trail');
+        return $this->hasResourceClass(ResourceEnum::TRAILS_CLASS);
     }
 
     public function shouldAddActivityTypeForPeriod(string $activityType, string $period): bool

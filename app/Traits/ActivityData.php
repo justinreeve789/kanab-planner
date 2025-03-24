@@ -10,6 +10,7 @@ use App\Models\ResourceBusy;
 use App\Models\ResourceData;
 use App\Models\Restaurant;
 use App\Models\Trail;
+use App\ResourceEnum;
 
 /**
  * Adventurousness = The uniqueness of the experience, and how outside an average person's comfort zone it is.
@@ -72,16 +73,16 @@ trait ActivityData
         $adventurousness = null;
         $this->setActivityType($activityType);
         switch (static::class) {
-            case 'App\\Models\\Events':
+            case ResourceEnum::EVENTS_CLASS:
                 $adventurousness = reset($this->data)->adventurousness;
                 break;
-            case 'App\\Models\\Location':
+            case ResourceEnum::LOCATIONS_CLASS:
                 break;
-            case 'App\\Models\\Restaurant':
+            case ResourceEnum::RESTAURANTS_CLASS:
                 $this->setActivityType('dining');
                 $adventurousness = $this->calculateAdventurousnessForRestaurant();
                 break;
-            case 'App\\Models\\Trail':
+            case ResourceEnum::TRAILS_CLASS:
                 if (!$this->getActivityType()) {
                     $this->setActivityType('hiking');
                 }
@@ -100,23 +101,23 @@ trait ActivityData
         $busynessAdj = $this->getBusyness();
         switch (static::class) {
             // We don't care so much about solitariness at a restaurant.
-            case 'App\\Models\\Restaurant':
+            case ResourceEnum::RESTAURANTS_CLASS:
                 $busynessAdj = $busynessAdj / 3;
                 $this->setActivityType('dining');
                 break;
-            case 'App\\Models\\Trail':
+            case ResourceEnum::TRAILS_CLASS:
                 $busynessAdj = $busynessAdj / 1.5;
                 if (!$this->getActivityType()) {
                     $this->setActivityType('hiking');
                 }
                 break;
-            case 'App\\Models\\Event':
+            case ResourceEnum::EVENTS_CLASS:
                 if (isset($this->data[0])) {
                     $busynessAdj = -($this->data[0]->solitariness);
                 }
                 $this->setActivityType('event');
                 break;
-            case 'App\\Models\\Location':
+            case ResourceEnum::LOCATIONS_CLASS:
             default:
                 $busynessAdj = $busynessAdj / 1.5;
         }
@@ -127,18 +128,18 @@ trait ActivityData
     public function strenuousness($activityType = null): float
     {
         switch (static::class) {
-            case 'App\\Models\\Trail':
+            case ResourceEnum::TRAILS_CLASS:
                 if (!$this->getActivityType()) {
                     $this->setActivityType('hiking');
                 }
                 $strenuousness = $this->calculateStrenuousnessForTrail();
                 break;
-            case 'App\\Models\\Restaurant':
+            case ResourceEnum::RESTAURANTS_CLASS:
                 $strenuousness = 0;
                 break;
-            case 'App\\Models\\Event':
+            case ResourceEnum::EVENTS_CLASS:
                 $strenuousness = reset($this->data)->strenuousness;
-            case 'App\\Models\\Location':
+            case ResourceEnum::LOCATIONS_CLASS:
             default:
                 $strenuousness = $this->data->strenuousness;
         }

@@ -49,10 +49,10 @@ class ResourceService
         }
 
         switch (get_class($resource1)) {
-            case 'App\\Models\\Location':
+            case ResourceEnum::LOCATIONS_CLASS:
                 $this->combineLocations($resource1, $resource2);
                 break;
-            case 'App\\Models\\Trail':
+            case ResourceEnum::TRAILS_CLASS:
                 $this->combineTrails($resource1, $resource2);
                 break;
             default:

@@ -7,14 +7,15 @@ use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Models\Image;
 use App\Repositories\ResourceRepository;
+use App\ResourceEnum;
 
 class PhraseService
 {
     public function getPhraseForActivityResource($resource, $activity = null): string
     {
-        if (get_class($resource) == 'App\\Models\\Restaurant') {
+        if (get_class($resource) == ResourceEnum::RESTAURANTS_CLASS) {
             return $this->getPhraseForDining($resource);
-        } else if (get_class($resource) == 'App\\Models\\Trail') {
+        } else if (get_class($resource) == ResourceEnum::TRAILS_CLASS) {
             if ($activity === null) {
                 $activity = 'hiking';
             }

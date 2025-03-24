@@ -3,15 +3,17 @@
 namespace App\Models\Itinerary;
 
 use App\Models\ActivityType;
+use App\ResourceEnum;
 use App\Services\PhraseService;
 use App\Traits\ReturnAllProperties;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
 
 class Activity extends Model
 {
     use HasFactory;
-    use ReturnAllProperties;
 
     const DEFAULT_ADVENTUROUSNESS = 0.3;
     const DEFAULT_SOLITARINESS = 0.3;
@@ -20,49 +22,92 @@ class Activity extends Model
     protected $guarded = [];
     protected $table = 'itinerary_activities';
 
-    public $hash;
+//    public $hash;
     public $data;
-    public $activityType;   // hiking, offroading, etc.
-    public $description;
+//    public $activityType;   // hiking, offroading, etc.
+//    public $description;
     public $phrase = '';
-    public $end_time;
-    public $name;
-    public $start_time;
+//    public $end_time;
+//    public $name;
+//    public $start_time;
     private $phraseService;
 
     public function __construct(array $attributes = [])
     {
-        parent::__construct();
+        parent::__construct($attributes);
 
-        $this->hash = substr(md5(microtime(true)), 0, 8);
-        $this->data = $this->resource;
-        $this->name = $this->resource->name;
-        $this->description = $this->resource->description;
+//        $this->hash = substr(md5(microtime(true)), 0, 8);
+//        $this->data = $this->resource;
+//        $this->name = $this->resource->name;
+//        $this->description = $this->resource->description;
 //        $this->activityType = $activityType;
 //        $this->start_time = $startTime;
 //        $this->end_time = $endTime;
 
-        if (isset($attributes['resource'])) {
-            $this->setResource($attributes['resource']);
+        if (isset($attributes['activity_type'])) {
+            $this->activity_type_id = $attributes['activity_type'];
         }
 
-        if (isset($attributes['activity_type'])) {
-            $this->activity_type_id = $attributes['activity_type']; // Assuming activity type is passed as ID
-        }
+        echo '<pre>'; print_r($attributes); echo '</pre>';
+        echo '<pre>'; print_r($this); echo '</pre>';
 
         $this->phraseService = new PhraseService();
-        $this->phrase = $this->phraseService->getPhraseForActivityResource($resource);
+        $this->phrase = $this->phraseService->getPhraseForActivityResource($this->resource);
     }
 
-    public function activityType()
+    public function activity_type()
     {
-        return $this->belongsTo(ActivityType::class);
+        return $this->belongsTo(ActivityType::class, 'id', 'activity_type_id');
     }
 
-    public function getActivityTypeAttribute()
-    {
-        return $this->activityType;
-    }
+//    protected function resource(): Attribute
+//    {
+//        return Attribute::make(
+//            get: function() {
+//                if (is_integer($this->resource_id)) {
+//                    if ($this->resource_table === ResourceEnum::EVENTS_TABLE) {
+//                        $modelClass = ResourceEnum::EVENTS_CLASS;
+//                    } elseif ($this->resource_table === ResourceEnum::LOCATIONS_TABLE) {
+//                        $modelClass = ResourceEnum::LOCATIONS_CLASS;
+//                    } elseif ($this->resource_table === ResourceEnum::RESTAURANTS_TABLE) {
+//                        $modelClass = ResourceEnum::RESTAURANTS_CLASS;
+//                    } elseif ($this->resource_table === ResourceEnum::TASKS_TABLE) {
+//                        $modelClass = ResourceEnum::TASKS_CLASS;
+//                    } elseif ($this->resource_table === ResourceEnum::TRAILS_TABLE) {
+//                        $modelClass = ResourceEnum::TRAILS_CLASS;
+//                    }
+//
+//                    if (isset($modelClass)) {
+//                        return $modelClass::find($this->resource_id);
+//                    }
+//                }
+//            },
+//            set: function($resource) {
+//                echo '<pre>'; print_r($this); echo '</pre>';
+//
+//                $this->resource_id = $resource->id;
+//                switch (get_class($resource)) {
+//                    case ResourceEnum::EVENTS_CLASS:
+//                        $this->resource_table = ResourceEnum::EVENTS_TABLE;
+//                        break;
+//                    case ResourceEnum::LOCATIONS_CLASS:
+//                        $this->resource_table = ResourceEnum::LOCATIONS_TABLE;
+//                        break;
+//                    case ResourceEnum::RESTAURANTS_CLASS:
+//                        $this->resource_table = ResourceEnum::RESTAURANTS_TABLE;
+//                        break;
+//                    case ResourceEnum::TASKS_CLASS:
+//                        $this->resource_table = ResourceEnum::TASKS_TABLE;
+//                        break;
+//                    case ResourceEnum::TRAILS_CLASS:
+//                        $this->resource_table = ResourceEnum::TRAILS_TABLE;
+//                        break;
+//                    default:
+//                        throw new InvalidArgumentException('Unsupported resource class.');
+//                }
+//            }
+//        );
+//    }
 
     /**
      * Dynamically load the related resource.
@@ -96,5 +141,13 @@ class Activity extends Model
             $this->resource_table = strtolower(class_basename($resource));
             $this->resource_id = $resource->id;
         }
+    }
+
+    protected function firstName(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => ucfirst($value),
+            set: fn (string $value) => strtolower($value),
+        );
     }
 }

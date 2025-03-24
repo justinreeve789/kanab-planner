@@ -85,7 +85,7 @@ class CombineResources extends Command
         do {
             $matches = [];
 
-            if ($model === 'App\\Models\\Location' || $model === 'App\\Models\\Trail') {
+            if ($model === ResourceEnum::LOCATIONS_CLASS || $model === ResourceEnum::TRAILS_CLASS) {
                 $resources = $model::withoutGlobalScope(UsableScope::class)
                     ->selectRaw(
                         $table . '.id, ' . $table . '.name, ' . $table . '.latitude, ' . $table .
@@ -120,7 +120,7 @@ class CombineResources extends Command
                 }
             }
 
-            if ($model === 'App\\Models\\Location') {
+            if ($model === ResourceEnum::LOCATIONS_CLASS) {
                 $resources = $model::withoutGlobalScope(UsableScope::class)
                     ->selectRaw(
                         $table . '.id, ' . $table . '.name, ' . $table .

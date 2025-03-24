@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Models\Builder\CustomQueryBuilder;
+use App\ResourceEnum;
 use App\Traits\ResourceScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Resource extends Model
+abstract class Resource extends Model
 {
     use HasFactory;
     use ResourceScopes;
@@ -116,22 +117,22 @@ class Resource extends Model
     }
 
     public function isEvent() {
-        return get_class($this) === 'App\\Models\\Event';
+        return get_class($this) === ResourceEnum::EVENTS_CLASS;
     }
 
     public function isLocation() {
-        return get_class($this) === 'App\\Models\\Location';
+        return get_class($this) === ResourceEnum::LOCATIONS_CLASS;
     }
 
     public function isRestaurant() {
-        return get_class($this) === 'App\\Models\\Restaurant';
+        return get_class($this) === ResourceEnum::RESTAURANTS_CLASS;
     }
 
     public function isTask() {
-        return get_class($this) === 'App\\Models\\Itinerary\\Task';
+        return get_class($this) === ResourceEnum::TASKS_CLASS;
     }
 
     public function isTrail() {
-        return get_class($this) === 'App\\Models\\Trail';
+        return get_class($this) === ResourceEnum::TRAILS_CLASS;
     }
 }
