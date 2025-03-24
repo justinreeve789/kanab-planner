@@ -18,6 +18,7 @@ use App\Models\Image;
 use App\Repositories\ItineraryRepository;
 use App\Services\LocationService;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class ItineraryService
 {
@@ -124,7 +125,13 @@ class ItineraryService
                 'name' => 'Departure',
                 'description' => $this->phraseService->getPhraseForCheckingOut(),
             ]);
-            $this->getItinerary()->addActivity($task, 'checking-out', ($date . ' ' . Day::DEFAULT_DEPARTURE_TIME), ($date . ' 23:59:59'), $dayNum, Period::MORNING);
+            $this->getItinerary()->addActivity(
+                $task,
+                'checking-out',
+                ($date . ' ' . Day::DEFAULT_DEPARTURE_TIME),
+                ($date . ' 23:59:59'),
+                $dayNum,
+                Period::MORNING);
             return;
         }
 
@@ -132,7 +139,7 @@ class ItineraryService
         foreach ($this->getItinerary()->getTrailPriorities(true) as $trailId) {
             $trail = Trail::where('id', $trailId)->whereNotNull('distance_miles')->first();
             if ($trail) {
-                if ($trail->area_id == $day->getAreaId() && !$this->getItinerary()->trailExists($trail)) {
+                if ($trail->area_id == $day->area_id && !$this->getItinerary()->trailExists($trail)) {
                     $trailPeriod = $this->trailService->getBestPeriodOfDayForTrail($trail);
                     break;
                 }
@@ -217,7 +224,7 @@ class ItineraryService
     public function addPreamble(Day $day)
     {
         $baseArea = $this->getItinerary()->getBaseArea();
-        if ($day->area->id === $baseArea->id && !$day->hasEvent() && !$day->hasLocation() && !$day->hasTrail()) {
+        if ($day->area_id === $baseArea->id && !$day->hasEvent() && !$day->hasLocation() && !$day->hasTrail()) {
             $day->setPreamble($this->phraseService->getPhraseForRelaxing());
         }
     }
@@ -269,7 +276,7 @@ class ItineraryService
             $event = Event::betweenDates($day->date . ' 12:00:00', $day->date . ' 16:00:00')
                 ->with('location')
                 ->whereHas('location', function($query) use ($day) {
-                    $query->where('area_id', $day->getAreaId());
+                    $query->where('area_id', $day->area_id);
                 })->inRandomOrder()
                 ->first();
             if ($event) {
@@ -288,7 +295,7 @@ class ItineraryService
 //            $event = Event::betweenDates($day->date . ' 17:00:00', $day->date . ' 22:00:00')
 //                ->with('location')
 //                ->whereHas('location', function($query) use ($day) {
-//                    $query->where('area_id', $day->getAreaId());
+//                    $query->where('area_id', $day->area_id);
 //                })->sortByDeviation($this->getDeviations())
 //                ->limit(2)
 //                ->inRandomOrder()
@@ -296,7 +303,7 @@ class ItineraryService
             $event = Event::betweenDates($day->date . ' 17:00:00', $day->date . ' 22:00:00')
                  ->with('location')
                 ->whereHas('location', function($query) use ($day) {
-                    $query->where('area_id', $day->getAreaId());
+                    $query->where('area_id', $day->area_id);
                 })->inRandomOrder()
                 ->first();
             if ($event) {
@@ -315,7 +322,7 @@ class ItineraryService
             $event = Event::betweenDates($day->date . ' 22:00:00', $day->date . ' 23:59:59')
                 ->with('location')
                 ->whereHas('location', function($query) use ($day) {
-                    $query->where('area_id', $day->getAreaId());
+                    $query->where('area_id', $day->area_id);
                 })->inRandomOrder()
                 ->first();
             if ($event) {
@@ -339,7 +346,7 @@ class ItineraryService
                 $query->with('images');
             }])->whereNotIn('restaurants.id', $this->getItinerary()->restaurant_ids)
                 ->whereIsOpen($date . ' ' . $mealTime['startTime'])->whereHas('location', function($query) use ($day) {
-                    $query->where('area_id', $day->getAreaId());
+                    $query->where('area_id', $day->area_id);
                 })->inRandomOrder()->first();
             if ($restaurant && !$this->getItinerary()->restaurantExists($restaurant)) {
                 $this->getItinerary()->addActivity(
@@ -407,7 +414,7 @@ class ItineraryService
                     $query->with('images');
                 }])->whereIsOpen($day->date . ' ' . $mealTime['startTime'])
                     ->whereHas('location', function($query) use ($day) {
-                        $query->where('area_id', $day->getAreaId());
+                        $query->where('area_id', $day->area_id);
                     })->inRandomOrder()->first();
                 if ($restaurant && !$this->getItinerary()->restaurantExists($restaurant)) {
                     $this->getItinerary()->addActivity(
@@ -460,8 +467,6 @@ class ItineraryService
         $trailPriorities = $this->getItinerary()->getTrailPriorities();
 
         $this->getItinerary()->setDays($days);
-
-        return $days;
 
         // Get the areas for the trails. Weight the areas that appear the most so they are first in the array.
         // TODO: Make sure the trails are actually open on the date.
@@ -560,7 +565,7 @@ class ItineraryService
 
     public function isTooCold($day, $period, $activityType) {
         if ($activityType === 'hiking') {
-            if (!Area::where('id', $day->getAreaId())->isHotterThan(0, Period::getStartTimeForActivities($period))->exists()) {
+            if (!Area::where('id', $day->area_id)->isHotterThan(0, Period::getStartTimeForActivities($period))->exists()) {
                 return true;
             }
         }
@@ -569,7 +574,7 @@ class ItineraryService
 
     public function isTooHot($day, $period, $activityType) {
         if ($activityType === 'hiking') {
-            if (!Area::where('id', $day->getAreaId())->isColderThan(100, Period::getStartTimeForActivities($period))->exists()) {
+            if (!Area::where('id', $day->area_id)->isColderThan(100, Period::getStartTimeForActivities($period))->exists()) {
                 return true;
             }
         }
@@ -606,7 +611,7 @@ class ItineraryService
      */
     public function shouldAddDining(Day $day, string $period): bool
     {
-        if ($day->getAreaId() !== $this->getItinerary()->getBaseAreaId()) {
+        if ($day->area_id !== $this->getItinerary()->getBaseAreaId()) {
             if ($period === Period::MORNING) {
                 return false;
             }

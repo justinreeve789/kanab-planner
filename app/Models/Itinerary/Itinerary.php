@@ -126,11 +126,6 @@ class Itinerary extends Model
 
     public function addActivity($resource, $activityType, $startDateTime, $endDateTime, int $dayNum, $period = null)
     {
-        $activity = new Activity();
-        $activity->resource = $resource;
-        $activity->firstName = 'teST';
-        echo $activity->firstName;
-        die;
         $activity = new Activity([
             'resource' => $resource,
             'activity_type' => $activityType,
@@ -140,7 +135,7 @@ class Itinerary extends Model
         $this->activities[] = $activity;
         $this->getDay($dayNum)->addActivity($resource, $activityType, date('H:i:s', strtotime($startDateTime)), date('H:i:s', strtotime($endDateTime)));
         if ($period) {
-            $this->getDay($dayNum)->periods[$period]->addActivity($resource, $activityType, date('H:i:s', strtotime($startDateTime)), date('H:i:s', strtotime($endDateTime)));
+            $this->getDay($dayNum)->getPeriod($period)->addActivity($resource, $activityType, date('H:i:s', strtotime($startDateTime)), date('H:i:s', strtotime($endDateTime)));
         }
 
         if ($resource->isEvent()) {

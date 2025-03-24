@@ -63,7 +63,7 @@ class ItineraryController extends Controller
 
         $this->getItinerary()->setTotalTravelDistance($this->itineraryService->estimateTotalTravelDistance());
 
-        $this->getItinerary()->save();
+//        $this->getItinerary()->save();
 
         return response()->json($this->getItinerary());
     }

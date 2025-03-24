@@ -19,6 +19,9 @@ class Area extends Model
     const ST_GEORGE = 6;
     const ZION = 7;
 
+    protected $guarded = [];
+    protected $table = 'areas';
+
     /**
      * @return \App\Models\Builder\CustomQueryBuilder
      */

@@ -13,14 +13,16 @@ class PhraseService
 {
     public function getPhraseForActivityResource($resource, $activity = null): string
     {
-        if (get_class($resource) == ResourceEnum::RESTAURANTS_CLASS) {
-            return $this->getPhraseForDining($resource);
-        } else if (get_class($resource) == ResourceEnum::TRAILS_CLASS) {
-            if ($activity === null) {
-                $activity = 'hiking';
-            }
-            if ($activity === 'hiking') {
-                return $this->getPhraseForHiking($resource);
+        if ($resource) {
+            if (get_class($resource) == ResourceEnum::RESTAURANTS_CLASS) {
+                return $this->getPhraseForDining($resource);
+            } else if (get_class($resource) == ResourceEnum::TRAILS_CLASS) {
+                if ($activity === null) {
+                    $activity = 'hiking';
+                }
+                if ($activity === 'hiking') {
+                    return $this->getPhraseForHiking($resource);
+                }
             }
         }
         return '';

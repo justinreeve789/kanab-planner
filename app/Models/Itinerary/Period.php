@@ -2,6 +2,7 @@
 
 namespace App\Models\Itinerary;
 
+use App\ResourceEnum;
 use App\Traits\ReturnAllProperties;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 class Period extends Model
 {
     use HasFactory;
-    use ReturnAllProperties;
 
     public const MORNING = 'morning';
     public const AFTERNOON = 'afternoon';
@@ -23,20 +23,25 @@ class Period extends Model
 
     public $activities = [];
 
-    public function __construct(?string $type, ?int $areaId) {
-        if ($type !== null) {
-            $this->type = $type;
-        }
-        if ($areaId !== null) {
-            $this->area_id = $areaId;
-        }
-
-        parent::__construct();
-    }
+//    public function __construct(array $attributes = []) {
+//        if ($type !== null) {
+//            $this->type = $type;
+//        }
+//        if ($areaId !== null) {
+//            $this->area_id = $areaId;
+//        }
+//
+//        parent::__construct();
+//    }
 
     public function addActivity($resource, $activityType = null, $startTime = null, $endTime = null)
     {
-        $this->activities[] = new Activity($resource, $activityType, $startTime, $endTime);
+        $this->activities[] = new Activity([
+            'resource' => $resource,
+            'activity_type' => $activityType,
+            'start_time' => $startTime,
+            'end_time' => $endTime
+        ]);
     }
 
     public function getActivities(): array

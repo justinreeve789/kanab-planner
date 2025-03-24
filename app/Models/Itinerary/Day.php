@@ -4,9 +4,12 @@ namespace App\Models\Itinerary;
 
 use App\Models\Area;
 use App\Models\AreaWeather;
+use App\ResourceEnum;
 use App\Traits\ReturnAllProperties;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Take into account that days are longer in summer and shorter in winter.
@@ -32,39 +35,41 @@ class Day extends Model
 
     public function __construct(array $attributes = [])
     {
-        parent::__construct($attributes);
+        foreach ($attributes as $key => $attr) {
+            $this->setAttribute($key, $attr);
+        }
 
-        $this->area = $attributes['area'] ?? null;  // Activities could potentially occur outside the day's area, such as eating dinner close to the home area after spending time in other areas, if the location is stil in a reasonable proximity, but generally all activities should occur in the same area.
+        // Activities could potentially occur outside the day's area, such as eating dinner close to the home area after
+        // spending time in other areas, if the location is still in a reasonable proximity, but generally all activities
+        // should occur in the same area.
+
 //        $this->day_num = $attributes['day_num'] ?? null;
-//        $this->end_time = '22:00';
-//
-//        if ($attributes['date']) {
-//            $this->date = $attributes['date'] ?? null;
-//            $this->setAttribute('date', $attributes['date']);
-//            $this->formatted_abbr_month_day = date('M j', strtotime($this->date));
-//            $this->formatted_date = date('l, F j, Y', strtotime($this->date));
-//            $this->formatted_day_of_week = date('l', strtotime($this->date));
-//            $this->formatted_month_day = date('F j', strtotime($this->date));
-//            $this->formatted_year = date('Y', strtotime($this->date));
-//        }
-//
-//        $this->start_time = '07:00';
-//
+        $this->end_time = '22:00';
+
+        if (isset($attributes['date'])) {
+            $this->formatted_abbr_month_day = date('M j', strtotime($this->date));
+            $this->formatted_date = date('l, F j, Y', strtotime($this->date));
+            $this->formatted_day_of_week = date('l', strtotime($this->date));
+            $this->formatted_month_day = date('F j', strtotime($this->date));
+            $this->formatted_year = date('Y', strtotime($this->date));
+        }
+
+        $this->start_time = '07:00';
+
 //        if (is_integer($this->area)) {
 //            $this->area = Area::where('id', $this->area)->first();
 //        }
-//
-//        echo '<pre>'; print_r($this->toArray()); echo '</pre>';
-//
-//        $this->activities = [];
-//        $this->periods = [
-//            Period::MORNING => new Period(Period::MORNING, $this->area->id),
-//            Period::AFTERNOON => new Period(Period::AFTERNOON, $this->area->id),
-//            Period::EVENING => new Period(Period::EVENING, $this->area->id),
-//            Period::NIGHT => new Period(Period::NIGHT, $this->area->id),
-//        ];
-//        $this->temperatures = $this->getTemperatures();
-//
+
+        $this->activities = [];
+        $this->periods = [
+            Period::MORNING => new Period(['period' => Period::MORNING, 'area_id' => $this->area_id]),
+            Period::AFTERNOON => new Period(['period' => Period::AFTERNOON, 'area_id' => $this->area_id]),
+            Period::EVENING => new Period(['period' => Period::EVENING, 'area_id' => $this->area_id]),
+            Period::NIGHT => new Period(['period' => Period::NIGHT, 'area_id' => $this->area_id]),
+        ];
+        $this->temperatures = $this->getTemperatures();
+
+        parent::__construct($attributes);
     }
 
 //    public function set($date, $area, ?int $dayNum)
@@ -77,14 +82,36 @@ class Day extends Model
         return $this->hasMany(Period::class, 'day_id', 'id');
     }
 
+    protected function area(): Attribute
+    {
+        return Attribute::make(
+            get: function() {
+                return Area::find($this->area_id);
+            },
+            set: function(Area $area) {
+                $this->area_id = $area->id;
+            }
+        );
+    }
+
     public function saveAll()
     {
         $this->periods->each()->save();
     }
 
-    public function addActivity($resource, $activityType = null, $startTime = null, $endTime = null)
+    public function addActivity($resource, $activityType = null, $startDateTime = null, $endDateTime = null): void
     {
-        $this->activities[] = new Activity($resource, $activityType, $startTime, $endTime);
+        $this->activities[] = new Activity([
+            'resource' => $resource,
+            'activity_type' => $activityType,
+            'start_date_time' => $startDateTime,
+            'end_date_time' => $endDateTime
+        ]);
+    }
+
+    public function getPeriod($index): Period
+    {
+        return $this->periods[$index];
     }
 
     public function getPeriods(): array
@@ -150,7 +177,7 @@ class Day extends Model
 
     public function getTemperatures()
     {
-        $weather = AreaWeather::where('area_id', $this->area->id)
+        $weather = AreaWeather::where('area_id', $this->area_id)
             ->where('start', '>=', $this->date . ' 00:00:00')
             ->where('end', '<=', $this->date . ' 23:59:59')
             ->select(
@@ -247,11 +274,6 @@ class Day extends Model
 
     public function shouldAddTrail(): bool
     {
-    }
-
-    public function getAreaId(): int
-    {
-        return $this->area->id;
     }
 
 //    public function setAreaId(int $area_id)
