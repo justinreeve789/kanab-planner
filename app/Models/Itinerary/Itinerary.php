@@ -42,7 +42,7 @@ class Itinerary extends Model
     const SUMMER = 'summer';
     const WINTER = 'winter';
 
-    protected $fillable = ['*'];
+    protected $guarded = [];
     protected $casts = [
         'activity_priorities' => 'json',
         'event_ids' => 'json',
@@ -113,7 +113,6 @@ class Itinerary extends Model
             $this->load('days');
             parent::save($options);
             if ($this->relationLoaded('days')) {
-                echo '<pre>'; print_r($this->days()); echo '</pre>';
                 $this->days()->saveMany($this->getRelation('days'));
             }
         });

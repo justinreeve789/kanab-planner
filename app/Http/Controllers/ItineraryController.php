@@ -61,7 +61,7 @@ class ItineraryController extends Controller
 
 //        $this->itineraryService->adjustDays();
 
-        $this->getItinerary()->setTotalTravelDistance($this->itineraryService->estimateTotalTravelDistance());
+//        $this->getItinerary()->setTotalTravelDistance($this->itineraryService->estimateTotalTravelDistance());
 
 //        $this->getItinerary()->save();
 

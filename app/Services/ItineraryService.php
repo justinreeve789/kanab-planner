@@ -177,6 +177,7 @@ class ItineraryService
             $this->addTrailForAfternoon($day);
         }
 
+
         // Add a trail in the area for the evening.
         $this->addTrailForEvening($day);
 
@@ -210,7 +211,7 @@ class ItineraryService
             // TODO: People may be foodies and want to try restaurants in different areas. Accommodate this.
             if ($day->area_id !== $baseArea->id && !$day->hasEvent() && !$day->hasLocation() && !$day->hasTrail()) {
                 unset($days[$index]);
-                $day = new Day(['date' => $date, 'base_area' => $baseArea, 'day_num' => $dayNum]);
+                $day = new Day(['date' => $date, 'area' => $baseArea, 'day_num' => $dayNum]);
                 $day = $this->fillDay($day, true);
                 $days[$index] = $day;
             }
@@ -482,7 +483,7 @@ class ItineraryService
         $modifier = $useLastDay ? 0 : -1;
         foreach ($trailAreaIds as $areaId => $tai) {
             if (count($days) < $durationDays + $modifier) {
-                $day = new Day(['date' => $date, 'base_area' => $baseArea, 'day_num' => $dayNum]);
+                $day = new Day(['date' => $date, 'area' => $baseArea, 'day_num' => $dayNum]);
                 $days[$dayNum++] = $day;
                 $date = $this->incrementDate($date);
             }
@@ -551,7 +552,7 @@ class ItineraryService
                 $areaId = $baseArea->id;
             }
 
-            $day = new Day(['date' => $date, 'base_area' => $baseArea, 'day_num' => $dayNum]);
+            $day = new Day(['date' => $date, 'area' => $baseArea, 'day_num' => $dayNum]);
             $days[$dayNum++] = $day;
             $date = $this->incrementDate($date);
             $areaIds[] = $areaId;
@@ -564,21 +565,12 @@ class ItineraryService
     }
 
     public function isTooCold($day, $period, $activityType) {
-        if ($activityType === 'hiking') {
-            if (!Area::where('id', $day->area_id)->isHotterThan(0, Period::getStartTimeForActivities($period))->exists()) {
-                return true;
-            }
-        }
-        return false;
+        return $day->area->isTooCold($day, $period, $activityType);
     }
 
     public function isTooHot($day, $period, $activityType) {
-        if ($activityType === 'hiking') {
-            if (!Area::where('id', $day->area_id)->isColderThan(100, Period::getStartTimeForActivities($period))->exists()) {
-                return true;
-            }
-        }
         return false;
+        return $day->area->isTooHot($day, $period, $activityType);
     }
 
     /**
@@ -672,7 +664,7 @@ class ItineraryService
     public function addRandomTrailToPeriod(Day $day, string $period)
     {
         $trail = $this->trailService->getRandomTrailForPeriod(
-            $day->area_id,
+            $day->area->id,
             $period,
             $this->getItinerary(),
             $this->getItinerary()->trail_ids
@@ -699,14 +691,13 @@ class ItineraryService
         $days = $this->getItinerary()->getDays();
         for ($i = 1; $i < count($days); $i++) {
             if ($i < count($days)) {
-                try {
+//                try {
                     $areaLat = $days[$i]->area->latitude;
                     $areaLon = $days[$i]->area->longitude;
-                } catch (\Throwable $e) {
-                    echo '<pre>'; print_r($days); echo '</pre>';
-                    echo '<pre>'; print_r($e); echo '</pre>';
-                    die;
-                }
+//                } catch (\Throwable $e) {
+//                    echo '<pre>'; print_r($days); echo '</pre>';
+//                    echo '<pre>'; print_r($e); echo '</pre>';
+//                }
 
 //                $totalMiles += 2 * (AreaDistance::where('from_area_id', $baseArea->id)->where('to_area_id', $days[$i]->getAreaId())->pluck('driving_miles') ?? 0);
                 $totalMiles += 2 * $this->locationService->estimateDrivingDistance($baseAreaLat, $baseAreaLon, $areaLat, $areaLon);
@@ -716,21 +707,24 @@ class ItineraryService
                     for ($j = 0; $j < count($activities); $j++) {
                         $distance = 0;
                         $data1 = $activities[$j]->data;
-                        $lat1 = isset($data1->location) ? $data1->location->latitude : $data1->latitude;
-                        $lon1 = isset($data1->location) ? $data1->location->longitude : $data1->longitude;
+                        if ($data1) {
+                            $lat1 = $data1->location->latitude ?? $data1->latitude;
+                            $lon1 = $data1->location->longitude ?? $data1->longitude;
 
-                        if (in_array(0, [$lat1, $lat1])) {
-                            continue;
+                            if (in_array(0, [$lat1, $lat1])) {
+                                continue;
+                            }
+
+                            if ($j === 0) {
+                                $distance = $this->locationService->estimateDrivingDistance(
+                                    $areaLat,
+                                    $areaLon,
+                                    $lat1,
+                                    $lon1,
+                                );
+                            }
                         }
 
-                        if ($j === 0) {
-                            $distance = $this->locationService->estimateDrivingDistance(
-                                $areaLat,
-                                $areaLon,
-                                $lat1,
-                                $lon1,
-                            );
-                        }
                         if ($j < count($activities) - 1) {
                             $data2 = $activities[$j + 1]->data;
                             $lat2 = isset($data2->location) ? $data2->location->latitude : $data2->latitude;

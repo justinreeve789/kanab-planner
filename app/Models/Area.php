@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Builder\CustomQueryBuilder;
+use App\Models\Itinerary\Period;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -65,6 +66,24 @@ class Area extends Model
                return $query->where('id', $areaId);
             }
         }
+    }
+
+    public function isTooCold($day, $period, $activityType) {
+        if ($activityType === 'hiking') {
+            if (!$this->where('id', $day->area_id)->isHotterThan(0, Period::getStartTimeForActivities($period))->exists()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function isTooHot($day, $period, $activityType) {
+        if ($activityType === 'hiking') {
+            if ($this->where('id', $day->area_id)->isColderThan(100, Period::getStartTimeForActivities($period))->exists()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function scopeTemperatureIsAbout(Builder $query, $temperature, $startDateTime = null, $endDateTime = null, $tolerance = 10)
