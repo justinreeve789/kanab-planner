@@ -34,14 +34,9 @@ class Period extends Model
 //        parent::__construct();
 //    }
 
-    public function addActivity($resource, $activityType = null, $startTime = null, $endTime = null)
+    public function addActivity(Activity $activity): void
     {
-        $this->activities[] = new Activity([
-            'resource' => $resource,
-            'activity_type' => $activityType,
-            'start_time' => $startTime,
-            'end_time' => $endTime
-        ]);
+        $this->activities[] = $activity;
     }
 
     public function getActivities(): array

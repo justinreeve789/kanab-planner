@@ -12,6 +12,7 @@ use App\Models\Itinerary\Itinerary;
 use App\Models\Itinerary\Period;
 use App\Models\Itinerary\Season;
 use App\Models\Itinerary\Task;
+use App\Models\Location;
 use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Models\Image;
@@ -88,8 +89,8 @@ class ItineraryService
     {
         $itinerary = $this->getItinerary();
         $adventurousness = $itinerary->getAdventurousness();
-        $days = max([$itinerary->durationDays - 2, 2]);
-        return round(min([$days * 1.25 * (log(1 + (5 * $adventurousness), 10) / 1.5), $itinerary->durationDays]));
+        $days = max([$itinerary->getDurationDays() - 2, 2]);
+        return round(min([$days * 2 * (log(1 + (5 * $adventurousness), 10) / 1.5), $itinerary->getDurationDays()]));
     }
 
     /**
@@ -97,7 +98,7 @@ class ItineraryService
      * Make sure there's at least 3 hours between breakfast and lunch, and 4 hours between lunch and dinner. If lunch
      * won't be possible, set a "bringSnacks" flag in the overlapping activity to true.
      *
-     * A combioned less adventurous and more solitary setting will avoid taking them too far, such as St. George or Page.
+     * A combined less adventurous and more solitary setting will avoid taking them too far, such as St. George or Page.
      */
     public function fillDay(Day $day, $pass = false)
     {
@@ -115,7 +116,7 @@ class ItineraryService
                 'name' => 'Arrival',
                 'description' => $this->phraseService->getPhraseForCheckingIn() . ' ' . $this->phraseService->getPhraseForArrivingLateFood(),
             ]);
-            $this->getItinerary()->addActivity($task, 'checking-in', ($date . ' ' . Day::DEFAULT_ARRIVAL_TIME), ($date . ' 23:59:59'), $dayNum, Period::EVENING);
+            $this->getItinerary()->addActivity($task, 'checking-in', Day::DEFAULT_ARRIVAL_TIME, '23:59:59', $dayNum, Period::EVENING);
             return;
         }
 
@@ -128,8 +129,8 @@ class ItineraryService
             $this->getItinerary()->addActivity(
                 $task,
                 'checking-out',
-                ($date . ' ' . Day::DEFAULT_DEPARTURE_TIME),
-                ($date . ' 23:59:59'),
+                Day::DEFAULT_DEPARTURE_TIME,
+                '23:59:59',
                 $dayNum,
                 Period::MORNING);
             return;
@@ -153,11 +154,19 @@ class ItineraryService
                 'name' => 'Breakfast',
                 'description' => 'Eat breakfast at home to make sure you can get to the trail at an early hour. Ideally you\'ll reach the trail by 8:00am to avoid larger crowds.',
             ]);
-            $this->getItinerary()->addActivity($task, 'cooking', ($day->date . ' 06:30'), ($date . ' 07:30'), $dayNum, $trailPeriod);
-            $this->getItinerary()->addActivity($trail,
+            $this->getItinerary()->addActivity(
+                $task,
+                'cooking',
+                '06:30',
+                '07:30',
+                $dayNum,
+                $trailPeriod
+            );
+            $this->getItinerary()->addActivity(
+                $trail,
                 'hiking',
-                $date . ' 08:00',
-                $trail->calculateEndDate('08:00'),
+                '08:00',
+                $trail->calculateEndTime($day->date, '08:00'),
                 $day->day_num,
                 $trailPeriod
             );
@@ -177,7 +186,6 @@ class ItineraryService
             $this->addTrailForAfternoon($day);
         }
 
-
         // Add a trail in the area for the evening.
         $this->addTrailForEvening($day);
 
@@ -188,7 +196,10 @@ class ItineraryService
 
         $this->addPreamble($day);
 
+        echo '<pre>'; print_r($this->getItinerary()->toArray()); echo '</pre>';
+
         $day->getASS();
+
         return $day;
     }
 
@@ -263,34 +274,52 @@ class ItineraryService
         }
     }
 
-    public function addEventForMorning(Day $day)
-    {
-    }
-
-    public function addEventForAfternoon(Day $day)
+    private function addEventForPeriod(Day $day, string $period, $startTime, $endTime)
     {
         if ($this->getItinerary()->getAdventurousness() < 0.5) {
             return;
         }
         $dayNum = $day->day_num;
-        if (empty($day->periods[Period::AFTERNOON]->getActivities())) {
-            $event = Event::betweenDates($day->date . ' 12:00:00', $day->date . ' 16:00:00')
+        if (empty($day->periods[$period]->getActivities())) {
+            $event = Event::betweenDates($day->date . ' ' . $startTime, $day->date . ' ' . $endTime)
                 ->with('location')
                 ->whereHas('location', function($query) use ($day) {
                     $query->where('area_id', $day->area_id);
                 })->inRandomOrder()
                 ->first();
             if ($event) {
-                $this->getItinerary()->addActivity($event, 'event', $event->start_date, $event->end_date, $dayNum, Period::AFTERNOON);
+                $this->getItinerary()->addActivity(
+                    $event,
+                    'event',
+                    date('H:i:s', strtotime($event->start_date)),
+                    date('H:i:s', strtotime($event->end_date)),
+                    $dayNum,
+                    $period
+                );
             }
         }
     }
 
-    public function addEventForEvening(Day $day)
+    public function addEventForMorning(Day $day)
+    {
+        $this->addEventForPeriod($day, Period::MORNING, '06:00:00', '11:00:00');
+    }
+
+    public function addEventForAfternoon(Day $day): void
     {
         if ($this->getItinerary()->getAdventurousness() < 0.5) {
             return;
         }
+        $this->addEventForPeriod($day, Period::AFTERNOON, '12:00:00', '16:00:00');
+    }
+
+    public function addEventForEvening(Day $day): void
+    {
+        if ($this->getItinerary()->getAdventurousness() < 0.5) {
+            return;
+        }
+        $this->addEventForPeriod($day, Period::EVENING, '16:15:00', '22:00:00');
+        return;
         $dayNum = $day->day_num;
         if (empty($day->periods[Period::EVENING]->getActivities())) {
 //            $event = Event::betweenDates($day->date . ' 17:00:00', $day->date . ' 22:00:00')
@@ -302,34 +331,44 @@ class ItineraryService
 //                ->inRandomOrder()
 //                ->first();
             $event = Event::betweenDates($day->date . ' 17:00:00', $day->date . ' 22:00:00')
-                 ->with('location')
-                ->whereHas('location', function($query) use ($day) {
-                    $query->where('area_id', $day->area_id);
-                })->inRandomOrder()
-                ->first();
-            if ($event) {
-                $this->getItinerary()->addActivity($event, 'event', $event->start_date, $event->end_date, $dayNum, Period::EVENING);
-            }
-        }
-    }
-
-    public function addEventForNight(Day $day)
-    {
-        if ($this->getItinerary()->getAdventurousness() < 0.5) {
-            return;
-        }
-        $dayNum = $day->day_num;
-        if (empty($day->periods[Period::EVENING]->getActivities())) {
-            $event = Event::betweenDates($day->date . ' 22:00:00', $day->date . ' 23:59:59')
                 ->with('location')
                 ->whereHas('location', function($query) use ($day) {
                     $query->where('area_id', $day->area_id);
                 })->inRandomOrder()
                 ->first();
             if ($event) {
-                $this->getItinerary()->addActivity($event, 'event', $event->start_date, $event->end_date, $dayNum, Period::EVENING);
+                $this->getItinerary()->addActivity(
+                    $event,
+                    'event',
+                    date('H:i:s', strtotime($event->start_date)),
+                    date('H:i:s', strtotime($event->end_date)),
+                    $dayNum,
+                    Period::EVENING
+                );
             }
         }
+    }
+
+    public function addEventForNight(Day $day): void
+    {
+        if ($this->getItinerary()->getAdventurousness() < 0.5) {
+            return;
+        }
+        $this->addEventForPeriod($day, Period::NIGHT, '22:00:00', '23:59:59');
+        return;
+//        $dayNum = $day->day_num;
+//        if (empty($day->periods[Period::EVENING]->getActivities())) {
+//            $event = Event::betweenDates($day->date . ' 22:00:00', $day->date . ' 23:59:59')
+//                ->with('location')
+//                ->whereHas('location', function($query) use ($day) {
+//                    $query->where('area_id', $day->area_id);
+//                })->inRandomOrder()
+//                ->first();
+//            if ($event) {
+//                $this->getItinerary()->addActivity(
+//                    $event, 'event', $event->start_date, $event->end_date, $dayNum, Period::EVENING);
+//            }
+//        }
     }
 
     // TODO: assessMeal? Split into morning/afternoon/evening functions?
@@ -353,8 +392,8 @@ class ItineraryService
                 $this->getItinerary()->addActivity(
                     $restaurant,
                     'dining',
-                    ($date . ' ' . $startTime),
-                    $restaurant->calculateEndDate($startTime),
+                    $startTime,
+                    $restaurant->calculateEndTime($day->date, $startTime),
                     $dayNum,
                     $period
                 );
@@ -421,14 +460,72 @@ class ItineraryService
                     $this->getItinerary()->addActivity(
                         $restaurant,
                         'dining',
-                        ($date . ' ' . $startTime),
-                        $restaurant->calculateEndDate($startTime),
+                        $startTime,
+                        $restaurant->calculateEndTime($day->date, $startTime),
                         $dayNum,
                         $period
                     );
                 }
             }
         }
+    }
+
+    /**
+     * Sort by how many subarrays each item has, in descending order.
+     */
+    private function sortBySubarrayCount(&$array, $ascending = false): array
+    {
+        usort($array, function($a, $b) use ($ascending) {
+            $countA = is_array($a) ? count($a) : 0;
+            $countB = is_array($b) ? count($b) : 0;
+            if ($ascending) {
+                return $countA - $countB;
+            } else {
+                return $countB - $countA;
+            }
+        });
+    }
+
+    /**
+     * We'll need to examine the priorities and make sure we include those areas.
+     */
+    public function calculateAreaPriorities(): array
+    {
+        $eventPriorities = $this->getItinerary()->getEventPriorities();
+        $locationPriorities = $this->getItinerary()->getLocationPriorities();
+        $restaurantPriorities = $this->getItinerary()->getRestaurantPriorities();
+        $trailPriorities = $this->getItinerary()->getTrailPriorities();
+        $areaPriorities = [];
+
+        foreach ($eventPriorities as $resourceId) {
+            $resource = Event::find($resourceId);
+            if ($resource) {
+                $areaPriorities[$resource->area_id][] = $resource;
+            }
+        }
+
+        foreach ($locationPriorities as $resourceId) {
+            $resource = Location::find($resourceId);
+            if ($resource) {
+                $areaPriorities[$resource->area_id][] = $resource;
+            }
+        }
+
+        foreach ($restaurantPriorities as $resourceId) {
+            $resource = Restaurant::find($resourceId);
+            if ($resource) {
+                $areaPriorities[$resource->area_id][] = $resource;
+            }
+        }
+
+        foreach ($trailPriorities as $resourceId) {
+            $resource = Trail::find($resourceId);
+            if ($resource) {
+                $areaPriorities[$resource->area_id][] = $resource;
+            }
+        }
+
+        return $this->sortBySubarrayCount($areaPriorities);
     }
 
     /**
@@ -483,7 +580,7 @@ class ItineraryService
         $modifier = $useLastDay ? 0 : -1;
         foreach ($trailAreaIds as $areaId => $tai) {
             if (count($days) < $durationDays + $modifier) {
-                $day = new Day(['date' => $date, 'area' => $baseArea, 'day_num' => $dayNum]);
+                $day = new Day(['date' => $date, 'area_id' => $areaId, 'day_num' => $dayNum]);
                 $days[$dayNum++] = $day;
                 $date = $this->incrementDate($date);
             }
@@ -521,8 +618,8 @@ class ItineraryService
             // If the user's adventurousness is < 0.8, only pick any area besides Kanab or Zion once, unless it's their base area.
             if ($adventurousness < 0.8) {
                 $numPossible = 1;
-                $areaCounts = array_count_values($areaIds);
-                $filteredAreaIds = array_filter($areaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
+                $areaCounts = array_count_values($allAreaIds);
+                $filteredAreaIds = array_filter($allAreaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
                     return (
                         $areaId !== Area::KANAB &&
                         $areaId !== $baseArea->id &&
@@ -669,13 +766,14 @@ class ItineraryService
             $this->getItinerary(),
             $this->getItinerary()->trail_ids
         );
+
         if ($trail && !$this->getItinerary()->trailExists($trail)) {
             $startTime = Period::getStartTimeForActivities($period);
             $this->getItinerary()->addActivity(
                 $trail,
                 'hiking',
                 ($day->date . ' ' . $startTime),
-                $trail->calculateEndDate($day->date . ' ' . $startTime),
+                $trail->calculateEndTime($day->date, $startTime),
                 $day->day_num,
                 $period
             );

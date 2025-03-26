@@ -45,11 +45,15 @@ class Itinerary extends Model
     protected $guarded = [];
     protected $casts = [
         'activity_priorities' => 'json',
+        'area_priorities' => 'json',
         'event_ids' => 'json',
+        'event_priorities' => 'json',
         'interests' => 'json',
         'location_ids' => 'json',
+        'location_priorities' => 'json',
         'priorities' => 'json',
         'restaurant_ids' => 'json',
+        'restaurant_priorities' => 'json',
         'solitariness' => 'json',
         'strenuousness' => 'json',
         'trail_ids' => 'json',
@@ -61,8 +65,11 @@ class Itinerary extends Model
     public $base_area;
 //    public $days;
     public $event_ids;
+    public $event_priorities;
     public $location_ids;
+    public $location_priorities;
     public $restaurant_ids;
+    public $restaurant_priorities;
     public $trail_ids;
 
     public function __construct(array $attributes = [])
@@ -123,18 +130,17 @@ class Itinerary extends Model
         $this->days->each()->saveAll();
     }
 
-    public function addActivity($resource, $activityType, $startDateTime, $endDateTime, int $dayNum, $period = null)
+    public function addActivity($resource, $activityType, $startTime, $endTime, int $dayNum, $period)
     {
         $activity = new Activity([
             'resource' => $resource,
             'activity_type' => $activityType,
-            'start_date_time' => $startDateTime,
-            'end_date_time' => $endDateTime
+            'start_time' => $startTime,
+            'end_time' => $endTime
         ]);
         $this->activities[] = $activity;
-        $this->getDay($dayNum)->addActivity($resource, $activityType, date('H:i:s', strtotime($startDateTime)), date('H:i:s', strtotime($endDateTime)));
         if ($period) {
-            $this->getDay($dayNum)->getPeriod($period)->addActivity($resource, $activityType, date('H:i:s', strtotime($startDateTime)), date('H:i:s', strtotime($endDateTime)));
+            $this->getDay($dayNum)->getPeriod($period)->addActivity($activity);
         }
 
         if ($resource->isEvent()) {

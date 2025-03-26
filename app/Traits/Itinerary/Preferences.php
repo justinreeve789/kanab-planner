@@ -46,9 +46,26 @@ trait Preferences
         return $this->end_date;
     }
 
+    public function getEventPriorities($random = false): ?array
+    {
+        if ($random === true) {
+            return $this->shuffleArray($this->event_priorities);
+        } else {
+            return $this->event_priorities;
+        }
+    }
     public function getLatitude(): ?float
     {
         return $this->latitude;
+    }
+
+    public function getLocationPriorities($random = false): ?array
+    {
+        if ($random === true) {
+            return $this->shuffleArray($this->location_priorities);
+        } else {
+            return $this->location_priorities;
+        }
     }
 
     public function getLongitude(): ?float
@@ -64,6 +81,15 @@ trait Preferences
     public function getPriorities(): ?array
     {
         return $this->priorities;
+    }
+
+    public function getRestaurantPriorities($random = false): ?array
+    {
+        if ($random === true) {
+            return $this->shuffleArray($this->restaurant_priorities);
+        } else {
+            return $this->restaurant_priorities;
+        }
     }
 
     public function getSeason(): ?string

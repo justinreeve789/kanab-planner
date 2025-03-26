@@ -40,11 +40,6 @@ class Trail extends Resource
         return $this->hasMany(TrailImage::class, 'trail_id', 'id');
     }
 
-    public function calculateEndDate(string $startDateTime)
-    {
-        return date('Y-m-d H:i:s', strtotime($startDateTime) + $this->getAverageHours() * 60 * 60);
-    }
-
     public function getAverageHours()
     {
         if (isset($this->average_hours)) {

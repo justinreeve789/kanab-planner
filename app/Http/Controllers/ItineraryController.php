@@ -46,7 +46,7 @@ class ItineraryController extends Controller
         $this->setupItinerary($request);
         $this->itineraryService->setItinerary($this->getItinerary());
         $days = $this->itineraryService->assignDaysForAreas($this->getItinerary()->getUseFirstDay(), $this->getItinerary()->getUseLastDay());
-//        $this->shuffleDays();
+        $this->shuffleDays();
         $this->getItinerary()->setTotalPossibleTrails($this->itineraryService->calculateTotalPossibleTrailsForTrip());
         foreach ($days as $dayNum => $day) {
             $day = $this->itineraryService->fillDay($day);
@@ -71,19 +71,40 @@ class ItineraryController extends Controller
     /**
      * Keep the first and last day, and shuffle the rest.
      */
-    private function shuffleDays()
+    private function shuffleDays(): void
     {
         $days = $this->getItinerary()->getDays();
+
+        // Return early if there are 3 or fewer days.
         if (count($days) <= 3) {
-            return $days;
+            return;
         }
+
+        // Preserve the first and last elements.
         $first = array_shift($days);
         $last = array_pop($days);
-        shuffle($days);
-        $days = array_merge([$first], $days, [$last]);
+
+        // Group days by area_id.
+        $groupedDays = [];
+        foreach ($days as $day) {
+            $groupedDays[$day->area_id][] = $day;
+        }
+
+        // Flatten the grouped days and shuffle the groups.
+        $shuffledGroups = [];
+        foreach ($groupedDays as $group) {
+            shuffle($group);
+            $shuffledGroups = array_merge($shuffledGroups, $group);
+        }
+
+        // Reinsert the first and last days and update the dayNum.
+        $days = array_merge([$first], $shuffledGroups, [$last]);
+
         foreach ($days as $dayNum => $day) {
             $day->dayNum = $dayNum;
         }
+
+        // Set the shuffled and grouped days back to the itinerary.
         $this->getItinerary()->setDays($days);
     }
 

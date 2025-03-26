@@ -99,14 +99,9 @@ class Day extends Model
         $this->periods->each()->save();
     }
 
-    public function addActivity($resource, $activityType = null, $startDateTime = null, $endDateTime = null): void
+    public function addActivity(Activity $activity): void
     {
-        $this->activities[] = new Activity([
-            'resource' => $resource,
-            'activity_type' => $activityType,
-            'start_date_time' => $startDateTime,
-            'end_date_time' => $endDateTime
-        ]);
+        $this->activities[] = $activity;
     }
 
     public function getPeriod($index): Period

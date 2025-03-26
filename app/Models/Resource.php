@@ -14,6 +14,8 @@ abstract class Resource extends Model
     use HasFactory;
     use ResourceScopes;
 
+    const DEFAULT_AVERAGE_HOURS = 2;
+
     protected $appends = ['description_short', 'adventurousness', 'solitariness', 'strenuousness'];
     protected $with = ['data', 'images', 'text'];
 
@@ -114,6 +116,17 @@ abstract class Resource extends Model
         }
 
         return $query;
+    }
+
+    public function calculateEndTime(string $date, string $startTime)
+    {
+        // TODO: Use busyness and popularity rankings.
+        return date('H:i:s', strtotime($date . ' ' . $startTime) + $this->getAverageHours() * 60 * 60);
+    }
+
+    public function getAverageHours()
+    {
+        return self::DEFAULT_AVERAGE_HOURS;
     }
 
     public function isEvent() {
