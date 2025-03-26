@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('itinerary_days', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('itinerary_id')->unsigned();
+            $table->uuid('id')->primary();
+            $table->uuid('itinerary_id');
             $table->integer('area_id')->unsigned();
             $table->string('date');
             $table->smallInteger('day_num')->unsigned();

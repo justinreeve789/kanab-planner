@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('user_itineraries', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('user_id')->unsigned();
-            $table->integer('itinerary_id')->unsigned();
+            $table->uuid('itinerary_id');
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('itinerary_id')->references('id')->on('itineraries')->onDelete('cascade');

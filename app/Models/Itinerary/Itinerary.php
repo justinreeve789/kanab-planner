@@ -14,10 +14,10 @@ use App\Traits\ReturnAllProperties;
 use App\Traits\SnakeCaseAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
-class Itinerary extends Model
+class Itinerary extends CachedModel
 {
-    use HasFactory;
     use Preferences;
 //    use ReturnAllProperties;
 //    use SnakeCaseAttributes;
@@ -75,7 +75,7 @@ class Itinerary extends Model
     {
         parent::__construct($attributes);
 
-        $this->key = \Session::getId();
+        $this->id = Str::uuid();
         $this->activities = [];
         $this->adventurousness = $this->adventurousness ?? self::DEFAULT_ADVENTUROUSNESS;
         $this->arrival_date_time = date('Y-m-d H:i:s', strtotime($this->getStartDate() . ' ' . self::DEFAULT_ARRIVAL_TIME));
@@ -112,17 +112,17 @@ class Itinerary extends Model
         return $this->hasOneThrough(User::class, UserItinerary::class, 'user_id', 'id', 'id', 'itinerary_id');
     }
 
-    public function save(array $options = [])
-    {
-        return \DB::transaction(function () use ($options) {
-            $this->load('days');
-            parent::save($options);
-            if ($this->relationLoaded('days')) {
-                $this->days()->saveMany($this->getRelation('days'));
-            }
-        });
-    }
-
+//    public function save(array $options = [])
+//    {
+//        return \DB::transaction(function () use ($options) {
+//            $this->load('days');
+//            parent::save($options);
+//            if ($this->relationLoaded('days')) {
+//                $this->days()->saveMany($this->getRelation('days'));
+//            }
+//        });
+//    }
+//
     public function saveAll()
     {
         $this->days->each()->saveAll();

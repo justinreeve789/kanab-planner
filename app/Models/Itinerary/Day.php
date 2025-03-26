@@ -10,18 +10,17 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /**
  * Take into account that days are longer in summer and shorter in winter.
  */
-class Day extends Model
+class Day extends CachedModel
 {
-    use HasFactory;
-
     const DEFAULT_ARRIVAL_TIME = '16:00:00';
     const DEFAULT_DEPARTURE_TIME = '10:00:00';
 
-    protected $casts = ['stats' => 'json'];
+    protected $casts = ['id' => 'string', 'itinerary_id' => 'string', 'stats' => 'json'];
     protected $guarded = [];
     protected $table = 'itinerary_days';
 
@@ -35,6 +34,8 @@ class Day extends Model
 
     public function __construct(array $attributes = [])
     {
+        $this->id = Str::uuid();
+
         foreach ($attributes as $key => $attr) {
             $this->setAttribute($key, $attr);
         }
@@ -60,17 +61,36 @@ class Day extends Model
 //        }
 
         $this->activities = [];
-        $this->periods = [
-            Period::MORNING => new Period(['type' => Period::MORNING, 'area_id' => $this->area_id]),
-            Period::AFTERNOON => new Period(['type' => Period::AFTERNOON, 'area_id' => $this->area_id]),
-            Period::EVENING => new Period(['type' => Period::EVENING, 'area_id' => $this->area_id]),
-            Period::NIGHT => new Period(['type' => Period::NIGHT, 'area_id' => $this->area_id]),
-        ];
+        $this->createPeriodsIfNotExist();
         $this->temperatures = $this->getTemperatures();
 
         parent::__construct($attributes);
     }
 
+    protected function createPeriodsIfNotExist()
+    {
+        $periods = [
+            Period::MORNING,
+            Period::AFTERNOON,
+            Period::EVENING,
+            Period::NIGHT
+        ];
+
+        foreach ($periods as $period) {
+            $this->periods[$period] = new Period(['day_id' => $this->id, 'type' => $period]);
+        }
+
+//        foreach ($periods as $periodType) {
+//            // Check if the period already exists for this day, if not, create it.
+//            $existingPeriod = $this->periods()->where('type', $periodType)->first();
+//            if (!$existingPeriod) {
+//                $this->periods()->create([
+//                    'day_id' => $this->id,
+//                    'type' => $periodType,
+//                ]);
+//            }
+//        }
+    }
 //    public function set($date, $area, ?int $dayNum)
 //    {
 //        $this->date = $date;

@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('itineraries', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('key')->nullable();
+            $table->uuid('id')->primary();
             $table->integer('user_id')->unsigned()->default(0);
+            $table->string('name')->nullable();
             $table->integer('base_area_id')->unsigned()->nullable();
             $table->dateTime('arrival_date_time')->nullable();
             $table->json('activity_priorities')->nullable();
@@ -48,7 +48,6 @@ return new class extends Migration
             $table->boolean('use_first_day')->nullable();
             $table->boolean('use_last_day')->nullable();
             $table->timestamps();
-            $table->unique('key');
             $table->foreign('base_area_id')->references('id')->on('areas')->onDelete('set null');
         });
     }

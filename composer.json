@@ -20,6 +20,7 @@
         "laravel/tinker": "^2.10",
         "league/flysystem-aws-s3-v3": "^3.16",
         "meilisearch/meilisearch-php": "^1.4",
+        "mikebronner/laravel-model-caching": "^12.0",
         "noffily/duckduckgo-images-api": "^1.0",
         "openai-php/laravel": "^0.11.0",
         "predis/predis": "^2.3",

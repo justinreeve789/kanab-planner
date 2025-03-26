@@ -13,12 +13,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('itinerary_periods', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('day_id')->unsigned();
+            $table->uuid('id')->primary();
+            $table->uuid('day_id');
             $table->enum('type', [Period::MORNING, Period::AFTERNOON, Period::EVENING, Period::NIGHT]);
             $table->timestamps();
             $table->index('type');
-            $table->unique(['day_id'], ['type']);
+            $table->unique(['day_id', 'type']);
             $table->foreign('day_id')->references('id')->on('itinerary_days')->onDelete('cascade');
         });
     }

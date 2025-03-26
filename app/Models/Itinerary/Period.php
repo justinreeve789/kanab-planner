@@ -7,36 +7,35 @@ use App\Traits\ReturnAllProperties;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
-class Period extends Model
+class Period extends CachedModel
 {
-    use HasFactory;
-
     public const MORNING = 'morning';
     public const AFTERNOON = 'afternoon';
     public const EVENING = 'evening';
     public const NIGHT = 'night';
 
-    protected $casts = ['activities'];
+    protected $casts = ['id' => 'string', 'day_id' => 'string'];
     protected $guarded = [];
     protected $table = 'itinerary_periods';
 
     public $activities = [];
 
-//    public function __construct(array $attributes = []) {
-//        if ($type !== null) {
-//            $this->type = $type;
-//        }
-//        if ($areaId !== null) {
-//            $this->area_id = $areaId;
-//        }
-//
-//        parent::__construct();
-//    }
+    public function __construct(array $attributes = []) {
+        $this->id = Str::uuid();
+
+        parent::__construct($attributes);
+    }
 
     public function activities(): HasMany
     {
         return $this->hasMany(Activity::class, 'period_id', 'id');
+    }
+
+    public function getActivities(): array
+    {
+        return $this->activities;
     }
 
     public function addActivity(Activity $activity): void

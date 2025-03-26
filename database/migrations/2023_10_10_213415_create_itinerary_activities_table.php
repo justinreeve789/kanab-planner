@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('itinerary_activities', function (Blueprint $table) {
-            $table->increments('id');
+            $table->uuid('id')->primary();
+            $table->uuid('period_id');
             $table->string('name');
-            $table->integer('period_id')->unsigned();
             $table->time('start_time');
             $table->time('end_time');
             $table->text('description')->nullable();
@@ -23,7 +23,6 @@ return new class extends Migration
             $table->string('resource_table')->nullable();
             $table->integer('resource_id')->unsigned()->nullable();
             $table->timestamps();
-            $table->unique(['itinerary_id', 'hash']);
             $table->foreign('period_id')->references('id')->on('itinerary_periods')->onDelete('cascade');
         });
     }

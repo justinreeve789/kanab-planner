@@ -10,20 +10,19 @@ use App\Traits\ReturnAllProperties;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 
-class Activity extends Model
+class Activity extends CachedModel
 {
-    use HasFactory;
-
     const DEFAULT_ADVENTUROUSNESS = 0.3;
     const DEFAULT_SOLITARINESS = 0.3;
     const DEFAULT_STRENUOUSNESS = 0.3;
 
+    protected $casts = ['id' => 'string', 'period_id' => 'string'];
     protected $guarded = [];
     protected $table = 'itinerary_activities';
 
-//    public $hash;
     public $data;
 //    public $activityType;   // hiking, offroading, etc.
 //    public $description;
@@ -35,9 +34,10 @@ class Activity extends Model
 
     public function __construct(array $attributes = [])
     {
+        $this->id = Str::uuid();
+
         parent::__construct($attributes);
 
-//        $this->hash = substr(md5(microtime(true)), 0, 8);
 //        $this->data = $this->resource;
 //        $this->name = $this->resource->name;
 //        $this->description = $this->resource->description;
