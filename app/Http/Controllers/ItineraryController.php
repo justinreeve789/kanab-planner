@@ -43,15 +43,13 @@ class ItineraryController extends Controller
      */
     public function createItinerary(Request $request)
     {
-        $this->setupItinerary($request);
-        $this->itineraryService->setItinerary($this->getItinerary());
-        $days = $this->itineraryService->assignDaysForAreas($this->getItinerary()->getUseFirstDay(), $this->getItinerary()->getUseLastDay());
-        $this->shuffleDays();
-        $this->getItinerary()->setTotalPossibleTrails($this->itineraryService->calculateTotalPossibleTrailsForTrip());
-        foreach ($days as $dayNum => $day) {
-            $day = $this->itineraryService->fillDay($day);
+        $this->itineraryService->setupItinerary($request);
+        $this->itineraryService->assignDaysForAreas($this->getItinerary()->getUseFirstDay(), $this->getItinerary()->getUseLastDay());
+        $this->itineraryService->shuffleDays();
+        $this->itineraryService->getItinerary()->setTotalPossibleTrails($this->itineraryService->calculateTotalPossibleTrailsForTrip());
+        foreach ($this->itineraryService->getItinerary()->getDays() as $dayNum => $day) {
+            $this->itineraryService->fillDay($day);
         }
-        $this->getItinerary()->setDays($days);
 
         // TODO: If the user is visiting two or more national parks or monuments, or spending two or more days at the
         // same national park or monument, advise they purchase a national park pass.
@@ -65,63 +63,8 @@ class ItineraryController extends Controller
 
 //        $this->getItinerary()->save();
 
-        return response()->json($this->getItinerary());
-    }
-
-    /**
-     * Keep the first and last day, and shuffle the rest.
-     */
-    private function shuffleDays(): void
-    {
-        $days = $this->getItinerary()->getDays();
-
-        // Return early if there are 3 or fewer days.
-        if (count($days) <= 3) {
-            return;
-        }
-
-        // Preserve the first and last elements.
-        $first = array_shift($days);
-        $last = array_pop($days);
-
-        // Group days by area_id.
-        $groupedDays = [];
-        foreach ($days as $day) {
-            $groupedDays[$day->area_id][] = $day;
-        }
-
-        // Flatten the grouped days and shuffle the groups.
-        $shuffledGroups = [];
-        foreach ($groupedDays as $group) {
-            shuffle($group);
-            $shuffledGroups = array_merge($shuffledGroups, $group);
-        }
-
-        // Reinsert the first and last days and update the dayNum.
-        $days = array_merge([$first], $shuffledGroups, [$last]);
-
-        foreach ($days as $dayNum => $day) {
-            $day->dayNum = $dayNum;
-        }
-
-        // Set the shuffled and grouped days back to the itinerary.
-        $this->getItinerary()->setDays($days);
-    }
-
-    private function getDeviations(): array
-    {
-        return $this->itineraryService->getDeviations();
-    }
-
-    private function getEvents()
-    {
-        $query = Event::betweenDates($this->itinerary->getStartDate(), $this->getItinerary()->getEndDate());
-//            ->with('data');
-        $deviations = $this->getDeviations();
-        if (!empty($deviations)) {
-            $query = $query->sortByDeviation($deviations);
-        }
-        return $query->get();
+//        return response()->json($this->itineraryService->getItinerary());
+        return $this->itineraryService->getItinerary();
     }
 
     /**
@@ -129,139 +72,6 @@ class ItineraryController extends Controller
      */
     private function getItinerary()
     {
-        return $this->itinerary;
-    }
-
-    private function setupItinerary(Request $request)
-    {
-        $this->itinerary = new Itinerary();
-
-        $accommodationPreference = $request->get('accommodation_preference');
-        $arrivalDateTime = $request->get('arrival_datetime');
-        $departureDateTime = $request->get('departure_datetime');
-        $interests = $request->get('interests');
-        $tripPreference = $request->get('trip_preference');
-
-        if ($request->get('base_area_id')) {
-            $area = Area::with('weather')->where('id', $request->get('base_area_id'))->first();
-            if ($area) {
-                $this->getItinerary()->setBaseArea($area);
-                $this->getItinerary()->setBaseAreaId($request->get('base_area_id'));
-            }
-        }
-
-        $this->getItinerary()->setCheckInTime($request->get('check_in'));
-        $this->getItinerary()->setCheckOutTime($request->get('check_out'));
-        $this->getItinerary()->setDurationDays($request->get('duration_days'));
-        $this->getItinerary()->setEndDate($request->get('end_date'));
-        $this->getItinerary()->setLatitude($request->get('lat'));
-        $this->getItinerary()->setLongitude($request->get('lng'));
-        $this->getItinerary()->setStartDate($request->get('start_date'));
-
-        // Some methods should be called after others have been set.
-        $this->getItinerary()->setMonth($request->get('month'));
-        $this->getItinerary()->setSeason($request->get('season'));
-
-        if (!$this->getItinerary()->getLatitude() || !$this->getItinerary()->getLongitude()) {
-            $areaId = $request->get('area_id');
-            if ($areaId) {
-                $area = Area::where('id', $areaId)->first();
-                $this->getItinerary()->setLatitude($area->latitude);
-                $this->getItinerary()->setLongitude($area->longitude);
-            }
-        }
-
-        $this->getItinerary()->setAdventurousness($request->get('adventurousness'));
-        $this->getItinerary()->setSolitariness($request->get('solitariness'));
-        $this->getItinerary()->setStrenuousness($request->get('strenuousness'));
-        $this->getItinerary()->setActivityPriorities($request->get('activities'));
-        $this->getItinerary()->setTrailPriorities($request->get('trails'));
-        $this->getItinerary()->setAverageHikingSpeed($request->get('average_hiking_speed'));
-
-        $this->determineAndSetMissingDates();
-    }
-
-    /**
-     * Most users probably won't have specific dates in mind. Just a season or month. We can decide on dates here.
-     * TODO: Incorporate the reservation system, so we're favoring dates that have accommodation openings.
-     */
-    private function determineAndSetMissingDates()
-    {
-        $startDate = $this->getItinerary()->getStartDate();
-        $endDate = $this->getItinerary()->getEndDate();
-        $durationDays = $this->getItinerary()->getDurationDays();
-
-        if ($startDate) {
-            if ($endDate) {
-                $dateStart = new \DateTime($startDate);
-                $dateEnd = new \DateTime($endDate);
-                $this->getItinerary()->setDurationDays($dateStart->diff($dateEnd)->days + 1);
-                return;
-            } else if ($durationDays) {
-                $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($startDate . ' +' . $durationDays . ' days')));
-                return;
-            }
-        }
-
-        if (!$startDate || !$endDate) {
-            // Let's try the month.
-            if ($this->getItinerary()->getMonth()) {
-                // Pick a random date in the month that's at least 2 weeks ahead of the current date.
-                $startDate = $this->getRandomDateInMonth($this->getItinerary()->getMonth());
-                $this->getItinerary()->setStartDate($startDate);
-
-                if ($durationDays) {
-                    $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($startDate . ' +' . $durationDays . ' days')));
-                    return;
-                }
-            }
-
-            // Let's try the season.
-            if ($this->getItinerary()->getSeason()) {
-                $startDate = Season::randomDateInSeason($this->getItinerary()->getSeason());
-                $this->getItinerary()->setStartDate($startDate);
-
-                if ($durationDays) {
-                    $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($startDate . ' +' . $durationDays . ' days')));
-                    return;
-                }
-            }
-        }
-//        throw new \Exception('Could not set dates: ' . print_r($this->getItinerary(), true));
-    }
-
-    private function getRandomDateInMonth($month, int $year = null) {
-        // Get the current date
-        $currentDate = new \DateTime();
-
-        // Calculate the target year
-        if ($year === null) {
-            $targetYear = (int)$currentDate->format('Y');
-        } else {
-            $targetYear = $year;
-        }
-
-        if ($currentDate->format('n') > $month) {
-            $targetYear++; // Move to the next year if the specified month is in the past
-        }
-
-        // Calculate the minimum date (2 weeks from the current date)
-        $minimumDate = clone $currentDate;
-        $minimumDate->add(new \DateInterval('P2W'));
-
-        // Generate a random date in the specified month
-        $randomDay = mt_rand(1, cal_days_in_month(CAL_GREGORIAN, $month, $targetYear));
-        $randomDate = new \DateTime("$targetYear-$month-$randomDay");
-
-        // Check if the random date is at least 2 weeks ahead
-        do {
-            $randomDate->add(new \DateInterval('P1D'));
-        } while ($randomDate < $minimumDate);
-
-        // Did we move outside the intended month? Let's try again, but this time jump forward a year.
-        if ((int)$randomDate->format('n') !== $month) {
-            $randomDate = new \DateTime($this->getRandomDateInMonth($month, $targetYear + 1));
-        }
-        return $randomDate->format('Y-m-d');
+        return $this->itineraryService->getItinerary();
     }
 }

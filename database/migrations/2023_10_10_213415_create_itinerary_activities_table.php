@@ -14,22 +14,17 @@ return new class extends Migration
         Schema::create('itinerary_activities', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->integer('itinerary_day_id')->unsigned();
-            $table->integer('itinerary_id')->unsigned();
-            $table->integer('activity_type_id')->unsigned();
-            $table->string('hash');
-            $table->text('description')->nullable();
-            $table->string('phrase')->nullable();
+            $table->integer('period_id')->unsigned();
             $table->time('start_time');
             $table->time('end_time');
-            $table->string('period')->nullable();
+            $table->text('description')->nullable();
+            $table->string('phrase')->nullable();
+            $table->integer('activity_type_id')->unsigned()->nullable();
             $table->string('resource_table')->nullable();
             $table->integer('resource_id')->unsigned()->nullable();
             $table->timestamps();
             $table->unique(['itinerary_id', 'hash']);
-            $table->foreign('itinerary_day_id')->references('id')->on('itinerary_days')->onDelete('cascade');
-            $table->foreign('itinerary_id')->references('id')->on('itineraries')->onDelete('cascade');
-            $table->foreign('activity_type_id')->references('id')->on('activity_types')->onDelete('cascade');
+            $table->foreign('period_id')->references('id')->on('itinerary_periods')->onDelete('cascade');
         });
     }
 

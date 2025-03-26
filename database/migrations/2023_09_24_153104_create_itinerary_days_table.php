@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('itinerary_days', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('date');
             $table->integer('itinerary_id')->unsigned();
             $table->integer('area_id')->unsigned();
+            $table->string('date');
             $table->smallInteger('day_num')->unsigned();
             $table->time('start_time');
             $table->time('end_time');

@@ -42,7 +42,6 @@ class Itinerary extends Model
     const SUMMER = 'summer';
     const WINTER = 'winter';
 
-    protected $guarded = [];
     protected $casts = [
         'activity_priorities' => 'json',
         'area_priorities' => 'json',
@@ -77,7 +76,6 @@ class Itinerary extends Model
         parent::__construct($attributes);
 
         $this->key = \Session::getId();
-        $this->days = [];
         $this->activities = [];
         $this->adventurousness = $this->adventurousness ?? self::DEFAULT_ADVENTUROUSNESS;
         $this->arrival_date_time = date('Y-m-d H:i:s', strtotime($this->getStartDate() . ' ' . self::DEFAULT_ARRIVAL_TIME));
@@ -227,6 +225,9 @@ class Itinerary extends Model
         return $this->days[$index];
     }
 
+    /**
+     * @return Day[]
+     */
     public function getDays(): array
     {
         return $this->days;

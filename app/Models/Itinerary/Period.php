@@ -6,6 +6,7 @@ use App\ResourceEnum;
 use App\Traits\ReturnAllProperties;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Period extends Model
 {
@@ -15,7 +16,6 @@ class Period extends Model
     public const AFTERNOON = 'afternoon';
     public const EVENING = 'evening';
     public const NIGHT = 'night';
-
 
     protected $casts = ['activities'];
     protected $guarded = [];
@@ -34,14 +34,14 @@ class Period extends Model
 //        parent::__construct();
 //    }
 
+    public function activities(): HasMany
+    {
+        return $this->hasMany(Activity::class, 'period_id', 'id');
+    }
+
     public function addActivity(Activity $activity): void
     {
         $this->activities[] = $activity;
-    }
-
-    public function getActivities(): array
-    {
-        return $this->activities;
     }
 
     public function getAreaId(): int

@@ -44,6 +44,7 @@ class Day extends Model
         // should occur in the same area.
 
 //        $this->day_num = $attributes['day_num'] ?? null;
+        $this->start_time = '07:00';
         $this->end_time = '22:00';
 
         if (isset($attributes['date'])) {
@@ -54,18 +55,16 @@ class Day extends Model
             $this->formatted_year = date('Y', strtotime($this->date));
         }
 
-        $this->start_time = '07:00';
-
 //        if (is_integer($this->area)) {
 //            $this->area = Area::where('id', $this->area)->first();
 //        }
 
         $this->activities = [];
         $this->periods = [
-            Period::MORNING => new Period(['period' => Period::MORNING, 'area_id' => $this->area_id]),
-            Period::AFTERNOON => new Period(['period' => Period::AFTERNOON, 'area_id' => $this->area_id]),
-            Period::EVENING => new Period(['period' => Period::EVENING, 'area_id' => $this->area_id]),
-            Period::NIGHT => new Period(['period' => Period::NIGHT, 'area_id' => $this->area_id]),
+            Period::MORNING => new Period(['type' => Period::MORNING, 'area_id' => $this->area_id]),
+            Period::AFTERNOON => new Period(['type' => Period::AFTERNOON, 'area_id' => $this->area_id]),
+            Period::EVENING => new Period(['type' => Period::EVENING, 'area_id' => $this->area_id]),
+            Period::NIGHT => new Period(['type' => Period::NIGHT, 'area_id' => $this->area_id]),
         ];
         $this->temperatures = $this->getTemperatures();
 
@@ -76,6 +75,11 @@ class Day extends Model
 //    {
 //        $this->date = $date;
 //    }
+
+    public function itinerary()
+    {
+        return $this->belongsTo(Itinerary::class, 'itinerary_id', 'id');
+    }
 
     public function periods()
     {
@@ -99,33 +103,32 @@ class Day extends Model
         $this->periods->each()->save();
     }
 
-    public function addActivity(Activity $activity): void
-    {
-        $this->activities[] = $activity;
-    }
-
     public function getPeriod($index): Period
     {
         return $this->periods[$index];
     }
 
+    /**
+     * @return Period[]
+     */
     public function getPeriods(): array
     {
         return $this->periods;
     }
 
     /**
-     * A trail is probably likely to be the focal point of the day. Weight it heavier than other activities when
+     * Since a trail is likely to be the focal point of the day, weight it heavier than other activities when
      * calculating the average.
      */
-    public function getASS(): array
+    public function calculateASS(): array
     {
         if ($this->stats) {
             return $this->stats;
         }
         $stats = ['adventurousness' => 0, 'solitariness' => 0, 'strenuousness' => 0];
-        $count = count($this->getActivities());
-        foreach ($this->getActivities() as $activity) {
+        $activities = $this->getActivities();
+        $count = count($activities);
+        foreach ($activities as $activity) {
             if (empty($activity->data->data)) {
                 $count--;
                 continue;
@@ -160,9 +163,18 @@ class Day extends Model
         return $stats;
     }
 
+    /**
+     * Return a flat array of activities from each period.
+     *
+     * @return array
+     */
     public function getActivities(): array
     {
-        return $this->activities;
+        $activities = [];
+        foreach ($this->getPeriods() as $period) {
+            $activities = array_merge($activities, $period->getActivities());
+        }
+        return $activities;
     }
 
     public function getPreamble(): string

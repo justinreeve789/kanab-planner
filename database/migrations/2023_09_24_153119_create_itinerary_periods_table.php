@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Itinerary\Period;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,10 +15,11 @@ return new class extends Migration
         Schema::create('itinerary_periods', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('day_id')->unsigned();
-            $table->string('type');
-            $table->json('activities')->nullable();
-            $table->foreign('day_id')->references('id')->on('itinerary_days')->onDelete('cascade');
+            $table->enum('type', [Period::MORNING, Period::AFTERNOON, Period::EVENING, Period::NIGHT]);
             $table->timestamps();
+            $table->index('type');
+            $table->unique(['day_id'], ['type']);
+            $table->foreign('day_id')->references('id')->on('itinerary_days')->onDelete('cascade');
         });
     }
 
