@@ -10,13 +10,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Trail extends Resource
 {
-    use ActivityData;
     use HasFactory;
     use Proximity;
     use Searchable;
 
     protected $guarded = ['id'];
     protected $hidden = ['source_type', 'source_id', 'raw_data'];
+
     public $trailService;
 
     public function __construct()
@@ -38,6 +38,11 @@ class Trail extends Resource
     public function images()
     {
         return $this->hasMany(TrailImage::class, 'trail_id', 'id');
+    }
+
+    public function openai_prompts()
+    {
+        return $this->hasMany(OpenAIPrompt::class, 'source_id', 'id')->where('openai_prompts.source_table', $this->getTable());
     }
 
     public function getAverageHours()

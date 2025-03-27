@@ -2,45 +2,42 @@
 
 namespace App\Services;
 
-use App\Models\Area;
 use App\Models\Blog\Blog;
 use App\Models\Blog\Post;
-use App\Models\Event;
-use App\Models\EventDate;
-use App\Models\Location;
-use App\Models\ResourceText;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class BlogService
 {
     private $client;
     private $conversionService;
+    private $openAIService;
 
 
     public function __construct()
     {
         $this->client = new Client();
         $this->conversionService = new ConversionService();
+        $this->openAIService = new OpenAIService();
+    }
+
+    public function extractPromptsFromPost($blogPost)
+    {
+        if (is_integer($blogPost)) {
+            $blogPost = Post::find($blogPost);
+        }
+
+        if ($blogPost) {
+            $prompts = $this->openAIService->generatePromptsWIthOpenAI($blogPost->content);
+            return json_decode($prompts);
+        }
     }
 
     public function import($blogId)
     {
         $blog = Blog::find($blogId);
         if ($blog) {
-            $blog_posts = $this->savePostsFromBlog($blog);
-            if (!empty($blog_posts)) {
-//                foreach ($blog_posts as $post) {
-//                    Post::create([
-//                        'blog_id' => $blogId,
-//                        'title' => '',
-//                        'content' => '',
-//                        'raw_data' => $post,
-//                        'posted_at' => '',
-//                    ]);
-//                }
-            }
+            $this->savePostsFromBlog($blog);
         }
     }
 
