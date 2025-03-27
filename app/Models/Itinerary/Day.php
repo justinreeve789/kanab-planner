@@ -7,6 +7,7 @@ use App\Models\AreaWeather;
 use App\ResourceEnum;
 use App\Traits\ReturnAllProperties;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
@@ -35,6 +36,7 @@ class Day extends CachedModel
     public function __construct(array $attributes = [])
     {
         $this->id = Str::uuid();
+        $this->periods = new Collection();
 
         foreach ($attributes as $key => $attr) {
             $this->setAttribute($key, $attr);
@@ -77,7 +79,7 @@ class Day extends CachedModel
         ];
 
         foreach ($periods as $period) {
-            $this->periods[$period] = new Period(['day_id' => $this->id, 'type' => $period]);
+            $this->periods->put($period, new Period(['day_id' => $this->id, 'type' => $period]));
         }
 
 //        foreach ($periods as $periodType) {
@@ -128,10 +130,7 @@ class Day extends CachedModel
         return $this->periods[$index];
     }
 
-    /**
-     * @return Period[]
-     */
-    public function getPeriods(): array
+    public function getPeriods(): Collection
     {
         return $this->periods;
     }
@@ -186,13 +185,13 @@ class Day extends CachedModel
     /**
      * Return a flat array of activities from each period.
      *
-     * @return array
+     * @return Collection
      */
-    public function getActivities(): array
+    public function getActivities(): Collection
     {
-        $activities = [];
+        $activities = new Collection();
         foreach ($this->getPeriods() as $period) {
-            $activities = array_merge($activities, $period->getActivities());
+            $activities = $activities->merge($period->getActivities());
         }
         return $activities;
     }

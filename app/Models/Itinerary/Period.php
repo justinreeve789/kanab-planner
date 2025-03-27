@@ -4,6 +4,7 @@ namespace App\Models\Itinerary;
 
 use App\ResourceEnum;
 use App\Traits\ReturnAllProperties;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -20,11 +21,11 @@ class Period extends CachedModel
     protected $guarded = [];
     protected $table = 'itinerary_periods';
 
-    public $activities = [];
+    public $activities;
 
     public function __construct(array $attributes = []) {
         $this->id = Str::uuid();
-
+        $this->activities = new Collection();
         parent::__construct($attributes);
     }
 
@@ -33,14 +34,14 @@ class Period extends CachedModel
         return $this->hasMany(Activity::class, 'period_id', 'id');
     }
 
-    public function getActivities(): array
+    public function getActivities(): Collection
     {
         return $this->activities;
     }
 
     public function addActivity(Activity $activity): void
     {
-        $this->activities[] = $activity;
+        $this->activities->add($activity);
     }
 
     public function getAreaId(): int
@@ -88,12 +89,12 @@ class Period extends CachedModel
         }
     }
 
-    public function getActivitiesOfType(string $activityType): array
+    public function getActivitiesOfType(string $activityType): Collection
     {
-        $activities = [];
+        $activities = new Collection();
         foreach ($this->activities as $activity) {
             if ($activity->activityType === $activityType) {
-                $activities[] = $activity;
+                $activities->add($activity);
             }
         }
         return $activities;

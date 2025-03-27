@@ -277,7 +277,7 @@ class ItineraryService
             return;
         }
         $dayNum = $day->day_num;
-        if (empty($day->periods[$period]->getActivities())) {
+        if (empty($day->periods->get($period)->getActivities())) {
             $event = Event::betweenDates($day->date . ' ' . $startTime, $day->date . ' ' . $endTime)
                 ->with('location')
                 ->whereHas('location', function($query) use ($day) {
