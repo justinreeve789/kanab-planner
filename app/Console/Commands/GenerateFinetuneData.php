@@ -17,7 +17,7 @@ class GenerateFinetuneData extends Command
      *
      * @var string
      */
-    protected $signature = 'openai:finetune {--trails} {--output=}';
+    protected $signature = 'openai:finetune {--trails} {--show} {--output=}';
 
     /**
      * The console command description.
@@ -27,6 +27,9 @@ class GenerateFinetuneData extends Command
     protected $description = 'Generate fine-tune data for OpenAI.';
 
     private $openAIService;
+
+    protected $showOutput;
+
     protected $outputFile;
 
     /**
@@ -35,6 +38,7 @@ class GenerateFinetuneData extends Command
     public function handle()
     {
         $doTrails = $this->option('trails');
+        $this->showOutput = $this->option('show');
         $this->outputFile = $this->option('output');
         $this->openAIService = new OpenAIService();
 
@@ -49,19 +53,23 @@ class GenerateFinetuneData extends Command
 
     public function processTrails()
     {
-        $json = '';
-
         $posts = Post::with('openai_prompts')
-            ->with('area')
             ->whereHas('openai_prompts')
             ->where('resource_table', 'trails')
             ->whereNotNull('resource_id')
             ->get();
         foreach ($posts as $post) {
-            $json .= $this->openAIService->generateFinetuneData($post);
-            if ($this->output) {
+            $trail = Trail::with('area')->where('id', $post->resource_id)->first();
+            if (!$trail) {
+                continue;
+            }
+            $post->trail = $trail;
+            $post->area = $trail->area;
+            $json = $this->openAIService->generateFinetuneData($post);
+            if ($this->outputFile) {
                 file_put_contents($this->outputFile, $json, FILE_APPEND);
-            } else {
+            }
+            if ($this->showOutput) {
                 echo $json;
             }
         }
@@ -71,10 +79,11 @@ class GenerateFinetuneData extends Command
             ->whereHas('openai_prompts')
             ->get();
         foreach ($trails as $trail) {
-            $json .= $this->openAIService->generateFinetuneData($trail);
-            if ($this->output) {
+            $json = $this->openAIService->generateFinetuneData($trail);
+            if ($this->outputFile) {
                 file_put_contents($this->outputFile, $json, FILE_APPEND);
-            } else {
+            }
+            if ($this->showOutput) {
                 echo $json;
             }
         }
