@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\TrailService;
 use App\Traits\ActivityData;
 use App\Traits\Proximity;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -38,6 +39,11 @@ class Trail extends Resource
     public function images()
     {
         return $this->hasMany(TrailImage::class, 'trail_id', 'id');
+    }
+
+    public function merged_trails(): HasManyThrough
+    {
+        return $this->hasManyThrough(Trail::class, TrailMerge::class, 'merged_from', 'id', 'id', 'merged_to');
     }
 
     public function openai_prompts()

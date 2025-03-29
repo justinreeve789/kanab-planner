@@ -2,8 +2,12 @@
 
 namespace App;
 
+use App\Models\Blog\Post;
+
 enum ResourceEnum
 {
+    const BLOG_POSTS_CLASS = Post::class;
+    const BLOG_POSTS_TABLE = 'blog_posts';
     const EVENTS_CLASS = 'App\\Models\\Event';
     const EVENTS_TABLE = 'events';
     const LOCATIONS_CLASS = 'App\\Models\\Location';

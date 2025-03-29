@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Builder\CustomQueryBuilder;
 use App\ResourceEnum;
+use App\Traits\InsertWithValues;
 use App\Traits\ResourceScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

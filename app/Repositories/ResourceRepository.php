@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use Illuminate\Database\Connection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class ResourceRepository
@@ -15,22 +16,29 @@ class ResourceRepository
         return ResourceRepository::class;
     }
 
-    public function combineResources($table, $primary = null, $secondary = null) {
+    public function combineResources(string $modelClass, $primary = null, $secondary = null) {
         if (!$primary || !$secondary) {
             return false;
         }
-        $columnNames = DB::getSchemaBuilder()->getColumnListing($table);
-        $fieldUpdates = [];
+
+        $model = new $modelClass();
+
+        // Get the column names for the table
+        $columnNames = DB::getSchemaBuilder()->getColumnListing($model->getTable());
+        $fieldValues = [];
 
         foreach ($columnNames as $columnName) {
-            if ($columnName !== 'id') { // Exclude the primary key column
-                $fieldUpdates[] = "`primary`.$columnName = COALESCE(`primary`.$columnName, secondary.$columnName)";
+            // Exclude the primary key column.
+            if ($columnName !== 'id') {
+                // If there's a primary value, use it; otherwise, use the secondary value.
+                $fieldValues[$columnName] = $primary->$columnName ?? $secondary->$columnName;
             }
         }
 
-        $updateQuery = "UPDATE " . $table . " AS `primary`, " . $table . " AS secondary
-                        SET " . implode(', ', $fieldUpdates) . "
-                        WHERE `primary`.id = ? AND secondary.id = ?";
-        DB::update($updateQuery, [$primary->id, $secondary->id]);
+        $fieldValues['source_type'] = 'merge';
+        $fieldValues['source_id'] = $primary->id . ',' . $secondary->id;
+        $fieldValues['is_merged'] = true;
+
+        return $model::create($fieldValues);
     }
 }

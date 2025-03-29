@@ -15,6 +15,7 @@
  * - Sometimes there's personal details (e.g. openai_prompts.id #6384, openai_prompts.id #7983-#7996) that should be omitted.
  * - Include an area id, so users can ask general questions about the area, like "What sort of wildlife can I expect to see?"
  * or "What are the best trails in Zion National Park?"
+ * - If an answer references another trail, make it a hyperlink. Tell it to add <trail_#>...</trail_#> around the trail name.
  */
 namespace App\Services;
 

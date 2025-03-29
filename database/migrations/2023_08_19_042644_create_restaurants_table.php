@@ -27,6 +27,7 @@ class CreateRestaurantsTable extends Migration
             $table->boolean('reservable')->nullable();
             $table->text('raw_data')->nullable();
             $table->boolean('is_usable')->default(true);
+            $table->boolean('is_merged')->default(false)->comment('If true, this is an amalgamation of multiple records, recorded in resource_merges');
             $table->timestamps();
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });

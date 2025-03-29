@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c00ce17c684558fc1061baee273b034c",
+    "content-hash": "e7cb0f443ca91ce2dbfd99ff13600b0f",
     "packages": [
         {
             "name": "ahmadmayahi/php-google-vision",

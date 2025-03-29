@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Models\Blog\Post;
+use App\Traits\InsertWithValues;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class OpenAIPrompt extends Model
 {
     use HasFactory;
+    use InsertWithValues;
 
     protected $guarded = ['id'];
     protected $table = 'openai_prompts';
