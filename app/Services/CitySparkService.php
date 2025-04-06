@@ -185,10 +185,10 @@ class CitySparkService
             $locLat = $this->getProp($event, 'latitude');
             $locLng = $this->getProp($event, 'longitude');
 
-            $location = Location::search(['address' => $locAddress, 'zip' => $locZip]) ??
-                Location::search(['address' => $locAddress, 'city' => $locCity]) ??
-                Location::search(['name' => $locName, 'city' => $locCity]) ??
-                Location::search(['name' => $locName, 'address' => $locAddress]);
+            $location = \App\Services\LocationService::search(['address' => $locAddress, 'zip' => $locZip]) ??
+                \App\Services\LocationService::search(['address' => $locAddress, 'city' => $locCity]) ??
+                \App\Services\LocationService::search(['name' => $locName, 'city' => $locCity]) ??
+                \App\Services\LocationService::search(['name' => $locName, 'address' => $locAddress]);
             if (!$location) {
                 $location = new Location([
                     'name' => $locName,

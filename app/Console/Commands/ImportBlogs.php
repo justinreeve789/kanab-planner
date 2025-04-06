@@ -13,7 +13,7 @@ class ImportBlogs extends Command
      *
      * @var string
      */
-    protected $signature = 'import:blogs';
+    protected $signature = 'import:blogs {--id=}';
 
     /**
      * The console command description.
@@ -27,7 +27,12 @@ class ImportBlogs extends Command
      */
     public function handle()
     {
-        $blogs = Blog::all();
+        $id = $this->option('id');
+        if ($id) {
+            $blogs = [Blog::find($id)];
+        } else {
+            $blogs = Blog::all();
+        }
         $blogService = new BlogService();
         foreach ($blogs as $blog) {
             $blogService->import($blog->id);

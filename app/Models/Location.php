@@ -2,20 +2,33 @@
 
 namespace App\Models;
 
-use App\Models\LocationHour;
 use App\Traits\Proximity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Laravel\Scout\Searchable;
+use App\Traits\SearchableResource;
 
 class Location extends Resource
 {
     use HasFactory;
     use Proximity;
-    use Searchable;
+    use SearchableResource;
 
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'area_id'];
+
+    public function toSearchableArray()
+    {
+        return [
+            'name' => $this->name,
+            'description' => $this->description,
+            'address' => $this->address,
+            'city' => $this->city,
+            'state' => $this->state,
+            'zip' => $this->zip,
+            'phone' => $this->phone,
+            'email' => $this->email,
+            'url' => $this->url,
+        ];
+    }
 
     public function area()
     {
@@ -38,6 +51,11 @@ class Location extends Resource
         $time = date('H:i:s', strtotime($dateTime));
     }
 
+    public function openai_prompts()
+    {
+        return $this->hasMany(OpenAIPrompt::class, 'source_id', 'id')->where('openai_prompts.source_table', $this->getTable());
+    }
+
     public function restaurant()
     {
         return $this->hasOne(Restaurant::class, 'location_id', 'id');
@@ -47,24 +65,5 @@ class Location extends Resource
     {
         // Return the Location's source_id or fallback to the Restaurant's source_id if available
         return $this->source_id ?? optional($this->restaurant)->source_id;
-    }
-
-    static public function search($params = []): ?Location {
-        if (!empty($params)) {
-            foreach ($params as $key => $value) {
-                if (!$value || trim($value) == '') {
-                    return null;
-                }
-                if (!isset($loc)) {
-                    $loc = Location::where($key, $value);
-                }
-                $loc = $loc->where($key, $value);
-            }
-            $location = $loc->first();
-            if ($location) {
-                return $location;
-            }
-        }
-        return null;
     }
 }

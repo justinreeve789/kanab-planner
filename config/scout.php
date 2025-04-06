@@ -133,6 +133,34 @@ return [
         'host' => env('MEILISEARCH_HOST', 'http://localhost:7700'),
         'key' => env('MEILISEARCH_KEY'),
         'index-settings' => [
+            'blog_posts' => [
+                 'filterableAttributes'=> ['blog_id', 'resource_table', 'resource_id', 'posted_at'],
+                 'sortableAttributes'=> ['title', 'posted_at'],
+            ],
+            'events' => [
+                'filterableAttributes'=> ['name', 'source_type', 'location_id', 'is_usable'],
+                'sortableAttributes'=> ['name'],
+            ],
+            'locations' => [
+                'filterableAttributes'=> ['name', 'source_type', 'area_id', 'address', 'city', 'state', 'zip', 'phone', 'email', 'url', 'is_usable'],
+                'sortableAttributes'=> ['name'],
+            ],
+            'openai_prompts' => [
+                'filterableAttributes'=> ['source_table', 'source_id'],
+                'sortableAttributes'=> ['prompt', 'answer'],
+            ],
+            'resource_text' => [
+                'filterableAttributes'=> ['resource_table', 'resource_id', 'type'],
+                'sortableAttributes'=> [],
+            ],
+            'restaurants' => [
+                'filterableAttributes'=> ['name', 'source_type', 'location_id', 'curbside_pickup', 'dine_in', 'reservable', 'is_usable'],
+                'sortableAttributes'=> ['name', 'average_price'],
+            ],
+            'trails' => [
+                'filterableAttributes'=> ['name', 'source_type', 'area_id', 'unique', 'difficulty', 'is_usable', 'reservation', 'fee'],
+                'sortableAttributes'=> ['name', 'distance_miles', 'average_hours', 'average_grade_pt', 'max_grade_pt'],
+            ],
             // 'users' => [
             //     'filterableAttributes'=> ['id', 'name', 'email'],
             // ],

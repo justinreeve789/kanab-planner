@@ -28,6 +28,10 @@ Route::prefix('v1')->group(function() {
         Route::get('/{areaId}/restaurant', 'App\Http\Controllers\RestaurantController@getRestaurantsInArea');
     });
 
+    Route::prefix('assistant')->group(function() {
+        Route::post('/', 'App\Http\Controllers\AssistantController@sendMessage');
+    });
+
     Route::prefix('event')->group(function() {
         Route::get('/', 'App\Http\Controllers\EventController@index');
         Route::get('/{id}', 'App\Http\Controllers\EventController@getEvent');
@@ -42,6 +46,8 @@ Route::prefix('v1')->group(function() {
 
     Route::prefix('image')->group(function() {
         Route::get('/', 'App\Http\Controllers\ImageController@getImageByQuery');
+        Route::get('/map/{mapType}', 'App\Http\Controllers\ImageController@getMapTile');
+        Route::get('/map/{mapType}/{z}/{x}/{y}.{ext}', 'App\Http\Controllers\ImageController@getMapTile');
     });
 
     Route::prefix('location')->group(function() {
@@ -65,6 +71,7 @@ Route::prefix('v1')->group(function() {
         Route::get('/', 'App\Http\Controllers\TrailController@index');
         Route::get('/{id}', 'App\Http\Controllers\TrailController@getTrail');
         Route::get('/{id}/geojson', 'App\Http\Controllers\TrailController@getGeoJsonData');
+        Route::get('/{id}/geojson/analyze', 'App\Http\Controllers\TrailController@analyzeGeoJson');
         Route::get('/{id}/geojson/download', 'App\Http\Controllers\TrailController@downloadGeoJson');
         Route::get('/{id}/gpx', 'App\Http\Controllers\TrailController@getGpxData');
         Route::get('/{id}/gpx/download', 'App\Http\Controllers\TrailController@downloadGpx');

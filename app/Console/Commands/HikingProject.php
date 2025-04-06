@@ -3,32 +3,23 @@
 namespace App\Console\Commands;
 
 use App\Models\Area;
-use App\Models\Event;
-use App\Models\Image;
-use App\Models\Location;
-use App\Models\LocationImage;
-use App\Models\LocationTag;
-use App\Models\ResourceText;
-use App\Models\Restaurant;
+use App\Models\Scopes\UsableScope;
 use App\Models\Trail;
 use App\Models\TrailImage;
-use App\Models\TrailTag;
 use App\Services\ConversionService;
-use App\Services\NPSService;
 use App\Services\TrailService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Config;
 use IvoPetkov\HTML5DOMDocument;
 use Nesk\Puphpeteer\Puppeteer;
 use Nesk\Rialto\Data\JsFunction;
-use Symfony\Component\Panther\PantherTestCase;
-use Symfony\Component\Panther\WebDriver;
 use Symfony\Component\Panther\Client;
-use Symfony\Component\Panther\DomCrawler\Crawler;
 
 class HikingProject extends Command
 {
     const COOKIE = 'GCLB=CMWrhfG39LvNOg; photosTitle=Nearby%20Photos; emailSentTo=eyJpdiI6IjJzTTcvWW8xcUhvUEZ0S2hiTVI1enc9PSIsInZhbHVlIjoiM2w3RHJsZ2VEaU56azlhN3A5NGxHcTZpSHYrSHJ3UkJnalNlVjBSOGVxL081MFovaGhHWHRoaklCQThhUzc3M3NRYkJGcmZSMk9vK0l5anIzUW1GS2c9PSIsIm1hYyI6ImM1ZDlkM2ZhYmNlNjY0MjAyZjcyYWU3N2M0NjIxMjU4MmE5NjU2MGUwMjU4MzRiZDRlMTcwNzQ5OTBjNjlkNTUiLCJ0YWciOiIifQ%3D%3D; user=eyJpdiI6IjU2ZDRoTUlPU3ZhZGQveTJtQUEzdGc9PSIsInZhbHVlIjoiZDdNb3VwRUN0bTQ0Rk9CNUNiSWVDdDRhdTVXYXRENS9mWnJYaG9nR2JEeWZCUDREMzhUNzIvcmRkd2hjaXVzQlZZai80QktXYS9xNWFEcUpUdlVFaVdwM01mdTNuNjErRUM0eThIbjdDeUdKbDQ1amdTaEZmRGtyOTdjYmtheXlwcXFZdjI5N0dzSnU4eldiU1R5Vzd3WDlXeW9FbjdFNDRqNmphZnUzVGFRPSIsIm1hYyI6ImI5N2EyNjM2ZTgyNzAwYjQzODEyZjg1Mjk0ZjFjMTkzZmEzNWUzNmEwZGZhMmVjMjJmZWQ3NzcxZDBiMDJiZTAiLCJ0YWciOiIifQ%3D%3D; ids=eyJpdiI6IkVyWFowUWxQVDIrVS9yMWFLY1lFVXc9PSIsInZhbHVlIjoiOC85akZyMXpCZlhraU11WG1VcnRlWSt1ZlhSOHk2eGFlWnV4SGpkUFN6eTVhS3hNdlpTN1hBc3hsQmRnUUg3THh3OThhY2FCN2NaWi9LY2lGYjZrQUE9PSIsIm1hYyI6ImMwZGJjNTQ5YTk5ZWNiZmU3ZDg5ZjcwMTZkNGU3NGNmZmVhMTQ2Njg5OGQ1NDlmZjQyMjkyNGIwNzk3OTc0ZDEiLCJ0YWciOiIifQ%3D%3D; photoIds=eyJpdiI6InQzZXVDSGRvZGs2MEQrVS9GUlBNV0E9PSIsInZhbHVlIjoiWkEzam1vWElia0k0dm5TM0dIdFlUK2dtNURaSzRVNFNWdlF3TWtubVRrNVphcmVJaUplanRGaG5SeFhwblFhRmxYVGFVdEFjN0Q2OHFBVXZ5RlducEVteFhEcXB6MWpzZjFiZ05RZFowa1FEbkx6VFRRQkVVcEJKRWNFcU1NNDhwSEZQNEEzOFFyb2dBN0RwdHk0QXNrRnNXbHJpbFRNWFVBODgvOWVUUElhcUYvVXVCV2Q2czNNem5DMVltemNUIiwibWFjIjoiZTgzMDhjMGQ1YmNjZWI0OWVjZDBmZGQ5NDE3MGY3YmI3MDViZmE5ZDE2ZWUwMzRjZTIwMjhiZTllYjkwZTE4OCIsInRhZyI6IiJ9; prefs=%5BcommentSort%7Coldest%5D%5BmapX%7C-11918277%5D%5BmapY%7C4707011%5D%5BmapZoom%7C12.4%5D; XSRF-TOKEN=eyJpdiI6ImlpUCtRZDF0dFpTbmp1V2NCNEZQMkE9PSIsInZhbHVlIjoiT1hYbDNiaVZTWkdheEhBUStTWUpMdjRLdnBmWndZc0RtdDdLK3NKcE5IVkVVc1I5ejh6SXBBcWtuUzlQdjhYdVorMGw3dDZjdzZvQlhMbzgyZlY4c3JhK000YnpUOW9pMFpydVc4b2lKY2hCbU5xeDBGaU5WcXJTVDAzTkV3UFYiLCJtYWMiOiJlMmZhZGMxMTJlNTA5ZTMxYzcwMDliNTgyZGQ3ZDU3ZTBiMTI4OTQyZGM4MDNiYjBhNGJkZmZkZWYxNDc5MzY0IiwidGFnIjoiIn0%3D; ap_session=eyJpdiI6ImE1d1krbjBIQlo1MVRvM3N4bVc2aFE9PSIsInZhbHVlIjoibTVjNWFvcmp4TmhHZWhjb1JLUTBSWlU2b0htaDExWk8rVVZKUS9VQ2x4UEVJWnhwalZ3RnhvNFdFTE90aThTaHo5cEZub0FhYzFMNEtDeHhDWHhkYk16blI3R3ZvVUtSekh1VlZIQzcwb0orUmYweml6c1BaRDNqdE9LalBkZHYiLCJtYWMiOiI4ZjIwZWEwYzFhOGUxMjMzYzUyZWM5NGYzMzA0YjMwMzFkODdkOTBjNTcxYjJlZTFkZTg5ZWFlMTE2YjFmYTE5IiwidGFnIjoiIn0%3D; pageCount=eyJpdiI6Ik1QQ3I2dzVHaXpnR1lwZm9JN0dsYnc9PSIsInZhbHVlIjoieko2Z0FlUW9OczF2aWM0WnVvZXl1L0k4RXVGcGpJUWRLTG8vaWxtNHRuai8rY3AyMTJnbkIxVFZLTWcvTGt4SCIsIm1hYyI6ImE3ZTExNTlhNzIzODA4ZTQ3M2JkMWU3ZTYyODU4YzU3NmY0ZTQ2YjE2OWU5OWJiODI5NjljNzUzMTk2NjlhMzUiLCJ0YWciOiIifQ%3D%3D';
     const SOURCE_TYPE = 'hikingproject';
+    const TOGEOJSON_PATH = 'node_modules/@mapbox/togeojson/togeojson';
 
     /**
      * The name and signature of the console command.
@@ -131,11 +122,11 @@ class HikingProject extends Command
     public function downloadGpxFiles()
     {
         $trails = Trail::where('source_type', self::SOURCE_TYPE)->whereNotNull('gpx_url')->get();
-        $client = Client::createChromeClient(base_path("drivers/chromedriver"), null, ["port" => 9558], null, [
-            "no-sandbox" => true,
-            "headless" => "new",
-            "disable-gpu" => true,
-            "user-agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
+        $client = Client::createChromeClient(base_path("drivers/chromedriver"), [
+            "--no-sandbox",
+            "--headless",
+            "--disable-gpu",
+            "--disable-dev-shm-usage",
         ]);
 
         foreach ($trails as $trail) {
@@ -156,7 +147,6 @@ class HikingProject extends Command
             }
 
             $client->waitFor('#user');
-            $crawler = $client->refreshCrawler();
             $client->waitFor('#toolbox');
             $client->executeScript("document.querySelector('#toolbox a.mt-threequarter.btn.btn-xs.btn-secondary.width100.require-user').click()");
             $this->moveGpxFile(storage_path('gpx/' . $trail->id . '-' . $trail->source_id . '.gpx'));
@@ -166,12 +156,12 @@ class HikingProject extends Command
     private function moveGpxFile($toFile)
     {
         // Wait for the download to complete (check for file presence)
-        $timeout = 15; // Set a timeout (in seconds) for waiting
+        $timeout = 15;
         $startTime = time();
 
         while (time() - $startTime < $timeout) {
             // Check if the file exists in the download directory
-            $matchingFiles = glob('/var/www/dev.visitkanab.org/*.gpx');
+            $matchingFiles = glob(Config::get('services.chromedriver.downloads_path') . '/*.gpx');
             if ($matchingFiles !== false) {
                 foreach($matchingFiles as $index => $fromFile) {
                     if (count($matchingFiles) > 1) {
@@ -182,6 +172,8 @@ class HikingProject extends Command
                         echo 'Could not move file ' . $toFile . '
 ';
                     } else {
+                        echo $toFile . '
+';
                         return;
                     }
                 }
@@ -215,8 +207,8 @@ class HikingProject extends Command
         $elevationLow = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(1)->querySelectorAll('h3 .imperial')->item(1)->textContent);
         $incline = html_entity_decode(trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(2)->querySelectorAll('h3 .imperial')->item(0)->textContent));
         $decline = html_entity_decode(trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(2)->querySelectorAll('h3 .imperial')->item(1)->textContent));
-//        $avgGrade = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(3)->querySelectorAll('h3')->item(0)->textContent);
-//        $maxGrade = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(3)->querySelectorAll('h3')->item(1)->textContent);
+        // $avgGrade = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(3)->querySelectorAll('h3')->item(0)->textContent);
+        // $maxGrade = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(3)->querySelectorAll('h3')->item(1)->textContent);
         $grade = html_entity_decode(trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(3)->textContent));
         $gpxUrl = trim($dom->querySelector('#toolbox a.mt-threequarter.require-user')->getAttribute('href'));
         try {
@@ -276,7 +268,7 @@ class HikingProject extends Command
 
         $sourceId = $this->getTrailIdFromUrl($trailUrl);
         try {
-            $trail = Trail::updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
+            $trail = Trail::withoutGlobalScope(UsableScope::class)->updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
                 'name' => $name,
                 'name_alt' => $areaId,
                 'area_id' => $areaId ?? 0,
@@ -302,13 +294,13 @@ class HikingProject extends Command
                 'elevation_low_ft' => $elevationLow,
                 'incline_ft' => $incline,
                 'decline_ft' => $decline,
-                'average_grade_percent' => $avgGrade,
-                'max_grade_percent' => $maxGrade,
+                'average_grade_pt' => $avgGrade,
+                'max_grade_pt' => $maxGrade,
                 'average_hours' => $this->trailService->calculateHikingTime($distanceMiles, null, $difficulty),
                 'raw_data' => $areaId . ' | ' . $trailUrl,
             ]);
-        } catch (\Illuminate\Database\QueryException) {
-            $trail = Trail::updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
+        } catch (\Illuminate\Database\QueryException $e) {
+            $trail = Trail::withoutGlobalScope(UsableScope::class)->updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
                 'name' => $name,
                 'name_alt' => $areaId,
                 'area_id' => 0,
@@ -438,7 +430,7 @@ class HikingProject extends Command
             $itemReservation = $this->getProp($item, 'isReservationRequired') ? true : false;
             $itemFee = $this->getProp($item, 'doFeesApply') ? true : false;
 
-            $trail = Trail::updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $item->id], [
+            $trail = Trail::withoutGlobalScope(UsableScope::class)->updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $item->id], [
                 'name' => $itemName,
                 'name_alt' => $itemNameAlt,
                 'area_id' => $parkData['area_id'],

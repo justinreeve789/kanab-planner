@@ -5,7 +5,23 @@
   width: 100%;
   z-index: 999;
 
-  .modal-container {
+    span.close-modal {
+        position: absolute;
+        background-color: #ffffff;
+        border-radius: 10px;
+        border-color: #a0a0a0;
+        border-width: 3px;
+        height: 2em;
+        top: 20px;
+        right: 20px;
+        z-index: 5000;
+
+        &:hover {
+            background-color: #e6e6e6;
+        }
+    }
+
+    .modal-container {
     position: fixed;
     background-color: #ffffff;
     border-radius: 15px;
@@ -17,17 +33,35 @@
     //width: 95%;
     z-index: 1000;
 
-    span.close {
-      position: absolute;
-      cursor: pointer;
-      font-size: 36px;
-      right: 10px;
-      top: 0;
-    }
+    //span.close {
+    //  position: absolute;
+    //  cursor: pointer;
+    //  font-size: 36px;
+    //  right: 10px;
+    //  top: 0;
+    //}
 
     .modal-box {
       min-height: 200px;
       width: 100%;
+
+        h3 {
+            border-radius: 10px;
+            background-color: #306000;
+            padding: 10px;
+            font-size: 24px;
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 20px;
+            position: sticky;
+            top: -20px;
+            width: 100%;
+            z-index: 20;
+        }
+
+      .list-container {
+          padding-top: 40px;
+      }
     }
   }
 

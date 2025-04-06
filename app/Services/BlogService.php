@@ -6,6 +6,7 @@ use App\Models\Blog\Blog;
 use App\Models\Blog\Post;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class BlogService
 {
@@ -64,7 +65,7 @@ class BlogService
                     'posted_at' => date('Y-m-d H:i:s', strtotime($post['date'])),
                 ], [
                     'blog_id' => $blog->id,
-                    'post_id' => $post['id']
+                    'post_id' => $post['id'],
                 ]);
             }
             $page++;

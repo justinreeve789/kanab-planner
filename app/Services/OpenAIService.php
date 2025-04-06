@@ -16,6 +16,11 @@
  * - Include an area id, so users can ask general questions about the area, like "What sort of wildlife can I expect to see?"
  * or "What are the best trails in Zion National Park?"
  * - If an answer references another trail, make it a hyperlink. Tell it to add <trail_#>...</trail_#> around the trail name.
+ * - If asked about closures, don't mention a date (e.g. "As of October 2023"). Point to a specific URL with more information
+ * if none is available.
+ * - Avoid recommending anything in the South Rim.
+ * - If an event, location, restaurant, or trail is recommended, give the user an option to add it to the itinerary.
+ * - If a change in topic is detected, automatically switch to that topic in the chat window.
  */
 namespace App\Services;
 
@@ -33,16 +38,42 @@ use OpenAI\Laravel\Facades\OpenAI;
 
 class OpenAIService
 {
-    public function query($prompt, $maxTokens = 500) {
+    public const GENERATE_GUIDE_PROMPTS_SYSTEM = 'You are a helpful assistant that creates a FAQ about $$TOPIC$$. Separate out content into many questions and output as JSON. Reword the answers while keeping useful, factual information. Some opinions are okay if they don\'t advertise a specific product. Each entry in the JSON array only has two attributes: prompt and answer. ONLY output JSON, nothing else.';
+    public const GENERATE_LOCATION_PROMPTS_SYSTEM = 'You are a helpful assistant that creates a FAQ of things hikers and tourists would like to know about a trail or location. Separate out content into many questions and output as JSON. Reword the answers while keeping useful information that hikers and tourists would find interesting. Each entry in the JSON array only has two attributes: prompt and answer. ONLY output JSON, nothing else.';
+    public const GENERATE_TRAIL_PROMPTS_SYSTEM = 'You are a helpful assistant that creates a FAQ of things hikers and tourists would like to know about a trail or location. Separate out content into many questions and output as JSON. Reword the answers while keeping useful information that hikers and tourists would find interesting. Each entry in the JSON array only has two attributes: prompt and answer. ONLY output JSON, nothing else.';
+
+    public function query($prompt, $maxTokens = 500, $model = null) {
+        if ($model === null) {
+            $model = Config::get('openai.model');
+        }
         $result = OpenAI::chat()->create([
             'max_tokens' => $maxTokens,
-            'model' => Config::get('openai.model'),
+            'model' => $model,
             'messages' => [[
                 'role' => 'user',
                 'content' => $prompt,
             ]],
         ]);
         return $result['choices'][0]['message']['content'];
+    }
+
+    /**
+     * TODO: Use OpenAI threads to track topics. Thread ids should follow this format: {userId_sessionId_resourceType_resourceId}
+     *
+     * @param $resource
+     * @return void
+     */
+    private function get_thread($resource = null) {
+    }
+
+    /**
+     * Use the Responses API to query the virtual assistant.
+     *
+     * @param $prompt
+     * @param $resource
+     * @return void
+     */
+    public function queryAssistant($prompt, $resource = null) {
     }
 
     private function createOpenAIFinetuneJson($systemPrompt, $userPrompt, $assistantPrompt) {
@@ -121,12 +152,41 @@ class OpenAIService
         return $data;
     }
 
-    public function generatePromptsWithOpenAI(string $text, $maxTokens = 2000) {
+    public function summarizeReviewsOfTrails(string $text, $maxTokens = 2000) {
         $result = OpenAI::chat()->create([
-            "model" => "gpt-4o-mini",
+            "model" => Config::get('openai.model'),
             "messages" => [
-                ["role" => "system", "content" => "You are a helpful assistant that creates a FAQ of things hikers would like to know about a trail. Separate out content into many questions and output as JSON. Reword the answers while keeping useful information that hikers would find interesting. Each entry in the JSON array only has two attributes: prompt and answer. ONLY output JSON, nothing else."],
+//                ["role" => "system", "content" => "You are a helpful assistant that analyzes reviews of hiking trails. Without sounding like ChatGPT or AI, only summarize the facts, recommendations, best time to visit, landmarks, things to do, wildlife but omit completely if nothing's mentioned, and overall experience. Don't indicate these came from reviews or mention 'guests' or 'visitors'."],
+                ["role" => "system", "content" => "You are a helpful assistant that analyzes reviews of hiking trails. Without sounding like ChatGPT or AI, only summarize the facts, recommendations, best time to visit, landmarks, things to do, wildlife but omit completely if nothing's mentioned, and overall experience. Don't indicate these came from reviews or mention 'guests' or 'visitors'. Only output JSON and nothing else. Format as a JSON string containing only these fields: location-and-access, recommendations, best-time-to-visit, landmarks-and-things-to-do, wildlife, overall-experience."],
                 ["role" => "user", "content" => $text]
+            ],
+            "max_tokens" => $maxTokens,
+        ]);
+        $outputContent = $result['choices'][0]['message']['content'];
+        $outputContent = str_replace('```jsonl', '', $outputContent);
+        $outputContent = str_replace('```', '', $outputContent);
+        $outputContent = str_replace('json', '', $outputContent);
+        return trim($outputContent);
+    }
+
+    public function generateGuidePrompts(string $text) {
+        return $this->generatePromptsWithOpenAI($text, self::GENERATE_GUIDE_PROMPTS_SYSTEM);
+    }
+
+    public function generateLocationPrompts(string $text) {
+        return $this->generatePromptsWithOpenAI($text, self::GENERATE_LOCATION_PROMPTS_SYSTEM);
+    }
+
+    public function generateTrailPrompts(string $text) {
+        return $this->generatePromptsWithOpenAI($text, self::GENERATE_TRAIL_PROMPTS_SYSTEM);
+    }
+
+    private function generatePromptsWithOpenAI(string $text, string $systemMessage, $maxTokens = 2000) {
+        $result = OpenAI::chat()->create([
+            "model" => Config::get('openai.model'),
+            "messages" => [
+                ["role" => "system", "content" => $systemMessage],
+                ["role" => "user", "content" => $text],
             ],
             "max_tokens" => $maxTokens,
         ]);

@@ -59,19 +59,35 @@ class GooglePlaces extends Command
 
         foreach ($areas as $area) {
             if ($doLocations) {
-                $types = ['aquarium', 'museum', 'tourist_attraction', 'zoo'];
+                $types = [
+                    "art_gallery",
+                    "bicycle_store",
+                    "campground",
+                    "car_rental",
+                    "gas_station",
+                    "landmark",
+                    "lodging",
+                    "museum",
+                    "rv_park",
+                    "tourist_attraction",
+                    "travel_agency",
+                ];
                 foreach ($types as $type) {
                     $items = $this->getPlacesForArea($area, $type);
                     foreach ($items as $item) {
                         $this->parseLocationResult($item);
                     }
+                    sleep(5);
                 }
             }
 
             if ($doRestaurants) {
-                $restaurants = $this->getRestaurantsForArea($area);
-                foreach ($restaurants as $item) {
-                    $this->parseRestaurantResult($item);
+                $types = ['bar', 'bakery', 'cafe', 'restaurant'];
+                foreach ($types as $type) {
+                    $restaurants = $this->getRestaurantsForArea($area, $type);
+                    foreach ($restaurants as $item) {
+                        $this->parseRestaurantResult($item);
+                    }
                 }
             }
         }
@@ -145,11 +161,11 @@ class GooglePlaces extends Command
             $$key = $value;
         }
 
-        $location = Location::search(['name' => $name, 'address' => $address]) ??
-            Location::search(['address' => $address, 'city' => $city]) ??
-            Location::search(['email' => $email]) ??
-            Location::search(['phone' => $phone]) ??
-            Location::search(['url' => $url]);
+        $location = Location::search($name)->where('name', $name)->options(['rankingScoreThreshold' => 0.9])->first() ??
+            Location::whereRaw('LOWER(TRIM(address)) = ?', [strtolower(trim($address))])->first() ??
+            Location::whereRaw('LOWER(TRIM(email)) = ?', [strtolower(trim($email))])->first() ??
+            Location::whereRaw('LOWER(TRIM(phone)) = ?', [strtolower(trim($phone))])->first() ??
+            Location::whereRaw('LOWER(TRIM(url)) = ?', [strtolower(trim($url))])->first();
         if (!$location) {
             $location = new Location([
                 'name' => $name,
@@ -276,12 +292,12 @@ class GooglePlaces extends Command
         return $this->getPlacesForLatLng($area->latitude, $area->longitude, $type, 30000);
     }
 
-    protected function getRestaurantsForArea($area)
+    protected function getRestaurantsForArea($area, $type)
     {
-        return $this->getPlacesForLatLng($area->latitude, $area->longitude, 'restaurant', 30000);
+        return $this->getPlacesForLatLng($area->latitude, $area->longitude, $type, 30000);
     }
 
-    protected function getPlacesForLatLng(float $lat, float $lng, string $type, $radiusMeters = 30000)
+    protected function getPlacesForLatLng(float $lat, float $lng, string $type, $radiusMeters = 50000)
     {
         $location = $lat . ',' . $lng;
 
@@ -311,6 +327,7 @@ class GooglePlaces extends Command
         } else {
             // Handle API error
             echo 'Google API returned an error: ' . $data['status'];
+            echo '<pre>'; print_r($data); echo '</pre>';
         }
         return [];
     }

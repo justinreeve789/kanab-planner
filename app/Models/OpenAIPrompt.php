@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Blog\Post;
 use App\Traits\InsertWithValues;
+use App\Traits\SearchableResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,6 +12,7 @@ class OpenAIPrompt extends Model
 {
     use HasFactory;
     use InsertWithValues;
+    use SearchableResource;
 
     protected $guarded = ['id'];
     protected $table = 'openai_prompts';

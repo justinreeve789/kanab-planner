@@ -1,27 +1,28 @@
 <?php
 
+use App\Traits\ImportTable;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    use ImportTable;
+
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('trail_merges', function (Blueprint $table) {
+        Schema::create('resource_merges', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('resource_table');
             $table->integer('merged_from')->unsigned();
             $table->integer('merged_to')->unsigned();
             $table->timestamps();
         });
 
-        if (file_exists('./database/dumps/trail_merges.sql')) {
-            DB::unprepared(file_get_contents('./database/dumps/trail_merges.sql'));
-        }
+        self::importTable('resource_merges');
     }
 
     /**
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('trail_merges');
+        Schema::dropIfExists('resource_merges');
     }
 };

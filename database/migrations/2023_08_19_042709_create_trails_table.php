@@ -1,11 +1,14 @@
 <?php
 
+use App\Traits\ImportTable;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 class CreateTrailsTable extends Migration
 {
+    use ImportTable;
+
     /**
      * Run the migrations.
      *
@@ -55,9 +58,7 @@ class CreateTrailsTable extends Migration
             $table->foreign('area_id')->references('id')->on('areas')->onDelete('cascade');
         });
 
-        if (file_exists('./database/dumps/trails.sql')) {
-            DB::unprepared(file_get_contents('./database/dumps/trails.sql'));
-        }
+        self::importTable('trails');
     }
 
     /**

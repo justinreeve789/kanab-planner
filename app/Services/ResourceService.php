@@ -5,9 +5,11 @@ namespace App\Services;
 use App\Models\Blog\Post;
 use App\Models\Event;
 use App\Models\Image;
+use App\Models\Itinerary\Activity;
 use App\Models\Location;
 use App\Models\OpenAIPrompt;
 use App\Models\Resource;
+use App\Models\ResourceData;
 use App\Models\ResourceText;
 use App\Models\Restaurant;
 use App\Models\Scopes\UsableScope;
@@ -132,11 +134,19 @@ class ResourceService
             // Combine the resource text.
             $this->combineResourceText($newResource, $primary, $secondary);
 
+            // Combine the resource data.
+            $this->combineResourceData($newResource, $primary, $secondary);
+
             // Combine the images.
             $this->combineImages($newResource, $primary, $secondary);
 
             // Update the blog posts.
             Post::where('resource_table', $newResource->getTable())
+                ->whereIn('resource_id', [$primary->id, $secondary->id])
+                ->update(['resource_id' => $newResource->id]);
+
+            // Update itineraries.
+            Activity::where('resource_table', $newResource->getTable())
                 ->whereIn('resource_id', [$primary->id, $secondary->id])
                 ->update(['resource_id' => $newResource->id]);
 
@@ -176,6 +186,21 @@ class ResourceService
             DB::rollback();
             throw new \Exception($e->getMessage());
         }
+    }
+
+    public function combineResourceData(Model $newResource, Model $primary, Model $secondary) {
+        $primaryData = ResourceData::where(['resource_table' => $secondary->getTable(), 'resource_id' => $secondary->id])->first();
+        $secondaryData = ResourceData::where(['resource_table' => $secondary->getTable(), 'resource_id' => $secondary->id])->first();
+        ResourceData::insert([
+            'resource_table' => $newResource->getTable(),
+            'resource_id' => $newResource->id,
+            'activity_type_id' => $primaryData->activity_id,
+            'adventurousness' => max($primaryData->adventurousness, $secondaryData->adventurousness),
+            'solitariness' => max($primaryData->solitariness, $secondaryData->solitariness),
+            'strenuousness' => max($primaryData->strenuousness, $secondaryData->strenuousness),
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
     }
 
     /**

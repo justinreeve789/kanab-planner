@@ -4,9 +4,8 @@ namespace App\Models;
 
 use App\Models\Builder\CustomQueryBuilder;
 use App\ResourceEnum;
-use App\Traits\InsertWithValues;
 use App\Traits\ResourceScopes;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Traits\SearchableResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,6 +13,7 @@ abstract class Resource extends Model
 {
     use HasFactory;
     use ResourceScopes;
+    use SearchableResource;
 
     const DEFAULT_AVERAGE_HOURS = 2;
 
@@ -36,6 +36,16 @@ abstract class Resource extends Model
     public function data()
     {
         return $this->hasMany(ResourceData::class, 'resource_id', 'id')->where('resource_table', $this->getTable());
+    }
+
+    public function merges()
+    {
+        return $this->hasMany(ResourceMerge::class, 'resource_id', 'id')->where('resource_table', $this->getTable());
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(ResourceReview::class, 'resource_id', 'id')->where('resource_table', $this->getTable());
     }
 
     public function text()

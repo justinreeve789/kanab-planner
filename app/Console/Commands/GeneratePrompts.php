@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Models\Blog\Post;
+use App\Models\Guide;
+use App\Models\Location;
 use App\Models\OpenAIPrompt;
 use App\Models\Trail;
 use App\Services\OpenAIService;
@@ -10,21 +12,20 @@ use Illuminate\Console\Command;
 
 class GeneratePrompts extends Command
 {
-    const MAX_PROMPTS = 10;
+    const MAX_PROMPTS = 30;
 
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'openai:generateprompts {--posts} {--trails}';
-
+    protected $signature = 'openai:generateprompts {--guides} {--locations} {--posts} {--trails}';
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Generate prompts for blog posts with OpenAI.';
+    protected $description = 'Generate prompts with OpenAI.';
 
     private $openAIService;
 
@@ -33,9 +34,19 @@ class GeneratePrompts extends Command
      */
     public function handle()
     {
+        $doGuides = $this->option('guides');
+        $doLocations = $this->option('locations');
         $doPosts = $this->option('posts');
         $doTrails = $this->option('trails');
         $this->openAIService = new OpenAIService();
+
+        if ($doGuides) {
+            $this->processGuides();
+        }
+
+        if ($doLocations) {
+            $this->processLocations();
+        }
 
         if ($doPosts) {
             $this->processPosts();
@@ -46,12 +57,72 @@ class GeneratePrompts extends Command
         }
     }
 
-    public function processPosts()
+    public function processGuides($maxPrompts = self::MAX_PROMPTS)
     {
-        $posts = Post::with('openai_prompts')->get();
+        // Process blog posts linked to guides.
+        $this->processPosts('guides');
+
+        // Process guides text that's been extracted or generated.
+        $guides = Guide::with(['openai_prompts', 'text'])->inRandomOrder()->get();
+        foreach ($guides as $obj) {
+            if (count($obj->openai_prompts) <= $maxPrompts) {
+                foreach ($obj->text as $text) {
+                    $promptsJson = $this->openAIService->generateGuidePrompts(strip_tags($text->clean));
+                    $prompts = json_decode($promptsJson);
+                    foreach ($prompts as $prompt) {
+                        OpenAIPrompt::create([
+                            'source_table' => 'guides',
+                            'source_id' => $obj->id,
+                            'prompt' => $prompt->prompt,
+                            'answer' => $prompt->answer,
+                        ]);
+                    }
+                }
+            }
+        }
+    }
+
+    public function processLocations($maxPrompts = self::MAX_PROMPTS)
+    {
+        $this->processPosts('locations');
+        $locations = Location::with(['openai_prompts', 'text'])->inRandomOrder()->get();
+        foreach ($locations as $obj) {
+            if (count($obj->openai_prompts) <= $maxPrompts) {
+                foreach ($obj->text as $text) {
+                    $promptsJson = $this->openAIService->generateLocationPrompts(strip_tags($text->clean));
+                    $prompts = json_decode($promptsJson);
+                    foreach ($prompts as $prompt) {
+                        OpenAIPrompt::create([
+                            'source_table' => 'locations',
+                            'source_id' => $obj->id,
+                            'prompt' => $prompt->prompt,
+                            'answer' => $prompt->answer,
+                        ]);
+                    }
+                }
+            }
+        }
+    }
+
+    public function processPosts($resourceTable = null, $maxPrompts = self::MAX_PROMPTS)
+    {
+        $postsQuery = Post::with('openai_prompts')->inRandomOrder();
+        if ($resourceTable !== null) {
+            $postsQuery = $postsQuery->where('resource_table', $resourceTable);
+        } else {
+            $postsQuery = $postsQuery->whereNotNull('resource_table');
+        }
+        $posts = $postsQuery->get();
         foreach ($posts as $obj) {
-            if (count($obj->openai_prompts) <= self::MAX_PROMPTS) {
-                $promptsJson = $this->openAIService->generatePromptsWithOpenAI(strip_tags($obj->content));
+            $promptsCount = count($obj->openai_prompts);
+            while ($promptsCount <= $maxPrompts) {
+                switch ($resourceTable) {
+                    case 'guides':
+                        $promptsJson = $this->openAIService->generateGuidePrompts(strip_tags($obj->content));
+                        break;
+                    default:
+                        $promptsJson = $this->openAIService->generateTrailPrompts(strip_tags($obj->content));
+                }
                 $prompts = json_decode($promptsJson);
                 foreach ($prompts as $prompt) {
                     OpenAIPrompt::create([
@@ -60,6 +131,7 @@ class GeneratePrompts extends Command
                         'prompt' => $prompt->prompt,
                         'answer' => $prompt->answer,
                     ]);
+                    $promptsCount++;
                 }
                 OpenAIPrompt::whereLike('answer', '%Gaia GPS%')
                     ->where('source_table', 'blog_posts')
@@ -73,11 +145,11 @@ class GeneratePrompts extends Command
         }
     }
 
-    public function processTrails()
+    public function processTrails($maxPrompts = self::MAX_PROMPTS)
     {
-        $trails = Trail::with(['openai_prompts', 'text'])->get();
+        $trails = Trail::with(['openai_prompts', 'text'])->whereHas('text')->inRandomOrder()->get();
         foreach ($trails as $obj) {
-            if (count($obj->openai_prompts) <= self::MAX_PROMPTS) {
+            if (count($obj->openai_prompts) <= $maxPrompts) {
                 $prompt = '';
                 if (!empty($obj->text[0])) {
                     $prompt .= $obj->text[0]->clean;
@@ -126,7 +198,7 @@ class GeneratePrompts extends Command
                     $prompt .= 'Longitude: ' . $obj->longitude . '\n';
                 }
 
-                $promptsJson = $this->openAIService->generatePromptsWithOpenAI($prompt);
+                $promptsJson = $this->openAIService->generateTrailPrompts($prompt);
                 $prompts = json_decode($promptsJson);
                 foreach ($prompts as $prompt) {
                     OpenAIPrompt::create([
@@ -135,6 +207,19 @@ class GeneratePrompts extends Command
                         'prompt' => $prompt->prompt,
                         'answer' => $prompt->answer,
                     ]);
+                }
+
+                foreach ($obj->text as $text) {
+                    $promptsJson = $this->openAIService->generateTrailPrompts($text->clean);
+                    $prompts = json_decode($promptsJson);
+                    foreach ($prompts as $prompt) {
+                        OpenAIPrompt::create([
+                            'source_table' => 'trails',
+                            'source_id' => $obj->id,
+                            'prompt' => $prompt->prompt,
+                            'answer' => $prompt->answer,
+                        ]);
+                    }
                 }
             }
         }

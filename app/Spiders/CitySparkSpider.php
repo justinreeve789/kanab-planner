@@ -52,10 +52,10 @@ class CitySparkSpider extends BasicSpider
             $locState = isset($event->cityState[1]) ? trim($cityState[1]) : null;
             $locZip = isset($event->Zip) ? $event->Zip : null;
 
-            $location = Location::search(['address' => $locAddress, 'zip' => $locZip]) ??
-                Location::search(['address' => $locAddress, 'city' => $locCity]) ??
-                Location::search(['name' => $locName, 'city' => $locCity, 'state' => $locState]) ??
-                Location::search(['name' => $locName, 'address' => $locAddress]);
+            $location = \App\Services\LocationService::search(['address' => $locAddress, 'zip' => $locZip]) ??
+                \App\Services\LocationService::search(['address' => $locAddress, 'city' => $locCity]) ??
+                \App\Services\LocationService::search(['name' => $locName, 'city' => $locCity, 'state' => $locState]) ??
+                \App\Services\LocationService::search(['name' => $locName, 'address' => $locAddress]);
             if ($location) {
                 $evtObj->location_id = $location->id;
             } else {

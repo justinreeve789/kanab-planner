@@ -4,9 +4,12 @@ namespace App\Models\Blog;
 
 use App\Models\OpenAIPrompt;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\SearchableResource;
 
 class Post extends Model
 {
+    use SearchableResource;
+
     protected $guarded = [];
     protected $table = 'blog_posts';
 

@@ -1,11 +1,14 @@
 <?php
 
+use App\Traits\ImportTable;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 class CreateRestaurantsTable extends Migration
 {
+    use ImportTable;
+
     /**
      * Run the migrations.
      *
@@ -32,9 +35,7 @@ class CreateRestaurantsTable extends Migration
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });
 
-        if (file_exists('./database/dumps/restaurants.sql')) {
-            DB::unprepared(file_get_contents('./database/dumps/restaurants.sql'));
-        }
+        self::importTable('restaurants');
     }
 
     /**

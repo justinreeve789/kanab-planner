@@ -2,12 +2,22 @@
 
 namespace App\Services;
 
+use App\Models\ActivityType;
 use App\Models\Area;
 use App\Models\Itinerary\Period;
 use App\Models\Trail;
+use Exception;
 
 class TrailService
 {
+    const DISTANCE_FATIGUE_ADJUSTER = 7;
+    const INCLINE_FATIGUE_ADJUSTER = 500;
+    const MAX_DECLINE_BICYCLING_SPEED = 15; // Maximum bicycling speed on a decline (miles per hour)
+    const MAX_DECLINE_HIKING_SPEED = 3.7; // Maximum hiking speed on a decline (miles per hour)
+    const MIN_INCLINE_BICYCLING_SPEED = 1; // Minimum bicycling speed on an incline (miles per hour)
+    const MIN_INCLINE_HIKING_SPEED = 0.2; // Minimum hiking speed on an incline (miles per hour)
+    const TIME_MULTIPLIER = 1;
+
     /**
      * TODO: This doesn't seem to work properly.
      */
@@ -122,5 +132,162 @@ class TrailService
     public function calculateTrailDifficulty($trail): string
     {
         return 'Intermediate';
+    }
+
+    /**
+     * Using the user's hiking speed and the formula from the NPS, reference the geoJSON data to determine when users
+     * will reach locations along the trail, in hour increments. If it's a short trail, use half-hour increments.
+     * Account for weariness toward the end of the trail after an incline.
+     *
+     * TODO: Users should be able to report their own times after a hike so we can adjust our formula.
+     *
+     * @param $geoJson
+     * @return array
+     */
+    public function estimateTimesAlongTrailPath(float $hikingSpeed, $geoJson): array
+    {
+    }
+
+    public function haversine($lat1, $lon1, $lat2, $lon2)
+    {
+        $earthRadius = 3960; // Earth radius in miles (for miles calculation)
+
+        $lat1 = deg2rad($lat1);
+        $lon1 = deg2rad($lon1);
+        $lat2 = deg2rad($lat2);
+        $lon2 = deg2rad($lon2);
+
+        $dlat = $lat2 - $lat1;
+        $dlon = $lon2 - $lon1;
+
+        $a = sin($dlat / 2) * sin($dlat / 2) +
+            cos($lat1) * cos($lat2) *
+            sin($dlon / 2) * sin($dlon / 2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c; // Distance in miles
+    }
+
+    /**
+     * Calculate the time between two points, considering incline, decline, and average speed
+     *
+     * @param $dist
+     * @param $elevationChange
+     * @param $isIncline
+     * @param $averageSpeed
+     * @param $maxDeclineSpeed
+     * @param $minInclineSpeed
+     * @return float|int
+     */
+    public function calculateTime($dist, $elevationChange, $isIncline, $averageSpeed, $maxDeclineSpeed, $minInclineSpeed)
+    {
+        // Adjust speed based on incline (decrease for incline)
+        if ($elevationChange > 0) {
+            $averageSpeed -= 0.0003 * $elevationChange; // A simple penalty for each foot of incline
+            $averageSpeed = max($averageSpeed, $minInclineSpeed); // Cap speed on steep inclines
+            $isIncline = true;
+        }
+
+        // Adjust speed based on decline (increase but cap at max decline speed)
+        elseif ($elevationChange < 0) {
+            $averageSpeed += 0.0002 * abs($elevationChange); // A small boost for decline, but capped
+            $averageSpeed = min($averageSpeed, $maxDeclineSpeed); // Cap speed on steep declines
+        }
+
+        // Account for fatigue (higher fatigue if there's significant elevation gain)
+        if ($isIncline) {
+            $fatiguePenalty = 1 + ($elevationChange / self::INCLINE_FATIGUE_ADJUSTER);
+            $averageSpeed = $averageSpeed / $fatiguePenalty;
+        }
+
+        // Account for fatigue due to overall distance.
+        $averageSpeed = $averageSpeed + (log(0.01 + $dist) / self::DISTANCE_FATIGUE_ADJUSTER);
+
+        // Time = Distance / Speed (convert miles to hours)
+        $time = $dist / $averageSpeed;
+
+        return $time * self::TIME_MULTIPLIER;
+    }
+
+    /**
+     * Parse the GeoJSON and estimate total time.
+     *
+     * @param $geoJson
+     * @param float $averageSpeed Average speed (miles per hour)
+     * @param $activityType
+     * @return array
+     */
+    public function analyzeTrail($geoJson, $averageSpeed, $activityType = ActivityType::HIKING, $roundPrecision = 1)
+    {
+        $data = json_decode($geoJson, true);
+        $trailPoints = $data['features'][0]['geometry']['coordinates'];
+        $totalTime = 0;
+        $cumulativeTime = 0;
+        $hourlyCoordinates = [];
+        $currentHour = 0;
+
+        for ($i = 1; $i < count($trailPoints); $i++) {
+            $point1 = $trailPoints[$i - 1];
+            $point2 = $trailPoints[$i];
+
+            $lat1 = $point1[1];
+            $lon1 = $point1[0];
+            $elev1 = isset($point1[2]) ? $point1[2] : 0; // Elevation in feet
+
+            $lat2 = $point2[1];
+            $lon2 = $point2[0];
+            $elev2 = isset($point2[2]) ? $point2[2] : 0;
+
+            // Calculate the distance between the two points in miles
+            $dist = $this->haversine($lat1, $lon1, $lat2, $lon2);
+
+            // Calculate the elevation change in feet
+            $elevationChange = $elev2 - $elev1;
+
+            // Calculate the time between the two points
+            if ($activityType === ActivityType::BICYCLING) {
+                $maxDeclineSpeed = self::MAX_DECLINE_BICYCLING_SPEED;
+                $minInclineSpeed = self::MIN_INCLINE_BICYCLING_SPEED;
+            } elseif ($activityType === ActivityType::HIKING) {
+                $maxDeclineSpeed = self::MAX_DECLINE_HIKING_SPEED;
+                $minInclineSpeed = self::MIN_INCLINE_HIKING_SPEED;
+            } else {
+                throw new Exception('Valid activity type not specified.');
+            }
+
+            $time = $this->calculateTime($dist, $elevationChange, $elevationChange > 0, $averageSpeed, $maxDeclineSpeed, $minInclineSpeed);
+
+            // Add time for this segment
+            $cumulativeTime += $time;
+            $totalTime += $time;
+
+            // Check if it's time to add coordinates for the current hour
+            $newHour = floor($cumulativeTime);
+            if ($newHour > $currentHour) {
+                $hourlyCoordinates[$newHour] = [
+                    [$lat2, $lon2]
+                ];
+                $currentHour = $newHour;
+            } else {
+                // Append coordinates if it's the same hour
+                if (isset($hourlyCoordinates[$newHour])) {
+                    $hourlyCoordinates[$newHour][] = [$lat2, $lon2];
+                } else {
+                    $hourlyCoordinates[$newHour] = [
+                        [$lat2, $lon2]
+                    ];
+                }
+            }
+        }
+
+        $hourLatLng = [];
+        foreach ($hourlyCoordinates as $hour => $coordinates) {
+            $hourLatLng[$hour] = $coordinates[0];
+        }
+        return [
+            'total_hours' => round($totalTime, $roundPrecision),
+            'time_hours' => $hourLatLng
+        ];
     }
 }

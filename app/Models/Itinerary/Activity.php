@@ -35,6 +35,7 @@ class Activity extends CachedModel
     public function __construct(array $attributes = [])
     {
         $this->id = Str::uuid();
+        $this->phraseService = new PhraseService();
 
         parent::__construct($attributes);
 
@@ -49,20 +50,27 @@ class Activity extends CachedModel
             $this->activity_type_id = $attributes['activity_type'];
         }
 
+        if (isset($attributes['phrase'])) {
+            $this->phrase = $attributes['phrase'];
+        }
+
         if (isset($attributes['resource'])) {
             $this->resource = $attributes['resource'];
         }
-
-//        echo '<pre>'; print_r($attributes); echo '</pre>';
-//        echo '<pre>'; print_r($this); echo '</pre>';
-
-        $this->phraseService = new PhraseService();
-        $this->phrase = $this->phraseService->getPhraseForActivityResource($this->resource);
     }
 
     public function activity_type()
     {
         return $this->belongsTo(ActivityType::class, 'id', 'activity_type_id');
+    }
+
+    protected function phrase(): Attribute
+    {
+        return Attribute::make(
+            get: function() {
+                return $this->phrase = $this->phraseService->getPhraseForActivityResource($this->resource);
+            }
+        );
     }
 
     protected function resource(): Attribute

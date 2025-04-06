@@ -1,11 +1,14 @@
 <?php
 
+use App\Traits\ImportTable;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    use ImportTable;
+
     /**
      * Run the migrations.
      */
@@ -16,7 +19,6 @@ return new class extends Migration
             $table->increments('id');
             $table->string('resource_table', 16);
             $table->integer('resource_id')->unsigned();
-            $table->integer('activity_id')->unsigned()->nullable();
             $table->integer('activity_type_id')->unsigned()->nullable();
             $table->decimal('adventurousness', 3, 2)->nullable();
             $table->decimal('solitariness', 3, 2)->nullable();
@@ -29,9 +31,7 @@ return new class extends Migration
             $table->foreign('activity_type_id')->references('id')->on('activity_types')->onDelete('cascade');
         });
 
-        if (file_exists('./database/dumps/resource_data.sql')) {
-            DB::unprepared(file_get_contents('./database/dumps/resource_data.sql'));
-        }
+        self::importTable('resource_data');
     }
 
     /**

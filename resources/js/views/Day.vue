@@ -9,6 +9,7 @@
             <span class="separator hidden md:inline md:text-lg"> - </span>
             <span class="area font-large md:inline text-md md:text-3xl md:inline-block block">{{ day.area.name }}</span>
           </div>
+<!--
           <div class="flex-1 p-4 items-start justify-end">
             <label :for="'day-stats-' + day.day_num" class="graph" v-if="day.stats">
               <div class="gradient-line adventurousness relative z-10" v-if="adventurousness" :style="'height: ' + adventurousness + '%;'"></div>
@@ -16,6 +17,7 @@
               <div class="gradient-line strenuousness relative z-10" v-if="strenuousness" :style="'height: ' + strenuousness + '%;'"></div>
             </label>
           </div>
+-->
           <div class="p-4 justify-end text-md text-right">
             <span class="date-day-of-week hidden md:inline">{{ day.formatted_day_of_week }}</span>
             <span class="pr-1 hidden md:inline">,</span>
@@ -35,17 +37,17 @@
       <section v-for="(period, periodType) in day.periods" :key="periodType">
         <div class="timeline"></div>
         <div :class="'day-content pt-4 period-' + period.type" v-for="(activity, index) in period.activities" :key="index">
-          <div class="mb-8" v-if="activity.activityType == 'event'">
+          <div class="mb-8 border border-solid border-gray-300 rounded-lg" v-if="activity.activity_type == 'event'">
             <Event :activity="activity" :day="day" />
           </div>
-          <div class="mb-8" v-if="activity.activityType == 'dining'">
-            <Restaurant :activity="activity" :day="day" />
+          <div class="mb-8 border border-solid border-green-300 rounded-lg" v-if="activity.activity_type == 'dining'">
+            <Restaurant :day="day" :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
           </div>
-          <div class="mb-8" v-else-if="activity.activityType == 'hiking'">
-            <Trail :unique="activity.hash" :phrase="activity.phrase" :resource="activity.data" />
+          <div class="mb-8 border border-solid border-orange-300 rounded-lg" v-else-if="activity.activity_type == 'hiking'">
+            <Trail :unique="activity.id" :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
           </div>
-          <div class="mb-8" v-else>
-            <Task :activity="activity" :day="day" />
+          <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-else>
+            <Task :activity="activity" :day="day" :resource="activity.resource" />
           </div>
         </div>
       </section>

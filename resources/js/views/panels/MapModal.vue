@@ -2,9 +2,9 @@
   <input type="checkbox" :id="'resource-' + unique + '-map'" class="modal-toggle" v-model="expanded" />
   <div class="modal" :id="'resource-' + unique + '-map-modal'">
     <div class="modal-box p-2 max-w-none w-full" style="height: 100%;">
-      <Map :resource="resource" />
+      <Map :resource="resource" :zoom="zoom" />
       <label :for="'resource-' + unique + '-map'">
-        <span class="btn btn-md btn-ghost bg-transparent border-green-800 text-2xl text-green-800 absolute right-2 top-2" style="z-index: 5000;">X</span>
+        <span class="close-modal btn btn-md btn-ghost bg-transparent border-green-800 text-2xl text-green-800 absolute right-2 top-2">X</span>
       </label>
 <!--      <div class="progress w-full h-screen flex justify-center items-center text-6xl relative">-->
 <!--        <span class="text text-center text-6xl text-white font-bold relative">-->
@@ -14,7 +14,7 @@
 <!--      </div>-->
     </div>
   </div>
-  <label :for="'activity-' + hash + '-map'" class="modal-backdrop"></label>
+  <label :for="'activity-' + 'hash' + '-map'" class="modal-backdrop"></label>
 </template>
 
 <script>
@@ -32,6 +32,7 @@ export default {
   props: {
     resource: Object,
     unique: String,
+    zoom: Number,
   },
 };
 </script>

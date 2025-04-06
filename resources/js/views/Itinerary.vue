@@ -34,10 +34,13 @@
   </div>
 
   <ListModal :type="'trail'" />
+
+  <Assistant :type="'general'" />
 </template>
 
 <script>
 import axios from 'axios';
+import Assistant from './assistant/Assistant.vue';
 import Day from './Day.vue';
 import ListModal from './panels/ListModal.vue';
 import Select from './components/Select.vue';
@@ -75,6 +78,7 @@ export default {
   },
   components: {
     ActivityStatsModal,
+    Assistant,
     Day,
   },
 };

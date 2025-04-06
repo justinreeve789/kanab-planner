@@ -2,20 +2,19 @@
 
 namespace App\Models;
 
-use App\Models\Builder\CustomQueryBuilder;
 use App\Traits\ActivityData;
 use App\Traits\ResourceScopes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Laravel\Scout\Searchable;
+use App\Traits\SearchableResource;
 
 class Restaurant extends Resource
 {
     use ActivityData;
     use HasFactory;
     use ResourceScopes;
-    use Searchable;
+    use SearchableResource;
 
+    protected $casts = ['deviation_percent' => 'float'];
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'location_id'];
 

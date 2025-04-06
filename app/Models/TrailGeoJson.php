@@ -10,5 +10,6 @@ class TrailGeoJson extends Model
     use HasFactory;
 
     protected $guarded = [];
+    protected $primaryKey = 'trail_id';
     protected $table = 'trail_geojson';
 }

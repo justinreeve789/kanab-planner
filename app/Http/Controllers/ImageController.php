@@ -85,4 +85,9 @@ class ImageController extends Controller
 
         abort(404);
     }
+
+    public function getMapTile(Request $request, string $mapType, $z, $x, $y, $ext)
+    {
+        return $this->imageService->getMapTile($mapType, $x, $y, $z, $ext);
+    }
 }

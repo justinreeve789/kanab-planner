@@ -136,10 +136,7 @@ class Itinerary extends CachedModel
             'start_time' => $startTime,
             'end_time' => $endTime
         ]);
-        $this->activities[] = $activity;
-        if ($period) {
-            $this->getDay($dayNum)->getPeriod($period)->addActivity($activity);
-        }
+        $this->days[$dayNum]->periods[$period]->addActivity($activity);
 
         if ($resource->isEvent()) {
             $this->event_ids[] = $resource->id;

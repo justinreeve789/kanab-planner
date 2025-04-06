@@ -63,6 +63,9 @@ class GenerateFinetuneData extends Command
             if (!$trail) {
                 continue;
             }
+            if ($trail->id != 17) {
+                continue;
+            }
             $post->trail = $trail;
             $post->area = $trail->area;
             $json = $this->openAIService->generateFinetuneData($post);
@@ -79,6 +82,9 @@ class GenerateFinetuneData extends Command
             ->whereHas('openai_prompts')
             ->get();
         foreach ($trails as $trail) {
+            if ($trail->id != 17) {
+                continue;
+            }
             $json = $this->openAIService->generateFinetuneData($trail);
             if ($this->outputFile) {
                 file_put_contents($this->outputFile, $json, FILE_APPEND);

@@ -1,11 +1,14 @@
 <?php
 
+use App\Traits\ImportTable;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    use ImportTable;
+
     /**
      * Run the migrations.
      */
@@ -18,9 +21,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        if (file_exists('./database/dumps/blogs.sql')) {
-            DB::unprepared(file_get_contents('./database/dumps/blogs.sql'));
-        }
+        self::importTable('blogs');
     }
 
     /**

@@ -152,7 +152,7 @@ class NPS extends Command
                 'raw_data' => json_encode($evt),
             ]);
 
-            $location = Location::search(['name' => $parkData['name']]);
+            $location = \App\Services\LocationService::search(['name' => $parkData['name']]);
             if ($location) {
                 $evtObj->location_id = $location->id;
             } else {

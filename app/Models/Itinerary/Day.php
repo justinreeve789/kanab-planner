@@ -29,14 +29,16 @@ class Day extends CachedModel
     public $activities;
 //    public $solitariness = self::DEFAULT_SOLITARINESS;
 //    public $strenuousness = self::DEFAULT_STRENUOUSNESS;
-    public $periods;
+//    public $periods;
     public $preamble;
     public $temperatures;
+
+    /** @var Period[] $periods */
 
     public function __construct(array $attributes = [])
     {
         $this->id = Str::uuid();
-        $this->periods = new Collection();
+//        $this->periods = new Collection();
 
         foreach ($attributes as $key => $attr) {
             $this->setAttribute($key, $attr);

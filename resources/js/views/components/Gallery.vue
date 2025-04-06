@@ -1,6 +1,6 @@
 <template>
-  <div class="carousel max-w-6xl w-full rounded-box" v-if="imageUrls.length > 0">
-    <div v-for="(imageUrl, index) in imageUrls" :key="index" :id="'slide-' + unique + '-' + index" class="carousel-item relative w-full">
+  <div class="carousel max-w-6xl flex h-full w-full items-stretch" v-if="imageUrls.length > 0">
+    <div v-for="(imageUrl, index) in imageUrls" :key="index" :id="'slide-' + unique + '-' + index" class="carousel-item relative h-full w-full">
         <img :src="'/image/' + type + '/' + imageUrl.id + '?size=medium'" class="w-full object-cover" />
         <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2 opacity-90 md:opacity-25 xl:opacity-75" v-if="imageUrls.length > 1">
           <a :href="'#slide-' + unique + '-' + Math.max(0, (index - 1))" :class="'slide-nav hidden md:flex btn btn-circle' + (index > 0 ? '' : ' invisible')">&lt;</a>

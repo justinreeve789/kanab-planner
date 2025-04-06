@@ -11,6 +11,7 @@ use App\Models\LocationImage;
 use App\Models\LocationTag;
 use App\Models\ResourceText;
 use App\Models\Restaurant;
+use App\Models\Scopes\UsableScope;
 use App\Models\Trail;
 use App\Services\ConversionService;
 use App\Services\OCRService;
@@ -78,7 +79,7 @@ class VisitSouthernUtah extends Command
             $trailUrl = $trail->link;
             $trailDifficulty = isset($trail->acf->difficulty->name) ? $trail->acf->difficulty->name : null;
 
-            $trailObj = Trail::where('name', $trailName)->first();
+            $trailObj = Trail::where('name', $trailName)->withoutGlobalScope(UsableScope::class)->first();
             if (!$trailObj) {
                 $trailObj = Trail::updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $trail->id], [
                     'area_id' => Area::KANAB,
@@ -104,6 +105,7 @@ class VisitSouthernUtah extends Command
                 $text = $this->conversionService->convertPdfToText($mapFile);
                 if ($text) {
                     ResourceText::updateOrCreate([
+                        'type' => 'document',
                         'resource_table' => 'trails',
                         'resource_id' => $trailObj->id,
                         'raw' => $text,
@@ -128,11 +130,11 @@ class VisitSouthernUtah extends Command
             $locLat = $this->getProp($rst, 'latitude');
             $locLng = $this->getProp($rst, 'longitude');
 
-            $location = Location::search(['name' => $locName, 'address' => $locAddress]) ??
-                Location::search(['address' => $locAddress, 'city' => $locCity]) ??
-                Location::search(['email' => $locEmail]) ??
-                Location::search(['phone' => $locPhone]) ??
-                Location::search(['url' => $locUrl]);
+            $location = \App\Services\LocationService::search(['name' => $locName, 'address' => $locAddress]) ??
+                \App\Services\LocationService::search(['address' => $locAddress, 'city' => $locCity]) ??
+                \App\Services\LocationService::search(['email' => $locEmail]) ??
+                \App\Services\LocationService::search(['phone' => $locPhone]) ??
+                \App\Services\LocationService::search(['url' => $locUrl]);
             if (!$location) {
                 $location = new Location([
                     'name' => $locName,
@@ -217,7 +219,7 @@ class VisitSouthernUtah extends Command
             $locName = isset($event->acf->location_name) ? $event->acf->location_name : null;
             $locAddress = isset($event->acf->address) ? $event->acf->address : null;
 
-            $location = Location::search(['name' => $locName, 'address' => $locAddress]);
+            $location = \App\Services\LocationService::search(['name' => $locName, 'address' => $locAddress]);
             if ($location) {
                 $evtObj->location_id = $location->id;
             } else {
@@ -245,6 +247,7 @@ class VisitSouthernUtah extends Command
                     $text = $this->conversionService->convertImageToText($imageUrl);
                     if ($text) {
                         ResourceText::updateOrCreate([
+                            'type' => 'document',
                             'resource_table' => 'events',
                             'resource_id' => $evtObj->id,
                             'raw' => $text,
@@ -257,6 +260,7 @@ class VisitSouthernUtah extends Command
                     $text = $this->conversionService->extractTextFromPdfUrl($pdfUrl);
                     if ($text) {
                         ResourceText::updateOrCreate([
+                            'type' => 'document',
                             'resource_table' => 'events',
                             'resource_id' => $evtObj->id,
                             'raw' => $text,

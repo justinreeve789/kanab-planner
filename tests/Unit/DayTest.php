@@ -3,7 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Itinerary\Itinerary;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class DayTest extends TestCase
 {
@@ -11,6 +11,7 @@ class DayTest extends TestCase
 
     public function setUp(): void
     {
+        parent::setUp();
         $this->itinerary = new Itinerary();
     }
 

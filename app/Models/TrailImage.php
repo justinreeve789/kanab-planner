@@ -12,5 +12,9 @@ class TrailImage extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
-    protected $hidden = ['url'];
+//    protected $hidden = ['url'];
+
+    public function hasGPS() {
+        return ($this->latitude && $this->longitude);
+    }
 }

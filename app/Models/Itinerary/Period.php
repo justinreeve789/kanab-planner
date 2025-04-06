@@ -12,20 +12,24 @@ use Illuminate\Support\Str;
 
 class Period extends CachedModel
 {
-    public const MORNING = 'morning';
-    public const AFTERNOON = 'afternoon';
-    public const EVENING = 'evening';
-    public const NIGHT = 'night';
+//    public const MORNING = 'morning';
+//    public const AFTERNOON = 'afternoon';
+//    public const EVENING = 'evening';
+//    public const NIGHT = 'night';
+    public const MORNING = 0;
+    public const AFTERNOON = 1;
+    public const EVENING = 2;
+    public const NIGHT = 3;
 
     protected $casts = ['id' => 'string', 'day_id' => 'string'];
     protected $guarded = [];
     protected $table = 'itinerary_periods';
 
-    public $activities;
+//    public $activities;
 
     public function __construct(array $attributes = []) {
         $this->id = Str::uuid();
-        $this->activities = new Collection();
+//        $this->activities = new Collection();
         parent::__construct($attributes);
     }
 
@@ -79,7 +83,7 @@ class Period extends CachedModel
     {
         switch ($period) {
             case Period::MORNING:
-                return ['startTime' => '09:00:00', 'endTime' => '10:00:00'];
+                return ['startTime' => '08:00:00', 'endTime' => '10:00:00'];
             case Period::AFTERNOON:
                 return ['startTime' => '12:00:00', 'endTime' => '13:30:00'];
             case Period::EVENING:
@@ -93,7 +97,7 @@ class Period extends CachedModel
     {
         $activities = new Collection();
         foreach ($this->activities as $activity) {
-            if ($activity->activityType === $activityType) {
+            if ($activity->activity_type === $activityType) {
                 $activities->add($activity);
             }
         }
@@ -109,7 +113,7 @@ class Period extends CachedModel
     public function hasResourceClass($resourceClass): bool
     {
         foreach ($this->activities as $activity) {
-            if ($activity->data && get_class($activity->data) === $resourceClass) {
+            if ($activity->resource && get_class($activity->resource) === $resourceClass) {
                 return true;
             }
         }

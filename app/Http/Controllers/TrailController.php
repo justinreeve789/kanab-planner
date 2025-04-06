@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityType;
 use App\Models\Trail;
 use App\Models\TrailGeoJson;
+use App\Services\TrailService;
 use Illuminate\Http\Request;
 
 class TrailController extends Controller
@@ -50,6 +52,16 @@ class TrailController extends Controller
             if (file_exists($gpxFile)) {
                 return response()->download($gpxFile, pathinfo($gpxFile, PATHINFO_BASENAME));
             }
+        }
+    }
+
+    public function analyzeGeoJson(Request $request, int $id)
+    {
+        $averageSpeed = $request->get('average_speed') ?? Trail::AVERAGE_HIKING_SPEED_MPH;
+        $json = $this->getGeoJsonData($request, $id);
+        if ($json) {
+            $trailService = new TrailService();
+            return $trailService->analyzeTrail($json, $averageSpeed);
         }
     }
 }

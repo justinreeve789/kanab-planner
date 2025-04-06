@@ -3,17 +3,18 @@
 namespace App\Models;
 
 use App\Services\TrailService;
-use App\Traits\ActivityData;
 use App\Traits\Proximity;
+use App\Traits\SearchableResource;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Trail extends Resource
 {
+    const AVERAGE_HIKING_SPEED_MPH = 1.3;
+
     use HasFactory;
     use Proximity;
-    use Searchable;
+    use SearchableResource;
 
     protected $guarded = ['id'];
     protected $hidden = ['source_type', 'source_id', 'raw_data'];
@@ -59,6 +60,12 @@ class Trail extends Resource
         $this->average_hours = $this->trailService->calculateHikingTime($this->distance_miles, null, $this->difficulty);
         $this->save();
         return $this->average_hours;
+    }
+
+    public function getEstimatedHours(TrailService $trailService, float $averageSpeed, string $activityType = ActivityType::HIKING, $roundPrecision = 1)
+    {
+        $stats = $trailService->analyzeTrail($this->geoJson()->where('trail_id', $this->id)->first(), $averageSpeed, $activityType, $roundPrecision);
+        return $stats['total_hours'];
     }
 
     public function getGeoJsonData()

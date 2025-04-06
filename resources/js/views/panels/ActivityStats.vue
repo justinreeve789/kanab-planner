@@ -16,6 +16,16 @@
       <span class="measurement">%</span>
     </span>
   </div>
+
+  <div v-if="restaurant" :class="'activity-stats flex align-baseline items-center ' + justify + ' ' + text_align + ' flex-wrap'">
+    <span class="distance flex">
+     <img class="icon pr-1 svg-anim" src="/images/icons/dollar-circle.svg" alt="Estimated Price">
+      <span class="amount pr-1">{{ (restaurant.average_price - (restaurant.average_price * restaurant.deviation_percent)) }}-(restaurant.average_price + (restaurant.average_price * restaurant.deviation_percent))</span>
+    </span>
+    <span class="incline flex justify-end ml-3 order-3 md:order-2">
+      <img v-if="restaurant.dine_in" class="icon pr-1 svg-anim" src="/images/icons/dine-in.svg" alt="Dine-In Available">
+    </span>
+  </div>
 </template>
 
 <script>
@@ -32,6 +42,7 @@ export default {
     },
   },
   data() {
+      return '';
   },
   props: {
     align: String,

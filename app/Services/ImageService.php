@@ -2,14 +2,44 @@
 
 namespace App\Services;
 
+use Aws\Exception\AwsException;
 use Aws\S3\S3Client;
 use DuckDuckGoImages\Client;
+use Exception;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use League\Flysystem\UnableToRetrieveMetadata;
+use Throwable;
 
 class ImageService
 {
-    // We use GD for image manipulation instead of PIL
-    // Make sure GD is enabled in your PHP configuration.
+    const CALTOPO_GEOLOGY = 'caltopo_geology';
+    const CALTOPO_GEOLOGY_PATH = 'visitkanab/maptiles/caltopo/geology';
+    const CALTOPO_GEOLOGY_URL = 'https://caltopo.com/tile/geology';
+    const CALTOPO_MB_HYBRID = 'caltopo_mb_hybrid';
+    const CALTOPO_MB_HYBRID_PATH = 'visitkanab/maptiles/caltopo/mb_hybrid';
+    const CALTOPO_MB_HYBRID_URL = 'https://caltopo.com/tile/mb_hybrid';
+    const OPENSTREETMAP = 'openstreetmap';
+    const OPENSTREETMAP_URL = 'https://a.tile.openstreetmap.org';
+    const OPENTOPOMAP = 'opentopomap';
+    const OPENTOPOMAP_PATH = 'visitkanab/maptiles/opentopomap';
+    const OPENTOPOMAP_URL = 'https://a.tile.opentopomap.org';
+    const STADIA_OUTDOORS = 'stadia_outdoors';
+    const STADIA_OUTDOORS_PATH = 'visitkanab/maptiles/stadia/outdoors';
+    const STADIA_OUTDOORS_URL = 'https://tiles.stadiamaps.com/tiles/outdoors';
+    const STADIA_STAMEN_TERRAIN = 'stadia_stamen_terrain';
+    const STADIA_STAMEN_TERRAIN_PATH = 'visitkanab/maptiles/stadia/stamem-terrain';
+    const STADIA_STAMEN_TERRAIN_URL = 'https://tiles.stadiamaps.com/tiles/stamen_terrain';
+    const THUNDERFOREST_CYCLE = 'thunderforest_cycle';
+    const THUNDERFOREST_CYCLE_PATH = 'visitkanab/maptiles/thunderforest/cycle';
+    const THUNDERFOREST_CYCLE_URL = 'https://tile.thunderforest.com/cycle';
+    const THUNDERFOREST_OUTDOORS = 'thunderforest_outdoors';
+    const THUNDERFOREST_OUTDOORS_PATH = 'visitkanab/maptiles/thunderforest/outdoors';
+    const THUNDERFOREST_OUTDOORS_URL = 'https://tile.thunderforest.com/outdoors';
 
     private $client;
     private $conversionService;
@@ -185,6 +215,125 @@ class ImageService
         return null;
     }
 
+    public function getMapTile(string $mapType, int $x, int $y, int $z, string $ext = 'png', $cache = true) {
+        $defaultMapType = self::OPENSTREETMAP;
+        $convertPngToJpg = [
+            self::THUNDERFOREST_CYCLE,
+            self::THUNDERFOREST_OUTDOORS,
+        ];
+        switch ($mapType) {
+            case self::CALTOPO_GEOLOGY:
+                $path = self::CALTOPO_GEOLOGY_PATH . "/{$z}/{$x}/{$y}.{$ext}";
+                $url = self::CALTOPO_GEOLOGY_URL . "/{$z}/{$x}/{$y}.{$ext}";
+                break;
+            case self::CALTOPO_MB_HYBRID:
+                $path = self::CALTOPO_MB_HYBRID_PATH . "/{$z}/{$x}/{$y}.{$ext}";
+                $url = self::CALTOPO_MB_HYBRID_URL . "/{$z}/{$x}/{$y}.{$ext}?ctdarkmode=false";
+                break;
+            case self::OPENTOPOMAP:
+                $path = self::OPENTOPOMAP_PATH . "/{$z}/{$x}/{$y}.{$ext}";
+                $url = self::OPENTOPOMAP_URL . "/{$z}/{$x}/{$y}.{$ext}";
+                break;
+            case self::STADIA_OUTDOORS:
+                $path = self::STADIA_OUTDOORS_PATH . "/{$z}/{$x}/{$y}.{$ext}";
+                $url = self::STADIA_OUTDOORS_URL . "/{$z}/{$x}/{$y}.{$ext}?1api_key=" . Config::get('services.stadia.key');
+                break;
+            case self::STADIA_STAMEN_TERRAIN:
+                $path = self::STADIA_STAMEN_TERRAIN_PATH . "/{$z}/{$x}/{$y}.{$ext}";
+                $url = self::STADIA_STAMEN_TERRAIN_URL . "/{$z}/{$x}/{$y}.{$ext}?api_key=" . Config::get('services.stadia.key');
+                break;
+            case self::THUNDERFOREST_CYCLE:
+                $path = self::THUNDERFOREST_CYCLE_PATH . "/{$z}/{$x}/{$y}.{$ext}";
+                $url = self::THUNDERFOREST_CYCLE_URL . "/{$z}/{$x}/{$y}.{$ext}?apikey=" . Config::get('services.thunderforest.key');
+                break;
+            case self::THUNDERFOREST_OUTDOORS:
+                $path = self::THUNDERFOREST_OUTDOORS_PATH . "/{$z}/{$x}/{$y}.{$ext}";
+                $url = self::THUNDERFOREST_OUTDOORS_URL . "/{$z}/{$x}/{$y}.{$ext}?apikey=" . Config::get('services.thunderforest.key');
+                break;
+            case self::OPENSTREETMAP:
+                // We won't ever store OpenStreetMap files.
+                $cache = false;
+                $url = self::OPENSTREETMAP_URL . "/{$z}/{$x}/{$y}.{$ext}";
+            default:
+                break;
+        }
+
+        if ($cache === false) {
+            return redirect($url);
+        }
+
+        // Check if the tile exists in S3.
+        try {
+            if ($this->s3->size($path) > 200) {
+                $tile = $this->s3->get($path);
+                return response($tile, 200, [
+                    'Content-Type' => $this->getMimeTypeForExtension($ext),
+                    'Cache-Control' => 'public, max-age=86400',
+                    'Expires' => now()->addSeconds(86400)->toRfc1123String(),
+                ]);
+            }
+            throw new Exception();
+        } catch (Throwable $e) {
+            if ($ext === 'jpg') {
+                if (in_array($mapType, $convertPngToJpg)) {
+                    $pngPath = str_replace('.' . $ext, '.png', $path);
+                    if ($this->s3->exists($pngPath)) {
+                        $tempJpg = storage_path('temp/' . uniqid('tile', true) . '.jpg');
+                        $tempPng = storage_path('temp/' . uniqid('tile', true) . '.png');
+                        $tile = $this->s3->get($pngPath);
+                        file_put_contents($tempPng, $tile);
+                        $image = imagecreatefrompng($tempPng);
+                        unlink($tempPng);
+                        imagejpeg($image, $tempJpg, 75);
+                        if (file_exists($tempJpg)) {
+                            $this->s3->put($path, file_get_contents($tempJpg));
+                            unlink($tempJpg);
+                            if ($this->s3->exists($path)) {
+                                $tile = $this->s3->get($path);
+                                Log::info('Converted: ' . $pngPath . ' to ' . $path);
+                                return response($tile, 200, [
+                                    'Content-Type' => $this->getMimeTypeForExtension($ext),
+                                    'Cache-Control' => 'public, max-age=86400',
+                                    'Expires' => now()->addSeconds(86400)->toRfc1123String(),
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Tile does not exist, so we'll fetch it from the provider.
+        getTile:
+        try {
+            $tileData = Http::get($url);
+        } catch (\GuzzleHttp\Exception\ConnectException|\Illuminate\Http\Client\ConnectionException $e) {
+            goto getTile;
+        }
+
+        if ($tileData->successful()) {
+            $this->s3->put($path, $tileData->body());
+            Log::info($url);
+            return response($tileData->body(), 200, [
+                'Content-Type' => $this->getMimeTypeForExtension($ext),
+                'Cache-Control' => 'public, max-age=86400',
+                'Expires' => now()->addSeconds(86400)->toRfc1123String(),
+            ]);
+        } else {
+            // Use the default if the tile could not be fetched.
+            return $this->getMapTile($defaultMapType, $x, $y, $z, $ext);
+        }
+    }
+
+    public function getMimeTypeForExtension($ext): string {
+        $mimeTypes = [
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+        ];
+        return $mimeTypes[$ext] ?? '';
+    }
+
     public function getPhotos($query) {
         $response = $this->client->getImages($query);
         $photos = [];
@@ -199,6 +348,21 @@ class ImageService
         }
         $this->images[$query] = $photos;
         return $photos;
+    }
+
+    /**
+     * Convert latitude and longitude to map tile coordinates for a given zoom level.
+     *
+     * @param $lat
+     * @param $lng
+     * @param $zoom
+     * @return array
+     */
+    function latLngToMapTile($lat, $lng, $zoom) {
+        $latRad = deg2rad($lat);
+        $x = floor((($lng + 180) / 360) * pow(2, $zoom));
+        $y = floor((1 - log(tan($latRad) + 1 / cos($latRad)) / M_PI) / 2 * pow(2, $zoom));
+        return ['x' => $x, 'y' => $y , 'z' => $zoom];
     }
 
     public function resizeImage($file, int $newWidth, int $newHeight) {

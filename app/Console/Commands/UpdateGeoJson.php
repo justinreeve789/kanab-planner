@@ -27,12 +27,13 @@ class UpdateGeoJson extends Command
      */
     public function handle()
     {
-        $trails = Trail::whereDoesntHave('geoJson')->get();
+        $trails = Trail::get();
         foreach ($trails as $trail) {
             $file = storage_path('geojson/' . $trail->id . '-' . $trail->source_id . '.geojson');
             if (file_exists($file)) {
                 $geoJson = file_get_contents($file);
                 if ($geoJson) {
+                    $geoJson = json_encode(json_decode($geoJson));
                     TrailGeoJson::updateOrCreate(['trail_id' => $trail->id], [
                         'geojson' => $geoJson,
                     ]);

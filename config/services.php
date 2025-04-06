@@ -36,4 +36,16 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => 'http://example.com/callback-url',
     ],
+
+    'stadia' => [
+        'key' => env('STADIA_API_KEY'),
+    ],
+
+    'thunderforest' => [
+        'key' => env('THUNDERFOREST_API_KEY'),
+    ],
+
+    'chromedriver' => [
+        'downloads_path' => env('CHROMEDRIVER_DOWNLOADS_PATH'),
+    ],
 ];

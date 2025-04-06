@@ -2,7 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\ImportBlogsJob;
+use App\Jobs\ImportCitySparkJob;
+use App\Services\CitySparkService;
 use Illuminate\Console\Command;
 
 class CitySpark extends Command
@@ -26,6 +27,8 @@ class CitySpark extends Command
      */
     public function handle()
     {
-        ImportBlogsJob::dispatch();
+//        ImportCitySparkJob::dispatch();
+        $citySparkService = new CitySparkService();
+        $citySparkService->import();
     }
 }

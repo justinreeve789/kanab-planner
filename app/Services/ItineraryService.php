@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\ActivityType;
 use App\Models\Area;
 use App\Models\AreaDistance;
 use App\Models\AreaWeather;
+use App\Models\Builder\CustomQueryBuilder;
 use App\Models\Event;
 use App\Models\Itinerary\Activity;
 use App\Models\Itinerary\Day;
@@ -20,6 +22,7 @@ use App\Repositories\ItineraryRepository;
 use App\Services\LocationService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ItineraryService
@@ -375,20 +378,20 @@ class ItineraryService
         $dayNum = $day->day_num;
         $mealTime = Period::getTimesForMeals($period);
         $startTime = $mealTime['startTime'];
-        $endTime = $mealTime['endTime'];
 
         // Add a restaurant in the area for the period.
         if ($this->shouldAddDining($day, $period)) {
             $restaurant = Restaurant::with(['location' => function($query) {
                 $query->with('images');
             }])->whereNotIn('restaurants.id', $this->getItinerary()->restaurant_ids)
-                ->whereIsOpen($date . ' ' . $mealTime['startTime'])->whereHas('location', function($query) use ($day) {
-                    $query->where('area_id', $day->area_id);
+//                ->whereIsOpen($date . ' ' . $mealTime['startTime'])
+                ->whereHas('location', function($query) use ($day) {
+                    $query->where('area_id', $day->area->id);
                 })->inRandomOrder()->first();
             if ($restaurant && !$this->getItinerary()->restaurantExists($restaurant)) {
                 $this->getItinerary()->addActivity(
                     $restaurant,
-                    'dining',
+                    ActivityType::DINING,
                     $startTime,
                     $restaurant->calculateEndTime($day->date, $startTime),
                     $dayNum,
@@ -565,7 +568,7 @@ class ItineraryService
 
         // Get the areas for the trails. Weight the areas that appear the most so they are first in the array.
         // TODO: Make sure the trails are actually open on the date.
-        $trailAreaIds = Trail::select('area_id', \DB::raw('COUNT(area_id) AS occurrences'))
+        $trailAreaIds = Trail::select('area_id', DB::raw('COUNT(area_id) AS occurrences'))
             ->whereNotNull('distance_miles')
             ->whereIn('id', $trailPriorities)
             ->groupBy('area_id')
@@ -587,15 +590,16 @@ class ItineraryService
         do {
             // TODO: Don't be so random about the area. Get an area with other events they'd be interested in. Also take
             // into account other preferences like maximum distance they want to travel.
+            /** @var CustomQueryBuilder $query */
             $query = Area::inWeightedRandomOrder($adventurousness);
 
             // If the user's adventurousness is low (< 0.3, < 0.4), we won't pick areas that are too far from their base area.
             switch ($adventurousness) {
                 case $adventurousness < 0.3:
-                    $maxDistance = 40;
+                    $maxDistance = 60;
                     break;
                 case $adventurousness < 0.4:
-                    $maxDistance = 60;
+                    $maxDistance = 75;
                     break;
                 default:
                     $maxDistance = null;
@@ -605,51 +609,55 @@ class ItineraryService
                 $query->whereProximity($baseArea->latitude, $baseArea->longitude, $maxDistance);
             }
 
-            // If the user's adventurousness is low (< 0.4), let's focus on Kanab, and not St. George.
-            if ($adventurousness < 0.4) {
+            // If the user's adventurousness < 0.5, let's focus on Kanab, and not St. George.
+            if ($adventurousness < 0.5) {
                 if ($baseArea->id === Area::ZION) {
                     $query->whereNot('id', Area::ST_GEORGE);
                 }
             }
 
+            // TODO: The North Rim is closed from December 1 to May 14. Don't assign this area between these dates.
+
             // If the user's adventurousness is < 0.8, only pick any area besides Kanab or Zion once, unless it's their base area.
-            if ($adventurousness < 0.8) {
-                $numPossible = 1;
-                $areaCounts = array_count_values($allAreaIds);
-                $filteredAreaIds = array_filter($allAreaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
-                    return (
-                        $areaId !== Area::KANAB &&
-                        $areaId !== $baseArea->id &&
-                        $areaId !== Area::ZION &&
-                        $areaCounts[$areaId] <= $numPossible
-                    );
-                });
-                $query->whereNotIn('id', $filteredAreaIds);
-            }
+            // TODO: Fix this.
+//            if ($adventurousness < 0.8) {
+//                $numPossible = 1;
+//                $areaCounts = array_count_values($allAreaIds);
+//                $filteredAreaIds = array_filter($allAreaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
+//                    return (
+//                        $areaId !== Area::KANAB &&
+//                        $areaId !== $baseArea->id &&
+//                        $areaId !== Area::ZION &&
+//                        $areaCounts[$areaId] <= $numPossible
+//                    );
+//                });
+//                $query->whereNotIn('id', $filteredAreaIds);
+//            }
 
             // If the user's adventurousness is < 0.9, only pick the remaining non-base area(s) once per 10 days of the trip.
-            if ($adventurousness < 0.9) {
-                $numPossible = ceil($this->getItinerary()->durationDays / 10);
-                $areaCounts = array_count_values($areaIds);
-                $filteredAreaIds = array_filter($allAreaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
-                    return (
-                        $areaId !== $baseArea->id &&
-                        isset($areaCounts[$areaId]) &&
-                        $areaCounts[$areaId] >= $numPossible
-                    );
-                });
-                $query->whereNotIn('id', $filteredAreaIds);
+            // TODO: Fix this.
+//            if ($adventurousness < 0.9) {
+//                $numPossible = ceil($this->getItinerary()->durationDays / 10);
+//                $areaCounts = array_count_values($areaIds);
+//                $filteredAreaIds = array_filter($allAreaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
+//                    return (
+//                        $areaId !== $baseArea->id &&
+//                        isset($areaCounts[$areaId]) &&
+//                        $areaCounts[$areaId] >= $numPossible
+//                    );
+//                });
+//                $query->whereNotIn('id', $filteredAreaIds);
+//            }
+
+            $area = $query->first();
+            if (!$area) {
+                $area = $baseArea;
             }
 
-            $areaId = $query->value('id');
-            if (!$areaId) {
-                $areaId = $baseArea->id;
-            }
-
-            $day = new Day(['date' => $date, 'area' => $baseArea, 'day_num' => $dayNum]);
+            $day = new Day(['date' => $date, 'area' => $area, 'day_num' => $dayNum]);
             $days[$dayNum++] = $day;
             $date = $this->incrementDate($date);
-            $areaIds[] = $areaId;
+            $areaIds[] = $area->id;
         } while (count($days) < $durationDays);
         ksort($days);
 
@@ -682,7 +690,7 @@ class ItineraryService
                 if (!$this->isTooHot($day, $period, 'hiking')) {
                     $dayHasTrail = $day->hasTrail();
                     if ($this->getItinerary()->getAdventurousness() >= 0.7 || !$dayHasTrail) {
-                        if (empty($day->periods[$period]->getActivities())) {
+                        if (count($day->periods[$period]->getActivities()) === 0) {
                             return true;
                         }
                     }
@@ -702,7 +710,7 @@ class ItineraryService
                 return false;
             }
         }
-        if ($day->getPeriods()[$period]->hasRestaurant() || $day->hasActivityTypeInPeriod('cooking', $period)) {
+        if ($day->periods[$period]->hasRestaurant() || $day->hasActivityTypeInPeriod('cooking', $period)) {
             return false;
         }
         return true;
