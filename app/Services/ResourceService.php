@@ -10,6 +10,7 @@ use App\Models\Location;
 use App\Models\OpenAIPrompt;
 use App\Models\Resource;
 use App\Models\ResourceData;
+use App\Models\ResourceMerge;
 use App\Models\ResourceText;
 use App\Models\Restaurant;
 use App\Models\Scopes\UsableScope;
@@ -163,12 +164,14 @@ class ResourceService
                 ]);
             }
 
-            TrailMerge::insert([[
+            ResourceMerge::insert([[
+                'resource_table' => $newResource->getTable(),
                 'merged_from' => $primary->id,
                 'merged_to' => $newResource->id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ], [
+                'resource_table' => $newResource->getTable(),
                 'merged_from' => $secondary->id,
                 'merged_to' => $newResource->id,
                 'created_at' => now(),

@@ -116,9 +116,14 @@ class GeneratePrompts extends Command
         foreach ($posts as $obj) {
             $promptsCount = count($obj->openai_prompts);
             while ($promptsCount <= $maxPrompts) {
-                switch ($resourceTable) {
+                switch ($obj->resource_table) {
                     case 'guides':
-                        $promptsJson = $this->openAIService->generateGuidePrompts(strip_tags($obj->content));
+                        $guide = Guide::where(['id' => $obj->resource_id, 'is_usable' => 1])->first();
+                        if ($guide) {
+                            $promptsJson = $this->openAIService->generateGuidePrompts(strip_tags($obj->content));
+                        } else {
+                            continue 2;
+                        }
                         break;
                     default:
                         $promptsJson = $this->openAIService->generateTrailPrompts(strip_tags($obj->content));

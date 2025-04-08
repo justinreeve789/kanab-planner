@@ -27,6 +27,7 @@ class ImportBlogs extends Command
      */
     public function handle()
     {
+        ini_set('memory_limit', '512M');
         $id = $this->option('id');
         if ($id) {
             $blogs = [Blog::find($id)];

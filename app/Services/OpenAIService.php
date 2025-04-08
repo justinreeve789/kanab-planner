@@ -21,6 +21,7 @@
  * - Avoid recommending anything in the South Rim.
  * - If an event, location, restaurant, or trail is recommended, give the user an option to add it to the itinerary.
  * - If a change in topic is detected, automatically switch to that topic in the chat window.
+ * - If there's any mention of a non-summer season at the Grand Canyon, include a disclaimer that the North Rim isn't open at March.
  */
 namespace App\Services;
 

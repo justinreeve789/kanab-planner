@@ -29,8 +29,8 @@ class BlogService
         }
 
         if ($blogPost) {
-            $prompts = $this->openAIService->generatePromptsWIthOpenAI($blogPost->content);
-            return json_decode($prompts);
+            // $prompts = $this->openAIService->generatePromptsWithOpenAI($blogPost->content);
+            // return json_decode($prompts);
         }
     }
 
@@ -42,7 +42,7 @@ class BlogService
         }
     }
 
-    public function savePostsFromBlog(Blog $blog, int $perPage = 50) {
+    public function savePostsFromBlog(Blog $blog, int $perPage = 25) {
         $page = 1;
         $allPosts = [];
 
@@ -59,13 +59,13 @@ class BlogService
 
             foreach ($posts as $post) {
                 Post::updateOrCreate([
+                    'blog_id' => $blog->id,
+                    'post_id' => $post['id'],
+                ], [
                     'title' => $post['title']['rendered'],
                     'content' => $post['content']['rendered'],
                     'raw_data' => json_encode($post),
                     'posted_at' => date('Y-m-d H:i:s', strtotime($post['date'])),
-                ], [
-                    'blog_id' => $blog->id,
-                    'post_id' => $post['id'],
                 ]);
             }
             $page++;

@@ -24146,10 +24146,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 /* harmony import */ var _History_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./History.vue */ "./resources/js/views/assistant/History.vue");
 /* harmony import */ var _Messages_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Messages.vue */ "./resources/js/views/assistant/Messages.vue");
 /* harmony import */ var _stores_assistant_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../stores/assistant.js */ "./resources/js/stores/assistant.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+
 
 
 
@@ -24161,6 +24163,11 @@ __webpack_require__.r(__webpack_exports__);
   },
   setup: function setup() {
     var store = (0,_stores_assistant_js__WEBPACK_IMPORTED_MODULE_2__.useAssistantStore)();
+
+    // If the current resource changes, we'll want to make sure we're on the messages panel.
+    (0,vue__WEBPACK_IMPORTED_MODULE_3__.watch)(function () {
+      return store.currentResource;
+    }, function (newVal, oldVal) {});
     return {
       store: store
     };
@@ -24172,15 +24179,18 @@ __webpack_require__.r(__webpack_exports__);
     return {
       isOpen: false,
       message: '',
-      messages: [{
-        id: 4,
-        content: 'What do I need to know about hiking the Narrows?',
-        is_assistant: false
-      }, {
-        id: 5,
-        content: 'Hiking the Narrows requires thorough planning for safety and requires sound judgment, as conditions can be challenging and occasionally hazardous. Always check in with the Zion park rangers at the visitor center for updates regarding water conditions, flash flood risks, and the weather forecast.',
-        is_assistant: true
-      }]
+      messages: [
+        // {
+        //   id: 4,
+        //   content: 'What do I need to know about hiking the Narrows?',
+        //   is_assistant: false,
+        // },
+        // {
+        //   id: 5,
+        //   content: 'Hiking the Narrows requires thorough planning for safety and requires sound judgment, as conditions can be challenging and occasionally hazardous. Always check in with the Zion park rangers at the visitor center for updates regarding water conditions, flash flood risks, and the weather forecast.',
+        //   is_assistant: true,
+        // },
+      ]
     };
   },
   methods: {
@@ -24209,7 +24219,7 @@ __webpack_require__.r(__webpack_exports__);
           is_assistant: true,
           content: '...'
         });
-        axios__WEBPACK_IMPORTED_MODULE_3__["default"].post('/api/v1/assistant', {
+        axios__WEBPACK_IMPORTED_MODULE_4__["default"].post('/api/v1/assistant', {
           message: messageToSend
         }).then(function (response) {
           _this.updateMessages(response.data);
@@ -24219,8 +24229,8 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     toggleWindow: function toggleWindow() {
-      this.isOpen = !this.isOpen;
-      if (this.isOpen) {
+      this.store.isAssistantOpen = !this.store.isAssistantOpen;
+      if (this.store.isAssistantOpen) {
         this.scrollToSlide(2, false);
       }
     },
@@ -24262,8 +24272,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 /* harmony import */ var _stores_assistant_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../stores/assistant.js */ "./resources/js/stores/assistant.js");
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -24286,7 +24298,20 @@ __webpack_require__.r(__webpack_exports__);
       messagesContainer: messagesContainer
     };
   },
-  mounted: function mounted() {}
+  mounted: function mounted() {},
+  methods: {
+    getMessages: function getMessages() {
+      var endpoint = '/api/v1/assistant';
+      if (this.store.hasCurrentResource()) {
+        endpoint += '/' + this.store.currentResource.id;
+      }
+      axios__WEBPACK_IMPORTED_MODULE_2__["default"].get(endpoint).then(function (response) {
+        console.log(response.data);
+      })["catch"](function (error) {
+        console.error('Error fetching assistant response:', error);
+      });
+    }
+  }
 });
 
 /***/ }),
@@ -24431,10 +24456,25 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var _stores_assistant_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../stores/assistant.js */ "./resources/js/stores/assistant.js");
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  components: {},
-  data: function data() {},
+  emits: ['openAssistant'],
+  setup: function setup() {
+    var store = (0,_stores_assistant_js__WEBPACK_IMPORTED_MODULE_0__.useAssistantStore)();
+    return {
+      store: store
+    };
+  },
+  methods: {
+    openAssistantForResource: function openAssistantForResource() {
+      this.store.setCurrentResource(this.resource_table, this.resource.id, this.resource);
+      this.store.isAssistantOpen = true;
+    }
+  },
   props: {
+    resource_table: String,
+    resource: Object,
     unique: String,
     type: String
   }
@@ -25022,9 +25062,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }, null, 8 /* PROPS */, ["day"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
   }), 128 /* KEYED_FRAGMENT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["ListModal"], {
     type: 'trail'
-  }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Assistant"], {
-    type: 'general'
-  })], 64 /* STABLE_FRAGMENT */);
+  }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Assistant"])], 64 /* STABLE_FRAGMENT */);
 }
 
 /***/ }),
@@ -25344,8 +25382,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, _hoisted_9)])])]), $data.expanded ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["ActivityButtons"], {
     "class": "text-right my-4 lg:text-left",
     type: "restaurant",
-    hash: $props.activity.id
-  }, null, 8 /* PROPS */, ["hash"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [$props.resource.description_alt ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_alt), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.resource.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), $props.resource.location.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Side"], {
+    unique: $props.activity.id,
+    resource_table: 'restaurants',
+    resource_id: $props.resource.id
+  }, null, 8 /* PROPS */, ["unique", "resource_id"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [$props.resource.description_alt ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_alt), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.resource.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), $props.resource.location.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Side"], {
     resource: $data.restaurant,
     unique: $props.resource.id,
     type: 'restaurant',
@@ -25544,8 +25584,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, null, 8 /* PROPS */, ["trail"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["ActivityButtons"], {
     "class": "text-right my-4 lg:text-left",
     type: "trail",
-    unique: $props.unique
-  }, null, 8 /* PROPS */, ["unique"])])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [$props.resource.description_short ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_short), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$props.resource.description_short || $props.resource.description && $props.resource.description.length > $props.resource.description_short.length + 25 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.resource.description_alt || $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_22, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_alt) + " ", 1 /* TEXT */), $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.phrase), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), $props.resource.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Side"], {
+    unique: $props.unique,
+    resource_table: 'trails',
+    resource: $props.resource
+  }, null, 8 /* PROPS */, ["unique", "resource"])])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [$props.resource.description_short ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_short), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$props.resource.description_short || $props.resource.description && $props.resource.description.length > $props.resource.description_short.length + 25 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.resource.description_alt || $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_22, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_alt) + " ", 1 /* TEXT */), $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.phrase), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), $props.resource.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Side"], {
     resource: $props.resource,
     unique: $props.unique,
     type: 'trail',
@@ -25604,21 +25646,21 @@ var _hoisted_11 = {
   "class": "carousel-item w-full flex flex-col"
 };
 var _hoisted_12 = {
+  key: 0,
   "class": "flex justify-between items-center mb-2 bg-gradient-to-r from-blue-50 to-cyan-100 pl-4 pr-4 pt-2 pb-2 w-full"
 };
 var _hoisted_13 = {
   "class": "breadcrumbs text-sm"
 };
-var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, "The Narrows", -1 /* HOISTED */);
-var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
   src: "images/icons/hiking.svg",
   alt: "Trail",
   "class": "h-6 w-6"
 }, null, -1 /* HOISTED */);
-var _hoisted_16 = {
+var _hoisted_15 = {
   "class": "w-full"
 };
-var _hoisted_17 = {
+var _hoisted_16 = {
   "class": "p-4"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
@@ -25629,7 +25671,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[0] || (_cache[0] = function () {
       return $options.toggleWindow && $options.toggleWindow.apply($options, arguments);
     })
-  }, _hoisted_3)]), $data.isOpen ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [_hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  }, _hoisted_3)]), $setup.store.isAssistantOpen ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [_hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     "class": "tooltip btn btn-sm btn-ghost hover:bg-cyan-100",
     onClick: _cache[1] || (_cache[1] = function () {
       return _ctx.showHistory && _ctx.showHistory.apply(_ctx, arguments);
@@ -25640,11 +25682,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[2] || (_cache[2] = function () {
       return $options.toggleWindow && $options.toggleWindow.apply($options, arguments);
     })
-  }, "✕")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_History)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+  }, "✕")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_History)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [$setup.store.currentResource ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
     onClick: _cache[3] || (_cache[3] = function ($event) {
       return $options.scrollToSlide(1);
     })
-  }, "Trails")]), _hoisted_14])]), _hoisted_15]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Messages)])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  }, "<<")]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.store.currentResource.name), 1 /* TEXT */)])]), _hoisted_14])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_15, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Messages)])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
       return $data.message = $event;
     }),
@@ -25962,18 +26004,14 @@ var _hoisted_1 = {
 var _hoisted_2 = ["for"];
 var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
   "class": "text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
-}, "View menu", -1 /* HOISTED */);
+}, " View menu ", -1 /* HOISTED */);
 var _hoisted_4 = [_hoisted_3];
 var _hoisted_5 = ["for"];
 var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
   "class": "text-white bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-orange-300 dark:focus:ring-orange-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
-}, "View map", -1 /* HOISTED */);
+}, " View map ", -1 /* HOISTED */);
 var _hoisted_7 = [_hoisted_6];
 var _hoisted_8 = ["for"];
-var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
-  "class": "text-white bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-purple-300 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
-}, "Ask question", -1 /* HOISTED */);
-var _hoisted_10 = [_hoisted_9];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return $props.type == 'restaurant' || $props.type == 'trail' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [$props.type == 'restaurant' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("label", {
     key: 0,
@@ -25984,7 +26022,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, _hoisted_7, 8 /* PROPS */, _hoisted_5)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.type == 'trail' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("label", {
     key: 2,
     "for": 'resource-' + $props.unique + '-assistant'
-  }, _hoisted_10, 8 /* PROPS */, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true);
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+    onClick: _cache[0] || (_cache[0] = function () {
+      return $options.openAssistantForResource && $options.openAssistantForResource.apply($options, arguments);
+    }),
+    "class": "text-white bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-purple-300 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
+  }, " Ask question ")], 8 /* PROPS */, _hoisted_8)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true);
 }
 
 /***/ }),
@@ -42715,6 +42758,10 @@ __webpack_require__.r(__webpack_exports__);
 var useAssistantStore = (0,pinia__WEBPACK_IMPORTED_MODULE_0__.defineStore)('assistant', {
   state: function state() {
     return {
+      currentResource: null,
+      currentResourceTable: null,
+      currentResourceId: null,
+      isAssistantOpen: false,
       messages: []
     };
   },
@@ -42727,14 +42774,26 @@ var useAssistantStore = (0,pinia__WEBPACK_IMPORTED_MODULE_0__.defineStore)('assi
         this.messages.push(messages[i]);
       }
     },
+    clearMessages: function clearMessages() {
+      this.messages = [];
+    },
+    hasCurrentResource: function hasCurrentResource() {
+      if (this.currentResource) {
+        return true;
+      } else {
+        return false;
+      }
+    },
     removeMessage: function removeMessage(index) {
       this.messages.splice(index, 1);
     },
     removeLastMessage: function removeLastMessage() {
       this.messages.splice(this.messages.length - 1, 1);
     },
-    clearMessages: function clearMessages() {
-      this.messages = [];
+    setCurrentResource: function setCurrentResource(table, id, resource) {
+      this.currentResourceTable = table;
+      this.currentResourceId = id;
+      this.currentResource = resource;
     }
   }
 });

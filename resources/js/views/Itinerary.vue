@@ -35,7 +35,7 @@
 
   <ListModal :type="'trail'" />
 
-  <Assistant :type="'general'" />
+  <Assistant />
 </template>
 
 <script>

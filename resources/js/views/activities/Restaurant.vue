@@ -22,7 +22,7 @@
       <div class="lg:flex lg:justify-between">
         <div class="w-full lg:w-2/3 lg:flex lg:flex-col">
           <div class="lg:order-2">
-            <ActivityButtons class="text-right my-4 lg:text-left" type="restaurant" :hash="activity.id" />
+            <ActivityButtons class="text-right my-4 lg:text-left" type="restaurant" :unique="activity.id" :resource_table="'restaurants'" :resource_id="resource.id" />
           </div>
           <div class="lg:order-1">
             <p class="mb-4" v-if="resource.description_alt">{{ resource.description_alt }}</p>

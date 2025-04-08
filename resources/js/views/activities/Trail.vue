@@ -30,7 +30,7 @@
                     <TrailStats :trail="resource" :align="'left'" class="pt-4" />
                   </div>
                   <div class="flex-right">
-                    <ActivityButtons class="text-right my-4 lg:text-left" type="trail" :unique="unique" />
+                    <ActivityButtons class="text-right my-4 lg:text-left" type="trail" :unique="unique" :resource_table="'trails'" :resource="resource" />
                   </div>
                 </div>
               </div>
