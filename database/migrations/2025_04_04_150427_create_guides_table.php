@@ -17,6 +17,7 @@ return new class extends Migration
         Schema::create('guides', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->boolean('is_usable')->default(true);
             $table->timestamps();
         });
 

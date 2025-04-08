@@ -1,5 +1,7 @@
 <template>
-  <div class="collapse collapse-arrow bg-white">
+  <div class="rounded-lg p-[2px] bg-gradient-to-r from-orange-100 to-red-100">
+    <div class="rounded-lg p-[1px] bg-gradient-to-r from-orange-200 to-red-200">
+    <div class="collapse collapse-arrow bg-white">
     <input type="checkbox" />
     <div class="collapse-title text-xl font-medium">
       <h2 :id="'day-heading-' + day.day_num" class="day-heading relative w-full">
@@ -52,6 +54,8 @@
         </div>
       </section>
     </div>
+  </div>
+  </div>
   </div>
 </template>
 
