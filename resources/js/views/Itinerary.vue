@@ -36,6 +36,8 @@
   <ListModal :type="'trail'" />
 
   <Assistant />
+
+  <Backdrop />
 </template>
 
 <script>
@@ -43,6 +45,7 @@ import axios from 'axios';
 import Assistant from './assistant/Assistant.vue';
 import Day from './Day.vue';
 import ListModal from './panels/ListModal.vue';
+import Backdrop from './Backdrop.vue';
 import Select from './components/Select.vue';
 
 export default {

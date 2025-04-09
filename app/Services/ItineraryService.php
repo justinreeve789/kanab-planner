@@ -722,12 +722,12 @@ class ItineraryService
      * a. Morning is okay, especially if they're hiking a Zion trail that morning.
      * b. Lunch is out of the question.
      * c. Dinner is okay if their afternoon activity will end and they can travel back by 5pm.
-     * back If they've already done a trail today, only add another
+     * back. If they've already done a trail today, only add another
      * trail if their adventurousness is >= 0.7.
      */
     public function shouldAddCooking(Day $day, string $period): bool {
         // Make sure there isn't already a restaurant or cooking activity during the period.
-        $dayPeriod = $day->getPeriods()[$period];
+        $dayPeriod = $day->getPeriod($period);
         if ($dayPeriod->hasRestaurant() || $dayPeriod->hasActivityType('cooking')) {
             return false;
         }
