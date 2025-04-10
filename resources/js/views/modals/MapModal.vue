@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import Map from './Map.vue';
+import Map from '../components/Map.vue';
 
 export default {
   components: {

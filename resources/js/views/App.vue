@@ -5,13 +5,22 @@
 <script>
 import axios from 'axios';
 import Itinerary from './Itinerary.vue';
-//import 'mapbox-gl/dist/mapbox-gl.css';
-//import "leaflet/dist/leaflet.css";
-//import { LMap, LTileLayer } from "@vue-leaflet/vue-leaflet";
+import {useFeatureStore} from "../stores/feature";
 
 export default {
   components: {
     Itinerary,
-  }
+  },
+  setup() {
+    const featureStore = useFeatureStore();
+    return featureStore;
+  },
+  methods: {
+    getFeatureFlags() {
+    },
+  },
+  mounted() {
+    this.getFeatureFlags();
+  },
 };
 </script>

@@ -1,4 +1,11 @@
 <?php
+/**
+ * A user may type things like "I want a new itinerary" or "This is too expensive," in which case we can identify and
+ * run appropriate functions in ItineraryService to update the itinerary accordingly.
+ *
+ * A lot of these requests should be included in the training data to indicate what steps the user can take to do it
+ * themselves. The assistant can provide basic how-to information in this regard.
+ */
 
 namespace App\Services;
 
@@ -209,6 +216,53 @@ class AssistantService
                 return true;
             }
         }
+        return false;
+    }
+
+    /**
+     * A user may type something like "create a new itinerary," in which case we'll want to refresh the itinerary, with
+     * the same dates.
+     */
+    public function isNewItineraryRequested(string $query, $resource): bool {
+        return false;
+    }
+
+    /**
+     * A user may type something like "I want different activities," in which case we'll want to refresh the itinerary,
+     * but keep the dates and areas.
+     */
+    public function isNewActivitiesRequested(string $query, $resource): bool {
+        return false;
+    }
+
+    /**
+     * A user may type something like "These hikes are too hard, give me new ones," in which we'll want to update the
+     * trails, keeping the dates and areas, unless no alternative trails are found in the areas.
+     */
+    public function isStrenuousChangeRequested(string $query, $resource): bool {
+        return false;
+    }
+
+    /**
+     * A user may indicate they have dietary restrictions, in which case we'll want to ensure the restaurants meet their
+     * standards, and update them if necessary.
+     */
+    public function isRestaurantChangeRequested(string $query, $resource): bool {
+        return false;
+    }
+
+    /**
+     * A user may indicate everything's too expensive, in which case we'll want refresh the itinerary with a new
+     * budget limit.
+     */
+    public function isBudgetChangeRequested(string $query, $resource): bool {
+        return false;
+    }
+
+    /**
+     * A user may request a weather forecast.
+     */
+    public function isWeatherForecastRequested(string $query, $resource): bool {
         return false;
     }
 }

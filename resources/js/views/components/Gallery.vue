@@ -19,6 +19,7 @@ export default {
   data() {
     return {
       imageUrls: [],
+      unique: this.$generateUnique(),
     };
   },
   methods: {
@@ -35,7 +36,6 @@ export default {
     this.imageUrls = this.images;
   },
   props: {
-    unique: String,
     images: Object,
     type: String,
   },

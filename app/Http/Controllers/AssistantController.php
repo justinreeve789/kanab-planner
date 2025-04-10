@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Assistant\Message;
 use App\Models\Assistant\Session;
+use App\Models\Trail;
 use App\Services\AssistantService;
 use App\Services\OpenAIService;
 use Exception;
@@ -64,15 +65,21 @@ class AssistantController extends Controller
         // TODO: Analyze the message for requests for trail maps or other content we can retrieve without using OpenAI.
         if ($resource) {
             if ($assistantService->isMapRequested($message, $resource)) {
+                // Are there other maps that could be used beside trail maps? Add them here. Either that, or remove
+                // anything we don't need from $resource before passing it into component_params.
+                $trail = new Trail();
+                $trail->id = $resource->id;
                 $newMessages[] = Message::create([
                     'assistant_session_id' => $assistantSession->id,
                     'is_assistant' => true,
-                    'content' => '',
+                    'content' => 'Here\'s a trail map for ' . $resource->name . '.',
                     'resource_table' => $resource->getTable(),
                     'resource_id' => $resource->id,
                     'show_in_chat_bubble' => false,
-                    'method_executed' => 'show_trail_map',
-                    'method_params' => 'id=' . $resource->id,
+                    'component' => 'buttons/ViewMap',
+                    'component_params' => json_encode((object) [
+                        'resource' => (object) $trail->toArray(),
+                    ]),
                 ]);
 
                 return collect($newMessages)->toJson();

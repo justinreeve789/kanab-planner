@@ -13,6 +13,7 @@ use App\ResourceEnum;
 use App\Traits\Itinerary\Preferences;
 use App\Traits\ReturnAllProperties;
 use App\Traits\SnakeCaseAttributes;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -113,7 +114,7 @@ class Itinerary extends CachedModel
             return $this->attributes['arrival_date_time'];
         } else {
             if (isset($this->attributes['start_date'])) {
-                $this->attributes['arrival_date_time'] = date('Y-m-h H:i:s', strtotime($this->attributes['start_date'] . ' ' . self::DEFAULT_ARRIVAL_TIME));
+                $this->attributes['arrival_date_time'] = Carbon::parse($this->attributes['start_date'] . ' ' . self::DEFAULT_ARRIVAL_TIME)->format('Y-m-d H:i:s');
                 return $this->attributes['arrival_date_time'];
             } else {
                 throw new Exception('Could not set arrival date/time.');

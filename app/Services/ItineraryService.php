@@ -869,8 +869,6 @@ class ItineraryService
     public function setupItinerary(Request $request)
     {
         $accommodationPreference = $request->get('accommodation_preference');
-        $arrivalDateTime = $request->get('arrival_datetime');
-        $departureDateTime = $request->get('departure_datetime');
         $interests = $request->get('interests');
         $tripPreference = $request->get('trip_preference');
 
@@ -882,6 +880,8 @@ class ItineraryService
             }
         }
 
+        $this->getItinerary()->arrival_date_time = $request->get('arrival_datetime');
+        $this->getItinerary()->departure_date_time = $request->get('departure_datetime');
         $this->getItinerary()->setCheckInTime($request->get('check_in'));
         $this->getItinerary()->setCheckOutTime($request->get('check_out'));
         $this->getItinerary()->setDurationDays($request->get('duration_days'));
@@ -889,7 +889,6 @@ class ItineraryService
         $this->getItinerary()->setLatitude($request->get('lat'));
         $this->getItinerary()->setLongitude($request->get('lng'));
         $this->getItinerary()->setStartDate($request->get('start_date'));
-        $this->getItinerary()->arrival_date_time = $request->get('arrival_date_time');
 
         // Some methods should be called after others have been set.
         $this->getItinerary()->setMonth($request->get('month'));

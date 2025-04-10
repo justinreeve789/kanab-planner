@@ -1,19 +1,17 @@
 <template>
   <div>
     <label for="startDate">Start Date:</label>
-    <datepicker v-model="startDate" id="startDate"></datepicker>
-
     <label for="endDate">End Date:</label>
-    <datepicker v-model="endDate" id="endDate"></datepicker>
   </div>
 </template>
 
 <script>
-import Datepicker from 'vuejs-datepicker';
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
 
 export default {
   components: {
-    Datepicker,
+    VueDatePicker,
   },
   data() {
     return {

@@ -37,6 +37,10 @@ Route::prefix('v1')->group(function() {
         Route::get('/{id}', 'App\Http\Controllers\EventController@getEvent');
     });
 
+    Route::prefix('feature')->group(function() {
+        Route::get('/', 'App\Http\Controllers\FeatureController@index');
+    });
+
     Route::prefix('itinerary')->group(function() {
 //        Route::get('/', 'App\Http\Controllers\ItineraryController@index');
         Route::get('/{id}', 'App\Http\Controllers\ItineraryController@getItinerary');

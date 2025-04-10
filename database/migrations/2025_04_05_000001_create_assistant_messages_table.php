@@ -22,8 +22,8 @@ return new class extends Migration
             $table->string('resource_table')->nullable();
             $table->integer('resource_id')->unsigned()->nullable();
             $table->boolean('show_in_chat_bubble')->default(true);
-            $table->string('method_executed', 32)->nullable();
-            $table->string('method_params')->nullable();
+            $table->string('component', 32)->nullable();
+            $table->json('component_params')->nullable();
             $table->timestamps();
             $table->index(['resource_table', 'resource_id']);
             $table->foreign('assistant_session_id')->references('id')->on('assistant_sessions')->onDelete('cascade');

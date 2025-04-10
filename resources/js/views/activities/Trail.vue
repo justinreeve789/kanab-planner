@@ -30,7 +30,7 @@
                     <TrailStats :trail="resource" :align="'left'" class="pt-4" />
                   </div>
                   <div class="flex-right">
-                    <ActivityButtons class="text-right my-4 lg:text-left" type="trail" :unique="unique" :resource_table="'trails'" :resource="resource" />
+                    <ActivityButtons class="text-right my-4 lg:text-left" type="trail" :resource_table="'trails'" :resource="resource" />
                   </div>
                 </div>
               </div>
@@ -41,12 +41,11 @@
               </div>
           </div>
           <div class="w-[calc(100%+16px)] -ml-2 -mb-4 lg:w-1/3 mt-4 lg:pl-4 lg:-mt-2 lg:-mr-2" v-if="resource.images">
-            <Side :resource="resource" :unique="unique" :type="'trail'" :images="resource.images" />
+            <Side :resource="resource" :type="'trail'" :images="resource.images" />
           </div>
         </div>
     </div>
   </div>
-  <MapModal :resource="resource" :unique="unique" :zoom="zoom()" />
 </template>
 
 <script>
@@ -79,7 +78,6 @@ export default {
     activity: Object,
     phrase: String,
     resource: Object,
-    unique: String,
   },
 };
 </script>
@@ -87,8 +85,8 @@ export default {
 <script setup>
 import { ref, onMounted, onUnmounted, defineProps, watch } from 'vue';
 import { useListStore } from '../../stores/list.js';
-import ActivityButtons from '../panels/ActivityButtons.vue'
-import MapModal from '../panels/MapModal.vue'
+import ActivityButtons from '../components/ActivityButtons.vue'
+import MapModal from '../modals/MapModal.vue'
 import Side from '../panels/Side.vue'
 import TrailStats from '../stats/TrailStats.vue'
 </script>

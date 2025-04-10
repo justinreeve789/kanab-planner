@@ -46,4 +46,9 @@ class User extends Authenticatable
     public function itineraries() {
         return $this->hasManyThrough(Itinerary::class, UserItinerary::class, 'itinerary_id', 'id', 'id', 'user_id');
     }
+
+    public function isAdmin() {
+        return true;
+    }
 }
+

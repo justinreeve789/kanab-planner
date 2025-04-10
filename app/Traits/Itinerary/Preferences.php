@@ -166,11 +166,11 @@ trait Preferences
         $this->check_out_time = $check_out_time;
     }
 
-    public function setDates($arrivalDateTime, $departureDateTime)
-    {
-        $this->arrival_date_time = $arrivalDateTime;
-        $this->departure_date_time = $departureDateTime;
-    }
+//    public function setDates($arrivalDateTime, $departureDateTime)
+//    {
+//        $this->arrival_date_time = $arrivalDateTime;
+//        $this->departure_date_time = $departureDateTime;
+//    }
 
     public function setDurationDays(?int $duration_days)
     {

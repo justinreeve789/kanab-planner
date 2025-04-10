@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Itinerary\Itinerary;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +24,5 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
     }
 }

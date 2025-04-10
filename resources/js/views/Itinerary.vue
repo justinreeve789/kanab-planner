@@ -44,7 +44,7 @@
 import axios from 'axios';
 import Assistant from './assistant/Assistant.vue';
 import Day from './Day.vue';
-import ListModal from './panels/ListModal.vue';
+import ListModal from './modals/ListModal.vue';
 import Backdrop from './Backdrop.vue';
 import Select from './components/Select.vue';
 
@@ -89,6 +89,6 @@ export default {
 
 <script setup>
 import { onMounted } from 'vue'
-import ActivityStatsModal from './panels/ActivityStatsModal.vue'
+import ActivityStatsModal from './modals/ActivityStatsModal.vue'
 import Side from './panels/Side.vue'
 </script>

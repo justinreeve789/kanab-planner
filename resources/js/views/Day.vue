@@ -46,7 +46,7 @@
             <Restaurant :day="day" :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
           </div>
           <div class="mb-8 border border-solid border-orange-300 rounded-lg" v-else-if="activity.activity_type == 'hiking'">
-            <Trail :unique="activity.id" :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
+            <Trail :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
           </div>
           <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-else>
             <Task :activity="activity" :day="day" :resource="activity.resource" />

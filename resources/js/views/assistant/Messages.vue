@@ -17,6 +17,9 @@
           </div>
           <div v-else>
             {{ message.content }}
+            <div class="method-component mt-4" v-if="message.component">
+              <component :is="getComponent(message.component)" v-bind="this.parseMessageParams(message.component_params)"></component>
+            </div>
           </div>
         </div>
       </div>
@@ -26,23 +29,27 @@
 
 <script>
 import axios from 'axios';
+import {defineAsyncComponent, ref, watch, nextTick} from 'vue';
 import {useAssistantStore} from '../../stores/assistant.js';
-import {ref, watch, nextTick} from 'vue';
 
 export default {
   setup() {
     const store = useAssistantStore();
     const messagesContainer = ref(null)
 
+    const getComponent = (component) => {
+      return defineAsyncComponent(() => import('../' + component)) || null;
+    };
+
     // Watch for changes in the store's messages, and scroll to the bottom of the messages container after a new message.
     watch(() => store.messages.length, () => {
       nextTick(() => {
         if (messagesContainer.value) {
-          messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+          messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
         }
       })
     })
-    return {store, messagesContainer}
+    return {store, messagesContainer, getComponent}
   },
   mounted() {
   },
@@ -60,8 +67,17 @@ export default {
         .catch((error) => {
           console.error('Error fetching assistant response:', error);
         });
-    }
+    },
+    parseMessageParams(params) {
+      try {
+        return typeof params === 'string'
+          ? JSON.parse(params)
+          : params
+      } catch (e) {
+        console.error('Invalid JSON in component_params', e)
+        return {}
+      }
+    },
   },
 }
-
 </script>

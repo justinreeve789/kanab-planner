@@ -1,5 +1,5 @@
 <template>
-  <Gallery :images="images" :type="type" :unique="unique" v-if="images" />
+  <Gallery :images="images" :type="type" v-if="images" />
 </template>
 
 <script>
@@ -16,7 +16,6 @@ export default {
   mounted() {
   },
   props: {
-    unique: String,
     resource: Object,
     images: Object,
     type: String,
