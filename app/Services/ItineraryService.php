@@ -19,7 +19,6 @@ use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Models\Image;
 use App\Repositories\ItineraryRepository;
-use App\Services\LocationService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -30,6 +29,7 @@ class ItineraryService
 {
     const DEFAULT_DRIVING_TIME_BETWEEN_AREAS = 1800;
 
+    private $budgetService;
     private $imageService;
     private $itinerary;
     private $locationService;
@@ -42,6 +42,7 @@ class ItineraryService
     public function __construct($itinerary = null)
     {
         $this->setItinerary(new Itinerary());
+        $this->budgetService = new BudgetService();
         $this->imageService = new ImageService();
         $this->locationService = new LocationService();
         $this->phraseService = new PhraseService();
@@ -888,6 +889,7 @@ class ItineraryService
         $this->getItinerary()->setLatitude($request->get('lat'));
         $this->getItinerary()->setLongitude($request->get('lng'));
         $this->getItinerary()->setStartDate($request->get('start_date'));
+        $this->getItinerary()->arrival_date_time = $request->get('arrival_date_time');
 
         // Some methods should be called after others have been set.
         $this->getItinerary()->setMonth($request->get('month'));
@@ -1032,7 +1034,7 @@ class ItineraryService
 
         $startDate = $this->getItinerary()->getStartDate();
         foreach ($days as $dayNum => $day) {
-            $day->dayNum = $dayNum;
+//            $day->dayNum = $dayNum;
             $day->day_num = $dayNum;
             $day->date = date('Y-m-d', strtotime($startDate . ' +' . $dayNum . ' days'));
         }

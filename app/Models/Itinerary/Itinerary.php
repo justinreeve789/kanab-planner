@@ -9,9 +9,12 @@ use App\Models\Itinerary\Period;
 use App\Models\Itinerary\Season;
 use App\Models\User;
 use App\Models\UserItinerary;
+use App\ResourceEnum;
 use App\Traits\Itinerary\Preferences;
 use App\Traits\ReturnAllProperties;
 use App\Traits\SnakeCaseAttributes;
+use Exception;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -42,6 +45,9 @@ class Itinerary extends CachedModel
     const SUMMER = 'summer';
     const WINTER = 'winter';
 
+    protected $attributes = [
+        'arrival_date_time' => '',
+    ];
     protected $casts = [
         'activity_priorities' => 'json',
         'area_priorities' => 'json',
@@ -78,7 +84,6 @@ class Itinerary extends CachedModel
         $this->id = Str::uuid();
         $this->activities = [];
         $this->adventurousness = $this->adventurousness ?? self::DEFAULT_ADVENTUROUSNESS;
-        $this->arrival_date_time = date('Y-m-d H:i:s', strtotime($this->getStartDate() . ' ' . self::DEFAULT_ARRIVAL_TIME));
         $this->base_area_id = $this->base_area_id ?? self::DEFAULT_BASE_AREA_ID;
         $this->duration_days = $this->duration_days ?? self::DEFAULT_DURATION_DAYS;
         $this->event_ids = [];
@@ -100,6 +105,20 @@ class Itinerary extends CachedModel
             self::$instance = new self();
         }
         return self::$instance;
+    }
+
+    public function getArrivalDateTimeAttribute()
+    {
+        if (isset($this->attributes['arrival_date_time'])) {
+            return $this->attributes['arrival_date_time'];
+        } else {
+            if (isset($this->attributes['start_date'])) {
+                $this->attributes['arrival_date_time'] = date('Y-m-h H:i:s', strtotime($this->attributes['start_date'] . ' ' . self::DEFAULT_ARRIVAL_TIME));
+                return $this->attributes['arrival_date_time'];
+            } else {
+                throw new Exception('Could not set arrival date/time.');
+            }
+        }
     }
 
     public function days()
@@ -200,15 +219,6 @@ class Itinerary extends CachedModel
         return $this->strenuousness;
     }
 
-    public function getArrivalDateTime()
-    {
-        if (isset($this->arrival_date_time)) {
-            return $this->arrival_date_time;
-        }
-        $this->arrival_date_time = date('Y-m-d H:i:s', strtotime($this->start_date . ' ' . self::DEFAULT_ARRIVAL_TIME));
-        return $this->arrival_date_time;
-    }
-
     public function getBaseArea(): ?Area
     {
         if ($this->base_area === null && $this->base_area_id !== null) {
@@ -228,6 +238,11 @@ class Itinerary extends CachedModel
     public function getDays(): array
     {
         return $this->days;
+    }
+
+    public function getArrivalDateTime()
+    {
+        return $this->arrival_date_time;
     }
 
     public function getDepartureDateTime()
@@ -325,7 +340,7 @@ class Itinerary extends CachedModel
 
     public function getUseFirstDay(): bool
     {
-        $a = strtotime($this->getArrivalDateTime());
+        $a = strtotime($this->arrival_date_time);
         $b = strtotime($this->start_date . ' ' . self::DEFAULT_ARRIVAL_TIME);
         return $a < $b - 3600;
     }
