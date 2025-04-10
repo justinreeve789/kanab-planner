@@ -20,6 +20,7 @@ use App\Models\Trail;
 use App\Models\Image;
 use App\Repositories\ItineraryRepository;
 use App\Services\LocationService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -1029,8 +1030,11 @@ class ItineraryService
         // Reinsert the first and last days and update the dayNum.
         $days = array_merge([$first], $shuffledGroups, [$last]);
 
+        $startDate = $this->getItinerary()->getStartDate();
         foreach ($days as $dayNum => $day) {
             $day->dayNum = $dayNum;
+            $day->day_num = $dayNum;
+            $day->date = date('Y-m-d', strtotime($startDate . ' +' . $dayNum . ' days'));
         }
 
         // Set the shuffled and grouped days back to the itinerary.
