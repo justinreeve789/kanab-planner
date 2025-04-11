@@ -94,6 +94,7 @@ class HikingProject extends Command
             'https://www.hikingproject.com/directory/8010544/zion-national-park',
             'https://www.hikingproject.com/directory/8013242/north-rim',
             'https://www.hikingproject.com/directory/8011899/glen-canyon-national-recreation-area',
+            'https://www.hikingproject.com/directory/8010574/glen-canyon-national-recreation-area',
         ];
         $this->trailUrls = [];
         if (empty($this->areaUrls)) {

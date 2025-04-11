@@ -23,7 +23,9 @@
  * - If a change in topic is detected, automatically switch to that topic in the chat window.
  * - If there's any mention of a non-summer season at the Grand Canyon, include a disclaimer that the North Rim isn't open at March.
  * - When a suggestion for an activity is made, ask the user if they want to add it to the itinerary.
- * - If asked about nearby trails or restaurants, use a Haversine search to find nearby resources rather than OpenAI. Then construct short snippets about the trails.
+ * - If asked about nearby trails or restaurants, use a Haversine search to find nearby resources rather than OpenAI. If
+ * they're trails, find trails of similar or shorter length. Then construct short snippets about the trails.
+ * - If asked about how to get to a place, open Google Maps with directions.
  */
 namespace App\Services;
 

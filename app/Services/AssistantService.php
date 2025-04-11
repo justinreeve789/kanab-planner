@@ -208,6 +208,13 @@ class AssistantService
         return null;
     }
 
+    /**
+     * Use RubixML to do some basic phrase matching and determine if the user is asking for a specific action to be taken.
+     */
+    public function analyzeQueryForRequests(string $query, $resource) {
+
+    }
+
     public function isMapRequested(string $query, $resource) {
         $query = preg_replace('/\s+/', ' ', $query);
         $query = trim(strtolower($query));

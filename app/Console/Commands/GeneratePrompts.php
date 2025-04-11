@@ -12,7 +12,7 @@ use Illuminate\Console\Command;
 
 class GeneratePrompts extends Command
 {
-    const MAX_PROMPTS = 30;
+    const MAX_PROMPTS = 50;
 
     /**
      * The name and signature of the console command.
@@ -114,7 +114,7 @@ class GeneratePrompts extends Command
             ->select('blog_posts.*')  // Select only columns from blog_posts
             ->groupBy('blog_posts.id')
             ->havingRaw('COUNT(openai_prompts.id) < ' . $maxPrompts)
-            ->inRandomOrder();
+            ->orderByDesc('blog_posts.id');
         if ($resourceTable !== null) {
             $postsQuery = $postsQuery->where('resource_table', $resourceTable);
         } else {
