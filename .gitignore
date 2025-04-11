@@ -4,6 +4,7 @@
 /node_modules
 /public/build
 /public/hot
+/public/js
 /public/storage
 /public/temp
 /search
