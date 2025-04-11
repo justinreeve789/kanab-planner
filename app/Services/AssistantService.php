@@ -265,4 +265,11 @@ class AssistantService
     public function isWeatherForecastRequested(string $query, $resource): bool {
         return false;
     }
+
+    /**
+     * A user may type something like "Print my itinerary," in which case we'll want to generate a formatted version.
+     */
+    public function isPrintableItineraryRequested(string $query, $resource): bool {
+        return false;
+    }
 }

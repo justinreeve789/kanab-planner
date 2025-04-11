@@ -106,7 +106,15 @@ class GeneratePrompts extends Command
 
     public function processPosts($resourceTable = null, $maxPrompts = self::MAX_PROMPTS)
     {
-        $postsQuery = Post::with('openai_prompts')->inRandomOrder();
+        $postsQuery = Post::with('openai_prompts')
+            ->leftJoin('openai_prompts', function ($join) {
+                $join->on('blog_posts.id', '=', 'openai_prompts.source_id')
+                    ->where('openai_prompts.source_table', '=', 'blog_posts');
+            })
+            ->select('blog_posts.*')  // Select only columns from blog_posts
+            ->groupBy('blog_posts.id')
+            ->havingRaw('COUNT(openai_prompts.id) < ' . $maxPrompts)
+            ->inRandomOrder();
         if ($resourceTable !== null) {
             $postsQuery = $postsQuery->where('resource_table', $resourceTable);
         } else {

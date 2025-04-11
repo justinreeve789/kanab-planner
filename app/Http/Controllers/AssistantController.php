@@ -69,20 +69,33 @@ class AssistantController extends Controller
                 // anything we don't need from $resource before passing it into component_params.
                 $trail = new Trail();
                 $trail->id = $resource->id;
+
+                if ($resource->latitude && $resource->longitude) {
+                    $trail->latitude = $resource->latitude;
+                    $trail->longitude = $resource->longitude;
+                    $newMessages[] = Message::create([
+                        'assistant_session_id' => $assistantSession->id,
+                        'is_assistant' => true,
+                        'content' => 'Here\'s a trail map for ' . $resource->name . '.',
+                        'resource_table' => $resource->getTable(),
+                        'resource_id' => $resource->id,
+                        'show_in_chat_bubble' => false,
+                        'component' => 'buttons/ViewMap',
+                        'component_params' => json_encode((object) [
+                            'resource' => (object) $trail->toArray(),
+                        ]),
+                    ]);
+                    return collect($newMessages)->toJson();
+                }
+
                 $newMessages[] = Message::create([
                     'assistant_session_id' => $assistantSession->id,
                     'is_assistant' => true,
-                    'content' => 'Here\'s a trail map for ' . $resource->name . '.',
+                    'content' => 'I couldn\'t find a trail map for ' . $resource->name . '. Weird. Try searching for it in the itinerary trail lists.',
                     'resource_table' => $resource->getTable(),
                     'resource_id' => $resource->id,
-                    'show_in_chat_bubble' => false,
-                    'component' => 'buttons/ViewMap',
-                    'component_params' => json_encode((object) [
-                        'resource' => (object) $trail->toArray(),
-                    ]),
+                    'show_in_chat_bubble' => true,
                 ]);
-
-                return collect($newMessages)->toJson();
             }
         }
 

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="tooltip tooltip-primary tooltip-left fixed bottom-4 right-4 z-50"
+    <div class="tooltip tooltip-primary tooltip-left fixed bottom-4 right-4 z-50 hidden md:block"
          data-tip="Talk to a virtual assistant">
       <button class="btn btn-circle btn-primary h-16 shadow-lg w-16" @click="toggleWindow">
         <img src="images/icons/virtual-assistant.png"/>
@@ -8,9 +8,9 @@
     </div>
 
     <div v-if="store.isAssistantOpen"
-         class="fixed bottom-20 right-4 w-96 max-w-[90vw] bg-base-100 border rounded-xl shadow-2xl p-0 z-50">
+         class="fixed bottom-[64px] right-0 top-0 left-0 md:right-4 md:top-auto md:left-auto md:bottom-20 w-full md:w-96 md:max-w-[90vw] bg-base-100 md:border md:rounded-xl md:shadow-2xl p-0 z-50">
       <div
-        class="flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 rounded-t-xl w-full">
+        class="flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full">
         <h2 class="text-lg">Virtual Assistant</h2>
         <button class="tooltip btn btn-sm btn-ghost hover:bg-cyan-100" @click="showHistory"
                 data-tip="Show chat history">

@@ -23,6 +23,7 @@
  * - If a change in topic is detected, automatically switch to that topic in the chat window.
  * - If there's any mention of a non-summer season at the Grand Canyon, include a disclaimer that the North Rim isn't open at March.
  * - When a suggestion for an activity is made, ask the user if they want to add it to the itinerary.
+ * - If asked about nearby trails or restaurants, use a Haversine search to find nearby resources rather than OpenAI. Then construct short snippets about the trails.
  */
 namespace App\Services;
 
@@ -42,7 +43,7 @@ class OpenAIService
 {
     public const GENERATE_GUIDE_PROMPTS_SYSTEM = 'You are a helpful assistant that creates a FAQ about $$TOPIC$$. Separate out content into many questions and output as JSON. Reword the answers while keeping useful, factual information. Some opinions are okay if they don\'t advertise a specific product. Each entry in the JSON array only has two attributes: prompt and answer. ONLY output JSON, nothing else.';
     public const GENERATE_LOCATION_PROMPTS_SYSTEM = 'You are a helpful assistant that creates a FAQ of things hikers and tourists would like to know about a trail or location. Separate out content into many questions and output as JSON. Reword the answers while keeping useful information that hikers and tourists would find interesting. Each entry in the JSON array only has two attributes: prompt and answer. ONLY output JSON, nothing else.';
-    public const GENERATE_TRAIL_PROMPTS_SYSTEM = 'You are a helpful assistant that creates a FAQ of things hikers and tourists would like to know about a trail or location. Keep questions short, as if typing into a search engine, but the answers can be longer. Each entry in the JSON array only has two attributes: prompt and answer. ONLY output JSON, nothing else.';
+    public const GENERATE_TRAIL_PROMPTS_SYSTEM = 'You are a helpful assistant that creates a FAQ of things hikers and tourists would like to know about a trail or location. Separate out content into many questions and output as JSON. Reword the answers while keeping useful information that hikers and tourists would find interesting. Each entry in the JSON array only has two attributes: prompt and answer. ONLY output JSON, nothing else.';
 
     public function query($prompt, $maxTokens = 500, $model = null) {
         if ($model === null) {
@@ -60,7 +61,7 @@ class OpenAIService
     }
 
     /**
-     * TODO: Use OpenAI threads to track topics. Thread ids should follow this format: {userId_sessionId_resourceType_resourceId}
+     * TODO: Use OpenAI threads to track topics. Thread ids should follow this format: {userId/sessionId_resourceType_resourceId}
      *
      * @param $resource
      * @return void
