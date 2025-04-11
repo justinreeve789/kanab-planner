@@ -146,7 +146,6 @@ class HikingProject extends Command
                 $crawler = $client->request('GET', $url);
                 $crawler = $client->refreshCrawler();
             }
-
             $client->waitFor('#user');
             $client->waitFor('#toolbox');
             $client->executeScript("document.querySelector('#toolbox a.mt-threequarter.btn.btn-xs.btn-secondary.width100.require-user').click()");
@@ -201,6 +200,7 @@ class HikingProject extends Command
         $dom = new HTML5DOMDocument();
         $dom->loadHTML($trailHtml, HTML5DOMDocument::ALLOW_DUPLICATE_IDS);
         $name = trim($dom->querySelector('#trail-title')->textContent);
+        $name = str_replace("html5-dom-document-internal-entity2-039-end", "'", $name);
         $difficulty = trim($dom->querySelector('.difficulty-text')->textContent);
         $distanceMiles = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(0)->querySelector('.imperial')->textContent);
         $distanceType = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(0)->querySelectorAll('h3')->item(2)->textContent);

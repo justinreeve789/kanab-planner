@@ -380,9 +380,9 @@ class ImageService
         try {
             $originalImage = \imagecreatefromstring(file_get_contents($filename));
         } catch (\Throwable $e) {
-                    echo 'Skipping ' . $filename . '
+            echo 'Skipping ' . $filename . '
 ';
-                    return null;
+            return null;
         }
 
         // Get the original image's width and height.

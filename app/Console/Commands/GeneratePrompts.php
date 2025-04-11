@@ -12,7 +12,7 @@ use Illuminate\Console\Command;
 
 class GeneratePrompts extends Command
 {
-    const MAX_PROMPTS = 50;
+    const MAX_PROMPTS = 30;
 
     /**
      * The name and signature of the console command.
@@ -160,7 +160,7 @@ class GeneratePrompts extends Command
 
     public function processTrails($maxPrompts = self::MAX_PROMPTS)
     {
-        $trails = Trail::with(['openai_prompts', 'text'])->whereHas('text')->inRandomOrder()->get();
+        $trails = Trail::with(['openai_prompts', 'text'])->inRandomOrder()->get();
         foreach ($trails as $obj) {
             if (count($obj->openai_prompts) <= $maxPrompts) {
                 $prompt = '';
@@ -172,7 +172,7 @@ class GeneratePrompts extends Command
                     $prompt .= 'Difficulty: ' . $obj->difficulty . '\n';
                 }
                 if ($obj->elevation_high_ft) {
-                    $prompt .= 'Highest elevation (in feet): ' . $obj->elevation_low_ft . '\n';
+                    $prompt .= 'Highest elevation (in feet): ' . $obj->elevation_high_ft . '\n';
                 }
                 if ($obj->elevation_low_ft) {
                     $prompt .= 'Lowest elevation (in feet): ' . $obj->elevation_low_ft . '\n';
@@ -190,10 +190,10 @@ class GeneratePrompts extends Command
                     $prompt .= 'Decline (in feet): ' . $obj->decline_ft . '\n';
                 }
                 if ($obj->average_grade_pt) {
-                    $prompt .= 'Average grade (in percentage): ' . $obj->average_grade_pt . '\n';
+                    $prompt .= 'Average grade (in percentage): ' . ($obj->average_grade_pt * 100) . '\n';
                 }
                 if ($obj->max_grade_pt) {
-                    $prompt .= 'Maximum grade (in percentage): ' . $obj->max_grade_pt . '\n';
+                    $prompt .= 'Maximum grade (in percentage): ' . ($obj->max_grade_pt * 100) . '\n';
                 }
                 if ($obj->features) {
                     $prompt .= 'Features: ' . $obj->features . '\n';
