@@ -1,40 +1,34 @@
 <template>
-  <div class="resource-details collapse collapse-arrow" data-type="trail" :data-id="resource.id">
-    <input type="checkbox" v-model="expanded" />
-    <div class="collapse-title flex items-center p-2 justify-between w-full bg-gradient-to-r from-orange-100 to-red-100">
+  <div :data-id="resource.id" class="resource-details collapse collapse-arrow" data-type="trail">
+    <input v-model="expanded" type="checkbox"/>
+    <div class="collapse-title flex items-center p-2 justify-between w-full bg-gradient-to-r from-blue-100 to-cyan-100">
       <div class="title w-1/2 flex items-center space-x-2 text-left">
         <div class="icon pr-1 shrink-0">
-          <img src="/images/icons/hiking.svg" alt="Hiking">
+          <img src="/images/icons/thumbs-up.svg" alt="Accommodation">
         </div>
         <div class="text-xl">{{ resource.name }}</div>
       </div>
       <div class="flex space-x-4 items-center mr-8 h-full">
-        <label for="accommodation-list">
-          <span @click="select" class="icon btn btn-sm btn-ghost relative z-10 h-full">
-            <img src="/images/icons/edit.svg" alt="Change Accommodations">
-          </span>
-        </label>
+        <div class="badge badge-lg bg-blue-400 border-blue-400 mr-2 text-white hidden md:flex">
+          Check-in: {{ formatTime(resource.check_in) }}
+        </div>
       </div>
     </div>
 
-    <div class="collapse-content min-h-[150px] items-stretch w-full bg-gray-200 p-2 bg-gradient-to-r from-white to-red-50" v-if="expanded">
+    <div v-if="expanded" class="collapse-content min-h-[150px] items-stretch w-full bg-gray-200 p-2 bg-gradient-to-r from-white to-cyan-100">
       <div class="lg:flex lg:justify-between">
         <div class="w-full lg:w-2/3 lg:flex lg:flex-col">
-          <div class="lg:order-2">
-            <div class="flex justify-between">
-              <div class="flex-auto text-left lg:hidden">
-              </div>
-              <div class="flex-right">
-                <ActivityButtons class="text-right my-4 lg:text-left" type="checking-in" :unique="unique" :resource="resource" />
-              </div>
-            </div>
-          </div>
           <div class="lg:order-1">
-            Test
+            <p>
+              {{ resource.description }}
+            </p>
+          </div>
+          <div class="sm:flex sm:flex-row justify-between lg:flex-col lg:order-2">
+            <ActivityButtons :resource="resource" :resource_table="'accommodations'" class="w-full my-4" type="checking-in" />
           </div>
         </div>
-        <div class="w-[calc(100%+16px)] -ml-2 -mb-4 lg:w-1/3 mt-4 lg:pl-4 lg:-mt-2 lg:-mr-2" v-if="resource.images">
-          <Side :resource="resource" :unique="unique" :type="'accommodation'" :images="resource.images" />
+        <div v-if="resource.images" class="w-[calc(100%+16px)] -ml-2 -mb-4 lg:w-1/3 mt-4 lg:pl-4 lg:-mt-2 lg:-mr-2">
+          <Side :images="resource.images" :resource="resource" :type="'accommodation'" />
         </div>
       </div>
     </div>
@@ -46,7 +40,6 @@ export default {
   components: {
     ActivityButtons,
     MapModal,
-    TrailStats,
   },
   data() {
     return {
@@ -54,30 +47,32 @@ export default {
     }
   },
   methods: {
-    zoom() {
-      // TODO: We'll want to include their base area on the map, so they have an idea where the trail is in relation to
-      // it. If it's far away, zoom out. If it's close, zoom in.
-      return 15;
-    },
-    select() {
-      // this.sendResource();
-    },
-    sendResource() {
-      // const store = useListStore();
-      // store.setResource(this.resource);
+    formatTime(time24) {
+      if (!time24) return '';
+      const [hours, minutes] = time24.split(':');
+      const date = new Date();
+      date.setHours(hours);
+      date.setMinutes(minutes);
+
+      const formatted = date.toLocaleTimeString([], {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+
+      return formatted.replace(/AM|PM/, match => match.toLowerCase());
     },
   },
   props: {
     activity: Object,
-    phrase: String,
     resource: Object,
   },
 };
 </script>
 
 <script setup>
-import { ref, onMounted, onUnmounted, defineProps, watch } from 'vue';
-import { useListStore } from '../../stores/list.js';
+import {ref, onMounted, onUnmounted, defineProps, watch} from 'vue';
+import {useListStore} from '../../stores/list.js';
 import ActivityButtons from '../components/ActivityButtons.vue'
 import MapModal from '../modals/MapModal.vue'
 import Side from '../panels/Side.vue'

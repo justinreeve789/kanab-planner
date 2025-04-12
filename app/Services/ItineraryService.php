@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Accommodation;
 use App\Models\ActivityType;
 use App\Models\Area;
 use App\Models\AreaDistance;
@@ -118,11 +119,14 @@ class ItineraryService
         // If this is the first day and they're arriving at a normal late time, let's not plan any activities. Just
         // grocery shopping, maybe fast food.
         if ($dayNum === 0 && !$this->getItinerary()->getUseFirstDay()) {
+            $accommodation = Accommodation::with('images')->where('id', 1)->first();
+            $accommodation->accommodation_name = $accommodation->name;
+            $accommodation->name = 'Arrive at ' . $accommodation->name;
             $task = new Task([
                 'name' => 'Arrival',
                 'description' => $this->phraseService->getPhraseForCheckingIn() . ' ' . $this->phraseService->getPhraseForArrivingLateFood(),
             ]);
-            $this->getItinerary()->addActivity($task, 'checking-in', Day::DEFAULT_ARRIVAL_TIME, '23:59:59', $dayNum, Period::EVENING);
+            $this->getItinerary()->addActivity($accommodation, 'checking-in', Day::DEFAULT_ARRIVAL_TIME, '23:59:59', $dayNum, Period::EVENING);
             return;
         }
 
@@ -622,19 +626,19 @@ class ItineraryService
 
             // If the user's adventurousness is < 0.8, only pick any area besides Kanab or Zion once, unless it's their base area.
             // TODO: Fix this.
-//            if ($adventurousness < 0.8) {
-//                $numPossible = 1;
-//                $areaCounts = array_count_values($allAreaIds);
-//                $filteredAreaIds = array_filter($allAreaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
-//                    return (
-//                        $areaId !== Area::KANAB &&
-//                        $areaId !== $baseArea->id &&
-//                        $areaId !== Area::ZION &&
-//                        $areaCounts[$areaId] <= $numPossible
-//                    );
-//                });
-//                $query->whereNotIn('id', $filteredAreaIds);
-//            }
+            if ($adventurousness < 0.8) {
+                $numPossible = 1;
+                $areaCounts = array_count_values($areaIds);
+                $filteredAreaIds = array_filter($allAreaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
+                    return (
+                        $areaId !== Area::KANAB &&
+                        $areaId !== $baseArea->id &&
+                        $areaId !== Area::ZION &&
+                        isset($areaCounts[$areaId]) ? $areaCounts[$areaId] : 9999999 <= $numPossible
+                    );
+                });
+                $query->whereNotIn('id', $filteredAreaIds);
+            }
 
             // If the user's adventurousness is < 0.9, only pick the remaining non-base area(s) once per 10 days of the trip.
             // TODO: Fix this.

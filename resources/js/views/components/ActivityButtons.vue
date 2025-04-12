@@ -1,6 +1,7 @@
 <template>
   <div class="flex flex-col sm:flex-row" v-if="type == 'checking-in' || type == 'restaurant' || type == 'trail'">
-    <FindAccommodations :resource="resource" v-if="type == 'checking-in'" />
+<!--    <FindAccommodations :resource="resource" v-if="type == 'checking-in'" />-->
+    <ViewAccommodations :resource="resource" v-if="type == 'checking-in'" />
     <ViewMenu :resource="resource" v-if="type == 'restaurant'" />
     <ViewMap :resource="resource" v-if="type == 'trail'" />
     <AskQuestion :resource="resource" :resource_table="resource_table" :resource_id="resource_id" v-if="type == 'trail'" />
@@ -10,6 +11,7 @@
 <script>
 import AskQuestion from '../buttons/AskQuestion.vue';
 import FindAccommodations from '../buttons/FindAccomodations.vue';
+import ViewAccommodations from '../buttons/ViewAccommodations.vue';
 import ViewMap from '../buttons/ViewMap.vue';
 import ViewMenu from '../buttons/ViewMenu.vue';
 import { useAssistantStore } from '../../stores/assistant.js';
@@ -19,6 +21,7 @@ export default {
   components: {
     AskQuestion,
     FindAccommodations,
+    ViewAccommodations,
     ViewMap,
     ViewMenu,
   },

@@ -92,6 +92,7 @@ class ImageService
         }
 
         switch (get_class($obj)) {
+            case 'App\\Models\\AccommodationImage':
             case 'App\\Models\\EventImage':
             case 'App\\Models\\LocationImage':
             case 'App\\Models\\TrailImage':

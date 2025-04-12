@@ -2,8 +2,13 @@
 
 namespace App\Models\Itinerary;
 
+use App\Models\Accommodation;
 use App\Models\ActivityType;
+use App\Models\Event;
+use App\Models\Location;
 use App\Models\Resource;
+use App\Models\Restaurant;
+use App\Models\Trail;
 use App\ResourceEnum;
 use App\Services\PhraseService;
 use App\Traits\ReturnAllProperties;
@@ -78,16 +83,18 @@ class Activity extends CachedModel
         return Attribute::make(
             get: function() {
                 if (is_integer($this->resource_id)) {
-                    if ($this->resource_table === ResourceEnum::EVENTS_TABLE) {
-                        $modelClass = ResourceEnum::EVENTS_CLASS;
+                    if ($this->resource_table === ResourceEnum::ACCOMMODATIONS_TABLE) {
+                        $modelClass = Accommodation::class;
+                    } elseif ($this->resource_table === ResourceEnum::EVENTS_TABLE) {
+                        $modelClass = Event::class;
                     } elseif ($this->resource_table === ResourceEnum::LOCATIONS_TABLE) {
-                        $modelClass = ResourceEnum::LOCATIONS_CLASS;
+                        $modelClass = Location::class;
                     } elseif ($this->resource_table === ResourceEnum::RESTAURANTS_TABLE) {
-                        $modelClass = ResourceEnum::RESTAURANTS_CLASS;
+                        $modelClass = Restaurant::class;
                     } elseif ($this->resource_table === ResourceEnum::TASKS_TABLE) {
-                        $modelClass = ResourceEnum::TASKS_CLASS;
+                        $modelClass = Task::class;
                     } elseif ($this->resource_table === ResourceEnum::TRAILS_TABLE) {
-                        $modelClass = ResourceEnum::TRAILS_CLASS;
+                        $modelClass = Trail::class;
                     }
 
                     if (isset($modelClass)) {
@@ -98,19 +105,22 @@ class Activity extends CachedModel
             set: function($resource) {
                 $this->resource_id = $resource->id;
                 switch (get_class($resource)) {
-                    case ResourceEnum::EVENTS_CLASS:
+                    case Accommodation::class:
+                        $this->resource_table = ResourceEnum::ACCOMMODATIONS_TABLE;
+                        break;
+                    case Event::class:
                         $this->resource_table = ResourceEnum::EVENTS_TABLE;
                         break;
-                    case ResourceEnum::LOCATIONS_CLASS:
+                    case Location::class:
                         $this->resource_table = ResourceEnum::LOCATIONS_TABLE;
                         break;
-                    case ResourceEnum::RESTAURANTS_CLASS:
+                    case Restaurant::class:
                         $this->resource_table = ResourceEnum::RESTAURANTS_TABLE;
                         break;
-                    case ResourceEnum::TASKS_CLASS:
+                    case Task::class:
                         $this->resource_table = ResourceEnum::TASKS_TABLE;
                         break;
-                    case ResourceEnum::TRAILS_CLASS:
+                    case Trail::class:
                         $this->resource_table = ResourceEnum::TRAILS_TABLE;
                         break;
                     default:

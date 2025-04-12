@@ -39,10 +39,13 @@
       <section v-for="(period, periodType) in day.periods" :key="periodType">
         <div class="timeline"></div>
         <div :class="'day-content pt-4 period-' + period.type" v-for="(activity, index) in period.activities" :key="index">
-          <div class="mb-8 border border-solid border-gray-300 rounded-lg" v-if="activity.activity_type == 'event'">
+          <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-if="activity.activity_type == 'checking-in'">
+            <Accommodation :activity="activity" :day="day" :resource="activity.resource" />
+          </div>
+          <div class="mb-8 border border-solid border-gray-300 rounded-lg" v-else-if="activity.activity_type == 'event'">
             <Event :activity="activity" :day="day" />
           </div>
-          <div class="mb-8 border border-solid border-green-300 rounded-lg" v-if="activity.activity_type == 'dining'">
+          <div class="mb-8 border border-solid border-green-300 rounded-lg" v-else-if="activity.activity_type == 'dining'">
             <Restaurant :day="day" :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
           </div>
           <div class="mb-8 border border-solid border-orange-300 rounded-lg" v-else-if="activity.activity_type == 'hiking'">
@@ -60,6 +63,7 @@
 </template>
 
 <script>
+import Accommodation from "./activities/Accommodation.vue";
 import Event from './activities/Event.vue';
 import Location from './activities/Location.vue';
 import Restaurant from './activities/Restaurant.vue';
@@ -68,6 +72,7 @@ import Trail from './activities/Trail.vue';
 
 export default {
   components: {
+    Accommodation,
     Event,
     Location,
     Restaurant,
@@ -109,7 +114,4 @@ export default {
     day: Object,
   },
 };
-</script>
-
-<script setup>
 </script>

@@ -17,16 +17,25 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->integer('location_id')->unsigned()->nullable();
             $table->integer('accommodation_type_id')->unsigned();
+            $table->text('description')->nullable();
             $table->string('hours')->nullable();
             $table->time('check_in')->nullable();
             $table->time('check_out')->nullable();
+            $table->boolean('is_usable')->default(true);
             $table->timestamps();
             $table->index('accommodation_type_id');
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });
 
         DB::table('accommodations')->insert([
-            ['name' => 'Tranquility Trails', 'location_id' => 1, 'accommodation_type_id' => 1],
+            [
+                'name' => 'Tranquility Trails',
+                'location_id' => 1,
+                'accommodation_type_id' => 1,
+                'description' => 'At Tranquility Trails, you\'re sure to notice the genuine care and attention to detail when you are a guest! With 90+ amenities, this heartfelt owner-managed home is perfect to explore Zion, Bryce and Grand Canyon National Parks and more! This 2-story, 3-bed/2-bath townhome can keep 6 guests comfortable. One of the few spots in Kanab with a pool and hot tub! It has a full-use kitchen with dishwasher, washer/dryer and TVs in the front room and main bedroom. The patio has a BBQ, seating and hammock. Enjoy free access to Disney+, Hulu, and HBO Max.',
+                'check_in' => '16:00',
+                'check_out' => '10:00',
+            ],
         ]);
     }
 

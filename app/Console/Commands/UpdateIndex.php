@@ -15,7 +15,7 @@ class UpdateIndex extends Command
      *
      * @var string
      */
-    protected $signature = 'update:index {--events} {--locations} {--posts} {--prompts} {--restaurants} {--text} {--trails}';
+    protected $signature = 'update:index {--accommodations} {--events} {--locations} {--posts} {--prompts} {--restaurants} {--text} {--trails}';
 
     /**
      * The console command description.
@@ -31,6 +31,7 @@ class UpdateIndex extends Command
     {
         ini_set('memory_limit', '512M');
 
+        $accommodations = $this->option('accommodations');
         $events = $this->option('events');
         $locations = $this->option('locations');
         $blog_posts = $this->option('posts');
@@ -40,6 +41,7 @@ class UpdateIndex extends Command
         $trails = $this->option('trails');
 
         $tables = [
+            'accommodations' => 'App\\Models\\Accommodation',
             'blog_posts' => 'App\\Models\\Blog\\Post',
             'events' => 'App\\Models\\Event',
             'locations' => 'App\\Models\\Location',

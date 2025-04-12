@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AccommodationImage;
 use App\Models\EventImage;
 use App\Models\LocationImage;
 use App\Models\TrailImage;
@@ -26,6 +27,9 @@ class ImageController extends Controller
         $size = $request->get('size');
 
         switch ($type) {
+            case 'accommodation':
+                $model = AccommodationImage::class;
+                break;
             case 'event':
                 $model = 'App\\Models\\EventImage';
                 break;
@@ -62,6 +66,9 @@ class ImageController extends Controller
     public function getFeaturedImageUrl(Request $request, string $type, int $resourceId)
     {
         switch ($type) {
+            case 'accommodation':
+                $model = 'App\\Models\\AccommodationImage';
+                break;
             case 'event':
                 $model = 'App\\Models\\EventImage';
                 break;
