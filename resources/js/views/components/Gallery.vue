@@ -42,11 +42,7 @@
     class="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center cursor-pointer"
     @click="toggleFullImage(null)"
   >
-    <img
-      :src="'/image/' + type + '/' + fullImage.id + '?size=full'"
-      class="max-w-full max-h-full"
-      alt="Expanded"
-    />
+    <img :src="'/image/' + type + '/' + fullImage.id" class="max-w-full max-h-full" alt="Expanded" />
   </div>
 </template>
 

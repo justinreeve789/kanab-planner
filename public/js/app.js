@@ -26366,15 +26366,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = ["for"];
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+var _hoisted_2 = ["href"];
+var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
   "class": "block w-full sm:w-auto text-white bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
 }, " View accommodations ", -1 /* HOISTED */);
-var _hoisted_3 = [_hoisted_2];
+var _hoisted_4 = [_hoisted_3];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("label", {
     "for": 'resource-' + $props.unique + '-accommodations',
     "class": "mb-2 sm:mb-0 sm:mr-2"
-  }, _hoisted_3, 8 /* PROPS */, _hoisted_1);
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+    href: $props.resource.url,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    "class": "mb-2 sm:mb-0 sm:mr-2 block w-full sm:w-auto"
+  }, _hoisted_4, 8 /* PROPS */, _hoisted_2)], 8 /* PROPS */, _hoisted_1);
 }
 
 /***/ }),
@@ -26545,7 +26551,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       return $options.toggleFullImage(null);
     })
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
-    src: '/image/' + $props.type + '/' + $data.fullImage.id + '?size=full',
+    src: '/image/' + $props.type + '/' + $data.fullImage.id,
     "class": "max-w-full max-h-full",
     alt: "Expanded"
   }, null, 8 /* PROPS */, _hoisted_9)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 64 /* STABLE_FRAGMENT */);
