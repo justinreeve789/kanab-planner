@@ -8,7 +8,7 @@
 <!--    </div>-->
 <!--  </div>-->
 
-  <div class="md:pb-0 pb-[80px] ">
+  <div class="md:pb-0 pb-[80px] text-black">
     <div class="itinerary-stats flex justify-end space-x-1 pr-4 pt-4 align-right text-white" title="Estimated total driving distance" v-if="itineraryData && itineraryData.totalTravelDistance">
       <img class="icon mr-1" src="/images/icons/car.svg" alt="Distance">
       <span class="amount">

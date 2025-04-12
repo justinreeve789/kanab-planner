@@ -24693,11 +24693,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  components: {},
   data: function data() {
     return {
       imageUrls: [],
-      unique: this.$generateUnique()
+      unique: this.$generateUnique(),
+      fullImage: null
     };
   },
   methods: {
@@ -24712,6 +24712,9 @@ __webpack_require__.r(__webpack_exports__);
           inline: 'center'
         });
       }
+    },
+    toggleFullImage: function toggleFullImage(image) {
+      this.fullImage = this.fullImage ? null : image;
     }
   },
   mounted: function mounted() {
@@ -25415,7 +25418,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "md:pb-0 pb-[80px]"
+  "class": "md:pb-0 pb-[80px] text-black"
 };
 var _hoisted_2 = {
   key: 0,
@@ -26494,7 +26497,7 @@ var _hoisted_1 = {
   "class": "carousel max-w-6xl flex h-full w-full items-stretch"
 };
 var _hoisted_2 = ["id"];
-var _hoisted_3 = ["src"];
+var _hoisted_3 = ["src", "onClick"];
 var _hoisted_4 = {
   key: 0,
   "class": "absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2 opacity-90 md:opacity-25 xl:opacity-75"
@@ -26509,23 +26512,43 @@ var _hoisted_8 = {
   key: 1,
   "class": "right-arrow text-white flex md:hidden"
 };
+var _hoisted_9 = ["src"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return $data.imageUrls.length > 0 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($data.imageUrls, function (imageUrl, index) {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [$data.imageUrls.length > 0 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($data.imageUrls, function (imageUrl, index) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       key: index,
       id: 'slide-' + $data.unique + '-' + index,
       "class": "carousel-item relative h-full w-full"
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
       src: '/image/' + $props.type + '/' + imageUrl.id + '?size=medium',
-      "class": "w-full object-cover"
+      "class": "w-full object-cover cursor-pointer",
+      onClick: function onClick($event) {
+        return $options.toggleFullImage(imageUrl);
+      }
     }, null, 8 /* PROPS */, _hoisted_3), $data.imageUrls.length > 1 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
       href: '#slide-' + $data.unique + '-' + Math.max(0, index - 1),
-      "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)('slide-nav hidden md:flex btn btn-circle' + (index > 0 ? '' : ' invisible'))
-    }, "<", 10 /* CLASS, PROPS */, _hoisted_5), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+      "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)('slide-nav hidden md:flex btn btn-circle' + (index > 0 ? '' : ' invisible')),
+      onClick: _cache[0] || (_cache[0] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+        return $options.preventJump && $options.preventJump.apply($options, arguments);
+      }, ["prevent"]))
+    }, " < ", 10 /* CLASS, PROPS */, _hoisted_5), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
       href: '#slide-' + $data.unique + '-' + Math.min($data.imageUrls.length - 1, index + 1),
-      "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)('slide-nav hidden md:flex btn btn-circle' + (index < $data.imageUrls.length - 1 ? '' : ' invisible'))
-    }, ">", 10 /* CLASS, PROPS */, _hoisted_6), index <= 0 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_7, "< <")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), index <= 0 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_8, "> >")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 8 /* PROPS */, _hoisted_2);
-  }), 128 /* KEYED_FRAGMENT */))])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true);
+      "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)('slide-nav hidden md:flex btn btn-circle' + (index < $data.imageUrls.length - 1 ? '' : ' invisible')),
+      onClick: _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+        return $options.preventJump && $options.preventJump.apply($options, arguments);
+      }, ["prevent"]))
+    }, " > ", 10 /* CLASS, PROPS */, _hoisted_6), index <= 0 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_7, "< <")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), index <= 0 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_8, "> >")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 8 /* PROPS */, _hoisted_2);
+  }), 128 /* KEYED_FRAGMENT */))])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Fullscreen Image Overlay "), $data.fullImage ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+    key: 1,
+    "class": "fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center cursor-pointer",
+    onClick: _cache[2] || (_cache[2] = function ($event) {
+      return $options.toggleFullImage(null);
+    })
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+    src: '/image/' + $props.type + '/' + $data.fullImage.id + '?size=full',
+    "class": "max-w-full max-h-full",
+    alt: "Expanded"
+  }, null, 8 /* PROPS */, _hoisted_9)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 64 /* STABLE_FRAGMENT */);
 }
 
 /***/ }),
