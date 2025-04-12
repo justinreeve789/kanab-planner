@@ -26,11 +26,8 @@
           <div
             class="flex justify-between items-center mb-2 bg-gradient-to-r from-blue-50 to-cyan-100 pl-4 pr-4 pt-2 pb-2 w-full"
             v-if="store.currentResource">
-            <div class="breadcrumbs text-sm">
-              <ul>
-                <li><a @click="scrollToSlide(1)">&lt;&lt;</a></li>
-                <li>{{ store.currentResource.name }}</li>
-              </ul>
+            <div class="text-sm">
+              {{ store.currentResource.name }}
             </div>
             <img src="images/icons/hiking.svg" alt="Trail" class="h-6 w-6"/>
           </div>

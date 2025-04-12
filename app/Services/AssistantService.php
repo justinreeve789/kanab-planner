@@ -212,7 +212,6 @@ class AssistantService
      * Use RubixML to do some basic phrase matching and determine if the user is asking for a specific action to be taken.
      */
     public function analyzeQueryForRequests(string $query, $resource) {
-
     }
 
     public function isMapRequested(string $query, $resource) {
