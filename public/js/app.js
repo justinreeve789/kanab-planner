@@ -25788,8 +25788,8 @@ var _hoisted_3 = {
 var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "icon pr-1 shrink-0"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
-  src: "/images/icons/hiking.svg",
-  alt: "Hiking"
+  alt: "Hiking",
+  src: "/images/icons/hiking.svg"
 })], -1 /* HOISTED */);
 var _hoisted_5 = {
   "class": "text-xl"
@@ -25797,7 +25797,7 @@ var _hoisted_5 = {
 var _hoisted_6 = {
   "class": "difficulty hidden"
 };
-var _hoisted_7 = ["src", "alt"];
+var _hoisted_7 = ["alt", "src"];
 var _hoisted_8 = {
   "class": "flex space-x-4 items-center mr-8 h-full"
 };
@@ -25805,8 +25805,8 @@ var _hoisted_9 = {
   "for": "trail-list"
 };
 var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
-  src: "/images/icons/edit.svg",
-  alt: "Change Activity"
+  alt: "Change Activity",
+  src: "/images/icons/edit.svg"
 }, null, -1 /* HOISTED */);
 var _hoisted_11 = [_hoisted_10];
 var _hoisted_12 = {
@@ -25820,75 +25820,66 @@ var _hoisted_14 = {
   "class": "w-full lg:w-2/3 lg:flex lg:flex-col"
 };
 var _hoisted_15 = {
-  "class": "lg:order-2"
+  "class": "sm:flex sm:flex-row justify-between lg:flex-col lg:order-2"
 };
 var _hoisted_16 = {
-  "class": "flex justify-between"
-};
-var _hoisted_17 = {
-  "class": "flex-auto text-left lg:hidden"
-};
-var _hoisted_18 = {
-  "class": "flex-right"
-};
-var _hoisted_19 = {
   "class": "lg:order-1"
 };
-var _hoisted_20 = {
+var _hoisted_17 = {
   key: 0,
   "class": "mb-4"
 };
-var _hoisted_21 = {
+var _hoisted_18 = {
   key: 1,
   "class": "mb-4"
 };
-var _hoisted_22 = {
+var _hoisted_19 = {
   key: 2,
   "class": "mb-4"
 };
-var _hoisted_23 = {
+var _hoisted_20 = {
   key: 0
 };
-var _hoisted_24 = {
+var _hoisted_21 = {
   key: 0,
   "class": "w-[calc(100%+16px)] -ml-2 -mb-4 lg:w-1/3 mt-4 lg:pl-4 lg:-mt-2 lg:-mr-2"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+    "data-id": $props.resource.id,
     "class": "resource-details collapse collapse-arrow",
-    "data-type": "trail",
-    "data-id": $props.resource.id
+    "data-type": "trail"
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    type: "checkbox",
     "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
       return $data.expanded = $event;
-    })
+    }),
+    type: "checkbox"
   }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.expanded]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [_hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
-    src: '/images/icons/difficulty-' + $props.resource.difficulty + '.png',
-    alt: $props.resource.formattedDifficulty
+    alt: $props.resource.formattedDifficulty,
+    src: '/images/icons/difficulty-' + $props.resource.difficulty + '.png'
   }, null, 8 /* PROPS */, _hoisted_7)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["TrailStats"], {
-    trail: $props.resource,
     align: 'right',
+    trail: $props.resource,
     "class": "hidden lg:flex"
   }, null, 8 /* PROPS */, ["trail"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+    "class": "icon btn btn-sm btn-ghost relative z-10 h-full",
     onClick: _cache[1] || (_cache[1] = function () {
       return $options.select && $options.select.apply($options, arguments);
-    }),
-    "class": "icon btn btn-sm btn-ghost relative z-10 h-full"
-  }, _hoisted_11)])])]), $data.expanded ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_15, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["TrailStats"], {
-    trail: $props.resource,
-    align: 'left',
-    "class": "pt-4"
-  }, null, 8 /* PROPS */, ["trail"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["ActivityButtons"], {
-    "class": "text-right my-4 lg:text-left",
-    type: "trail",
-    resource_table: 'trails',
-    resource: $props.resource
-  }, null, 8 /* PROPS */, ["resource"])])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [$props.resource.description_short ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_short), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$props.resource.description_short || $props.resource.description && $props.resource.description.length > $props.resource.description_short.length + 25 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.resource.description_alt || $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_22, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_alt) + " ", 1 /* TEXT */), $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_23, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.phrase), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), $props.resource.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Side"], {
+    })
+  }, _hoisted_11)])])]), $data.expanded ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_15, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["ActivityButtons"], {
     resource: $props.resource,
-    type: 'trail',
-    images: $props.resource.images
-  }, null, 8 /* PROPS */, ["resource", "images"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 8 /* PROPS */, _hoisted_1);
+    resource_table: 'trails',
+    "class": "w-full order-2 sm:w-1/2 text-right my-4 justify-end lg:justify-start lg:w-full",
+    type: "trail"
+  }, null, 8 /* PROPS */, ["resource"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["TrailStats"], {
+    align: 'center',
+    trail: $props.resource,
+    "class": "w-full sm:w-1/2 order-1 my-4 sm:pt-2 justify-center sm:justify-start lg:w-full lg:mb-4 flex lg:hidden xs:space-x-4"
+  }, null, 8 /* PROPS */, ["trail"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [$props.resource.description_short ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_short), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), !$props.resource.description_short || $props.resource.description && $props.resource.description.length > $props.resource.description_short.length + 25 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_18, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.resource.description_alt || $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_19, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_alt) + " ", 1 /* TEXT */), $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.phrase), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), $props.resource.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_21, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)($setup["Side"], {
+    images: $props.resource.images,
+    resource: $props.resource,
+    type: 'trail'
+  }, null, 8 /* PROPS */, ["images", "resource"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 8 /* PROPS */, _hoisted_1);
 }
 
 /***/ }),
@@ -26880,7 +26871,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "distance flex items-center mb-2 sm:mb-0 sm:mr-6"
+  "class": "distance flex items-center mb-0 mr-6"
 };
 var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
   "class": "icon pr-1 svg-anim",
@@ -26894,7 +26885,7 @@ var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
   "class": "measurement"
 }, "mi", -1 /* HOISTED */);
 var _hoisted_5 = {
-  "class": "incline flex items-center mb-2 sm:mb-0 sm:mr-6 sm:order-2"
+  "class": "incline flex items-center mb-0 mr-6 sm:order-2"
 };
 var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
   "class": "icon pr-1 svg-anim",
@@ -26924,7 +26915,7 @@ var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return $props.trail ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
-    "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)('activity-stats flex flex-col sm:flex-row flex-wrap items-start sm:items-center ' + $options.justify + ' ' + $options.text_align)
+    "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)('activity-stats items-start ' + $options.justify + ' ' + $options.text_align)
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_1, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.trail.distance_miles), 1 /* TEXT */), _hoisted_4]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_5, [_hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_7, "+" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.trail.incline_ft), 1 /* TEXT */), _hoisted_8]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_9, [_hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.average_grade_pt), 1 /* TEXT */), _hoisted_12])], 2 /* CLASS */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true);
 }
 
