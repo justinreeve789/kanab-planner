@@ -18,11 +18,11 @@
         </button>
         <button class="btn btn-sm btn-ghost hover:bg-cyan-100" @click="toggleWindow">✕</button>
       </div>
-      <div class="carousel w-full">
+      <div class="carousel bg-white w-full">
         <div class="carousel-item w-full">
           <History/>
         </div>
-        <div class="carousel-item w-full flex flex-col">
+        <div class="carousel-item bg-white w-full flex flex-col">
           <div
             class="flex justify-between items-center mb-2 bg-gradient-to-r from-blue-50 to-cyan-100 pl-4 pr-4 pt-2 pb-2 w-full"
             v-if="store.currentResource">
@@ -36,13 +36,13 @@
           </div>
         </div>
       </div>
-      <div class="p-4">
+      <div class="p-4 bg-white">
         <input
           v-model="message"
           @keyup.enter="sendMessage"
           type="text"
           placeholder="Type a message…"
-          class="input input-bordered input-md input-info w-full mt-2"
+          class="input input-bordered input-md input-info bg-white mt-2 w-full"
         />
       </div>
     </div>

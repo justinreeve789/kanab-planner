@@ -19,6 +19,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('v1')->group(function() {
+    Route::prefix('activity_type')->group(function() {
+        Route::get('/', 'App\Http\Controllers\ActivityController@getSelectableActivityTypes');
+    });
+
     Route::prefix('area')->group(function() {
         Route::get('/', 'App\Http\Controllers\AreaController@index');
         Route::get('/{id}/trail', 'App\Http\Controllers\AreaController@getTrails');

@@ -17,7 +17,7 @@ class GenerateFinetuneData extends Command
      *
      * @var string
      */
-    protected $signature = 'openai:finetune {--trails} {--show} {--output=}';
+    protected $signature = 'openai:finetune {--locations} {--trails} {--show} {--output=}';
 
     /**
      * The console command description.
@@ -37,6 +37,7 @@ class GenerateFinetuneData extends Command
      */
     public function handle()
     {
+        $doLocations = $this->option('locations');
         $doTrails = $this->option('trails');
         $this->showOutput = $this->option('show');
         $this->outputFile = $this->option('output');
@@ -46,8 +47,53 @@ class GenerateFinetuneData extends Command
             unlink($this->outputFile);
         }
 
+        if ($doLocations) {
+            $this->processLocations();
+        }
+
         if ($doTrails) {
             $this->processTrails();
+        }
+    }
+
+    /**
+     * TODO: Fix this.
+     */
+    public function processLocations()
+    {
+        $posts = Post::with('openai_prompts')
+            ->whereHas('openai_prompts')
+            ->where('resource_table', 'locations')
+            ->whereNotNull('resource_id')
+            ->get();
+        foreach ($posts as $post) {
+            $location = Location::with('area')->where('id', $post->resource_id)->first();
+            if (!$location) {
+                continue;
+            }
+            $post->location = $location;
+            $post->area = $location->area;
+            $json = $this->openAIService->generateFinetuneData($post);
+            if ($this->outputFile) {
+                file_put_contents($this->outputFile, $json, FILE_APPEND);
+            }
+            if ($this->showOutput) {
+                echo $json;
+            }
+        }
+
+        $locations = Location::with('openai_prompts')
+            ->with('area')
+            ->whereHas('openai_prompts')
+            ->get();
+        foreach ($locations as $location) {
+            $json = $this->openAIService->generateFinetuneData($location);
+            if ($this->outputFile) {
+                file_put_contents($this->outputFile, $json, FILE_APPEND);
+            }
+            if ($this->showOutput) {
+                echo $json;
+            }
         }
     }
 
@@ -61,9 +107,6 @@ class GenerateFinetuneData extends Command
         foreach ($posts as $post) {
             $trail = Trail::with('area')->where('id', $post->resource_id)->first();
             if (!$trail) {
-                continue;
-            }
-            if ($trail->id != 17) {
                 continue;
             }
             $post->trail = $trail;
@@ -82,9 +125,9 @@ class GenerateFinetuneData extends Command
             ->whereHas('openai_prompts')
             ->get();
         foreach ($trails as $trail) {
-            if ($trail->id != 17) {
-                continue;
-            }
+//            if ($trail->id != 17) {
+//                continue;
+//            }
             $json = $this->openAIService->generateFinetuneData($trail);
             if ($this->outputFile) {
                 file_put_contents($this->outputFile, $json, FILE_APPEND);

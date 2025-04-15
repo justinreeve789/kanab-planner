@@ -68,6 +68,7 @@ class HikingProject extends Command
         ];
 
         $this->areaUrls = [
+            'https://www.hikingproject.com/directory/8010547/grand-staircase-escalante-national-monument',
             'https://www.hikingproject.com/directory/8015386/beaver',
             'https://www.hikingproject.com/directory/8010573/brian-head-resort',
             'https://www.hikingproject.com/directory/8010545/bryce-canyon-national-park',
@@ -78,7 +79,6 @@ class HikingProject extends Command
             'https://www.hikingproject.com/directory/8013435/dixie-national-forest',
             'https://www.hikingproject.com/directory/8013360/enoch',
             'https://www.hikingproject.com/directory/8014261/escalante',
-            'https://www.hikingproject.com/directory/8010547/grand-staircase-escalante-national-monument',
             'https://www.hikingproject.com/directory/8012285/hurricane-and-la-verkin',
             'https://www.hikingproject.com/directory/8018421/junction',
             'https://www.hikingproject.com/directory/8019059/kanab',
@@ -271,7 +271,7 @@ class HikingProject extends Command
         try {
             $trail = Trail::withoutGlobalScope(UsableScope::class)->updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
                 'name' => $name,
-                'name_alt' => $areaId,
+                'name_alt' => '',
                 'area_id' => $areaId ?? 0,
                 'description' => $description,
                 'description_alt' => $descriptionAlt ?? null,
@@ -370,7 +370,25 @@ class HikingProject extends Command
 
     private function getTrailUrlsForArea($areaId) {
         $trailUrls = [];
-        $page = -3; // For some reason, the first 10 trails are only retrieved if we start at -3.
+        // For some reason, the first 10 trails are only retrieved if we start at -3, for /trails.
+        // It starts at -1 for /featured (Recommended Routes).
+        $page = -1;
+        do {
+            $url = 'https://www.hikingproject.com/ajax/area/' . $areaId . '/featured?idx=' . $page;
+            $json = json_decode(file_get_contents($url));
+            $urls = [];
+            if ($json) {
+                if ($json->success === true) {
+                    $urls = $this->conversionService->extractUrlsFromHtml($json->markup);
+                    $urls = array_filter($urls, fn($url) => str_starts_with($url, 'https://www.hikingproject.com/trail/'));
+                    if (!empty($urls)) {
+                        $trailUrls = array_merge($trailUrls, $urls);
+                    }
+                }
+            }
+        } while (!empty($urls) && $page++ < 100);
+
+        $page = -3;
         do {
             $url = 'https://www.hikingproject.com/ajax/area/' . $areaId . '/trails?idx=' . $page;
             $json = json_decode(file_get_contents($url));
@@ -378,12 +396,14 @@ class HikingProject extends Command
             if ($json) {
                 if ($json->success === true) {
                     $urls = $this->conversionService->extractUrlsFromHtml($json->markup);
+                    $urls = array_filter($urls, fn($url) => str_starts_with($url, 'https://www.hikingproject.com/trail/'));
                     if (!empty($urls)) {
                         $trailUrls = array_merge($trailUrls, $urls);
                     }
                 }
             }
         } while (!empty($urls) && $page++ < 100);
+
         return array_values(array_unique($trailUrls));
     }
 
