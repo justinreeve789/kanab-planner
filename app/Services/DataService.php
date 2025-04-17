@@ -93,7 +93,7 @@ class DataService
     public function calculateAdventurousness($resource, $activityTypeId)
     {
         $adventurousness = null;
-        switch (get_class($this)) {
+        switch (get_class($resource)) {
             case ResourceEnum::EVENTS_CLASS:
                 $adventurousness = $this->calculateAdventurousnessForEvent($resource, $activityTypeId);
                 break;
@@ -116,9 +116,9 @@ class DataService
     public function calculateSolitariness($resource, $activityTypeId)
     {
         $solitariness = null;
-        switch (get_class($this)) {
+        switch (get_class($resource)) {
             case ResourceEnum::EVENTS_CLASS:
-                $solitariness = $this->calculateSolitarinessorEvent($resource, $activityTypeId);
+                $solitariness = $this->calculateSolitarinessForEvent($resource, $activityTypeId);
                 break;
             case ResourceEnum::LOCATIONS_CLASS:
                 $solitariness = $this->calculateSolitarinessForLocation($resource, $activityTypeId);
@@ -139,7 +139,7 @@ class DataService
     public function calculateStrenuousness($resource, $activityTypeId)
     {
         $strenuousness = null;
-        switch (get_class($this)) {
+        switch (get_class($resource)) {
             case ResourceEnum::EVENTS_CLASS:
                 $strenuousness = $this->calculateStrenuousnessForEvent($resource, $activityTypeId);
                 break;
@@ -213,7 +213,7 @@ class DataService
         return ActivityType::find($activityTypeId)->solitariness;
     }
 
-    public function calculateSolitarinessForRestauarant($resource, $activityTypeId)
+    public function calculateSolitarinessForRestaurant($resource, $activityTypeId)
     {
         return ActivityType::find($activityTypeId)->solitariness;
     }

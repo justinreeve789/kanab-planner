@@ -7,6 +7,7 @@ use App\Models\ActivityType;
 use App\Models\Event;
 use App\Models\Location;
 use App\Models\Resource;
+use App\Models\ResourceData;
 use App\Models\Restaurant;
 use App\Models\Trail;
 use App\ResourceEnum;
@@ -70,26 +71,92 @@ class Activity extends CachedModel
         return $this->belongsTo(ActivityType::class, 'id', 'activity_type_id');
     }
 
+    /**
+     * TODO: Use a cache.
+     */
     protected function adventurousness(): Attribute
     {
         return Attribute::get(function() {
             if ($this->shouldHaveAttribute('adventurousness')) {
-                return $this->dataService->calculateAdventurousness($this->resource, $this->activity_type_id);
+                $resourceData = ResourceData::where([
+                    'resource_table', $this->resource->getTable(),
+                    'resource_id' => $this->resource->id,
+                    'activity_type_id' => $this->activity_type_id,
+                ]);
+                if (!$resourceData || !isset($resourceData->adventurousness)) {
+                    $attr = $this->dataService->calculateAdventurousness($this->resource, $this->activity_type_id);
+                    ResourceData::updateOrInsert([
+                        'resource_table' => $this->resource->getTable(),
+                        'resource_id' => $this->resource->id,
+                        'activity_type_id' => $this->activity_type_id,
+                    ], [
+                        'adventurousness' => $attr,
+                    ]);
+                } else {
+                    $attr = $resourceData->adventurousness;
+                }
+                return $attr;
             }
             return null;
         });
     }
 
+    /**
+     * TODO: Use a cache.
+     */
     protected function solitariness(): Attribute
     {
         return Attribute::get(function() {
+            if ($this->shouldHaveAttribute('solitariness')) {
+                $resourceData = ResourceData::where([
+                    'resource_table', $this->resource->getTable(),
+                    'resource_id' => $this->resource->id,
+                    'activity_type_id' => $this->activity_type_id,
+                ]);
+                if (!$resourceData || !isset($resourceData->solitariness)) {
+                    $attr = $this->dataService->calculateSolitariness($this->resource, $this->activity_type_id);
+                    ResourceData::updateOrInsert([
+                        'resource_table' => $this->resource->getTable(),
+                        'resource_id' => $this->resource->id,
+                        'activity_type_id' => $this->activity_type_id,
+                    ], [
+                        'solitariness' => $attr,
+                    ]);
+                } else {
+                    $attr = $resourceData->solitariness;
+                }
+                return $attr;
+            }
             return null;
         });
     }
 
+    /**
+     * TODO: Use a cache.
+     */
     protected function strenuousness(): Attribute
     {
         return Attribute::get(function() {
+            if ($this->shouldHaveAttribute('strenuousness')) {
+                $resourceData = ResourceData::where([
+                    'resource_table', $this->resource->getTable(),
+                    'resource_id' => $this->resource->id,
+                    'activity_type_id' => $this->activity_type_id,
+                ]);
+                if (!$resourceData || !isset($resourceData->strenuousness)) {
+                    $attr = $this->dataService->calculateStrenuousness($this->resource, $this->activity_type_id);
+                    ResourceData::updateOrInsert([
+                        'resource_table' => $this->resource->getTable(),
+                        'resource_id' => $this->resource->id,
+                        'activity_type_id' => $this->activity_type_id,
+                    ], [
+                        'strenuousness' => $attr,
+                    ]);
+                } else {
+                    $attr = $resourceData->strenuousness;
+                }
+                return $attr;
+            }
             return null;
         });
     }
