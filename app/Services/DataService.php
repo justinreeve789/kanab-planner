@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ActivityType;
 use App\Models\Blog\Post;
 use App\Models\Event;
 use App\Models\Image;
@@ -13,7 +14,7 @@ use App\Models\ResourceData;
 use App\Models\ResourceMerge;
 use App\Models\ResourceText;
 use App\Models\Restaurant;
-use App\Models\Scopes\UsableScope;
+use App\Models\Scopes\DataScope;
 use App\Models\Trail;
 use App\Models\TrailGeoJson;
 use App\Models\TrailImage;
@@ -23,32 +24,14 @@ use App\ResourceEnum;
 use App\Services\OpenAIService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class DataService
 {
-    public function adventurousness($resource, $activityType = null)
-    {
-        $adventurousness = null;
-        switch (get_class($resource)) {
-            case ResourceEnum::EVENTS_CLASS:
-                $adventurousness = reset($this->data)->adventurousness;
-                break;
-            case ResourceEnum::LOCATIONS_CLASS:
-                break;
-            case ResourceEnum::RESTAURANTS_CLASS:
-                $this->setActivityType('dining');
-                $adventurousness = $this->calculateAdventurousnessForRestaurant();
-                break;
-            case ResourceEnum::TRAILS_CLASS:
-                if (!$this->getActivityType()) {
-                    $this->setActivityType('hiking');
-                }
-                $adventurousness = $this->calculateAdventurousnessForTrail();
-            default:
-        }
-        return round($adventurousness, 2);
-    }
+    const DEFAULT_ADVENTUROUSNESS = 0.3;
+    const DEFAULT_SOLITARINESS = 0.3;
+    const DEFAULT_STRENUOUSNESS = 0.3;
 
     /**
      * The busier the event, restaurant, or trail, the lower the solitariness.
@@ -105,13 +88,91 @@ class DataService
     }
 
     /**
+     * TODO: Cache the results.
+     */
+    public function calculateAdventurousness($resource, $activityTypeId)
+    {
+        $adventurousness = null;
+        switch (get_class($this)) {
+            case ResourceEnum::EVENTS_CLASS:
+                $adventurousness = $this->calculateAdventurousnessForEvent($resource, $activityTypeId);
+                break;
+            case ResourceEnum::LOCATIONS_CLASS:
+                $adventurousness = $this->calculateAdventurousnessForLocation($resource, $activityTypeId);
+                break;
+            case ResourceEnum::RESTAURANTS_CLASS:
+                $adventurousness = $this->calculateAdventurousnessForRestaurant($resource, $activityTypeId);
+                break;
+            case ResourceEnum::TRAILS_CLASS:
+                $adventurousness = $this->calculateAdventurousnessForTrail($resource, $activityTypeId);
+            default:
+        }
+        return round($adventurousness, 2);
+    }
+
+    /**
+     * TODO: Cache the results.
+     */
+    public function calculateSolitariness($resource, $activityTypeId)
+    {
+        $solitariness = null;
+        switch (get_class($this)) {
+            case ResourceEnum::EVENTS_CLASS:
+                $solitariness = $this->calculateSolitarinessorEvent($resource, $activityTypeId);
+                break;
+            case ResourceEnum::LOCATIONS_CLASS:
+                $solitariness = $this->calculateSolitarinessForLocation($resource, $activityTypeId);
+                break;
+            case ResourceEnum::RESTAURANTS_CLASS:
+                $solitariness = $this->calculateSolitarinessForRestaurant($resource, $activityTypeId);
+                break;
+            case ResourceEnum::TRAILS_CLASS:
+                $solitariness = $this->calculateSolitarinessForTrail($resource, $activityTypeId);
+            default:
+        }
+        return round($solitariness, 2);
+    }
+
+    /**
+     * TODO: Cache the results.
+     */
+    public function calculateStrenuousness($resource, $activityTypeId)
+    {
+        $strenuousness = null;
+        switch (get_class($this)) {
+            case ResourceEnum::EVENTS_CLASS:
+                $strenuousness = $this->calculateStrenuousnessForEvent($resource, $activityTypeId);
+                break;
+            case ResourceEnum::LOCATIONS_CLASS:
+                $strenuousness = $this->calculateStrenuousnessForLocation($resource, $activityTypeId);
+                break;
+            case ResourceEnum::RESTAURANTS_CLASS:
+                $strenuousness = $this->calculateStrenuousnessForRestaurant($resource, $activityTypeId);
+                break;
+            case ResourceEnum::TRAILS_CLASS:
+                $strenuousness = $this->calculateStrenuousnessForTrail($resource, $activityTypeId);
+            default:
+        }
+        return round($strenuousness, 2);
+    }
+
+    private function calculateAdventurousnessForEvent($resource, $activityTypeId): float
+    {
+        return ActivityType::find($activityTypeId)->adventurousness;
+    }
+
+    private function calculateAdventurousnessForLocation($resource, $activityTypeId): float
+    {
+        return ActivityType::find($activityTypeId)->adventurousness;
+    }
+
+    /**
      * The higher the average price, the more adventurous the restaurant (+/ 0.2).
      * 0.2 * tanh(0.1 * (x - 15))
      */
-    private function calculateAdventurousnessForRestaurant(): float
+    public function calculateAdventurousnessForRestaurant($resource, $activityTypeId): float
     {
-        $activityType = $this->getActivityType();
-        return $this->getActivityTypeByName($activityType)->adventurousness + 0.2 * tanh(0.1 * ($this->getAveragePrice() - 15));
+        return ActivityType::find($activityTypeId)->adventurousness + 0.2 * tanh(0.1 * ($resource->getAveragePrice() - 15));
     }
 
     /**
@@ -120,14 +181,64 @@ class DataService
      * adventurousness, since they'll be spending more time outdoors. The more remote the trail, the higher the
      * adventurousness.
      */
-    private function calculateAdventurousnessForTrail(): float
+    public function calculateAdventurousnessForTrail($resource, $activityTypeId): float
     {
-        $activityType = $this->getActivityType();
-        $adventurousness = $this->getActivityTypeByName($activityType)->adventurousness;
-        if ($this->unique === 1) {
+        $adventurousness = ActivityType::find($activityTypeId)->adventurousness;
+
+        if ($resource->unique === 1) {
             $adventurousness = min(1.5 * $adventurousness, 1);
         }
+
+        if ($resource->distance_miles && $resource->distance_miles >= 5) {
+            // This part controls how quickly the curve approaches 1.5
+            $scale = 0.2;
+
+            // Shift distance so 5 miles becomes the new 0
+            $adjusted = log($resource->distance_miles - 4) * $scale + 1;
+            $adventurousness = min($adjusted * $adventurousness, 1);
+        }
+
+        // TODO: Add calculation for remoteness.
+
         return $adventurousness;
+    }
+
+    public function calculateSolitarinessForEvent($resource, $activityTypeId)
+    {
+        return ActivityType::find($activityTypeId)->solitariness;
+    }
+
+    public function calculateSolitarinessForLocation($resource, $activityTypeId)
+    {
+        return ActivityType::find($activityTypeId)->solitariness;
+    }
+
+    public function calculateSolitarinessForRestauarant($resource, $activityTypeId)
+    {
+        return ActivityType::find($activityTypeId)->solitariness;
+    }
+
+    /**
+     * TODO: Use a busyness calculation for the trail to determine a solitariness modifier.
+     */
+    public function calculateSolitarinessForTrail($resource, $activityTypeId)
+    {
+        return ActivityType::find($activityTypeId)->solitariness;
+    }
+
+    public function calculateStrenuousnessForEvent($resource, $activityTypeId)
+    {
+        return ActivityType::find($activityTypeId)->strenuousness;
+    }
+
+    public function calculateStrenuousnessForLocation($resource, $activityTypeId)
+    {
+        return ActivityType::find($activityTypeId)->strenuousness;
+    }
+
+    public function calculateStrenuousnessForRestaurant($resource, $activityTypeId)
+    {
+        return ActivityType::find($activityTypeId)->strenuousness;
     }
 
     /**
@@ -157,21 +268,19 @@ class DataService
 
     This equation allows you to calculate the strenuousness score for a trail based on its characteristics and activity type. Simply plug in the values for incline, decline, distance, and other parameters to compute the score.
      */
-    private function calculateStrenuousnessForTrail(): float
+    public function calculateStrenuousnessForTrail($resource, $activityTypeId): float
     {
-        $activityType = $this->getActivityType();
-
         // Calculate the individual terms.
         $K = 0.75; // Incline/decline sensitivity
         $D = 3; // Distance sensitivity
         $G = 1.25; // Grade sensitivity
         $A = 3.0;  // Distance threshold
 
-        $incline = (int)$this->incline_ft;
-        $decline = (int)$this->decline_ft;
-        $distance = (float)$this->distance_miles;
-        $avgGrade = (float)$this->average_grade_pt;
-        $maxGrade = (float)$this->max_grade_pt;
+        $incline = (int)$resource->incline_ft;
+        $decline = (int)$resource->decline_ft;
+        $distance = (float)$resource->distance_miles;
+        $avgGrade = (float)$resource->average_grade_pt;
+        $maxGrade = (float)$resource->max_grade_pt;
 
         // Use a logarithmic value based on distance, so extremely long distances don't skew the results too much. This
         // will have a wider curve for smaller numbers, and cap out at 7.5.
@@ -188,23 +297,22 @@ class DataService
         $strenuousness = max(0, min(0.5, $strenuousness));
 
         // Take into account what the difficulty field specifies (-0.2/+0.2).
-        if ($this->isEasy()) {
+        if ($resource->isEasy()) {
             $strenuousness -= 0.2;
         }
-        if ($this->isDifficult()) {
+        if ($resource->isDifficult()) {
             $strenuousness += 0.2;
         }
 
         // Take into account the average hours of the trail (-0.1/+0.2).
-        if ($this->average_hours) {
-            $strenuousness += (0.4 * (1 - exp(-0.2 * $this->average_hours)) - 0.2) / 2;
+        if ($resource->average_hours) {
+            $strenuousness += (0.4 * (1 - exp(-0.2 * $resource->average_hours)) - 0.2) / 2;
         }
 
         try {
-            return $this->getActivityTypeByName($activityType)->strenuousness + $strenuousness;
+            return ActivityType::find($activityTypeId)->strenuousness + $strenuousness;
         } catch (\Throwable $e) {
-            echo 'Could not calculate strenuousness for ' . $activityType . ' ' . $this->id . ' ' . $this->name . '
-';
+            Log::error('Could not calculate strenuousness for ' . $activityTypeId . ' ' . $resource->id . ' ' . $resource->name);
             return 0;
         }
     }

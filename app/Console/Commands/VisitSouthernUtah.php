@@ -11,7 +11,7 @@ use App\Models\LocationImage;
 use App\Models\LocationTag;
 use App\Models\ResourceText;
 use App\Models\Restaurant;
-use App\Models\Scopes\UsableScope;
+use App\Models\Scopes\DataScope;
 use App\Models\Trail;
 use App\Services\ConversionService;
 use App\Services\OCRService;
@@ -79,7 +79,7 @@ class VisitSouthernUtah extends Command
             $trailUrl = $trail->link;
             $trailDifficulty = isset($trail->acf->difficulty->name) ? $trail->acf->difficulty->name : null;
 
-            $trailObj = Trail::where('name', $trailName)->withoutGlobalScope(UsableScope::class)->first();
+            $trailObj = Trail::where('name', $trailName)->withoutGlobalScope(DataScope::class)->first();
             if (!$trailObj) {
                 $trailObj = Trail::updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $trail->id], [
                     'area_id' => Area::KANAB,

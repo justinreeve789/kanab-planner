@@ -119,7 +119,8 @@ class ItineraryService
         // If this is the first day and they're arriving at a normal late time, let's not plan any activities. Just
         // grocery shopping, maybe fast food.
         if ($dayNum === 0 && !$this->getItinerary()->getUseFirstDay()) {
-            $accommodation = Accommodation::with('images')->where('id', 1)->first();
+//            $accommodation = Accommodation::with('images')->where('id', 1)->first();
+            $accommodation = Accommodation::where('id', 1)->first();
             $accommodation->accommodation_name = $accommodation->name;
             $accommodation->name = 'Arrive at ' . $accommodation->name;
             $task = new Task([
@@ -388,7 +389,7 @@ class ItineraryService
         // Add a restaurant in the area for the period.
         if ($this->shouldAddDining($day, $period)) {
             $restaurant = Restaurant::with(['location' => function($query) {
-                $query->with('images');
+//                $query->with('images');
             }])->whereNotIn('restaurants.id', $this->getItinerary()->restaurant_ids)
 //                ->whereIsOpen($date . ' ' . $mealTime['startTime'])
                 ->whereHas('location', function($query) use ($day) {
@@ -457,7 +458,7 @@ class ItineraryService
             if (!$dayPeriod->hasRestaurant() && $dayPeriod->hasActivityType('cooking'))
             {
                 $restaurant = Restaurant::with(['location' => function($query) {
-                    $query->with('images');
+//                    $query->with('images');
                 }])->whereIsOpen($day->date . ' ' . $mealTime['startTime'])
                     ->whereHas('location', function($query) use ($day) {
                         $query->where('area_id', $day->area_id);

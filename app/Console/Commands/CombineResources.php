@@ -4,10 +4,11 @@ namespace App\Console\Commands;
 
 use App\Models\Event;
 use App\Models\Location;
-use App\Models\Scopes\UsableScope;
+use App\Models\Scopes\DataScope;
 use App\Models\Trail;
 use App\ResourceEnum;
 use App\Services\DataService;
+use App\Services\ResourceService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
 use function Laravel\Prompts\confirm;
@@ -19,7 +20,7 @@ class CombineResources extends Command
      *
      * @var string
      */
-    protected $signature = 'combine:resources {--events} {--locations} {--trails}';
+    protected $signature = 'combine:resources {--events} {--locations} {--trails=}';
 
     /**
      * The console command description.
@@ -35,11 +36,20 @@ class CombineResources extends Command
      */
     public function handle()
     {
-        $this->resourceService = new DataService();
+        $this->resourceService = new ResourceService();
 
         $doEvents = $this->option('events');
         $doLocations = $this->option('locations');
         $doTrails = $this->option('trails');
+        $ids = null;
+        if ($doTrails !== null) {
+            $ids = explode(',', $doTrails);
+            if (count($ids) !== 2 || !is_numeric($ids[0]) || !is_numeric($ids[1]))  {
+                echo 'You must have exactly 2 ids.
+';
+                exit(0);
+            }
+        }
 
         if ($doEvents !== false) {
             $this->processEvents();
@@ -50,7 +60,7 @@ class CombineResources extends Command
         }
 
         if ($doTrails !== false) {
-            $this->processTrails();
+            $this->processTrails($ids);
         }
     }
 
@@ -77,17 +87,29 @@ class CombineResources extends Command
         $this->processResources(Location::class, 'locations', 0.05, 0.35);
     }
 
-    protected function processTrails() {
-        $this->processResources(Trail::class, 'trails', 5, 0.75);
-        $this->processResources(Trail::class, 'trails', 0.1, 0.3);
+    protected function processTrails($ids) {
+        $this->processResources(Trail::class, 'trails', 5, 0.75, $ids);
+        $this->processResources(Trail::class, 'trails', 0.1, 0.3, $ids);
     }
 
-    protected function processResources($model, $table, $maxDistance, $minSimilarity)
+    protected function processResources($model, $table, $maxDistance, $minSimilarity, $ids = null)
     {
+        if ($ids !== null) {
+            $resource1 = $model::withoutGlobalScope(DataScope::class)->where('id', $ids[0])->first();
+            $resource2 = $model::withoutGlobalScope(DataScope::class)->where('id', $ids[1])->first();
+            $confirm = confirm(
+                label: 'Combine these ' . $table . '? ' . $resource1->name . ' (' . $resource1->id . ') & ' . $resource2->name . ' (' . $resource2->id . ')',
+                default: false,
+            );
+            if ($confirm) {
+                $this->resourceService->combineResources($resource1->id, $resource2->id, $model);
+            }
+            return;
+        }
         $matches = [];
 
         if ($model === ResourceEnum::LOCATIONS_CLASS || $model === ResourceEnum::TRAILS_CLASS) {
-            $resources = $model::withoutGlobalScope(UsableScope::class)
+            $resources = $model::withoutGlobalScope(DataScope::class)
                 ->selectRaw(
                     $table . '.id, ' . $table . '.name, ' . $table . '.latitude, ' . $table .
                     '.longitude, other_resource.id AS other_id, other_resource.name AS other_name'
@@ -131,7 +153,7 @@ class CombineResources extends Command
         }
 
         if ($model === ResourceEnum::LOCATIONS_CLASS) {
-            $resources = $model::withoutGlobalScope(UsableScope::class)
+            $resources = $model::withoutGlobalScope(DataScope::class)
                 ->selectRaw(
                     $table . '.id, ' . $table . '.name, ' . $table .
                     '.address, other_resource.id AS other_id, other_resource.name AS other_name, other_resource.address AS other_address'

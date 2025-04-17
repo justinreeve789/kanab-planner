@@ -10,7 +10,9 @@ use App\Models\Resource;
 use App\Models\Restaurant;
 use App\Models\Trail;
 use App\ResourceEnum;
+use App\Services\DataService;
 use App\Services\PhraseService;
+use App\Traits\ActivityData;
 use App\Traits\ReturnAllProperties;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,10 +22,13 @@ use InvalidArgumentException;
 
 class Activity extends CachedModel
 {
+    use ActivityData;
+
     const DEFAULT_ADVENTUROUSNESS = 0.3;
     const DEFAULT_SOLITARINESS = 0.3;
     const DEFAULT_STRENUOUSNESS = 0.3;
 
+    protected $appends = ['adventurousness', 'solitariness', 'strenuousness'];
     protected $casts = ['id' => 'string', 'period_id' => 'string'];
     protected $guarded = [];
     protected $table = 'itinerary_activities';
@@ -35,24 +40,20 @@ class Activity extends CachedModel
 //    public $end_time;
 //    public $name;
 //    public $start_time;
+    private $dataService;
     private $phraseService;
 
     public function __construct(array $attributes = [])
     {
         $this->id = Str::uuid();
+        $this->dataService = new DataService();
         $this->phraseService = new PhraseService();
 
         parent::__construct($attributes);
 
-//        $this->data = $this->resource;
-//        $this->name = $this->resource->name;
-//        $this->description = $this->resource->description;
-//        $this->activityType = $activityType;
-//        $this->start_time = $startTime;
-//        $this->end_time = $endTime;
-
         if (isset($attributes['activity_type'])) {
-            $this->activity_type_id = $attributes['activity_type'];
+            // TODO: It's not efficient to call the database each time. Fix this, or use just activity_type or activity_type_id, not both.
+            $this->activity_type_id = ActivityType::where('name', $attributes['activity_type'])->pluck('id')->first();
         }
 
         if (isset($attributes['phrase'])) {
@@ -67,6 +68,30 @@ class Activity extends CachedModel
     public function activity_type()
     {
         return $this->belongsTo(ActivityType::class, 'id', 'activity_type_id');
+    }
+
+    protected function adventurousness(): Attribute
+    {
+        return Attribute::get(function() {
+            if ($this->shouldHaveAttribute('adventurousness')) {
+                return $this->dataService->calculateAdventurousness($this->resource, $this->activity_type_id);
+            }
+            return null;
+        });
+    }
+
+    protected function solitariness(): Attribute
+    {
+        return Attribute::get(function() {
+            return null;
+        });
+    }
+
+    protected function strenuousness(): Attribute
+    {
+        return Attribute::get(function() {
+            return null;
+        });
     }
 
     protected function phrase(): Attribute

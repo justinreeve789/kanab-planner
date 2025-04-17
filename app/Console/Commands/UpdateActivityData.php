@@ -100,7 +100,8 @@ class UpdateActivityData extends Command
 
     protected function processRestaurants()
     {
-        $restaurants = Restaurant::with('data')->get();
+//        $restaurants = Restaurant::with('data')->get();
+        $restaurants = Restaurant::get();
         foreach ($restaurants as $item) {
             $item->activity_type = 'dining';
             $this->update('restaurants', $item);
@@ -109,7 +110,8 @@ class UpdateActivityData extends Command
 
     protected function processTrails()
     {
-        $trails = Trail::with('data')->get();
+//        $trails = Trail::with('data')->get();
+        $trails = Trail::get();
         foreach ($trails as $item) {
             foreach (['hiking'] as $activityType) {
                 $item->activity_type = $activityType;

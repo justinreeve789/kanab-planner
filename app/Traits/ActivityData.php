@@ -5,12 +5,14 @@ namespace App\Traits;
 use App\Models\ActivityType;
 use App\Models\Event;
 use App\Models\EventTag;
+use App\Models\Itinerary\Task;
 use App\Models\Location;
 use App\Models\ResourceBusy;
 use App\Models\ResourceData;
 use App\Models\Restaurant;
 use App\Models\Trail;
 use App\ResourceEnum;
+use App\Services\DataService;
 
 /**
  * Adventurousness = The uniqueness of the experience, and how outside an average person's comfort zone it is.
@@ -22,6 +24,24 @@ trait ActivityData
     private $activities;
     private string $activityType;
     private float $busyness = 0.5;
+
+    private function shouldHaveAttribute($attr)
+    {
+        if (!isset($this->activity_type_id) || !isset($this->resource)) {
+            return false;
+        }
+        switch (get_class($this->resource)) {
+            case Event::class:
+            case Location::class:
+            case Restaurant::class:
+            case Task::class:
+            case Trail::class:
+                return true;
+            default:
+                return false;
+        }
+    }
+
 
     public function getActivityTypeByName($name): ?ActivityType
     {

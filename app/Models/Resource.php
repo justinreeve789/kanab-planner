@@ -6,6 +6,7 @@ use App\Models\Blog\Post;
 use App\Models\Builder\CustomQueryBuilder;
 use App\Models\Itinerary\Task;
 use App\ResourceEnum;
+use App\Traits\ActivityData;
 use App\Traits\ResourceScopes;
 use App\Traits\SearchableResource;
 use Exception;
@@ -21,7 +22,7 @@ abstract class Resource extends Model
     const DEFAULT_AVERAGE_HOURS = 2;
 
     protected $appends = ['description_short', 'adventurousness', 'solitariness', 'strenuousness'];
-    protected $with = ['data', 'images', 'text'];
+//    protected $with = ['data', 'images', 'text'];
 
     /**
      * @return \App\Models\Builder\CustomQueryBuilder
