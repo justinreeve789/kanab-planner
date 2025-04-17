@@ -7,7 +7,7 @@ use App\Models\Location;
 use App\Models\Scopes\UsableScope;
 use App\Models\Trail;
 use App\ResourceEnum;
-use App\Services\ResourceService;
+use App\Services\DataService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
 use function Laravel\Prompts\confirm;
@@ -35,7 +35,7 @@ class CombineResources extends Command
      */
     public function handle()
     {
-        $this->resourceService = new ResourceService();
+        $this->resourceService = new DataService();
 
         $doEvents = $this->option('events');
         $doLocations = $this->option('locations');

@@ -102,7 +102,7 @@ class UpdateActivityData extends Command
     {
         $restaurants = Restaurant::with('data')->get();
         foreach ($restaurants as $item) {
-            $item->setActivityType('dining');
+            $item->activity_type = 'dining';
             $this->update('restaurants', $item);
         }
     }
@@ -112,7 +112,7 @@ class UpdateActivityData extends Command
         $trails = Trail::with('data')->get();
         foreach ($trails as $item) {
             foreach (['hiking'] as $activityType) {
-                $item->setActivityType($activityType);
+                $item->activity_type = $activityType;
                 $this->update('trails', $item);
             }
         }
@@ -120,10 +120,10 @@ class UpdateActivityData extends Command
 
     protected function update($resourceTable, $item)
     {
-        ResourceData::updateOrCreate(['resource_table' => $resourceTable, 'resource_id' => $item->id, 'activity_type_id' => $item->getActivityType()->id], [
-            'adventurousness' => $item->adventurousness($item->getActivityType()),
-            'solitariness' => $item->solitariness($item->getActivityType()),
-            'strenuousness' => $item->strenuousness($item->getActivityType()),
+        ResourceData::updateOrCreate(['resource_table' => $resourceTable, 'resource_id' => $item->id, 'activity_type_id' => $item->activity_type_id], [
+            'adventurousness' => $item->adventurousness($item->activity_type),
+            'solitariness' => $item->solitariness($item->activity_type),
+            'strenuousness' => $item->strenuousness($item->activity_type),
         ]);
     }
 }
