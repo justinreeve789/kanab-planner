@@ -1,5 +1,5 @@
 <template>
-    <Itinerary />
+  <Itinerary :itinerary-id="itineraryId" />
 </template>
 
 <script>
@@ -12,12 +12,18 @@ export default {
     Itinerary,
     QuestionnaireModal,
   },
-    data() {
-        return {
-            completedQuestionnaire: false,
-            openQuestionnaire: false,
-        };
-    },
+  props: {
+    itineraryId: {
+      type: String,
+      required: false,
+    }
+  },
+  data() {
+    return {
+      completedQuestionnaire: false,
+      openQuestionnaire: false,
+    };
+  },
   setup() {
     const featureStore = useFeatureStore();
     return featureStore;

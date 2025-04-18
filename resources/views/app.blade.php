@@ -18,7 +18,7 @@
 </head>
 <body class="bg-gray-300">
 <div id="app" class="container mx-auto">
-    <app></app>
+    <app :itinerary-id="'{{ $id ?? null }}'"></app>
 </div>
 <script src="{{ mix('js/app.js') }}" defer></script>
 </body>

@@ -5,7 +5,8 @@ import { createApp } from 'vue'
 import App from './views/App.vue'
 import { createPinia } from 'pinia';
 
-const app = createApp(App);
+const app = createApp({});
+app.component('app', App);
 const pinia = createPinia();
 
 app.config.globalProperties.$generateUnique = function() {

@@ -131,14 +131,18 @@ class ItineraryService
             return;
         }
 
-        // If this is the last day and they're departing at a normal early time, let's not plan any activities.
+        // If this is the last day and they're departing at a normal early time, let's not plan any activities. We'll
+        // also want to use the same accommodation they checked in with on their first day.
         if ($dayNum === ($durationDays - 1) && !$this->getItinerary()->getUseLastDay()) {
+            $accommodation = Accommodation::where('id', 1)->first();
+            $accommodation->accommodation_name = $accommodation->name;
+            $accommodation->name = 'Depart from ' . $accommodation->name;
             $task = new Task([
                 'name' => 'Departure',
                 'description' => $this->phraseService->getPhraseForCheckingOut(),
             ]);
             $this->getItinerary()->addActivity(
-                $task,
+                $accommodation,
                 'checking-out',
                 Day::DEFAULT_DEPARTURE_TIME,
                 '23:59:59',

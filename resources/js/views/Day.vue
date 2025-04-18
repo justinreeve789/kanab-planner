@@ -39,16 +39,16 @@
       <section v-for="(period, periodType) in day.periods" :key="periodType">
         <div class="timeline"></div>
         <div :class="'day-content pt-4 period-' + period.type" v-for="(activity, index) in period.activities" :key="index">
-          <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-if="activity.activity_type == 'checking-in'">
+          <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-if="activity.activity_type && activity.activity_type.name == 'checking-in'">
             <Accommodation :activity="activity" :day="day" :resource="activity.resource" />
           </div>
-          <div class="mb-8 border border-solid border-gray-300 rounded-lg" v-else-if="activity.activity_type == 'event'">
+          <div class="mb-8 border border-solid border-gray-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'event'">
             <Event :activity="activity" :day="day" />
           </div>
-          <div class="mb-8 border border-solid border-green-300 rounded-lg" v-else-if="activity.activity_type == 'dining'">
+          <div class="mb-8 border border-solid border-green-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'dining'">
             <Restaurant :day="day" :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
           </div>
-          <div class="mb-8 border border-solid border-orange-300 rounded-lg" v-else-if="activity.activity_type == 'hiking'">
+          <div class="mb-8 border border-solid border-orange-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'hiking'">
             <Trail :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
           </div>
           <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-else>

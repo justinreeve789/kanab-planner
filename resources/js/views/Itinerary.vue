@@ -60,6 +60,9 @@ export default {
       itineraryData: null,
     };
   },
+  props: {
+    itineraryId: String,
+  },
   mounted() {
     this.fetchItineraryData();
   },
@@ -73,8 +76,12 @@ export default {
       urlParams.forEach((value, key) => {
         params[key] = value;
       });
+      let url = '/api/v1/itinerary';
+      if (this.itineraryId) {
+        url += '/' + this.itineraryId
+      }
       axios
-        .get('/api/v1/itinerary', {
+        .get(url, {
            params: params,
         })
         .then((response) => {

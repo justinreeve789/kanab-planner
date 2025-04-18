@@ -19,6 +19,10 @@ Route::get('/', function () {
     return view('app');
 })->name('application');
 
+Route::get('/{id}', function ($id) {
+    return view('app', ['id' => $id]);
+})->name('application');
+
 Route::get('/auth/redirect', function () {
     return Socialite::driver('google')->redirect();
 });
@@ -28,6 +32,10 @@ Route::get('/auth/callback', function () {
 
     // $user->token
 });
-Route::get('/itinerary', 'App\Http\Controllers\ItineraryController@create');
+
+Route::prefix('itinerary')->group(function() {
+    Route::get('/', 'App\Http\Controllers\ItineraryController@create');
+});
+
 Route::get('/image/{type}/{id}', [ImageController::class, 'getUrl']);
 Route::get('/featured-resource-image/{type}/{resourceId}', [ImageController::class, 'getFeaturedImageUrl']);

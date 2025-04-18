@@ -68,6 +68,12 @@ class ItineraryController extends Controller
         return $this->itineraryService->getItinerary();
     }
 
+    public function loadItinerary(Request $request, $id)
+    {
+        $itinerary = Itinerary::with(['days.periods.activities'])->where('id', $id)->first();
+        return $itinerary;
+    }
+
     /**
      * @return Itinerary
      */

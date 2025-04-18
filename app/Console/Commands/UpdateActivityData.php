@@ -76,7 +76,7 @@ class UpdateActivityData extends Command
                 if ($activityType) {
                     $resourceData = ResourceData::updateOrCreate(
                         ['resource_table' => 'events', 'resource_id' => $item->id],
-                        ['activity_id' => $activityType->id]
+                        ['activity_type_id' => $activityType->id]
                     );
                     $this->info('Assigned ' . $guessType . ' to ' . $item->name);
                 } else {
@@ -103,7 +103,7 @@ class UpdateActivityData extends Command
 //        $restaurants = Restaurant::with('data')->get();
         $restaurants = Restaurant::get();
         foreach ($restaurants as $item) {
-            $item->activity_type = 'dining';
+            $item->activity_type_id = ActivityType::where('name', 'dining')->pluck('id')->first();
             $this->update('restaurants', $item);
         }
     }
@@ -113,8 +113,8 @@ class UpdateActivityData extends Command
 //        $trails = Trail::with('data')->get();
         $trails = Trail::get();
         foreach ($trails as $item) {
-            foreach (['hiking'] as $activityType) {
-                $item->activity_type = $activityType;
+            foreach (['hiking'] as $activityTypeName) {
+                $item->activity_type_id = ActivityType::where('name', $activityTypeName)->pluck('id')->first();
                 $this->update('trails', $item);
             }
         }
@@ -123,9 +123,9 @@ class UpdateActivityData extends Command
     protected function update($resourceTable, $item)
     {
         ResourceData::updateOrCreate(['resource_table' => $resourceTable, 'resource_id' => $item->id, 'activity_type_id' => $item->activity_type_id], [
-            'adventurousness' => $item->adventurousness($item->activity_type),
-            'solitariness' => $item->solitariness($item->activity_type),
-            'strenuousness' => $item->strenuousness($item->activity_type),
+            'adventurousness' => $item->adventurousness($item->activity_type->name),
+            'solitariness' => $item->solitariness($item->activity_type->name),
+            'strenuousness' => $item->strenuousness($item->activity_type->name),
         ]);
     }
 }

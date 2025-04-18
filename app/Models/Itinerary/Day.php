@@ -22,6 +22,9 @@ class Day extends CachedModel
     const DEFAULT_ARRIVAL_TIME = '16:00:00';
     const DEFAULT_DEPARTURE_TIME = '10:00:00';
 
+    protected $appends = [
+        'area',
+    ];
     protected $attributes = [
         'formatted_abbr_month_day' => '',
         'formatted_date' => '',

@@ -18,6 +18,7 @@ use App\Traits\ReturnAllProperties;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
@@ -29,10 +30,11 @@ class Activity extends CachedModel
     const DEFAULT_SOLITARINESS = 0.3;
     const DEFAULT_STRENUOUSNESS = 0.3;
 
-    protected $appends = ['adventurousness', 'solitariness', 'strenuousness'];
+    protected $appends = ['adventurousness', 'solitariness', 'strenuousness', 'resource'];
     protected $casts = ['id' => 'string', 'period_id' => 'string'];
     protected $guarded = [];
     protected $table = 'itinerary_activities';
+    protected $with = ['activity_type'];
 
     public $data;
 //    public $activityType;   // hiking, offroading, etc.
@@ -52,10 +54,19 @@ class Activity extends CachedModel
 
         parent::__construct($attributes);
 
-        if (isset($attributes['activity_type'])) {
-            // TODO: It's not efficient to call the database each time. Fix this, or use just activity_type or activity_type_id, not both.
-            $this->activity_type_id = ActivityType::where('name', $attributes['activity_type'])->pluck('id')->first();
-        }
+//        if (isset($attributes['activity_type'])) {
+//            // TODO: It's not efficient to call the database each time. Fix this, or use just activity_type or activity_type_id, not both.
+//            if (!isset($this->activity_type_id)) {
+//                $this->activity_type_id = ActivityType::where('name', $attributes['activity_type'])->pluck('id')->first();
+//            }
+//        }
+
+//        if (isset($attributes['activity_type_id'])) {
+//            // TODO: It's not efficient to call the database each time. Fix this, or use just activity_type or activity_type_id, not both.
+//            if (!isset($this->activity_type)) {
+//                $this->activity_type = ActivityType::where('id', $attributes['activity_type_id'])->first();
+//            }
+//        }
 
         if (isset($attributes['phrase'])) {
             $this->phrase = $attributes['phrase'];
@@ -68,8 +79,58 @@ class Activity extends CachedModel
 
     public function activity_type()
     {
-        return $this->belongsTo(ActivityType::class, 'id', 'activity_type_id');
+        return $this->belongsTo(ActivityType::class, 'activity_type_id', 'id');
     }
+
+//    protected function activity_type(): Attribute
+//    {
+//        return Attribute::make(
+//            get: function() {
+//                if (isset($this->activity_type_id)) {
+//                    return ActivityType::find($this->activity_type_id)->name;
+//                }
+//                return null;
+//            },
+//        );
+//    }
+
+//    protected function activityType(): Attribute
+//    {
+//        return Attribute::make(
+//            get: function() {
+//                if (isset($this->activity_type)) {
+//                    return $this->activity_type;
+//                }
+//
+//                if (! $this->relationLoaded('activity_type_id') && $this->activity_type_id) {
+//                    $this->load('activityType');
+//                }
+//                return $this->getRelation('activity_type');
+//            },
+//            set: function(?ActivityType $activityType) {
+//                return ['activity_type_id' => $activityType ? $activityType->id : null];
+//            },
+//        )->withoutObjectCaching();
+//    }
+//
+//    protected function activityTypeId(): Attribute
+//    {
+//        return Attribute::make(
+//            get: fn ($value) => $value, // No special getter logic needed
+//            set: function (?int $activityTypeId) {
+//                $this->attributes['activity_type_id'] = $activityTypeId;
+//
+//                if ($activityTypeId) {
+//                    $this->load('activity_type');
+//                } else {
+//                    $this->activityType()->dissociate();
+//                    $this->activityType = null;
+//                }
+//
+//                return $activityTypeId;
+//            },
+//        );
+//    }
 
     /**
      * TODO: Use a cache.

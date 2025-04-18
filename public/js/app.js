@@ -23706,6 +23706,12 @@ __webpack_require__.r(__webpack_exports__);
     Itinerary: _Itinerary_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
     QuestionnaireModal: _modals_QuestionnaireModal_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
+  props: {
+    itineraryId: {
+      type: String,
+      required: false
+    }
+  },
   data: function data() {
     return {
       completedQuestionnaire: false,
@@ -23863,6 +23869,9 @@ var __default__ = {
       itineraryData: null
     };
   },
+  props: {
+    itineraryId: String
+  },
   mounted: function mounted() {
     this.fetchItineraryData();
   },
@@ -23877,7 +23886,11 @@ var __default__ = {
       urlParams.forEach(function (value, key) {
         params[key] = value;
       });
-      axios__WEBPACK_IMPORTED_MODULE_9__["default"].get('/api/v1/itinerary', {
+      var url = '/api/v1/itinerary';
+      if (this.itineraryId) {
+        url += '/' + this.itineraryId;
+      }
+      axios__WEBPACK_IMPORTED_MODULE_9__["default"].get(url, {
         params: params
       }).then(function (response) {
         _this.itineraryData = response.data;
@@ -25335,7 +25348,9 @@ __webpack_require__.r(__webpack_exports__);
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_Itinerary = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Itinerary");
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_Itinerary);
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_Itinerary, {
+    "itinerary-id": $props.itineraryId
+  }, null, 8 /* PROPS */, ["itinerary-id"]);
 }
 
 /***/ }),
@@ -25477,19 +25492,19 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)('day-content pt-4 period-' + period.type),
         key: index
-      }, [activity.activity_type == 'checking-in' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Accommodation, {
+      }, [activity.activity_type && activity.activity_type.name == 'checking-in' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Accommodation, {
         activity: activity,
         day: $props.day,
         resource: activity.resource
-      }, null, 8 /* PROPS */, ["activity", "day", "resource"])])) : activity.activity_type == 'event' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Event, {
+      }, null, 8 /* PROPS */, ["activity", "day", "resource"])])) : activity.activity_type && activity.activity_type.name == 'event' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Event, {
         activity: activity,
         day: $props.day
-      }, null, 8 /* PROPS */, ["activity", "day"])])) : activity.activity_type == 'dining' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Restaurant, {
+      }, null, 8 /* PROPS */, ["activity", "day"])])) : activity.activity_type && activity.activity_type.name == 'dining' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Restaurant, {
         day: $props.day,
         phrase: activity.phrase,
         activity: activity,
         resource: activity.resource
-      }, null, 8 /* PROPS */, ["day", "phrase", "activity", "resource"])])) : activity.activity_type == 'hiking' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_26, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Trail, {
+      }, null, 8 /* PROPS */, ["day", "phrase", "activity", "resource"])])) : activity.activity_type && activity.activity_type.name == 'hiking' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_26, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Trail, {
         phrase: activity.phrase,
         activity: activity,
         resource: activity.resource
@@ -43642,7 +43657,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 
 
 
-var app = (0,vue__WEBPACK_IMPORTED_MODULE_1__.createApp)(_views_App_vue__WEBPACK_IMPORTED_MODULE_2__["default"]);
+var app = (0,vue__WEBPACK_IMPORTED_MODULE_1__.createApp)({});
+app.component('app', _views_App_vue__WEBPACK_IMPORTED_MODULE_2__["default"]);
 var pinia = (0,pinia__WEBPACK_IMPORTED_MODULE_3__.createPinia)();
 app.config.globalProperties.$generateUnique = function () {
   var length = 32;

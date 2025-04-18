@@ -2,6 +2,7 @@
 
 namespace App\Models\Itinerary;
 
+use App\Models\ActivityType;
 use App\Models\Area;
 use App\Models\Itinerary\Activity;
 use App\Models\Itinerary\Day;
@@ -69,7 +70,6 @@ class Itinerary extends CachedModel
 
     public $activities;
     public $base_area;
-//    public $days;
     public $event_ids;
     public $event_priorities;
     public $location_ids;
@@ -152,7 +152,7 @@ class Itinerary extends CachedModel
     {
         $activity = new Activity([
             'resource' => $resource,
-            'activity_type' => $activityType,
+            'activity_type_id' => ActivityType::where('name', $activityType)->pluck('id')->first(),
             'start_time' => $startTime,
             'end_time' => $endTime
         ]);

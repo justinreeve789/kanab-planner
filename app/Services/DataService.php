@@ -37,55 +37,55 @@ class DataService
      * The busier the event, restaurant, or trail, the lower the solitariness.
      * (x - 0.5) / y
      */
-    public function solitariness($activityType = null)
-    {
-        $busynessAdj = $this->getBusyness();
-        switch (static::class) {
-            // We don't care so much about solitariness at a restaurant.
-            case ResourceEnum::RESTAURANTS_CLASS:
-                $busynessAdj = $busynessAdj / 3;
-                $this->setActivityType('dining');
-                break;
-            case ResourceEnum::TRAILS_CLASS:
-                $busynessAdj = $busynessAdj / 1.5;
-                if (!$this->getActivityType()) {
-                    $this->setActivityType('hiking');
-                }
-                break;
-            case ResourceEnum::EVENTS_CLASS:
-                if (isset($this->data[0])) {
-                    $busynessAdj = -($this->data[0]->solitariness);
-                }
-                $this->setActivityType('event');
-                break;
-            case ResourceEnum::LOCATIONS_CLASS:
-            default:
-                $busynessAdj = $busynessAdj / 1.5;
-        }
-        $solitariness = ($this->getActivityTypeByName($activityType)->solitariness ?? 0.5) - $busynessAdj;
-        return round($solitariness, 2);
-    }
-
-    public function strenuousness($activityType = null): float
-    {
-        switch (static::class) {
-            case ResourceEnum::TRAILS_CLASS:
-                if (!$this->getActivityType()) {
-                    $this->setActivityType('hiking');
-                }
-                $strenuousness = $this->calculateStrenuousnessForTrail();
-                break;
-            case ResourceEnum::RESTAURANTS_CLASS:
-                $strenuousness = 0;
-                break;
-            case ResourceEnum::EVENTS_CLASS:
-                $strenuousness = reset($this->data)->strenuousness;
-            case ResourceEnum::LOCATIONS_CLASS:
-            default:
-                $strenuousness = $this->data->strenuousness;
-        }
-        return round($strenuousness, 2);
-    }
+//    public function solitariness($activityType = null)
+//    {
+//        $busynessAdj = $this->getBusyness();
+//        switch (static::class) {
+//            // We don't care so much about solitariness at a restaurant.
+//            case ResourceEnum::RESTAURANTS_CLASS:
+//                $busynessAdj = $busynessAdj / 3;
+//                $this->setActivityType('dining');
+//                break;
+//            case ResourceEnum::TRAILS_CLASS:
+//                $busynessAdj = $busynessAdj / 1.5;
+//                if (!$this->getActivityType()) {
+//                    $this->setActivityType('hiking');
+//                }
+//                break;
+//            case ResourceEnum::EVENTS_CLASS:
+//                if (isset($this->data[0])) {
+//                    $busynessAdj = -($this->data[0]->solitariness);
+//                }
+//                $this->setActivityType('event');
+//                break;
+//            case ResourceEnum::LOCATIONS_CLASS:
+//            default:
+//                $busynessAdj = $busynessAdj / 1.5;
+//        }
+//        $solitariness = ($this->getActivityTypeByName($activityType)->solitariness ?? 0.5) - $busynessAdj;
+//        return round($solitariness, 2);
+//    }
+//
+//    public function strenuousness($activityType = null): float
+//    {
+//        switch (static::class) {
+//            case ResourceEnum::TRAILS_CLASS:
+//                if (!$this->getActivityType()) {
+//                    $this->setActivityType('hiking');
+//                }
+//                $strenuousness = $this->calculateStrenuousnessForTrail();
+//                break;
+//            case ResourceEnum::RESTAURANTS_CLASS:
+//                $strenuousness = 0;
+//                break;
+//            case ResourceEnum::EVENTS_CLASS:
+//                $strenuousness = reset($this->data)->strenuousness;
+//            case ResourceEnum::LOCATIONS_CLASS:
+//            default:
+//                $strenuousness = $this->data->strenuousness;
+//        }
+//        return round($strenuousness, 2);
+//    }
 
     /**
      * TODO: Cache the results.
