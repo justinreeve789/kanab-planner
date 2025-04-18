@@ -18,12 +18,12 @@
     <div v-if="expanded" class="collapse-content min-h-[150px] items-stretch w-full bg-gray-200 p-2 bg-gradient-to-r from-white to-cyan-100">
       <div class="lg:flex lg:justify-between">
         <div class="w-full lg:w-2/3 lg:flex lg:flex-col">
-          <div class="lg:order-1">
+          <div class="order-2 lg:order-1">
             <p>
               {{ resource.description }}
             </p>
           </div>
-          <div class="sm:flex sm:flex-row justify-between lg:flex-col lg:order-2">
+          <div class="sm:flex sm:flex-row justify-between lg:flex-col order-1 lg:order-2">
             <ActivityButtons :resource="resource" :resource_table="'accommodations'" class="w-full my-4" type="checking-in" />
           </div>
         </div>

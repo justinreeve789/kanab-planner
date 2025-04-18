@@ -25624,10 +25624,10 @@ var _hoisted_10 = {
   "class": "w-full lg:w-2/3 lg:flex lg:flex-col"
 };
 var _hoisted_11 = {
-  "class": "lg:order-1"
+  "class": "order-2 lg:order-1"
 };
 var _hoisted_12 = {
-  "class": "sm:flex sm:flex-row justify-between lg:flex-col lg:order-2"
+  "class": "sm:flex sm:flex-row justify-between lg:flex-col order-1 lg:order-2"
 };
 var _hoisted_13 = {
   key: 0,
