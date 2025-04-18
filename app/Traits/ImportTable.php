@@ -27,8 +27,9 @@ trait ImportTable
             }
             fclose($file);
             if (!file_exists($gz)) {
-                exec('gzip -f ' . $sql);
+                exec('gzip -f -k ' . $sql);
             }
+            unlink($sql);
         }
     }
 }
