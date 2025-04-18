@@ -30,7 +30,13 @@ class Day extends CachedModel
         'formatted_year' => '',
     ];
     protected $casts = ['id' => 'string', 'itinerary_id' => 'string', 'stats' => 'json'];
-    protected $guarded = [];
+    protected $guarded = [
+        'formatted_abbr_month_day',
+        'formatted_date',
+        'formatted_day_of_week',
+        'formatted_month_day',
+        'formatted_year',
+    ];
     protected $table = 'itinerary_days';
 
 //    public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;

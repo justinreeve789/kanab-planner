@@ -62,7 +62,7 @@ class ItineraryController extends Controller
 
 //        $this->getItinerary()->setTotalTravelDistance($this->itineraryService->estimateTotalTravelDistance());
 
-//        $this->saveItinerary();
+        $this->saveItinerary();
 
 //        return response()->json($this->itineraryService->getItinerary());
         return $this->itineraryService->getItinerary();
@@ -76,23 +76,52 @@ class ItineraryController extends Controller
         return $this->itineraryService->getItinerary();
     }
 
+    /**
+     * TODO: Fix the model definitions so we're not doing any of this offsetUnset() and setRelation() stuff.
+     */
     private function saveItinerary()
     {
         DB::transaction(function() {
-            $itinerary = $this->getItinerary();
+            $itinerary = clone $this->getItinerary();
+            $days = $itinerary->getDays();
+            $itinerary->offsetUnset('days');
+//            $itinerary->setRelation('days', collect($days));
             $itinerary->save();
+            $itinerary->days = $days;
 
-            foreach ($itinerary->days as $day) {
+            foreach ($days as $day) {
+                $day = clone $day;
                 $day->itinerary_id = $itinerary->id;
+                $day->area_id = $day->area->id;
+                $area = $day->area;
+                $day->offsetUnset('area');
+                $day->offsetUnset('formatted_abbr_month_day');
+                $day->offsetUnset('formatted_date');
+                $day->offsetUnset('formatted_day_of_week');
+                $day->offsetUnset('formatted_month_day');
+                $day->offsetUnset('formatted_year');
+                $day->setRelation('area', $area);
                 $day->save();
 
                 foreach ($day->periods as $period) {
                     $period->day_id = $day->id;
+                    $period->type = (string) $period->type;
                     $period->save();
+                    $period->type = (int) $period->type;
+                    $activities = clone $period->activities;
 
-                    foreach ($period->activities as $activity) {
+                    foreach ($activities as $activity) {
                         $activity->period_id = $period->id;
+                        $resource = $activity->resource;
+                        $activity->offsetUnset('resource');
+                        $activity->setRelation('resource', $resource);
+                        $activity->resource_table = $resource->getTable();
+                        $activity->resource_id = $resource->id;
+                        $activityType = $activity->activity_type;
+                        $activity->offsetUnset('activity_type');
+                        $activity->activity_type_id = $activity->activity_type_id ?? 0;
                         $activity->save();
+                        $activity->activity_type = $activityType;
                     }
                 }
             }

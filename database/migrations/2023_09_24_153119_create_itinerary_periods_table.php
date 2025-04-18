@@ -16,8 +16,6 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('day_id');
             $table->enum('type', [Period::MORNING, Period::AFTERNOON, Period::EVENING, Period::NIGHT]);
-            $table->string('resource_table')->nullable();
-            $table->integer('resource_id')->unsigned();
             $table->timestamps();
             $table->index('type');
             $table->unique(['day_id', 'type']);
