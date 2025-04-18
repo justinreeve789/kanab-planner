@@ -13,6 +13,7 @@ use App\Traits\ActivityData;
 use App\Services\ConversionService;
 use App\Services\ItineraryService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ItineraryController extends Controller
 {
@@ -61,7 +62,7 @@ class ItineraryController extends Controller
 
 //        $this->getItinerary()->setTotalTravelDistance($this->itineraryService->estimateTotalTravelDistance());
 
-//        $this->getItinerary()->save();
+//        $this->saveItinerary();
 
 //        return response()->json($this->itineraryService->getItinerary());
         return $this->itineraryService->getItinerary();
@@ -73,5 +74,28 @@ class ItineraryController extends Controller
     private function getItinerary()
     {
         return $this->itineraryService->getItinerary();
+    }
+
+    private function saveItinerary()
+    {
+        DB::transaction(function() {
+            $itinerary = $this->getItinerary();
+            $itinerary->save();
+
+            foreach ($itinerary->days as $day) {
+                $day->itinerary_id = $itinerary->id;
+                $day->save();
+
+                foreach ($day->periods as $period) {
+                    $period->day_id = $day->id;
+                    $period->save();
+
+                    foreach ($period->activities as $activity) {
+                        $activity->period_id = $period->id;
+                        $activity->save();
+                    }
+                }
+            }
+        });
     }
 }

@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('itineraries', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->integer('user_id')->unsigned()->default(0);
             $table->string('name')->nullable();
             $table->integer('base_area_id')->unsigned()->nullable();
             $table->dateTime('arrival_date_time')->nullable();

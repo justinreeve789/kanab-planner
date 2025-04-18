@@ -19,9 +19,10 @@ return new class extends Migration
             $table->time('end_time');
             $table->text('description')->nullable();
             $table->string('phrase')->nullable();
-            $table->integer('activity_type_id')->unsigned()->nullable();
+            $table->integer('activity_type_id')->unsigned();
             $table->string('resource_table')->nullable();
             $table->integer('resource_id')->unsigned()->nullable();
+            $table->json('stats')->nullable();
             $table->timestamps();
             $table->foreign('period_id')->references('id')->on('itinerary_periods')->onDelete('cascade');
         });

@@ -24,9 +24,11 @@ return new class extends Migration
             $table->string('formatted_month_day');
             $table->string('formatted_year');
             $table->json('stats')->nullable();
+            $table->timestamps();
+            $table->unique(['itinerary_id', 'date']);
+            $table->unique(['itinerary_id', 'day_num']);
             $table->foreign('itinerary_id')->references('id')->on('itineraries')->onDelete('cascade');
             $table->foreign('area_id')->references('id')->on('areas')->onDelete('cascade');
-            $table->timestamps();
         });
     }
 
