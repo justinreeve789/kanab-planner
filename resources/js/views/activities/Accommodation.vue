@@ -6,11 +6,20 @@
         <div class="icon pr-1 shrink-0">
           <img src="/images/icons/thumbs-up.svg" alt="Accommodation">
         </div>
-        <div class="text-xl">{{ resource.name }}</div>
+        <div class="text-xl">
+          <span v-if="activity.activity_type.name == 'checking-in'">Arrive at</span>
+          <span v-else-if="activity.activity_type.name == 'checking-out'">Depart from</span>
+          {{ resource.name }}
+        </div>
       </div>
       <div class="flex space-x-4 items-center mr-8 h-full">
         <div class="badge badge-lg bg-blue-400 border-blue-400 mr-2 text-white hidden md:flex">
-          Check-in: {{ formatTime(resource.check_in) }}
+          <span v-if="activity.activity_type.name == 'checking-in'">
+            Check-in: {{ formatTime(resource.check_in) }}
+          </span>
+          <span v-else-if="activity.activity_type.name == 'checking-out'">
+            Check-out: {{ formatTime(resource.check_out) }}
+          </span>
         </div>
       </div>
     </div>

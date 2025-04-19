@@ -41,10 +41,10 @@ class ImageService
     const THUNDERFOREST_OUTDOORS_PATH = 'visitkanab/maptiles/thunderforest/outdoors';
     const THUNDERFOREST_OUTDOORS_URL = 'https://tile.thunderforest.com/outdoors';
 
+    public $conversionService;
+    public $s3;
     private $client;
-    private $conversionService;
     private $images = [];
-    private $s3;
     private $s3Client;
 
     public function __construct() {

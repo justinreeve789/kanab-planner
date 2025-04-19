@@ -19,6 +19,7 @@
         "laravel/prompts": "^0.3.5",
         "laravel/sanctum": "^4.0",
         "laravel/scout": "^10.4",
+        "laravel/socialite": "^5.19",
         "laravel/tinker": "^2.10",
         "league/flysystem-aws-s3-v3": "^3.16",
         "meilisearch/meilisearch-php": "^1.4",

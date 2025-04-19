@@ -30,15 +30,15 @@ class ItineraryService
 {
     const DEFAULT_DRIVING_TIME_BETWEEN_AREAS = 1800;
 
-    private $budgetService;
-    private $imageService;
+    public $budgetService;
+    public $imageService;
+    public $locationService;
+    public $phraseService;
+    public $restaurantService;
+    public $trailService;
     private $itinerary;
-    private $locationService;
-    private $phraseService;
     private $repository;
-    private $restaurantService;
     private $seasons;
-    private $trailService;
 
     public function __construct($itinerary = null)
     {
@@ -60,6 +60,58 @@ class ItineraryService
     public function setItinerary(?Itinerary $itinerary)
     {
         $this->itinerary = $itinerary;
+    }
+
+    /**
+     * TODO: Fix the model definitions so we're not doing any of this offsetUnset() and setRelation() stuff.
+     */
+    public function saveItinerary()
+    {
+        DB::transaction(function() {
+            $itinerary = clone $this->getItinerary();
+            $days = $itinerary->getDays();
+            $itinerary->offsetUnset('days');
+//            $itinerary->setRelation('days', collect($days));
+            $itinerary->save();
+            $itinerary->days = $days;
+
+            foreach ($days as $day) {
+                $day = clone $day;
+                $day->itinerary_id = $itinerary->id;
+                $day->area_id = $day->area->id;
+                $area = $day->area;
+                $day->offsetUnset('area');
+                $day->offsetUnset('formatted_abbr_month_day');
+                $day->offsetUnset('formatted_date');
+                $day->offsetUnset('formatted_day_of_week');
+                $day->offsetUnset('formatted_month_day');
+                $day->offsetUnset('formatted_year');
+                $day->setRelation('area', $area);
+                $day->save();
+
+                foreach ($day->periods as $period) {
+                    $period->day_id = $day->id;
+                    $period->type = (string) $period->type;
+                    $period->save();
+                    $period->type = (int) $period->type;
+                    $activities = clone $period->activities;
+
+                    foreach ($activities as $activity) {
+                        $activity->period_id = $period->id;
+                        $resource = $activity->resource;
+                        $activity->offsetUnset('resource');
+                        $activity->setRelation('resource', $resource);
+                        $activity->resource_table = $resource->getTable();
+                        $activity->resource_id = $resource->id;
+                        $activityType = $activity->activity_type;
+                        $activity->offsetUnset('activity_type');
+                        $activity->activity_type_id = $activity->activity_type_id ?? 0;
+                        $activity->save();
+                        $activity->activity_type = $activityType;
+                    }
+                }
+            }
+        });
     }
 
     public function getRepository()
@@ -122,11 +174,10 @@ class ItineraryService
 //            $accommodation = Accommodation::with('images')->where('id', 1)->first();
             $accommodation = Accommodation::where('id', 1)->first();
             $accommodation->accommodation_name = $accommodation->name;
-            $accommodation->name = 'Arrive at ' . $accommodation->name;
-            $task = new Task([
-                'name' => 'Arrival',
-                'description' => $this->phraseService->getPhraseForCheckingIn() . ' ' . $this->phraseService->getPhraseForArrivingLateFood(),
-            ]);
+//            $task = new Task([
+//                'name' => 'Arrival',
+//                'description' => $this->phraseService->getPhraseForCheckingIn() . ' ' . $this->phraseService->getPhraseForArrivingLateFood(),
+//            ]);
             $this->getItinerary()->addActivity($accommodation, 'checking-in', Day::DEFAULT_ARRIVAL_TIME, '23:59:59', $dayNum, Period::EVENING);
             return;
         }
@@ -136,11 +187,10 @@ class ItineraryService
         if ($dayNum === ($durationDays - 1) && !$this->getItinerary()->getUseLastDay()) {
             $accommodation = Accommodation::where('id', 1)->first();
             $accommodation->accommodation_name = $accommodation->name;
-            $accommodation->name = 'Depart from ' . $accommodation->name;
-            $task = new Task([
-                'name' => 'Departure',
-                'description' => $this->phraseService->getPhraseForCheckingOut(),
-            ]);
+//            $task = new Task([
+//                'name' => 'Departure',
+//                'description' => $this->phraseService->getPhraseForCheckingOut(),
+//            ]);
             $this->getItinerary()->addActivity(
                 $accommodation,
                 'checking-out',

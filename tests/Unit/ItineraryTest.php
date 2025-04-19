@@ -2,10 +2,34 @@
 
 namespace Tests\Unit;
 
+use App\Models\Itinerary\Itinerary;
+use App\Services\ItineraryService;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Tests\CreatesApplication;
 use Tests\TestCase;
 
 class ItineraryTest extends TestCase
 {
+    use CreatesApplication;
+
+    public $itineraryService;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->itineraryService = new ItineraryService();
+    }
+
+    public function createApplication(): Application
+    {
+        $app = require __DIR__ . '/../../bootstrap/app.php';
+        $app->loadEnvironmentFrom('.env'); // Ensure testing environment is loaded
+        $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+        return $app;
+    }
+
     public function test_starts_and_ends_at_base_location_when_set(): void
     {
         $this->assertTrue(true);

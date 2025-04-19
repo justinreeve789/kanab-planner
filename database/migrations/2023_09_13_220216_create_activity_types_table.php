@@ -25,6 +25,7 @@ return new class extends Migration
 //            $table->decimal('weatheriness', 3, 2)->nullable()->comment('How dependents the experience is on the weather');
 //            $table->decimal('noisiness', 3, 2)->nullable();
             $table->boolean('is_selectable')->default(true);
+            $table->unique('name');
         });
 
         DB::table('activity_types')->insert([
@@ -49,6 +50,8 @@ return new class extends Migration
             ['name' => 'tour', 'description' => 'Tours', 'adventurousness' => 0.4, 'solitariness' => 0.2, 'strenuousness' => 0.2, 'is_selectable' => true],
             ['name' => 'fishing', 'description' => 'Fishing', 'adventurousness' => 0.2, 'solitariness' => 0.9, 'strenuousness' => 0.1, 'is_selectable' => false],
             ['name' => 'games-and-entertainment', 'description' => 'Games & Entertainment', 'adventurousness' => 0.4, 'solitariness' => 0.1, 'strenuousness' => 0.1, 'is_selectable' => false],
+            ['name' => 'checking-in', 'description' => 'Checking In', 'adventurousness' => 0.0, 'solitariness' => 0.0, 'strenuousness' => 0.0, 'is_selectable' => false],
+            ['name' => 'checking-out', 'description' => 'Checking Out', 'adventurousness' => 0.0, 'solitariness' => 0.0, 'strenuousness' => 0.0, 'is_selectable' => false],
             ['name' => 'unknown', 'description' => 'Unknown', 'adventurousness' => 0.4, 'solitariness' => 0.3, 'strenuousness' => 0.2, 'is_selectable' => false],
         ]);
     }
