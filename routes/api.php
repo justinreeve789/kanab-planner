@@ -1,10 +1,7 @@
 <?php
 
-use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Laravel\Socialite\Facades\Socialite;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,30 +19,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('v1')->group(function() {
-    Route::prefix('/oauth')->group(function() {
-        Route::get('/{provider}', [AuthController::class, 'redirectToProvider'])
-            ->where('provider', 'google|facebook|...'); // Add other providers you support
-
-        Route::get('/oauth/callback', [AuthController::class, 'handleProviderCallback'])
-            ->where('provider', 'google|facebook|...');        Route::get('/redirect/{provider}', function ($provider) {
-            return Socialite::driver($provider)->stateless()->redirect();
-        });
-
-        Route::get('/callback/{provider}', function ($provider) {
-            $user = Socialite::driver($provider)->stateless()->user();
-            $existingUser = User::where('email', $user->getEmail())->first();
-            if (!$existingUser) {
-                $existingUser = User::create([
-                    'name' => $user->getName(),
-                    'email' => $user->getEmail(),
-                    'provider_id' => $user->getId(),
-                ]);
-            }
-            Auth::login($existingUser);
-            return redirect('/');
-        });
-    });
-
     Route::prefix('activity_type')->group(function() {
         Route::get('/', 'App\Http\Controllers\ActivityController@getSelectableActivityTypes');
     });
@@ -73,7 +46,7 @@ Route::prefix('v1')->group(function() {
     });
 
     Route::prefix('itinerary')->group(function() {
-//        Route::get('/', 'App\Http\Controllers\ItineraryController@index');
+        // TODO: Make this a POST to create the itinerary. A GET should return a list of itineraries.
         Route::get('/', 'App\Http\Controllers\ItineraryController@createItinerary');
         Route::get('/{id}', 'App\Http\Controllers\ItineraryController@loadItinerary');
         Route::put('/{id}', 'App\Http\Controllers\ItineraryController@updateItinerary');

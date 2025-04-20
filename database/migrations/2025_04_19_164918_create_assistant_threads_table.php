@@ -14,17 +14,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('assistant_messages', function (Blueprint $table) {
+        Schema::create('assistant_threads', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('assistant_session_id')->unsigned();
-            $table->boolean('is_assistant');
-            $table->text('content');
+            $table->string('thread_key')->nullable()->comment('For the OpenAI Responses API, this is the response_id, and should be updated after each query. It can be sent to the next query as the previous_response_id parameter.');
+            $table->string('thread_type')->nullable();
             $table->string('resource_table')->nullable();
             $table->integer('resource_id')->unsigned()->nullable();
-            $table->boolean('show_in_chat_bubble')->default(true);
-            $table->string('component', 32)->nullable();
-            $table->json('component_params')->nullable();
             $table->timestamps();
+            $table->unique(['thread_key', 'thread_type']);
             $table->index(['resource_table', 'resource_id']);
             $table->foreign('assistant_session_id')->references('id')->on('assistant_sessions')->onDelete('cascade');
         });
@@ -37,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('assistant_messages');
+        Schema::dropIfExists('assistant_threads');
     }
 };

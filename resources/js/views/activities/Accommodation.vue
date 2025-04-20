@@ -26,7 +26,11 @@
 
     <div v-if="expanded" class="collapse-content min-h-[150px] items-stretch w-full bg-gray-200 p-2 bg-gradient-to-r from-white to-cyan-100">
       <div class="lg:flex lg:justify-between">
-        <div class="w-full lg:w-2/3 lg:flex lg:flex-col">
+        <div class="w-full lg:w-2/3 lg:flex lg:flex-col" v-if="activity.activity_type.name == 'checking-out'">
+          {{ activity.phrase }}
+          <p>Leave a review of your accommodations!</p>
+        </div>
+        <div class="w-full lg:w-2/3 lg:flex lg:flex-col" v-else-if="activity.activity_type.name == 'checking-in'">
           <div class="order-2 lg:order-1">
             <p>
               {{ resource.description }}
@@ -36,7 +40,7 @@
             <ActivityButtons :resource="resource" :resource_table="'accommodations'" class="w-full my-4" type="checking-in" />
           </div>
         </div>
-        <div v-if="resource.images" class="w-[calc(100%+16px)] -ml-2 -mb-4 lg:w-1/3 mt-4 lg:pl-4 lg:-mt-2 lg:-mr-2">
+        <div v-if="activity.activity_type.name == 'checking-in' && resource.images" class="w-[calc(100%+16px)] -ml-2 -mb-4 lg:w-1/3 mt-4 lg:pl-4 lg:-mt-2 lg:-mr-2">
           <Side :images="resource.images" :resource="resource" :type="'accommodation'" />
         </div>
       </div>

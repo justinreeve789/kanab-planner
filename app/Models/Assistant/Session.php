@@ -4,6 +4,7 @@ namespace App\Models\Assistant;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cookie;
 
@@ -13,6 +14,21 @@ class Session extends Model
 
     protected $guarded = [];
     protected $table = 'assistant_sessions';
+
+    public function assistant_messages(): HasMany
+    {
+        return $this->hasMany(Message::class, 'assistant_session_id', 'id');
+    }
+
+    public function assistant_thread(): BelongsTo
+    {
+        return $this->belongsTo(Thread::class, 'id', 'assistant_thread_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'id', 'user_id');
+    }
 
     protected function session_key(): Attribute
     {
@@ -27,10 +43,5 @@ class Session extends Model
                 $this->session_key = $sessionKey;
             }
         );
-    }
-
-    public function assistant_messages(): HasMany
-    {
-        return $this->hasMany(Message::class, 'assistant_session_id', 'id');
     }
 }

@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Models\Assistant;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Thread extends Model
+{
+    protected $guarded = [];
+    protected $table = 'assistant_threads';
+
+    public function assistant_messages(): HasMany {
+        return $this->hasMany(Message::class, 'assistant_thread_id', 'id');
+    }
+
+    public function assistant_session(): BelongsTo {
+        return $this->belongsTo(Session::class, 'id', 'assistant_session_id');
+    }
+}

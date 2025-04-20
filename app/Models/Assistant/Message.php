@@ -15,8 +15,4 @@ class Message extends Model
     public function assistant_session(): BelongsTo {
         return $this->belongsTo(Session::class, 'id', 'assistant_session_id');
     }
-
-    public function user(): BelongsTo {
-        return $this->belongsTo(User::class, 'id', 'user_id');
-    }
 }

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Assistant\Assistant;
 use App\Models\Assistant\Message;
 use App\Models\Assistant\Session;
+use App\Models\Assistant\Thread;
 use App\Models\Trail;
 use App\Services\AssistantService;
 use App\Services\OpenAIService;
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 class AssistantController extends Controller
 {
     const MAX_TOKENS = 200;
+    const OPENAI_RESPONSES_TYPE = 'openai_responses';
 
     public function getMessages(Request $request)
     {
@@ -53,13 +56,20 @@ class AssistantController extends Controller
             $resource = $newResource;
         }
 
+        // Create an assistant if needed.
+        $assistant = Assistant::get($resource, $openAIService);
+
         // Save the user's message.
-        $newMessages[] = Message::create([
+        $assistantThread = Thread::updateOrCreate([
             'assistant_session_id' => $assistantSession->id,
-            'is_assistant' => false,
-            'content' => $message,
             'resource_table' => $resource ? $resource->getTable() : null,
             'resource_id' => $resource ? $resource->id : null,
+        ]);
+
+        $newMessages[] = Message::create([
+            'assistant_thread_id' => $assistantThread->id,
+            'is_assistant' => false,
+            'content' => $message,
         ]);
 
         // TODO: Analyze the message for requests for trail maps or other content we can retrieve without using OpenAI.
@@ -74,26 +84,23 @@ class AssistantController extends Controller
                     $trail->latitude = $resource->latitude;
                     $trail->longitude = $resource->longitude;
                     $newMessages[] = Message::create([
-                        'assistant_session_id' => $assistantSession->id,
+                        'assistant_thread_id' => $assistantThread->id,
                         'is_assistant' => true,
                         'content' => 'Here\'s a trail map for ' . $resource->name . '.',
-                        'resource_table' => $resource->getTable(),
-                        'resource_id' => $resource->id,
-                        'show_in_chat_bubble' => false,
                         'component' => 'buttons/ViewMap',
+                        'show_in_chat_bubble' => false,
                         'component_params' => json_encode((object) [
                             'resource' => (object) $trail->toArray(),
                         ]),
                     ]);
-                    return collect($newMessages)->toJson();
+                    $assistantThread->assistant_messages = collect($newMessages);
+                    return $assistantThread->toJson();
                 }
 
                 $newMessages[] = Message::create([
-                    'assistant_session_id' => $assistantSession->id,
+                    'assistant_thread_id' => $assistantThread->id,
                     'is_assistant' => true,
                     'content' => 'I couldn\'t find a trail map for ' . $resource->name . '. Weird. Try searching for it in the itinerary trail lists.',
-                    'resource_table' => $resource->getTable(),
-                    'resource_id' => $resource->id,
                     'show_in_chat_bubble' => true,
                 ]);
             }
@@ -102,18 +109,26 @@ class AssistantController extends Controller
         if ($assistantSession) {
             $newMessages = [];
             if ($message && $message !== '') {
-                $response = $openAIService->query($message, self::MAX_TOKENS, Config::get('oopenai.finetune_model'));
+                $response = $openAIService->query($message, self::MAX_TOKENS, Config::get('openai.finetune_model'), $assistant, $assistantThread->thread_key);
                 if ($response) {
                     // Save the assistant's message.
-                    $newMessages[] = Message::create([
+                    $assistantThread = Thread::updateOrCreate([
                         'assistant_session_id' => $assistantSession->id,
-                        'is_assistant' => true,
-                        'content' => $response,
                         'resource_table' => $resource ? $resource->getTable() : null,
                         'resource_id' => $resource ? $resource->id : null,
+                    ], [
+                        'thread_key' => $response->thread_id,
+                        'thread_type' => self::OPENAI_RESPONSES_TYPE,
                     ]);
 
-                    return collect($newMessages)->toJson();
+                    $newMessages[] = Message::create([
+                        'assistant_thread_id' => $assistantThread->id,
+                        'is_assistant' => true,
+                        'content' => $response->content,
+                    ]);
+
+                    $assistantThread->assistant_messages = collect($newMessages);
+                    return $assistantThread->toJson();
                 } else {
                     return (object) [
                         'error' => 'Could not retrieve response. Please try again.',

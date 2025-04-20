@@ -8,6 +8,9 @@
 <!--    </div>-->
 <!--  </div>-->
 
+  <Header />
+
+  <div class="container mx-auto">
   <div class="md:pb-0 pb-[80px] text-black">
     <div class="itinerary-stats flex justify-end space-x-1 pr-4 pt-4 align-right text-white" title="Estimated total driving distance" v-if="itineraryData && itineraryData.totalTravelDistance">
       <img class="icon mr-1" src="/images/icons/car.svg" alt="Distance">
@@ -40,6 +43,7 @@
 
     <Backdrop />
   </div>
+  </div>
 
   <Dock />
 
@@ -49,7 +53,8 @@
 import axios from 'axios';
 import Assistant from './assistant/Assistant.vue';
 import Day from './Day.vue';
-import Dock from "./panels/Dock.vue";
+import Dock from './panels/Dock.vue';
+import Header from './panels/Header.vue';
 import ListModal from './modals/ListModal.vue';
 import Backdrop from './Backdrop.vue';
 import Select from './components/Select.vue';
@@ -97,6 +102,7 @@ export default {
     Assistant,
     Day,
     Dock,
+    Header,
   },
 };
 </script>

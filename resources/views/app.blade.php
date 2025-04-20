@@ -17,7 +17,7 @@
     <title>Itinerary</title>
 </head>
 <body class="bg-gray-300">
-<div id="app" class="container mx-auto">
+<div id="app">
     <app :itinerary-id="'{{ $id ?? null }}'"></app>
 </div>
 <script src="{{ mix('js/app.js') }}" defer></script>
