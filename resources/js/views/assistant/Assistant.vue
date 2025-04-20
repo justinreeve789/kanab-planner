@@ -120,7 +120,7 @@ export default {
             message: messageToSend,
           })
           .then((response) => {
-            this.updateMessages(response.data);
+            this.updateMessages(response.data.assistant_messages);
           })
           .catch((error) => {
             console.error('Error fetching assistant response:', error);

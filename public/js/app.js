@@ -24397,7 +24397,7 @@ __webpack_require__.r(__webpack_exports__);
         axios__WEBPACK_IMPORTED_MODULE_4__["default"].post('/api/v1/assistant', {
           message: messageToSend
         }).then(function (response) {
-          _this.updateMessages(response.data);
+          _this.updateMessages(response.data.assistant_messages);
         })["catch"](function (error) {
           console.error('Error fetching assistant response:', error);
         });

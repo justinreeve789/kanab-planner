@@ -9,6 +9,7 @@
 
 namespace App\Services;
 
+use App\Models\Assistant\Message;
 use App\Models\Restaurant;
 use App\Models\Trail;
 use Illuminate\Database\Eloquent\Collection;
@@ -212,6 +213,96 @@ class AssistantService
      * Use RubixML to do some basic phrase matching and determine if the user is asking for a specific action to be taken.
      */
     public function analyzeQueryForRequests(string $query, $resource) {
+    }
+
+    /**
+     * TODO: Use the $threadId to analyze previous messages for context.
+     */
+    public function analyzeQueryForInstantResponse(string $query, int $threadId, $resource = null): ?Message
+    {
+        if ($resource === null) {
+            $message = $this->analyzeQueryForInstantResponseWithoutResource($query);
+        } else {
+            $message = $this->analyzeQueryForInstantResponseWithResource($query, $resource);
+        }
+
+        if (!$message && $resource !== null) {
+            switch (get_class($resource)) {
+                case Trail::class:
+                    $message = $this->analyzeQueryForInstantResponseWithTrail($query, $resource);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if ($message) {
+            $message->assistant_thread_id = $threadId;
+            $message->is_assistant = true;
+            $message->show_in_chat_bubble = $message->show_in_chat_bubble ?? true;
+            return $message;
+        }
+
+        return null;
+    }
+
+    private function analyzeQueryForInstantResponseWithTrail(string $query, Trail $resource): ?Message {
+        if ($this->isMapRequested($query, $resource)) {
+            // TODO: Are there other maps that could be used beside trail maps? Add them here. Either that, or remove
+            // anything we don't need from $resource before passing it into component_params.
+            $trail = new Trail();
+            $trail->id = $resource->id;
+
+            if ($resource->latitude && $resource->longitude) {
+                $trail->latitude = $resource->latitude;
+                $trail->longitude = $resource->longitude;
+                return new Message([
+                    'content' => 'Here\'s a trail map for ' . $resource->name . '.',
+                    'component' => 'buttons/ViewMap',
+                    'show_in_chat_bubble' => false,
+                    'component_params' => json_encode((object)[
+                        'resource' => (object)$trail->toArray(),
+                    ]),
+                ]);
+            }
+
+            return new Message([
+                'content' => 'I couldn\'t find a trail map for ' . $resource->name . '. Weird. Try searching for it in the itinerary trail lists.',
+            ]);
+        }
+        return null;
+    }
+
+    private function analyzeQueryForInstantResponseWithResource(string $query, $resource): ?Message {
+        $stripped = strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $query));
+        if ($stripped === 'thanks' || $stripped === 'thankyou') {
+            if ($resource) {
+                $responses = [
+                    'You\'re welcome. Let me know if you have other questions about ' . $resource->name . '.',
+                ];
+                return new Message(['content' => $responses[array_rand($responses)]]);
+            }
+        }
+        return null;
+    }
+
+    private function analyzeQueryForInstantResponseWithoutResource(string $query): ?Message {
+        $stripped = strtolower(preg_replace("/[^a-zA-Z0-9]/", "", $query));
+        if ($stripped === '') {
+            $responses = [
+                'I\'m not sure I understand what you\'re asking. Could you rephrase your question?',
+            ];
+            return new Message(['content' => $responses[array_rand($responses)]]);
+        }
+
+        if ($stripped === 'thanks' || $stripped === 'thankyou') {
+            $responses = [
+                'You\'re welcome. Let me know if you have other questions.',
+            ];
+            return new Message(['content' => $responses[array_rand($responses)]]);
+        }
+
+        return null;
     }
 
     public function isMapRequested(string $query, $resource) {

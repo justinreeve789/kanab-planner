@@ -56,55 +56,32 @@ class AssistantController extends Controller
             $resource = $newResource;
         }
 
-        // Create an assistant if needed.
-        $assistant = Assistant::get($resource, $openAIService);
-
-        // Save the user's message.
+        // Make sure we're working in the right thread.
         $assistantThread = Thread::updateOrCreate([
             'assistant_session_id' => $assistantSession->id,
             'resource_table' => $resource ? $resource->getTable() : null,
             'resource_id' => $resource ? $resource->id : null,
         ]);
 
+        // Save the user's message.
         $newMessages[] = Message::create([
             'assistant_thread_id' => $assistantThread->id,
             'is_assistant' => false,
             'content' => $message,
         ]);
 
-        // TODO: Analyze the message for requests for trail maps or other content we can retrieve without using OpenAI.
-        if ($resource) {
-            if ($assistantService->isMapRequested($message, $resource)) {
-                // Are there other maps that could be used beside trail maps? Add them here. Either that, or remove
-                // anything we don't need from $resource before passing it into component_params.
-                $trail = new Trail();
-                $trail->id = $resource->id;
-
-                if ($resource->latitude && $resource->longitude) {
-                    $trail->latitude = $resource->latitude;
-                    $trail->longitude = $resource->longitude;
-                    $newMessages[] = Message::create([
-                        'assistant_thread_id' => $assistantThread->id,
-                        'is_assistant' => true,
-                        'content' => 'Here\'s a trail map for ' . $resource->name . '.',
-                        'component' => 'buttons/ViewMap',
-                        'show_in_chat_bubble' => false,
-                        'component_params' => json_encode((object) [
-                            'resource' => (object) $trail->toArray(),
-                        ]),
-                    ]);
-                    $assistantThread->assistant_messages = collect($newMessages);
-                    return $assistantThread->toJson();
-                }
-
-                $newMessages[] = Message::create([
-                    'assistant_thread_id' => $assistantThread->id,
-                    'is_assistant' => true,
-                    'content' => 'I couldn\'t find a trail map for ' . $resource->name . '. Weird. Try searching for it in the itinerary trail lists.',
-                    'show_in_chat_bubble' => true,
-                ]);
-            }
+        // Now we can determnine how to respond. Check if there's any instant responses we can give to the prompt, e.g.
+        // if the user says "thank you" we can instantly respond with a "you're welcome" message without using OpenAI.
+        $instantResponseMessage = $assistantService->analyzeQueryForInstantResponse($message, $assistantThread->id, $resource ?? null);
+        if ($instantResponseMessage) {
+            $instantResponseMessage->save();
+            $newMessages[] = $instantResponseMessage;
+            $assistantThread->assistant_messages = collect($newMessages);
+            return $assistantThread->toJson();
         }
+
+        // Create an assistant if needed.
+        $assistant = Assistant::get($resource, $openAIService);
 
         if ($assistantSession) {
             $newMessages = [];
