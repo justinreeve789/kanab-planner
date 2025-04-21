@@ -12,6 +12,7 @@ class Session extends Model
 {
     const COOKIE_NAME = 'assistant_session_key';
 
+    protected $appends = ['session_key'];
     protected $guarded = [];
     protected $table = 'assistant_sessions';
 
