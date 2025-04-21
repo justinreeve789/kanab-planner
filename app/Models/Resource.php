@@ -21,7 +21,7 @@ abstract class Resource extends Model
 
     const DEFAULT_AVERAGE_HOURS = 2;
 
-    protected $appends = ['description_short', 'adventurousness', 'solitariness', 'strenuousness'];
+    protected $appends = ['description_short', 'adventurousness', 'solitariness', 'strenuousness', 'type'];
 //    protected $with = ['data', 'images', 'text'];
 
     /**
@@ -91,6 +91,11 @@ abstract class Resource extends Model
     public function getStrenuousnessAttribute()
     {
         return $this->getASS('strenuousness');
+    }
+
+    public function getTypeAttribute()
+    {
+        return substr($this->getTable(), 0, -1);
     }
 
     /**

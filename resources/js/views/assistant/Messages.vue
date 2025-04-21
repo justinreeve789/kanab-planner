@@ -48,21 +48,47 @@ export default {
           messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
         }
       })
-    })
+    });
+
     return {store, messagesContainer, getComponent}
   },
+  watch: {
+    // If the current resource changes, retrieve the new resource's messages.
+    'store.messages.length'() {
+      this.$nextTick(() => {
+        if (this.messagesContainer) {
+          this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+        }
+      });
+    },
+    'store.currentResource'(newVal, oldVal) {
+      if (oldVal !== null) {
+        this.store.clearMessages();
+      }
+      this.getMessages();
+    },
+    'store.currentResourceTableId'(newVal, oldVal) {
+      this.store.clearMessages();
+      this.getMessages();
+    },
+  },
   mounted() {
+    // TODO: Make the watcher work and remove this.
+    this.store.clearMessages();
+    this.getMessages();
   },
   methods: {
     getMessages() {
-      let endpoint = '/api/v1/assistant';
-      if (this.store.hasCurrentResource()) {
-        endpoint += '/' + this.store.currentResource.id;
-      }
+      const endpoint = '/api/v1/assistant';
       axios
-        .get(endpoint)
+        .get(endpoint, {
+          params: {
+            resource_table: this.store.hasCurrentResource() ? this.store.currentResourceTable : null,
+            resource_id: this.store.hasCurrentResource() ? this.store.currentResourceId : null,
+          },
+        })
         .then((response) => {
-          console.log(response.data);
+          this.store.messages = response.data;
         })
         .catch((error) => {
           console.error('Error fetching assistant response:', error);

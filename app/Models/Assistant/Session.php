@@ -30,7 +30,7 @@ class Session extends Model
         return $this->belongsTo(User::class, 'id', 'user_id');
     }
 
-    protected function session_key(): Attribute
+    protected function sessionKey(): Attribute
     {
         return Attribute::make(
             get: function(): string {

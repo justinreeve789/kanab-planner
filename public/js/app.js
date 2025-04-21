@@ -24338,14 +24338,17 @@ __webpack_require__.r(__webpack_exports__);
   },
   setup: function setup() {
     var store = (0,_stores_assistant_js__WEBPACK_IMPORTED_MODULE_2__.useAssistantStore)();
-
-    // If the current resource changes, we'll want to make sure we're on the messages panel.
-    (0,vue__WEBPACK_IMPORTED_MODULE_3__.watch)(function () {
-      return store.currentResource;
-    }, function (newVal, oldVal) {});
     return {
       store: store
     };
+  },
+  watch: {
+    // If the assistant opens, we'll want to make sure we're on the messages panel.
+    'store.isAssistantOpen': function storeIsAssistantOpen(newVal, oldVal) {
+      if (oldVal === false && newVal === true) {
+        this.scrollToSlide(2, false);
+      }
+    }
   },
   mounted: function mounted() {
     this.store.addMessages(this.messages);
@@ -24354,25 +24357,14 @@ __webpack_require__.r(__webpack_exports__);
     return {
       isOpen: false,
       message: '',
-      messages: [
-        // {
-        //   id: 4,
-        //   content: 'What do I need to know about hiking the Narrows?',
-        //   is_assistant: false,
-        // },
-        // {
-        //   id: 5,
-        //   content: 'Hiking the Narrows requires thorough planning for safety and requires sound judgment, as conditions can be challenging and occasionally hazardous. Always check in with the Zion park rangers at the visitor center for updates regarding water conditions, flash flood risks, and the weather forecast.',
-        //   is_assistant: true,
-        // },
-      ]
+      messages: []
     };
   },
   methods: {
     scrollToSlide: function scrollToSlide(slideNumber) {
       var smoothScroll = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
       this.$nextTick(function () {
-        var carouselItems = document.querySelectorAll('.carousel-item');
+        var carouselItems = document.querySelectorAll('.assistant-panels.carousel .carousel-item');
         if (carouselItems.length >= slideNumber) {
           carouselItems[slideNumber - 1].scrollIntoView({
             behavior: smoothScroll ? 'smooth' : 'instant',
@@ -24395,7 +24387,9 @@ __webpack_require__.r(__webpack_exports__);
           content: '...'
         });
         axios__WEBPACK_IMPORTED_MODULE_4__["default"].post('/api/v1/assistant', {
-          message: messageToSend
+          message: messageToSend,
+          resource_type: this.store.hasCurrentResource() ? this.store.currentResource.type : null,
+          resource_id: this.store.hasCurrentResource() ? this.store.currentResource.id : null
         }).then(function (response) {
           _this.updateMessages(response.data.assistant_messages);
         })["catch"](function (error) {
@@ -24479,15 +24473,43 @@ __webpack_require__.r(__webpack_exports__);
       getComponent: getComponent
     };
   },
-  mounted: function mounted() {},
+  watch: {
+    // If the current resource changes, retrieve the new resource's messages.
+    'store.messages.length': function storeMessagesLength() {
+      var _this = this;
+      this.$nextTick(function () {
+        if (_this.messagesContainer) {
+          _this.messagesContainer.scrollTop = _this.messagesContainer.scrollHeight;
+        }
+      });
+    },
+    'store.currentResource': function storeCurrentResource(newVal, oldVal) {
+      if (oldVal !== null) {
+        this.store.clearMessages();
+      }
+      this.getMessages();
+    },
+    'store.currentResourceTableId': function storeCurrentResourceTableId(newVal, oldVal) {
+      this.store.clearMessages();
+      this.getMessages();
+    }
+  },
+  mounted: function mounted() {
+    // TODO: Make the watcher work and remove this.
+    this.store.clearMessages();
+    this.getMessages();
+  },
   methods: {
     getMessages: function getMessages() {
+      var _this2 = this;
       var endpoint = '/api/v1/assistant';
-      if (this.store.hasCurrentResource()) {
-        endpoint += '/' + this.store.currentResource.id;
-      }
-      axios__WEBPACK_IMPORTED_MODULE_2__["default"].get(endpoint).then(function (response) {
-        console.log(response.data);
+      axios__WEBPACK_IMPORTED_MODULE_2__["default"].get(endpoint, {
+        params: {
+          resource_table: this.store.hasCurrentResource() ? this.store.currentResourceTable : null,
+          resource_id: this.store.hasCurrentResource() ? this.store.currentResourceId : null
+        }
+      }).then(function (response) {
+        _this2.store.messages = response.data;
       })["catch"](function (error) {
         console.error('Error fetching assistant response:', error);
       });
@@ -26272,7 +26294,7 @@ var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 }, null, -1 /* HOISTED */);
 var _hoisted_8 = [_hoisted_7];
 var _hoisted_9 = {
-  "class": "carousel bg-white w-full"
+  "class": "assistant-panels carousel bg-white w-full"
 };
 var _hoisted_10 = {
   "class": "carousel-item w-full"
@@ -43819,6 +43841,7 @@ var useAssistantStore = (0,pinia__WEBPACK_IMPORTED_MODULE_0__.defineStore)('assi
       currentResource: null,
       currentResourceTable: null,
       currentResourceId: null,
+      currentResourceTableId: null,
       isAssistantOpen: false,
       messages: []
     };
@@ -43836,11 +43859,7 @@ var useAssistantStore = (0,pinia__WEBPACK_IMPORTED_MODULE_0__.defineStore)('assi
       this.messages = [];
     },
     hasCurrentResource: function hasCurrentResource() {
-      if (this.currentResource) {
-        return true;
-      } else {
-        return false;
-      }
+      return !!this.currentResource;
     },
     removeMessage: function removeMessage(index) {
       this.messages.splice(index, 1);
@@ -43851,6 +43870,7 @@ var useAssistantStore = (0,pinia__WEBPACK_IMPORTED_MODULE_0__.defineStore)('assi
     setCurrentResource: function setCurrentResource(table, id, resource) {
       this.currentResourceTable = table;
       this.currentResourceId = id;
+      this.currentResourceTableId = table + '_' + id;
       this.currentResource = resource;
     }
   }

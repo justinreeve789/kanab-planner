@@ -53,6 +53,8 @@ class OpenAIService
     public const GENERATE_GUIDE_PROMPTS_SYSTEM = 'You are a helpful assistant that creates a FAQ about $$TOPIC$$. Separate out content into many questions and output as JSON. Reword the answers while keeping useful, factual information. Some opinions are okay if they don\'t advertise a specific product. Each entry in the JSON array only has two attributes: prompt and answer. ONLY output JSON, nothing else.';
     public const GENERATE_LOCATION_PROMPTS_SYSTEM = 'You are a helpful assistant that creates a FAQ of things hikers and tourists would like to know about a trail or location. Separate out content into many questions and output as JSON. Reword the answers while keeping useful information that hikers and tourists would find interesting. Each entry in the JSON array only has two attributes: prompt and answer. ONLY output JSON, nothing else.';
     public const GENERATE_TRAIL_PROMPTS_SYSTEM = 'You are a helpful assistant that creates a FAQ of things hikers and tourists would like to know about a trail or location. Separate out content into many questions and output as JSON. Reword the answers while keeping useful information that hikers and tourists would find interesting. Each entry in the JSON array only has two attributes: prompt and answer. ONLY output JSON, nothing else.';
+
+    public const MAX_PROMPT_TOKENS = 500;
     public const MAX_SECONDS_FOR_QUERY = 15;
     public const POLL_SECONDS = 1;
 
@@ -66,7 +68,7 @@ class OpenAIService
      * @param $threadId
      * @return object
      */
-    public function query($prompt, $maxTokens = 500, $model = null, Assistant $assistant, $threadId = null) {
+    public function query($prompt, $maxTokens = 750, $model = null, Assistant $assistant, $threadId = null) {
         if ($model === null) {
             $model = Config::get('openai.model');
         }
@@ -85,14 +87,10 @@ class OpenAIService
 
         $run = OpenAI::threads()->runs()->create($threadId, [
             'assistant_id' => $assistant->assistant_id,
-            'max_prompt_tokens' => 5000,
-            'max_completion_tokens' => 5000,
+            'max_prompt_tokens' => self::MAX_PROMPT_TOKENS,
+            'max_completion_tokens' => $maxTokens,
             'temperature' => self::DEFAULT_TEMPERATURE,
             'top_p' => self::DEFAULT_TOP_P,
-            'truncation_strategy' => [
-                'type' => 'last_messages',
-                'last_messages' => 1,
-            ],
         ]);
 
         // Poll until the run is complete.
@@ -103,7 +101,12 @@ class OpenAIService
             sleep(self::POLL_SECONDS);
             $run = OpenAI::threads()->runs()->retrieve($threadId, $run->id);
             Log::info($run->toArray());
-        } while ($run->status !== 'completed' && time() < $startTime + self::MAX_SECONDS_FOR_QUERY * 1000);
+        } while ($run->status !== 'completed' && $run->status !== 'failed' && time() < $startTime + self::MAX_SECONDS_FOR_QUERY);
+
+        if ($run->status === 'failed') {
+            Log::error('Could not run query:', $run->toArray());
+            return null;
+        }
 
         // Retrieve messages.
         $result = OpenAI::threads()->messages()->list($threadId);
@@ -118,7 +121,7 @@ class OpenAIService
 //            'tool_calls' => $result['choices'][0]['message']['toolCalls'],
 //            'prompt_tokens' => $result['usage']['promptTokens'],
 //            'completion_tokens' => $result['usage']['completionTokens'],
-//            'total_tokens' => $result['usage']['totalTokens'],
+//            'total_tokens' => $result->usage->totalTokens,
 //            'processing_ms' => $result['meta']['openai']['processingMs'],
         ];
     }

@@ -16,6 +16,6 @@ class Thread extends Model
     }
 
     public function assistant_session(): BelongsTo {
-        return $this->belongsTo(Session::class, 'id', 'assistant_session_id');
+        return $this->belongsTo(Session::class, 'assistant_session_id', 'id');
     }
 }

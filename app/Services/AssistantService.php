@@ -259,10 +259,10 @@ class AssistantService
                 return new Message([
                     'content' => 'Here\'s a trail map for ' . $resource->name . '.',
                     'component' => 'buttons/ViewMap',
-                    'show_in_chat_bubble' => false,
                     'component_params' => json_encode((object)[
                         'resource' => (object)$trail->toArray(),
                     ]),
+                    'show_in_chat_bubble' => false,
                 ]);
             }
 
@@ -283,6 +283,15 @@ class AssistantService
                 return new Message(['content' => $responses[array_rand($responses)]]);
             }
         }
+
+        if ($this->isAccommodationsRequested($query)) {
+            return new Message([
+                'content' => 'I can help you find suitable accommodations near ' . $resource->name . '.',
+                'component' => 'buttons/FindAccommodations',
+                'component_params' => [],
+                'show_in_chat_bubble' => false,
+            ]);
+        }
         return null;
     }
 
@@ -302,6 +311,15 @@ class AssistantService
             return new Message(['content' => $responses[array_rand($responses)]]);
         }
 
+        if ($this->isAccommodationsRequested($query)) {
+            return new Message([
+                'content' => 'I can help you find suitable accommodations.',
+                'component' => 'buttons/FindAccommodations',
+                'component_params' => [],
+                'show_in_chat_bubble' => false,
+            ]);
+        }
+
         return null;
     }
 
@@ -313,6 +331,22 @@ class AssistantService
                 return true;
             }
         }
+        return false;
+    }
+
+    public function isAccommodationsRequested(string $query): bool {
+        $query = preg_replace('/\s+/', ' ', $query);
+        $query = trim(strtolower($query));
+        if (str_contains($query, 'hotel') || str_contains($query, 'motel') || str_contains($query, 'airbnb') || str_contains($query, 'vrbo') || str_contains($query, 'accommodation')) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * A user may ask how far one resource is from another. Use Gemini or Google Maps since it's more accurate than OpenAI.
+     */
+    public function isDistanceRequested(string $query, $resource): bool {
         return false;
     }
 

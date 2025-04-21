@@ -17,14 +17,25 @@ use Illuminate\Support\Facades\Log;
 
 class AssistantController extends Controller
 {
-    const MAX_TOKENS = 200;
+    const MAX_TOKENS = 2500;
     const OPENAI_RESPONSES_TYPE = 'openai_responses';
 
     public function getMessages(Request $request)
     {
-        $messages = Message::with('session', function($query) {
-            $query->where('session_key', Cookie::get(Session::COOKIE_NAME));
-        })->orderBy('created_at')->get();
+        $resourceTable = $request->get('resource_table');
+        $resourceId = $request->get('resource_id');
+        $messages = Message::whereHas('assistant_thread', function ($query) use ($resourceTable, $resourceId) {
+            $query->where([
+                'resource_table' => $resourceTable,
+                'resource_id' => $resourceId,
+            ])->whereHas('assistant_session', function ($q) {
+                $q->where('session_key', Cookie::get(Session::COOKIE_NAME));
+            });
+        })
+            ->with(['assistant_thread.assistant_session']) // eager load relationships
+            ->orderBy('created_at')
+            ->get();
+        return $messages;
     }
 
     public function sendMessage(Request $request)
@@ -51,7 +62,7 @@ class AssistantController extends Controller
 
         // Do a query analysis to determine if we're referencing a resource, even if we already have one.
         $newResource = $assistantService->analyzeQueryForResource($message);
-        if ($resource !== $newResource) {
+        if ($newResource && $resource !== $newResource) {
             // TODO: Handle a change in topic focus.
             $resource = $newResource;
         }

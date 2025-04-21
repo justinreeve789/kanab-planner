@@ -1,7 +1,6 @@
 <template>
   <div>
-    <div class="tooltip tooltip-primary tooltip-left fixed bottom-4 right-4 z-50 hidden md:block"
-         data-tip="Talk to a virtual assistant">
+    <div class="tooltip tooltip-primary tooltip-left fixed bottom-4 right-4 z-50 hidden md:block" data-tip="Talk to a virtual assistant">
       <button class="btn btn-circle btn-primary h-16 shadow-lg w-16" @click="toggleWindow">
         <img src="images/icons/virtual-assistant.png"/>
       </button>
@@ -12,13 +11,12 @@
       <div
         class="flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full">
         <h2 class="text-lg">Virtual Assistant</h2>
-        <button class="tooltip btn btn-sm btn-ghost hover:bg-cyan-100" @click="showHistory"
-                data-tip="Show chat history">
+        <button class="tooltip btn btn-sm btn-ghost hover:bg-cyan-100" @click="showHistory" data-tip="Show chat history">
           <img src="images/icons/history.svg"/>
         </button>
         <button class="btn btn-sm btn-ghost hover:bg-cyan-100" @click="toggleWindow">✕</button>
       </div>
-      <div class="carousel bg-white w-full">
+      <div class="assistant-panels carousel bg-white w-full">
         <div class="carousel-item w-full">
           <History/>
         </div>
@@ -54,7 +52,7 @@ import axios from 'axios';
 import History from './History.vue';
 import Messages from './Messages.vue';
 import {useAssistantStore} from '../../stores/assistant.js';
-import {watch} from "vue";
+import {ref, watch} from "vue";
 
 export default {
   components: {
@@ -63,12 +61,15 @@ export default {
   },
   setup() {
     const store = useAssistantStore();
-
-    // If the current resource changes, we'll want to make sure we're on the messages panel.
-    watch(() => store.currentResource, (newVal, oldVal) => {
-    });
-
     return {store};
+  },
+  watch: {
+    // If the assistant opens, we'll want to make sure we're on the messages panel.
+    'store.isAssistantOpen'(newVal, oldVal) {
+      if (oldVal === false && newVal === true) {
+        this.scrollToSlide(2, false);
+      }
+    },
   },
   mounted() {
     this.store.addMessages(this.messages);
@@ -77,24 +78,13 @@ export default {
     return {
       isOpen: false,
       message: '',
-      messages: [
-        // {
-        //   id: 4,
-        //   content: 'What do I need to know about hiking the Narrows?',
-        //   is_assistant: false,
-        // },
-        // {
-        //   id: 5,
-        //   content: 'Hiking the Narrows requires thorough planning for safety and requires sound judgment, as conditions can be challenging and occasionally hazardous. Always check in with the Zion park rangers at the visitor center for updates regarding water conditions, flash flood risks, and the weather forecast.',
-        //   is_assistant: true,
-        // },
-      ],
+      messages: [],
     };
   },
   methods: {
     scrollToSlide(slideNumber, smoothScroll = true) {
       this.$nextTick(() => {
-        const carouselItems = document.querySelectorAll('.carousel-item');
+        const carouselItems = document.querySelectorAll('.assistant-panels.carousel .carousel-item');
         if (carouselItems.length >= slideNumber) {
           carouselItems[slideNumber - 1].scrollIntoView({
             behavior: smoothScroll ? 'smooth' : 'instant',
@@ -118,6 +108,8 @@ export default {
         axios
           .post('/api/v1/assistant', {
             message: messageToSend,
+            resource_type: this.store.hasCurrentResource() ? this.store.currentResource.type : null,
+            resource_id: this.store.hasCurrentResource() ? this.store.currentResource.id : null,
           })
           .then((response) => {
             this.updateMessages(response.data.assistant_messages);

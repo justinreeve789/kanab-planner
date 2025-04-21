@@ -12,7 +12,7 @@ class Message extends Model
     protected $guarded = [];
     protected $table = 'assistant_messages';
 
-    public function assistant_session(): BelongsTo {
-        return $this->belongsTo(Session::class, 'id', 'assistant_session_id');
+    public function assistant_thread(): BelongsTo {
+        return $this->belongsTo(Thread::class, 'assistant_thread_id', 'id');
     }
 }

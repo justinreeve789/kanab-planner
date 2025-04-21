@@ -5,6 +5,7 @@ export const useAssistantStore = defineStore('assistant', {
         currentResource: null,
         currentResourceTable: null,
         currentResourceId: null,
+        currentResourceTableId: null,
         isAssistantOpen: false,
         messages: [],
     }),
@@ -21,11 +22,7 @@ export const useAssistantStore = defineStore('assistant', {
             this.messages = [];
         },
         hasCurrentResource() {
-            if (this.currentResource) {
-                return true;
-            } else {
-                return false;
-            }
+            return !!this.currentResource;
         },
         removeMessage(index) {
             this.messages.splice(index, 1);
@@ -36,6 +33,7 @@ export const useAssistantStore = defineStore('assistant', {
         setCurrentResource(table, id, resource) {
             this.currentResourceTable = table;
             this.currentResourceId = id;
+            this.currentResourceTableId = table + '_' + id;
             this.currentResource = resource;
         },
     }
