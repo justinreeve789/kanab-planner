@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('resource_table')->nullable();
             $table->integer('resource_id')->unsigned()->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->unique(['assistant_id', 'assistant_type']);
             $table->unique(['assistant_type', 'resource_table', 'resource_id']);
         });

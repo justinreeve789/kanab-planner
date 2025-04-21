@@ -26,6 +26,7 @@
  * - If asked about nearby trails or restaurants, use a Haversine search to find nearby resources rather than OpenAI. If
  * they're trails, find trails of similar or shorter length. Then construct short snippets about the trails.
  * - If asked about how to get to a place, open Google Maps with directions.
+ * - If asked about family-friendly activities in the area or stuff to do, reference the events table.
  */
 namespace App\Services;
 
@@ -143,6 +144,7 @@ class OpenAIService
                     $instructions = 'You are assisting a hiker looking at a trail page about the ' . $resource->name . ' Trail (ID "trail_' . $resource->id . '") in the ' . $resource->area->name . ' area. Your task is to provide context-sensitive responses about the trail and answer their questions.';
                     break;
                 default:
+                    $name = 'Resource ' . $resource->type . ' ' . $resource->id;
                     break;
             }
         } else {
@@ -361,5 +363,36 @@ class OpenAIService
             $prompt .= '\r\n' . $rt->raw;
         }
         $this->query($prompt);
+    }
+
+    public function promptsToAdd() {
+        return [
+            [
+                'prompts' => [
+                    'Give me trail maps.',
+                    'I need trail maps.',
+                    'Show me trail maps.',
+                    'Trail maps',
+                    'Do you have trail maps?',
+                    'Just give me a map.',
+                ],
+                'answer' => 'You may browse the trails and find maps by selecting "Trails" from the menu. If you mention a specific trail, I can provide the map directly.',
+            ],
+            [
+                'prompts' => [
+                    'What restaurants are there?',
+                    'Where can I eat?',
+                    'I\'m hungry.',
+                    'Restaurants nearby',
+                ],
+                'answer' => 'You may browse the restaurants by selecting "Restaurants" from the menu.',
+            ],
+            'prompts' => [
+                'What\'s happening?',
+                'Give me something to do.',
+                'Stuff to do',
+            ],
+            'answer' => 'There are always events going on in the area! You may browse the local events by selecting "Events" from the menu.',
+        ];
     }
 }

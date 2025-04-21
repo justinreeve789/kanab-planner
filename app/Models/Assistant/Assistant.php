@@ -5,10 +5,13 @@ namespace App\Models\Assistant;
 use App\Services\OpenAIService;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Config;
 
 class Assistant extends Model
 {
+    use SoftDeletes;
+
     const OPENAI_ASSISTANT_TYPE = 'openai_assistant';
 
     protected $guarded = [];

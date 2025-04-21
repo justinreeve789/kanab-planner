@@ -10,6 +10,7 @@
 namespace App\Services;
 
 use App\Models\Assistant\Message;
+use App\Models\Location;
 use App\Models\Restaurant;
 use App\Models\Trail;
 use Illuminate\Database\Eloquent\Collection;
@@ -25,6 +26,7 @@ class AssistantService
     const TRAILS = 'trails';
 
     public $client;
+    public $phraseService;
     public $wordsToRemove = [
         'backpacking',
         'backpack',
@@ -44,10 +46,27 @@ class AssistantService
     public function __construct()
     {
         $this->client = new Client(Config::get('scout.meilisearch.host'), Config::get('scout.meilisearch.key'));
+        $this->phraseService = new PhraseService();
         $this->stats = [
             self::RESTAURANTS => [],
             self::TRAILS => [],
         ];
+    }
+
+    public function transformLinks($message): string {
+        return $message;
+        $analysis = $this->phraseService->analyzePhraseWithSpacy($message);
+        if (isset($analysis['PROPN'])) {
+            foreach ($analysis['PROPN'] as $word) {
+                Log::info($word);
+                $location = Location::search($word)->where('name', $word)->options(['rankingScoreThreshold' => 0.9])->first();
+                if ($location && $location->url !== null) {
+                    Log::info($location->url);
+                    $message = str_replace($word, '<a href="' . $location->url . '" target="_blank">' . $word . '</a>', $message);
+                }
+            }
+        }
+        return $message;
     }
 
     public function getResourceFromTypeAndId(string $type, string $id) {

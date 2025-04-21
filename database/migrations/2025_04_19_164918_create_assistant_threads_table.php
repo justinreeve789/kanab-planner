@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('resource_table')->nullable();
             $table->integer('resource_id')->unsigned()->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->unique(['thread_key', 'thread_type']);
             $table->index(['resource_table', 'resource_id']);
             $table->foreign('assistant_session_id')->references('id')->on('assistant_sessions')->onDelete('cascade');

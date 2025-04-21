@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('component', 32)->nullable();
             $table->json('component_params')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->foreign('assistant_thread_id')->references('id')->on('assistant_threads')->onDelete('cascade');
         });
 

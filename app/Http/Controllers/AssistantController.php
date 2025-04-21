@@ -31,8 +31,7 @@ class AssistantController extends Controller
             ])->whereHas('assistant_session', function ($q) {
                 $q->where('session_key', Cookie::get(Session::COOKIE_NAME));
             });
-        })
-            ->with(['assistant_thread.assistant_session']) // eager load relationships
+        })->with(['assistant_thread.assistant_session'])
             ->orderBy('created_at')
             ->get();
         return $messages;
@@ -98,12 +97,12 @@ class AssistantController extends Controller
             'content' => $message,
         ]);
 
-        // Now we can determnine how to respond. Check if there's any instant responses we can give to the prompt, e.g.
+        // Now we can determine how to respond. Check if there's any instant responses we can give to the prompt, e.g.
         // if the user says "thank you" we can instantly respond with a "you're welcome" message without using OpenAI.
         $instantResponseMessage = $assistantService->analyzeQueryForInstantResponse($message, $assistantThread->id, $resource ?? null);
         if ($instantResponseMessage) {
             $instantResponseMessage->save();
-            $newMessages[] = $instantResponseMessage;
+            $newMessages[] = $assistantService->transformLinks($instantResponseMessage);
             $assistantThread->assistant_messages = collect($newMessages);
             return $assistantThread->toJson();
         }
@@ -129,7 +128,7 @@ class AssistantController extends Controller
                     $newMessages[] = Message::create([
                         'assistant_thread_id' => $assistantThread->id,
                         'is_assistant' => true,
-                        'content' => $response->content,
+                        'content' => $assistantService->transformLinks($response->content),
                     ]);
 
                     $assistantThread->assistant_messages = collect($newMessages);
