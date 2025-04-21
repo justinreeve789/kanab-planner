@@ -8,13 +8,17 @@
 
     <div v-if="store.isAssistantOpen"
          class="fixed bottom-[64px] right-0 top-0 left-0 md:right-4 md:top-auto md:left-auto md:bottom-20 w-full md:w-96 md:max-w-[90vw] bg-base-100 md:border md:rounded-xl md:shadow-2xl p-0 z-50">
-      <div
-        class="flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full">
+      <div class="flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full">
         <h2 class="text-lg">Virtual Assistant</h2>
-        <button class="tooltip btn btn-sm btn-ghost hover:bg-cyan-100" @click="showHistory" data-tip="Show chat history">
-          <img src="images/icons/history.svg"/>
-        </button>
-        <button class="btn btn-sm btn-ghost hover:bg-cyan-100" @click="toggleWindow">✕</button>
+        <div class="flex align-right">
+          <button class="tooltip btn btn-sm btn-ghost hover:bg-cyan-100" @click="showHistory" data-tip="Show chat history">
+            <img src="images/icons/history.svg"/>
+          </button>
+          <button class="tooltip btn btn-sm btn-ghost hover:bg-cyan-100" @click="deleteHistory" data-tip="Clear chat history">
+            <img class="h-4" src="images/icons/sweep.svg"/>
+          </button>
+          <button class="btn btn-sm btn-ghost hover:bg-cyan-100" @click="toggleWindow">✕</button>
+        </div>
       </div>
       <div class="assistant-panels carousel bg-white w-full">
         <div class="carousel-item w-full">
@@ -92,6 +96,21 @@ export default {
           });
         }
       });
+    },
+    deleteHistory() {
+      axios
+        .delete('/api/v1/assistant', {
+          params: {
+            resource_table: this.store.hasCurrentResource() ? this.store.currentResourceTable : null,
+            resource_id: this.store.hasCurrentResource() ? this.store.currentResourceId : null,
+          },
+        })
+        .then((response) => {
+          this.store.clearMessages();
+        })
+        .catch((error) => {
+          console.error('Error deleting assistant history:', error);
+        });
     },
     sendMessage() {
       const messageToSend = this.message;

@@ -61,19 +61,19 @@ export default {
         }
       });
     },
-    'store.currentResource'(newVal, oldVal) {
-      if (oldVal !== null) {
-        this.store.clearMessages();
-      }
-      this.getMessages();
-    },
-    'store.currentResourceTableId'(newVal, oldVal) {
-      this.store.clearMessages();
-      this.getMessages();
-    },
+    // 'store.currentResource'(newVal, oldVal) {
+    //   if (oldVal !== null) {
+    //     this.store.clearMessages();
+      // }
+      // this.getMessages();
+    // },
+    // 'store.currentResourceTableId'(newVal, oldVal) {
+      // this.store.clearMessages();
+      // this.getMessages();
+    // },
   },
   mounted() {
-    // TODO: Make the watcher work and remove this.
+    // TODO: Make the watcher work and remove this, so we're not reloading messages each time the chat opens.
     this.store.clearMessages();
     this.getMessages();
   },

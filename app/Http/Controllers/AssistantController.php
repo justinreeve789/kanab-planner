@@ -38,6 +38,23 @@ class AssistantController extends Controller
         return $messages;
     }
 
+    public function deleteMessages(Request $request)
+    {
+        $resourceTable = $request->get('resource_table') ?? null;
+        $resourceId = $request->get('resource_id') ?? null;
+        $sessionKey = Cookie::get(Session::COOKIE_NAME);
+        if ($sessionKey && trim($sessionKey) !== '') {
+            if ($resourceTable === null && $resourceId === null) {
+                Thread::whereHas('assistant_session', function($query) use ($sessionKey) {
+                    $query->where('session_key', $sessionKey);
+                })->where([
+                    'resource_table' => $resourceTable,
+                    'resource_id' => $resourceId,
+                ])->delete();
+            }
+        }
+    }
+
     public function sendMessage(Request $request)
     {
         $assistantService = new AssistantService();
