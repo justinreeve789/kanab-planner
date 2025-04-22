@@ -1,3 +1,10 @@
+.messages .chat-bubble {
+  ol {
+    list-style-type: auto;
+    margin-left: 1em;
+  }
+}
+
 .messages .chat-bubble a {
   color: orange;
   display: inline-block;

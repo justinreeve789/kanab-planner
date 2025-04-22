@@ -24,7 +24,9 @@ class Message extends Model
     }
 
     public function getContentHtmlAttribute() {
-        return self::transformLinks($this->attributes['content']);
+//        $contentHtml = self::convertInlineNumberedListToHtml($this->attributes['content']);
+        $contentHtml = self::transformLinks($this->attributes['content']);
+        return $contentHtml;
     }
 
     /**
@@ -34,19 +36,21 @@ class Message extends Model
         $locations = Location::whereNotNull('url')->get();
         $trails = Trail::whereNotNull('url')->get();
         foreach ($locations as $resource) {
-            $modifiedResourceName = str_ireplace(['restaurant'], '', $resource->name);
-            $modifiedResourceName = strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $modifiedResourceName));
-            $modifiedMessage = strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $message));
+            $modifiedResourceName = str_ireplace(['the ', ' national park', ' restaurant'], '', strtolower($resource->name));
+            $modifiedResourceName = trim(strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $modifiedResourceName)));
+            $modifiedMessage = str_ireplace(['the ', ' national park', ' restaurant'], '', strtolower($message));
+            $modifiedMessage = trim(strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $modifiedMessage)));
             if (stripos($modifiedMessage, $modifiedResourceName) !== false) {
-                $message = str_replace($resource->name, '<a href="' . $resource->url . '" target="_blank"><span>' . $resource->name . '</span></a>', $message);
+                $message = str_ireplace($resource->name, '<a href="' . $resource->url . '" target="_blank"><span>' . $resource->name . '</span></a>', $message);
             }
         }
         foreach ($trails as $resource) {
-            $modifiedResourceName = str_ireplace(['hike', 'trail'], '', $resource->name);
-            $modifiedResourceName = strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $modifiedResourceName));
-            $modifiedMessage = strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $message));
+            $modifiedResourceName = str_ireplace(['the ', ' hike', ' loop', ' trail'], '', strtolower($resource->name));
+            $modifiedResourceName = trim(strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $modifiedResourceName)));
+            $modifiedMessage = str_ireplace(['the ', ' hike', ' loop', ' trail'], '', strtolower($message));
+            $modifiedMessage = trim(strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $modifiedMessage)));
             if (stripos($modifiedMessage, $modifiedResourceName) !== false) {
-                $message = str_replace($resource->name, '<a href="' . $resource->url . '" target="_blank"><span>' . $resource->name . '</span></a>', $message);
+                $message = str_ireplace($resource->name, '<a href="' . $resource->url . '" target="_blank"><span>' . $resource->name . '</span></a>', $message);
             }
         }
         return $message;
@@ -62,5 +66,37 @@ class Message extends Model
 //            }
 //        }
 //        return $message;
+    }
+
+    /**
+     * TODO: Fix this. It truncates the end.
+     */
+    public static function convertInlineNumberedListToHtml($text) {
+        // Match everything before the numbered list
+        if (preg_match('/^(.*?)(\s*\d+\.\s+)/', $text, $prefixMatch)) {
+            $prefix = trim($prefixMatch[1]);
+            // Split into list items
+            $items = preg_split('/\s(?=\d+\.\s)/', $text);
+
+            // Filter out non-list parts (like the first sentence or ending sentence)
+            $listItems = [];
+            foreach ($items as $item) {
+                if (preg_match('/^\d+\.\s*(.*)$/', $item, $m)) {
+                    $listItems[] = trim($m[1]);
+                }
+            }
+
+            // Rebuild the output
+            $html = "<p>{$prefix}:</p>\n<ol>";
+            foreach ($listItems as $li) {
+                $html .= '<li>' . htmlspecialchars($li) . '</li>';
+            }
+            $html .= '</ol>';
+
+            return $html;
+        }
+
+        // If no match, just return escaped version
+        return '<p>' . htmlspecialchars($text) . '</p>';
     }
 }

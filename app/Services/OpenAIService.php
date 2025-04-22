@@ -140,12 +140,17 @@ class OpenAIService
         // Different resources will use different instructions.
         if ($resource) {
             switch (get_class($resource)) {
+                case Restaurant::class:
+                    $name = 'Restaurant ' . $resource->id;
+                    $instructions = 'You are assisting a traveler looking at a restaurant page about ' . $resource->name . '  (ID "' . $resource->type . '_' . $resource->id . '") in the ' . $resource->location->area->name . ' area. Your task is to provide context-sensitive responses about the restaurant and answer their questions.';
+                    break;
                 case Trail::class:
                     $name = 'Trail ' . $resource->id;
                     $instructions = 'You are assisting a hiker looking at a trail page about the ' . $resource->name . ' Trail (ID "trail_' . $resource->id . '") in the ' . $resource->area->name . ' area. Your task is to provide context-sensitive responses about the trail and answer their questions.';
                     break;
                 default:
                     $name = 'Resource ' . $resource->type . ' ' . $resource->id;
+                    $instructions = 'You are assisting a traveler looking at a page about ' . $resource->name . ' (ID "' . $resource->type . '_' . $resource->id . '") in the ' . $resource->area->name . ' area. Your task is to provide context-sensitive answers to their questions.';
                     break;
             }
         } else {

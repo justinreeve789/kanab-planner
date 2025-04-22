@@ -4315,6 +4315,11 @@ hiking-project-map iframe {
   background: linear-gradient(to bottom, #5733FF, #C833FF);
 }
 
+.messages .chat-bubble ol {
+  list-style-type: auto;
+  margin-left: 1em;
+}
+
 .messages .chat-bubble a {
   color: orange;
   display: inline-block;
