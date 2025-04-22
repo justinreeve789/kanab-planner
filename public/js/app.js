@@ -24375,7 +24375,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     deleteHistory: function deleteHistory() {
       var _this = this;
-      axios__WEBPACK_IMPORTED_MODULE_4__["default"]["delete"]('/api/v1/assistant', {
+      axios__WEBPACK_IMPORTED_MODULE_4__["default"]["delete"]('/api/v1/assistant/thread', {
         params: {
           resource_table: this.store.hasCurrentResource() ? this.store.currentResourceTable : null,
           resource_id: this.store.hasCurrentResource() ? this.store.currentResourceId : null
@@ -24393,13 +24393,15 @@ __webpack_require__.r(__webpack_exports__);
       if (messageToSend.trim()) {
         this.store.addMessage({
           is_assistant: false,
-          content: messageToSend
+          content: messageToSend,
+          content_html: messageToSend
         });
         this.store.addMessage({
           is_assistant: true,
-          content: '...'
+          content: '...',
+          content_html: '...'
         });
-        axios__WEBPACK_IMPORTED_MODULE_4__["default"].post('/api/v1/assistant', {
+        axios__WEBPACK_IMPORTED_MODULE_4__["default"].post('/api/v1/assistant/message', {
           message: messageToSend,
           resource_type: this.store.hasCurrentResource() ? this.store.currentResource.type : null,
           resource_id: this.store.hasCurrentResource() ? this.store.currentResource.id : null
@@ -24514,7 +24516,7 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     getMessages: function getMessages() {
       var _this2 = this;
-      var endpoint = '/api/v1/assistant';
+      var endpoint = '/api/v1/assistant/thread';
       axios__WEBPACK_IMPORTED_MODULE_2__["default"].get(endpoint, {
         params: {
           resource_table: this.store.hasCurrentResource() ? this.store.currentResourceTable : null,
@@ -26464,7 +26466,8 @@ var _hoisted_7 = [_hoisted_6];
 var _hoisted_8 = {
   key: 1
 };
-var _hoisted_9 = {
+var _hoisted_9 = ["innerHTML"];
+var _hoisted_10 = {
   key: 0,
   "class": "method-component mt-4"
 };
@@ -26479,7 +26482,9 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       src: message.is_assistant ? '/images/icons/virtual-assistant.png' : '/images/icons/blank-profile.svg'
     }, null, 8 /* PROPS */, _hoisted_4)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(['chat-bubble', message.is_assistant ? 'chat-bubble-primary' : 'chat-bubble-neutral'])
-    }, [message.content == '...' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_5, _hoisted_7)) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message.content) + " ", 1 /* TEXT */), message.component ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_9, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)((0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveDynamicComponent)($setup.getComponent(message.component)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeProps)((0,vue__WEBPACK_IMPORTED_MODULE_0__.guardReactiveProps)(_this.parseMessageParams(message.component_params))), null, 16 /* FULL_PROPS */))])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]))], 2 /* CLASS */)], 2 /* CLASS */)]);
+    }, [message.content == '...' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_5, _hoisted_7)) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+      innerHTML: message.content_html
+    }, null, 8 /* PROPS */, _hoisted_9), message.component ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_10, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)((0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveDynamicComponent)($setup.getComponent(message.component)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeProps)((0,vue__WEBPACK_IMPORTED_MODULE_0__.guardReactiveProps)(_this.parseMessageParams(message.component_params))), null, 16 /* FULL_PROPS */))])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]))], 2 /* CLASS */)], 2 /* CLASS */)]);
   }), 128 /* KEYED_FRAGMENT */))], 512 /* NEED_PATCH */);
 }
 

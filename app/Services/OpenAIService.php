@@ -33,6 +33,7 @@ namespace App\Services;
 use App\Models\ActivityType;
 use App\Models\Area;
 use App\Models\Assistant\Assistant;
+use App\Models\Blog\Post;
 use App\Models\Event;
 use App\Models\Location;
 use App\Models\OpenAIPrompt;
@@ -182,59 +183,149 @@ class OpenAIService
 ';
     }
 
+    private function generateFinetuneDataForArea($area) {
+        $data = '';
+        if (get_class($area) === Area::class) {
+            $areaName = $area->name;
+            $areaId = $area->id;
+            $prompts = $area->openai_prompts;
+            if (isset($prompts)) {
+                foreach ($prompts as $prompt) {
+                    $systemPrompt = "You are assisting a traveler looking at an area page about the " . $areaName . " area. The page has an ID and your task is to provide context-sensitive responses about the area and answer their questions.";
+                    $userPrompt = "I'm on the page for the " . $areaName . ", which has ID 'area_" . $areaId . "'. User question: '" . $prompt->prompt . "'";
+                    $data .= $this->createOpenAIFinetuneJson($systemPrompt, $userPrompt, $prompt->answer);
+                }
+            }
+        }
+        return $data;
+    }
+
+    private function generateFinetuneDataForLocation($resource) {
+        $data = '';
+        if (get_class($resource) === Location::class) {
+            if (!isset($resource->area)) {
+                $resource->area = Area::where('id', $resource->area_id)->first();
+            }
+            $areaName = $resource->area->name;
+            $resourceType = $resource->type;
+            $resourceId = $resource->id;
+            $resourceName = $resource->name;
+            $prompts = $resource->openai_prompts;
+            if (isset($prompts)) {
+                foreach ($prompts as $prompt) {
+                    $systemPrompt = "You are assisting a traveler looking at a specific location page. Each location is a point of interest that has an ID and your task is to provide context-sensitive responses about the location and answer their questions.";
+                    $userPrompt = "I'm on the location page for " . $resourceName . ", which has ID '" . $resourceType . "_" . $resourceId . "' and is in the " . $areaName . " area. User question: '" . $prompt->prompt . "'";
+                    $data .= $this->createOpenAIFinetuneJson($systemPrompt, $userPrompt, $prompt->answer);
+                }
+            }
+        }
+        return $data;
+    }
+
+    private function generateFinetuneDataForRestaurant($resource) {
+        $data = '';
+        if (get_class($resource) === Restaurant::class) {
+            if (!isset($resource->area)) {
+                $resource->area = Area::where('id', $resource->area_id)->first();
+            }
+            $areaName = $resource->area->name;
+            $resourceType = $resource->type;
+            $resourceId = $resource->id;
+            $resourceName = $resource->name;
+            $prompts = $resource->openai_prompts;
+            if (isset($prompts)) {
+                foreach ($prompts as $prompt) {
+                    $systemPrompt = "You are assisting a user looking at a specific restaurant page. Each restaurant has an ID and your task is to provide context-sensitive responses about the restaurant and answer their questions.";
+                    $userPrompt = "I'm on the restaurant page for " . $resourceName . ", which has ID '" . $resourceType . "_" . $resourceId . "' and is in the " . $areaName . " area. User question: '" . $prompt->prompt . "'";
+                    $data .= $this->createOpenAIFinetuneJson($systemPrompt, $userPrompt, $prompt->answer);
+                }
+            }
+        }
+        return $data;
+    }
+
+    private function generateFinetuneDataForTrail($resource) {
+        $data = '';
+        if (get_class($resource) === Trail::class) {
+            if (!isset($resource->area)) {
+                $resource->area = Area::where('id', $resource->area_id)->first();
+            }
+            $areaName = $resource->area->name;
+            $resourceType = $resource->type;
+            $resourceId = $resource->id;
+            $resourceName = $resource->name;
+            $prompts = $resource->openai_prompts;
+            if (isset($prompts)) {
+                foreach ($prompts as $prompt) {
+                    $systemPrompt = "You are assisting a hiker looking at a specific trail page. Each trail has an ID and your task is to provide context-sensitive responses about the trail and answer their questions.";
+                    $userPrompt = "I'm on the trail page for " . $resourceName . ", which has ID '" . $resourceType . "_" . $resourceId . "' and is in the " . $areaName . " area. User question: '" . $prompt->prompt . "'";
+                    $data .= $this->createOpenAIFinetuneJson($systemPrompt, $userPrompt, $prompt->answer);
+                }
+            }
+        }
+        return $data;
+    }
+
     public function generateFinetuneData($resource) {
         if (!isset($resource->openai_prompts)) {
             throw new Exception('Missing OpenAI prompts.');
         }
 
-        $data = '';
-        $areaName = '';
-        $trailId = null;
-        $trailName = '';
-
         // A blog post could be linked to any resource, so we'll make sure we have the right one first, and apply the prompts manually.
-        if (get_class($resource) === 'App\Models\Blog\Post') {
+        if (get_class($resource) === Post::class) {
             $post = $resource;
-            if ($post->resource_table === 'trails') {
-                if (!isset($post->trail) || !isset($post->area)) {
-                    $post->trail = Trail::with('area')->where('id', $post->resource_id)->first();
-                    if (!$post->trail) {
-                        return null;
-                    }
-                }
+            if ($post->openai_prompts) {
+                $prompts = $post->openai_prompts;
+            } else {
+                $prompts = OpenAIPrompt::where(['source_table' => 'blog_posts', 'source_id' => $post->id])->get();
+            }
 
-                $areaName = $post->trail->area->name;
-                $trailId = $post->trail->id;
-                $trailName = $post->trail->name;
-
-                if ($post->openai_prompts) {
-                    $prompts = $post->openai_prompts;
-                } else {
-                    $prompts = OpenAIPrompt::where(['source_table' => 'blog_posts', 'source_id' => $post->id])->get();
+            if ($post->resource_table === ResourceEnum::AREAS_TABLE) {
+                $area = Area::where('id', $post->resource_id)->first();
+                if ($area) {
+                    $area->openai_prompts = $prompts;
+                    return $this->generateFinetuneDataForArea($area);
                 }
             }
-        }
 
-        if (get_class($resource) === 'App\Models\Trail') {
-            $trail = $resource;
-            if (!isset($trail->area)) {
-                $trail->area = Area::where('id', $trail->area_id)->first();
+            if ($post->resource_table === ResourceEnum::LOCATIONS_TABLE) {
+                $location = Location::where('id', $post->resource_id)->first();
+                if ($location) {
+                    $location->openai_prompts = $prompts;
+                    return $this->generateFinetuneDataForLocation($location);
+                }
             }
-            $areaName = $trail->area->name;
-            $trailId = $trail->id;
-            $trailName = $trail->name;
-            $prompts = $resource->openai_prompts;
-        }
 
-        if (isset($prompts))  {
-            foreach ($prompts as $prompt) {
-                $systemPrompt = "You are assisting a hiker looking at a specific trail page. Each trail has an ID and your task is to provide context-sensitive responses about the trail and answer their questions.";
-                $userPrompt = "I'm on the trail page for " . $trailName . ", which has ID 'trail_" . $trailId . "' and is in the " . $areaName . " area. User question: '" . $prompt->prompt . "'";
-                $data .= $this->createOpenAIFinetuneJson($systemPrompt, $userPrompt, $prompt->answer);
+            if ($post->resource_table === ResourceEnum::RESTAURANTS_TABLE) {
+                $restaurant = Restaurant::where('id', $post->resource_id)->first();
+                if ($restaurant) {
+                    $restaurant->openai_prompts = $prompts;
+                    return $this->generateFinetuneDataForRestaurant($restaurant);
+                }
+            }
+
+            if ($post->resource_table === ResourceEnum::TRAILS_TABLE) {
+                $trail = Trail::where('id', $post->resource_id)->first();
+                if ($trail) {
+                    $trail->openai_prompts = $prompts;
+                    return $this->generateFinetuneDataForTrail($trail);
+                }
             }
         }
 
-        return $data;
+        if (get_class($resource) === Location::class) {
+            if (!isset($resource->openai_prompts)) {
+                $resource->openai_prompts = OpenAIPrompt::where(['source_table' => $resource->getTable(), 'source_id' => $resource->id])->get();
+            }
+            return $this->generateFinetuneDataForLocation($resource);
+        }
+
+        if (get_class($resource) === Trail::class) {
+            if (!isset($resource->openai_prompts)) {
+                $resource->openai_prompts = OpenAIPrompt::where(['source_table' => $resource->getTable(), 'source_id' => $resource->id])->get();
+            }
+            return $this->generateFinetuneDataForTrail($resource);
+        }
     }
 
     public function summarizeReviewsOfTrails(string $text, $maxTokens = 2000) {

@@ -102,7 +102,7 @@ class AssistantController extends Controller
         $instantResponseMessage = $assistantService->analyzeQueryForInstantResponse($message, $assistantThread->id, $resource ?? null);
         if ($instantResponseMessage) {
             $instantResponseMessage->save();
-            $newMessages[] = $assistantService->transformLinks($instantResponseMessage);
+            $newMessages[] = $instantResponseMessage;
             $assistantThread->assistant_messages = collect($newMessages);
             return $assistantThread->toJson();
         }
@@ -125,12 +125,13 @@ class AssistantController extends Controller
                         'thread_type' => self::OPENAI_RESPONSES_TYPE,
                     ]);
 
-                    $newMessages[] = Message::create([
+                    $newMessage = Message::create([
                         'assistant_thread_id' => $assistantThread->id,
                         'is_assistant' => true,
-                        'content' => $assistantService->transformLinks($response->content),
+                        'content' => $response->content,
                     ]);
 
+                    $newMessages[] = $newMessage;
                     $assistantThread->assistant_messages = collect($newMessages);
                     return $assistantThread->toJson();
                 } else {

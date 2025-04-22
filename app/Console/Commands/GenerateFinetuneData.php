@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Area;
 use App\Models\Blog\Post;
 use App\Models\Location;
 use App\Models\OpenAIPrompt;
@@ -12,12 +13,14 @@ use Illuminate\Console\Command;
 
 class GenerateFinetuneData extends Command
 {
+    const WORD_LIMIT_PER_FILE = 40000;
+
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'openai:finetune {--locations} {--trails} {--show} {--output=}';
+    protected $signature = 'openai:finetune {--areas} {--locations} {--trails} {--show} {--output=}';
 
     /**
      * The console command description.
@@ -27,6 +30,7 @@ class GenerateFinetuneData extends Command
     protected $description = 'Generate fine-tune data for OpenAI.';
 
     private $openAIService;
+    private $wordCount = [];
 
     protected $showOutput;
 
@@ -37,14 +41,24 @@ class GenerateFinetuneData extends Command
      */
     public function handle()
     {
+        $doAreas = $this->option('areas');
         $doLocations = $this->option('locations');
         $doTrails = $this->option('trails');
         $this->showOutput = $this->option('show');
         $this->outputFile = $this->option('output');
         $this->openAIService = new OpenAIService();
 
+        $areas = Area::all();
+        foreach ($areas as $area) {
+            $this->wordCount[$area->id] = 0;
+        }
+
         if ($this->output && file_exists($this->outputFile)) {
             unlink($this->outputFile);
+        }
+
+        if ($doAreas) {
+            $this->processAreas();
         }
 
         if ($doLocations) {
@@ -53,6 +67,28 @@ class GenerateFinetuneData extends Command
 
         if ($doTrails) {
             $this->processTrails();
+        }
+    }
+
+    public function processAreas()
+    {
+        $posts = Post::with('openai_prompts')
+            ->whereHas('openai_prompts')
+            ->where('resource_table', 'areas')
+            ->whereNotNull('resource_id')
+            ->get();
+        foreach ($posts as $post) {
+            $area = Area::where('id', $post->resource_id)->first();
+            if (!$area) {
+                continue;
+            }
+            $json = $this->openAIService->generateFinetuneData($post);
+            $this->wordCount[$area->id] += str_word_count($json);
+            $seqOutputFile = $this->outputFile . '-area-' . $area->id . '-' . ceil($this->wordCount[$area->id] / self::WORD_LIMIT_PER_FILE) . '.jsonl';
+            file_put_contents($seqOutputFile, $json, FILE_APPEND);
+            if ($this->showOutput) {
+                echo $json;
+            }
         }
     }
 
@@ -74,8 +110,10 @@ class GenerateFinetuneData extends Command
             $post->location = $location;
             $post->area = $location->area;
             $json = $this->openAIService->generateFinetuneData($post);
+            $this->wordCount[$post->area->id] += str_word_count($json);
+            $seqOutputFile = $this->outputFile . '-area-' . $post->area->id . '-' . ceil($this->wordCount[$post->area->id] / self::WORD_LIMIT_PER_FILE) . '.jsonl';
             if ($this->outputFile) {
-                file_put_contents($this->outputFile, $json, FILE_APPEND);
+                file_put_contents($seqOutputFile, $json, FILE_APPEND);
             }
             if ($this->showOutput) {
                 echo $json;
@@ -88,8 +126,10 @@ class GenerateFinetuneData extends Command
             ->get();
         foreach ($locations as $location) {
             $json = $this->openAIService->generateFinetuneData($location);
+            $this->wordCount[$location->area->id] += str_word_count($json);
+            $seqOutputFile = $this->outputFile . '-area-' . $location->area->id . '-' . ceil($this->wordCount[$location->area->id] / self::WORD_LIMIT_PER_FILE) . '.jsonl';
             if ($this->outputFile) {
-                file_put_contents($this->outputFile, $json, FILE_APPEND);
+                file_put_contents($seqOutputFile, $json, FILE_APPEND);
             }
             if ($this->showOutput) {
                 echo $json;
@@ -112,8 +152,10 @@ class GenerateFinetuneData extends Command
             $post->trail = $trail;
             $post->area = $trail->area;
             $json = $this->openAIService->generateFinetuneData($post);
+            $this->wordCount[$post->area->id] += str_word_count($json);
+            $seqOutputFile = $this->outputFile . '-area-' . $post->area->id . '-' . ceil($this->wordCount[$post->area->id] / self::WORD_LIMIT_PER_FILE) . '.jsonl';
             if ($this->outputFile) {
-                file_put_contents($this->outputFile, $json, FILE_APPEND);
+                file_put_contents($seqOutputFile, $json, FILE_APPEND);
             }
             if ($this->showOutput) {
                 echo $json;
@@ -125,12 +167,11 @@ class GenerateFinetuneData extends Command
             ->whereHas('openai_prompts')
             ->get();
         foreach ($trails as $trail) {
-//            if ($trail->id != 17) {
-//                continue;
-//            }
             $json = $this->openAIService->generateFinetuneData($trail);
+            $this->wordCount[$trail->area->id] += str_word_count($json);
+            $seqOutputFile = $this->outputFile . '-area-' . $post->area->id . '-' . ceil($this->wordCount[$trail->area->id] / self::WORD_LIMIT_PER_FILE) . '.jsonl';
             if ($this->outputFile) {
-                file_put_contents($this->outputFile, $json, FILE_APPEND);
+                file_put_contents($seqOutputFile, $json, FILE_APPEND);
             }
             if ($this->showOutput) {
                 echo $json;

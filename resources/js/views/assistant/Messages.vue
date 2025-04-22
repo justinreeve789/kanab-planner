@@ -16,7 +16,7 @@
             <span class="loading loading-dots loading-xs"></span>
           </div>
           <div v-else>
-            {{ message.content }}
+            <span v-html="message.content_html"></span>
             <div class="method-component mt-4" v-if="message.component">
               <component :is="getComponent(message.component)" v-bind="this.parseMessageParams(message.component_params)"></component>
             </div>
@@ -79,7 +79,7 @@ export default {
   },
   methods: {
     getMessages() {
-      const endpoint = '/api/v1/assistant';
+      const endpoint = '/api/v1/assistant/thread';
       axios
         .get(endpoint, {
           params: {

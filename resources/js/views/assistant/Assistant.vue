@@ -99,7 +99,7 @@ export default {
     },
     deleteHistory() {
       axios
-        .delete('/api/v1/assistant', {
+        .delete('/api/v1/assistant/thread', {
           params: {
             resource_table: this.store.hasCurrentResource() ? this.store.currentResourceTable : null,
             resource_id: this.store.hasCurrentResource() ? this.store.currentResourceId : null,
@@ -119,13 +119,15 @@ export default {
         this.store.addMessage({
           is_assistant: false,
           content: messageToSend,
+          content_html: messageToSend,
         });
         this.store.addMessage({
           is_assistant: true,
           content: '...',
+          content_html: '...',
         });
         axios
-          .post('/api/v1/assistant', {
+          .post('/api/v1/assistant/message', {
             message: messageToSend,
             resource_type: this.store.hasCurrentResource() ? this.store.currentResource.type : null,
             resource_id: this.store.hasCurrentResource() ? this.store.currentResource.id : null,

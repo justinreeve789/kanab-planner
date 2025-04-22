@@ -33,9 +33,14 @@ Route::prefix('v1')->group(function() {
     });
 
     Route::prefix('assistant')->group(function() {
-        Route::get('/', 'App\Http\Controllers\AssistantController@getMessages');
-        Route::post('/', 'App\Http\Controllers\AssistantController@sendMessage');
-        Route::delete('/', 'App\Http\Controllers\AssistantController@deleteMessages');
+        Route::get('/', 'App\Http\Controllers\AssistantController@getAssistants');
+        Route::prefix('message')->group(function() {
+            Route::post('/', 'App\Http\Controllers\AssistantController@sendMessage');
+        });
+        Route::prefix('thread')->group(function() {
+            Route::get('/', 'App\Http\Controllers\AssistantController@getMessages');
+            Route::delete('/', 'App\Http\Controllers\AssistantController@deleteMessages');
+        });
     });
 
     Route::prefix('event')->group(function() {

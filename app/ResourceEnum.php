@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Models\Accommodation;
+use App\Models\Area;
 use App\Models\Blog\Post;
 use App\Models\Event;
 use App\Models\Guide;
@@ -15,6 +16,8 @@ enum ResourceEnum
 {
     const ACCOMMODATIONS_CLASS = Accommodation::class;
     const ACCOMMODATIONS_TABLE = 'accommodations';
+    const AREAS_CLASS = Area::class;
+    const AREAS_TABLE = 'areas';
     const BLOG_POSTS_CLASS = Post::class;
     const BLOG_POSTS_TABLE = 'blog_posts';
     const EVENTS_CLASS = Event::class;

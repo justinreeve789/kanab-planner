@@ -53,22 +53,6 @@ class AssistantService
         ];
     }
 
-    public function transformLinks($message): string {
-        return $message;
-        $analysis = $this->phraseService->analyzePhraseWithSpacy($message);
-        if (isset($analysis['PROPN'])) {
-            foreach ($analysis['PROPN'] as $word) {
-                Log::info($word);
-                $location = Location::search($word)->where('name', $word)->options(['rankingScoreThreshold' => 0.9])->first();
-                if ($location && $location->url !== null) {
-                    Log::info($location->url);
-                    $message = str_replace($word, '<a href="' . $location->url . '" target="_blank">' . $word . '</a>', $message);
-                }
-            }
-        }
-        return $message;
-    }
-
     public function getResourceFromTypeAndId(string $type, string $id) {
         if (is_numeric($id)) {
             switch ($type) {
