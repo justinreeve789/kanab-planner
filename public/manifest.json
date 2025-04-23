@@ -1,10 +1,10 @@
 {
   "name": "Kanab Trip Planner",
-  "short_name": "Trip Planner",
+  "short_name": "Kanab Trip Planner",
   "start_url": "https://alpha.visitkanab.org",
   "display": "standalone",
   "background_color": "#000000",
-  "theme_color": "#e69138",
+  "theme_color": "#000000",
   "orientation": "portrait",
   "scope": "/",
   "icons": [
@@ -20,5 +20,8 @@
     }
   ],
   "description": "An itinerary and trip planner for Kanab, Utah and the surrounding national parks: Zion, Bryce, and the Grand Canyon.",
-  "id": "kanab-trip-planner"
+  "id": "kanab-trip-planner",
+  "categories": [
+    "travel"
+  ]
 }
