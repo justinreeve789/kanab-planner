@@ -23,5 +23,10 @@
   "id": "kanab-trip-planner",
   "categories": [
     "travel"
+  ],
+  "lang": "en",
+  "display_override": [
+    "standalone",
+    "window-controls-overlay"
   ]
 }
