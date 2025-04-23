@@ -26342,7 +26342,7 @@ var _hoisted_18 = {
   "class": "w-full"
 };
 var _hoisted_19 = {
-  "class": "p-4 bg-white"
+  "class": "fixed bottom-[64px] p-4 bg-white w-full sm:relative sm:bottom-0"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_History = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("History");
@@ -26445,7 +26445,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "messages max-h-[350px] p-4",
+  "class": "messages max-h-[540px] lg:max-h-[350px] p-4",
   style: {
     "overflow-y": "scroll"
   },

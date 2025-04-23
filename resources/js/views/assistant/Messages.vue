@@ -1,5 +1,5 @@
 <template>
-  <div class="messages max-h-[350px] p-4" style="overflow-y: scroll;" ref="messagesContainer">
+  <div class="messages max-h-[540px] lg:max-h-[350px] p-4" style="overflow-y: scroll;" ref="messagesContainer">
     <div v-for="(message, index) in store.messages" :key="index">
       <div :class="['chat', message.is_assistant ? 'chat-start' : 'chat-end']">
         <div class="chat-image avatar">

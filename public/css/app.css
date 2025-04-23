@@ -2999,6 +2999,9 @@ video {
 .top-2\.5 {
   top: 0.625rem;
 }
+.bottom-\[100px\] {
+  bottom: 100px;
+}
 .z-10 {
   z-index: 10;
 }
@@ -3107,6 +3110,12 @@ video {
 .mt-6 {
   margin-top: 1.5rem;
 }
+.mb-\[120px\] {
+  margin-bottom: 120px;
+}
+.mb-\[64px\] {
+  margin-bottom: 64px;
+}
 .block {
   display: block;
 }
@@ -3158,11 +3167,17 @@ video {
 .h-screen {
   height: 100vh;
 }
+.h-0 {
+  height: 0px;
+}
 .max-h-\[350px\] {
   max-height: 350px;
 }
 .max-h-full {
   max-height: 100%;
+}
+.max-h-\[540px\] {
+  max-height: 540px;
 }
 .min-h-\[150px\] {
   min-height: 150px;
@@ -3242,8 +3257,14 @@ video {
 .flex-auto {
   flex: 1 1 auto;
 }
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
 .shrink-0 {
   flex-shrink: 0;
+}
+.flex-grow {
+  flex-grow: 1;
 }
 .origin-center {
   transform-origin: center;
@@ -4740,6 +4761,14 @@ hiking-project-map iframe {
 
 @media (min-width: 640px) {
 
+  .sm\:relative {
+    position: relative;
+  }
+
+  .sm\:bottom-0 {
+    bottom: 0px;
+  }
+
   .sm\:order-2 {
     order: 2;
   }
@@ -4825,6 +4854,10 @@ hiking-project-map iframe {
 
 @media (min-width: 768px) {
 
+  .md\:relative {
+    position: relative;
+  }
+
   .md\:bottom-20 {
     bottom: 5rem;
   }
@@ -4839,6 +4872,10 @@ hiking-project-map iframe {
 
   .md\:top-auto {
     top: auto;
+  }
+
+  .md\:bottom-0 {
+    bottom: 0px;
   }
 
   .md\:order-2 {
@@ -4957,6 +4994,14 @@ hiking-project-map iframe {
 
 @media (min-width: 1024px) {
 
+  .lg\:relative {
+    position: relative;
+  }
+
+  .lg\:bottom-0 {
+    bottom: 0px;
+  }
+
   .lg\:order-1 {
     order: 1;
   }
@@ -4977,12 +5022,20 @@ hiking-project-map iframe {
     margin-bottom: 1rem;
   }
 
+  .lg\:mb-0 {
+    margin-bottom: 0px;
+  }
+
   .lg\:flex {
     display: flex;
   }
 
   .lg\:hidden {
     display: none;
+  }
+
+  .lg\:max-h-\[350px\] {
+    max-height: 350px;
   }
 
   .lg\:w-1\/3 {
@@ -4995,6 +5048,10 @@ hiking-project-map iframe {
 
   .lg\:w-full {
     width: 100%;
+  }
+
+  .lg\:w-auto {
+    width: auto;
   }
 
   .lg\:flex-col {

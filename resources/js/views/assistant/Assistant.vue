@@ -38,7 +38,7 @@
           </div>
         </div>
       </div>
-      <div class="p-4 bg-white">
+      <div class="fixed bottom-[64px] p-4 bg-white w-full sm:relative sm:bottom-0">
         <input
           v-model="message"
           @keyup.enter="sendMessage"
