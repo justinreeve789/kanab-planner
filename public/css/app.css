@@ -3901,6 +3901,10 @@ video {
   --join-es: var(--radius-field);
   --join-ee: var(--radius-field);
 }
+html, body {
+  overscroll-behavior-y: none;
+}
+
 html {
   font-family: Arial, sans-serif;
   height: 100%;
@@ -3914,7 +3918,6 @@ body {
   background-size: cover;
   min-height: 100%;
   margin: 0;
-  overscroll-behavior-y: none;
   padding: 0;
   position: relative;
   z-index: -2;
