@@ -148,7 +148,6 @@ export default {
     },
     updateMessages(messages) {
       this.store.removeLastMessage();
-      this.store.removeLastMessage();
       this.store.addMessages(messages);
     },
   }

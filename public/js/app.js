@@ -24420,7 +24420,6 @@ __webpack_require__.r(__webpack_exports__);
     },
     updateMessages: function updateMessages(messages) {
       this.store.removeLastMessage();
-      this.store.removeLastMessage();
       this.store.addMessages(messages);
     }
   }
