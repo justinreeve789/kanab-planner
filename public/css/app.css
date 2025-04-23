@@ -3914,6 +3914,7 @@ body {
   background-size: cover;
   min-height: 100%;
   margin: 0;
+  overscroll-behavior-y: none;
   padding: 0;
   position: relative;
   z-index: -2;
