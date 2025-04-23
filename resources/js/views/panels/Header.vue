@@ -8,7 +8,7 @@
               <path d="M4 6h16M4 12h8m-8 6h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
           </div>
-          <ul class="menu menu-sm dropdown-content bg-base-100 bg-neutral text-neutral-content rounded-box z-1 mt-3 w-52 p-2 shadow" tabindex="0">
+          <ul class="menu menu-lg dropdown-content bg-base-100 bg-neutral text-neutral-content rounded-b-box z-1 mt-3 w-52 p-2 shadow" tabindex="0">
             <li><a>Accommodations</a></li>
             <li><a>Events</a></li>
             <li><a>Locations</a></li>
@@ -16,10 +16,10 @@
             <li><a>Trails</a></li>
           </ul>
         </div>
-        <a class="btn btn-ghost text-xl">Trip Planner</a>
+        <span class="font-bold text-xl">Trip Planner</span>
       </div>
       <div class="navbar-center hidden lg:flex">
-        <ul class="menu menu-horizontal px-1">
+        <ul class="menu menu-horizontal menu-md px-1">
           <li><a>Accommodations</a></li>
           <li><a>Events</a></li>
           <li><a>Locations</a></li>
@@ -45,7 +45,7 @@
                 src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
             </div>
           </div>
-          <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 bg-neutral text-neutral-content rounded-box z-1 mt-3 w-52 p-2 shadow">
+          <ul tabindex="0" class="menu menu-lg dropdown-content bg-base-100 bg-neutral text-neutral-content rounded-b-box z-1 mt-3 w-52 p-2 shadow">
             <li>
               <a class="justify-between">
                 Profile
