@@ -18,6 +18,11 @@
     <title>Itinerary</title>
 </head>
 <body class="bg-gray-300">
+<script>
+  if (typeof navigator.serviceWorker !== 'undefined') {
+    navigator.serviceWorker.register('sw.js')
+  }
+</script>
 <div id="app">
     <app :itinerary-id="'{{ $id ?? null }}'"></app>
 </div>
