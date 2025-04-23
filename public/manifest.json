@@ -19,5 +19,6 @@
       "type": "image/png"
     }
   ],
-  "description": "An itinerary and trip planner for Kanab, Utah and the surrounding national parks: Zion, Bryce, and the Grand Canyon."
+  "description": "An itinerary and trip planner for Kanab, Utah and the surrounding national parks: Zion, Bryce, and the Grand Canyon.",
+  "id": "kanab-trip-planner"
 }
