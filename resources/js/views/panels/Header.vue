@@ -37,6 +37,11 @@
             <span class="badge badge-xs badge-primary indicator-item"></span>
           </div>
         </button>
+        <button class="btn btn-ghost btn-circle" @click="togglePreferences">
+          <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.75 4H19M7.75 4a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 4h2.25m13.5 6H19m-2.25 0a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 10h11.25m-4.5 6H19M7.75 16a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 16h2.25"/>
+          </svg>
+        </button>
         <div class="dropdown dropdown-end">
           <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
             <div class="w-10 rounded-full">
@@ -52,13 +57,54 @@
                 <span class="badge">New</span>
               </a>
             </li>
-            <li><a>Settings</a></li>
             <li><a>Logout</a></li>
           </ul>
         </div>
       </div>
     </div>
   </header>
+  <CallyCalendar v-model.lazy="dateRange" />
 </template>
-<script setup>
+
+<script>
+import { ref } from "vue";
+import { usePreferencesStore } from "../../stores/preferences";
+import CallyCalendar from "../components/CallyCalendar.vue";
+
+export default {
+  setup() {
+    const preferencesStore = usePreferencesStore();
+    return { preferencesStore };
+  },
+  components: {
+    CallyCalendar,
+  },
+  props: {
+    itineraryId: {
+      type: String,
+      required: false,
+    }
+  },
+  data() {
+    return {
+      completedQuestionnaire: false,
+      openQuestionnaire: false,
+      dateRange: {
+        start: '',
+        end: '',
+      },
+    };
+  },
+  methods: {
+    getFeatureFlags() {
+    },
+    togglePreferences() {
+      this.preferencesStore.isPreferencesOpen = !this.preferencesStore.isPreferencesOpen;
+    },
+  },
+  mounted() {
+    this.getFeatureFlags();
+    this.openQuestionnaire = true;
+  },
+};
 </script>

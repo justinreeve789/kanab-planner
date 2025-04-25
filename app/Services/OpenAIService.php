@@ -51,7 +51,7 @@ class OpenAIService
     public const DEFAULT_TEMPERATURE = 0.2;
     public const DEFAULT_TOP_P = 1.0;
     public const GENERAL_ASSISTANT_NAME = 'General';
-    public const GENERAL_ASSISTANT_INSTRUCTIONS = 'You are assisting a traveler to southern Utah. Provide helpful answers to their questions.';
+    public const GENERAL_ASSISTANT_INSTRUCTIONS = 'You are assisting a traveler to southern Utah. Provide helpful answers to their questions, giving specific examples and recommendations.';
     public const GENERATE_GUIDE_PROMPTS_SYSTEM = 'You are a helpful assistant that creates a FAQ about $$TOPIC$$. Separate out content into many questions and output as JSON. Reword the answers while keeping useful, factual information. Some opinions are okay if they don\'t advertise a specific product. Each entry in the JSON array only has two attributes: prompt and answer. ONLY output JSON, nothing else.';
     public const GENERATE_LOCATION_PROMPTS_SYSTEM = 'You are a helpful assistant that creates a FAQ of things hikers and tourists would like to know about a trail or location. Separate out content into many questions and output as JSON. Reword the answers while keeping useful information that hikers and tourists would find interesting. Each entry in the JSON array only has two attributes: prompt and answer. ONLY output JSON, nothing else.';
     public const GENERATE_TRAIL_PROMPTS_SYSTEM = 'You are a helpful assistant that creates a FAQ of things hikers and tourists would like to know about a trail or location. Separate out content into many questions and output as JSON. Reword the answers while keeping useful information that hikers and tourists would find interesting. Each entry in the JSON array only has two attributes: prompt and answer. ONLY output JSON, nothing else.';
@@ -150,7 +150,7 @@ class OpenAIService
                     break;
                 default:
                     $name = 'Resource ' . $resource->type . ' ' . $resource->id;
-                    $instructions = 'You are assisting a traveler looking at a page about ' . $resource->name . ' (ID "' . $resource->type . '_' . $resource->id . '") in the ' . $resource->area->name . ' area. Your task is to provide context-sensitive answers to their questions.';
+                    $instructions = 'You are assisting a traveler looking at a page about ' . $resource->name . ' (ID "' . $resource->type . '_' . $resource->id . '") in the ' . $resource->area->name . ' area. Your task is to provide context-sensitive answers with specific details and recommendations to their questions.';
                     break;
             }
         } else {

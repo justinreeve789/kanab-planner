@@ -1,5 +1,6 @@
 <template>
-  <input type="checkbox" :id="'day-stats-' + day.dayNum" class="modal-toggle" />
+<!--  <input type="checkbox" :id="'day-stats-' + day.dayNum" class="modal-toggle" />-->
+  <input type="checkbox" :id="'day-stats'" class="modal-toggle" />
   <div class="modal">
     <div class="modal-container">
       <div class="modal-box ass">
@@ -30,7 +31,8 @@
         </div>
       </div>
     </div>
-    <label class="modal-backdrop" :for="'day-stats-' + day.dayNum"></label>
+<!--    <label class="modal-backdrop" :for="'day-stats-' + day.dayNum"></label>-->
+    <label class="modal-backdrop" :for="'day-stats'"></label>
   </div>
 </template>
 

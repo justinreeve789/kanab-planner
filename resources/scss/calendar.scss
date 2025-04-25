@@ -1,0 +1,9 @@
+calendar-month::part(td) {
+  border: solid 1px rgb(73, 79, 138, 0.25);
+}
+
+@media (max-width: 767px) {
+  calendar-month::part(button) {
+    width: 100%;
+  }
+}

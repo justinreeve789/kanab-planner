@@ -26,9 +26,9 @@
       <Day :day="day" />
     </div>
 
-    <div v-if="itineraryData" v-for="(day, index) in itineraryData.days" :key="index">
-      <ActivityStatsModal :day="day" v-if="day.stats" />
-    </div>
+<!--    <div v-if="itineraryData" v-for="(day, index) in itineraryData.days" :key="index">-->
+<!--      <ActivityStatsModal :day="day" v-if="day.stats" />-->
+<!--    </div>-->
 
     <ListModal :type="'trail'" />
 
@@ -44,7 +44,9 @@
   </div>
 </div>
 
-<Dock v-if="itineraryData" />
+  <PreferencesModal />
+
+  <Dock v-if="itineraryData" />
 
 </template>
 
@@ -55,10 +57,16 @@ import Day from './Day.vue';
 import Dock from './panels/Dock.vue';
 import Header from './panels/Header.vue';
 import ListModal from './modals/ListModal.vue';
+import PreferencesModal from './modals/PreferencesModal.vue';
 import Backdrop from './Backdrop.vue';
 import Select from './components/Select.vue';
+import { usePreferencesStore } from "../stores/preferences";
 
 export default {
+  setup() {
+    const preferencesStore = usePreferencesStore();
+    return { preferencesStore };
+  },
   data() {
     return {
       itineraryData: null,
@@ -97,17 +105,18 @@ export default {
     }
   },
   components: {
-    ActivityStatsModal,
+    // ActivityStatsModal,
     Assistant,
     Day,
     Dock,
     Header,
+    PreferencesModal,
   },
 };
 </script>
 
 <script setup>
 import { onMounted } from 'vue'
-import ActivityStatsModal from './modals/ActivityStatsModal.vue'
+// import ActivityStatsModal from './modals/ActivityStatsModal.vue'
 import Side from './panels/Side.vue'
 </script>

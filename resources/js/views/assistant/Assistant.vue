@@ -11,10 +11,10 @@
       <div class="flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full">
         <h2 class="text-lg">Virtual Assistant</h2>
         <div class="flex align-right">
-          <button class="tooltip btn btn-sm btn-ghost hover:bg-cyan-100" @click="showHistory" data-tip="Show chat history">
+          <button class="tooltip tooltip-bottom btn btn-sm btn-ghost hover:bg-cyan-100" @click="showHistory" data-tip="Show chat history">
             <img src="images/icons/history.svg"/>
           </button>
-          <button class="tooltip btn btn-sm btn-ghost hover:bg-cyan-100" @click="deleteHistory" data-tip="Clear chat history">
+          <button class="tooltip tooltip-bottom btn btn-sm btn-ghost hover:bg-cyan-100" @click="deleteHistory" data-tip="Clear chat history">
             <img class="h-4" src="images/icons/sweep.svg"/>
           </button>
           <button class="btn btn-sm btn-ghost hover:bg-cyan-100" @click="toggleWindow">✕</button>
