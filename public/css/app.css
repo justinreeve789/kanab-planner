@@ -5143,6 +5143,10 @@ calendar-month::part(td) {
 
 @media (min-width: 768px) {
 
+  .md\:visible {
+    visibility: visible;
+  }
+
   .md\:bottom-20 {
     bottom: 5rem;
   }
