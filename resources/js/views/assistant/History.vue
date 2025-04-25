@@ -25,7 +25,6 @@
                 <img src="images/icons/hiking.svg" alt="Icon" class="h-6 mr-6 w-6" />
             </div>
             <div class="collapse-content text-sm px-4 py-2">
-                The Narrows
             </div>
         </div>
     </div>

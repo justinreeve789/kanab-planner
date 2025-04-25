@@ -11,6 +11,30 @@ use App\ResourceEnum;
 
 class PhraseService
 {
+    public function analyzePhraseWithSpacy($text)
+    {
+        $cmd = '/venv/bin/python3 ' . base_path() . '/utilities/analyze_text.py "' . trim(preg_replace("/[^a-zA-Z0-9 ]/", " ", addslashes($text))) . '"';
+        $output = shell_exec($cmd);
+        $lines = explode("\n", $output);
+        $prevCategory = '';
+        $grouped = [];
+        for ($i = 0; $i < count($lines); $i++) {
+            if (strpos($lines[$i], '-') !== false) {
+                $parts = explode('-', $lines[$i]);
+                $category = trim($parts[1]);
+                $word = trim(preg_replace("/[^a-zA-Z0-9 ]/", " ", $parts[0]));
+
+                if ($prevCategory === $category) {
+                    $grouped[$category][count($grouped[$category]) - 1] .= ' ' . $word;
+                } else {
+                    $grouped[$category][] = $word;
+                }
+                $prevCategory = $category;
+            }
+        }
+        return $grouped;
+    }
+
     public function getPhraseForActivityResource($resource, $activity = null): string
     {
         if ($resource) {

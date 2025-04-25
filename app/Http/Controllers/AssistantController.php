@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Assistant\Assistant;
 use App\Models\Assistant\Message;
 use App\Models\Assistant\Session;
+use App\Models\Assistant\Thread;
+use App\Models\Trail;
 use App\Services\AssistantService;
 use App\Services\OpenAIService;
 use Exception;
@@ -14,13 +17,41 @@ use Illuminate\Support\Facades\Log;
 
 class AssistantController extends Controller
 {
-    const MAX_TOKENS = 200;
+    const MAX_TOKENS = 2500;
+    const OPENAI_RESPONSES_TYPE = 'openai_responses';
 
     public function getMessages(Request $request)
     {
-        $messages = Message::with('session', function($query) {
-            $query->where('session_key', Cookie::get(Session::COOKIE_NAME));
-        })->orderBy('created_at')->get();
+        $resourceTable = $request->get('resource_table');
+        $resourceId = $request->get('resource_id');
+        $messages = Message::whereHas('assistant_thread', function ($query) use ($resourceTable, $resourceId) {
+            $query->where([
+                'resource_table' => $resourceTable,
+                'resource_id' => $resourceId,
+            ])->whereHas('assistant_session', function ($q) {
+                $q->where('session_key', Cookie::get(Session::COOKIE_NAME));
+            });
+        })->with(['assistant_thread.assistant_session'])
+            ->orderBy('created_at')
+            ->get();
+        return $messages;
+    }
+
+    public function deleteMessages(Request $request)
+    {
+        $resourceTable = $request->get('resource_table') ?? null;
+        $resourceId = $request->get('resource_id') ?? null;
+        $sessionKey = Cookie::get(Session::COOKIE_NAME);
+        if ($sessionKey && trim($sessionKey) !== '') {
+            if ($resourceTable === null && $resourceId === null) {
+                Thread::whereHas('assistant_session', function($query) use ($sessionKey) {
+                    $query->where('session_key', $sessionKey);
+                })->where([
+                    'resource_table' => $resourceTable,
+                    'resource_id' => $resourceId,
+                ])->delete();
+            }
+        }
     }
 
     public function sendMessage(Request $request)
@@ -47,53 +78,62 @@ class AssistantController extends Controller
 
         // Do a query analysis to determine if we're referencing a resource, even if we already have one.
         $newResource = $assistantService->analyzeQueryForResource($message);
-        if ($resource !== $newResource) {
+        if ($newResource && $resource !== $newResource) {
             // TODO: Handle a change in topic focus.
             $resource = $newResource;
         }
 
-        // Save the user's message.
-        $newMessages[] = Message::create([
+        // Make sure we're working in the right thread.
+        $assistantThread = Thread::updateOrCreate([
             'assistant_session_id' => $assistantSession->id,
-            'is_assistant' => false,
-            'content' => $message,
             'resource_table' => $resource ? $resource->getTable() : null,
             'resource_id' => $resource ? $resource->id : null,
         ]);
 
-        // TODO: Analyze the message for requests for trail maps or other content we can retrieve without using OpenAI.
-        if ($resource) {
-            if ($assistantService->isMapRequested($message, $resource)) {
-                $newMessages[] = Message::create([
-                    'assistant_session_id' => $assistantSession->id,
-                    'is_assistant' => true,
-                    'content' => '',
-                    'resource_table' => $resource->getTable(),
-                    'resource_id' => $resource->id,
-                    'show_in_chat_bubble' => false,
-                    'method_executed' => 'show_trail_map',
-                    'method_params' => 'id=' . $resource->id,
-                ]);
+        // Save the user's message.
+        $newMessages[] = Message::create([
+            'assistant_thread_id' => $assistantThread->id,
+            'is_assistant' => false,
+            'content' => $message,
+        ]);
 
-                return collect($newMessages)->toJson();
-            }
+        // Now we can determine how to respond. Check if there's any instant responses we can give to the prompt, e.g.
+        // if the user says "thank you" we can instantly respond with a "you're welcome" message without using OpenAI.
+        $instantResponseMessage = $assistantService->analyzeQueryForInstantResponse($message, $assistantThread->id, $resource ?? null);
+        if ($instantResponseMessage) {
+            $instantResponseMessage->save();
+            $newMessages[] = $instantResponseMessage;
+            $assistantThread->assistant_messages = collect($newMessages);
+            return $assistantThread->toJson();
         }
+
+        // Create an assistant if needed.
+        $assistant = Assistant::get($resource, $openAIService);
 
         if ($assistantSession) {
             $newMessages = [];
             if ($message && $message !== '') {
-                $response = $openAIService->query($message, self::MAX_TOKENS, Config::get('oopenai.finetune_model'));
+                $response = $openAIService->query($message, self::MAX_TOKENS, Config::get('openai.finetune_model'), $assistant, $assistantThread->thread_key);
                 if ($response) {
                     // Save the assistant's message.
-                    $newMessages[] = Message::create([
+                    $assistantThread = Thread::updateOrCreate([
                         'assistant_session_id' => $assistantSession->id,
-                        'is_assistant' => true,
-                        'content' => $response,
                         'resource_table' => $resource ? $resource->getTable() : null,
                         'resource_id' => $resource ? $resource->id : null,
+                    ], [
+                        'thread_key' => $response->thread_id,
+                        'thread_type' => self::OPENAI_RESPONSES_TYPE,
                     ]);
 
-                    return collect($newMessages)->toJson();
+                    $newMessage = Message::create([
+                        'assistant_thread_id' => $assistantThread->id,
+                        'is_assistant' => true,
+                        'content' => $response->content,
+                    ]);
+
+                    $newMessages[] = $newMessage;
+                    $assistantThread->assistant_messages = collect($newMessages);
+                    return $assistantThread->toJson();
                 } else {
                     return (object) [
                         'error' => 'Could not retrieve response. Please try again.',

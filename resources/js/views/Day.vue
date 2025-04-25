@@ -1,5 +1,7 @@
 <template>
-  <div class="collapse collapse-arrow bg-white">
+  <div class="rounded-lg p-[2px] bg-gradient-to-r from-orange-100 to-red-100">
+    <div class="rounded-lg p-[1px] bg-gradient-to-r from-orange-200 to-red-200">
+    <div class="collapse collapse-arrow bg-white">
     <input type="checkbox" />
     <div class="collapse-title text-xl font-medium">
       <h2 :id="'day-heading-' + day.day_num" class="day-heading relative w-full">
@@ -37,14 +39,17 @@
       <section v-for="(period, periodType) in day.periods" :key="periodType">
         <div class="timeline"></div>
         <div :class="'day-content pt-4 period-' + period.type" v-for="(activity, index) in period.activities" :key="index">
-          <div class="mb-8 border border-solid border-gray-300 rounded-lg" v-if="activity.activity_type == 'event'">
+          <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-if="activity.activity_type && (activity.activity_type.name == 'checking-in' || activity.activity_type.name == 'checking-out')">
+            <Accommodation :activity="activity" :day="day" :resource="activity.resource" />
+          </div>
+          <div class="mb-8 border border-solid border-gray-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'event'">
             <Event :activity="activity" :day="day" />
           </div>
-          <div class="mb-8 border border-solid border-green-300 rounded-lg" v-if="activity.activity_type == 'dining'">
+          <div class="mb-8 border border-solid border-green-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'dining'">
             <Restaurant :day="day" :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
           </div>
-          <div class="mb-8 border border-solid border-orange-300 rounded-lg" v-else-if="activity.activity_type == 'hiking'">
-            <Trail :unique="activity.id" :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
+          <div class="mb-8 border border-solid border-orange-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'hiking'">
+            <Trail :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
           </div>
           <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-else>
             <Task :activity="activity" :day="day" :resource="activity.resource" />
@@ -53,9 +58,12 @@
       </section>
     </div>
   </div>
+  </div>
+  </div>
 </template>
 
 <script>
+import Accommodation from "./activities/Accommodation.vue";
 import Event from './activities/Event.vue';
 import Location from './activities/Location.vue';
 import Restaurant from './activities/Restaurant.vue';
@@ -64,6 +72,7 @@ import Trail from './activities/Trail.vue';
 
 export default {
   components: {
+    Accommodation,
     Event,
     Location,
     Restaurant,
@@ -105,7 +114,4 @@ export default {
     day: Object,
   },
 };
-</script>
-
-<script setup>
 </script>

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Accommodation;
 use App\Models\ActivityType;
 use App\Models\Area;
 use App\Models\AreaDistance;
@@ -19,7 +20,7 @@ use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Models\Image;
 use App\Repositories\ItineraryRepository;
-use App\Services\LocationService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,18 +30,20 @@ class ItineraryService
 {
     const DEFAULT_DRIVING_TIME_BETWEEN_AREAS = 1800;
 
-    private $imageService;
+    public $budgetService;
+    public $imageService;
+    public $locationService;
+    public $phraseService;
+    public $restaurantService;
+    public $trailService;
     private $itinerary;
-    private $locationService;
-    private $phraseService;
     private $repository;
-    private $restaurantService;
     private $seasons;
-    private $trailService;
 
     public function __construct($itinerary = null)
     {
         $this->setItinerary(new Itinerary());
+        $this->budgetService = new BudgetService();
         $this->imageService = new ImageService();
         $this->locationService = new LocationService();
         $this->phraseService = new PhraseService();
@@ -57,6 +60,58 @@ class ItineraryService
     public function setItinerary(?Itinerary $itinerary)
     {
         $this->itinerary = $itinerary;
+    }
+
+    /**
+     * TODO: Fix the model definitions so we're not doing any of this offsetUnset() and setRelation() stuff.
+     */
+    public function saveItinerary()
+    {
+        DB::transaction(function() {
+            $itinerary = clone $this->getItinerary();
+            $days = $itinerary->getDays();
+            $itinerary->offsetUnset('days');
+//            $itinerary->setRelation('days', collect($days));
+            $itinerary->save();
+            $itinerary->days = $days;
+
+            foreach ($days as $day) {
+                $day = clone $day;
+                $day->itinerary_id = $itinerary->id;
+                $day->area_id = $day->area->id;
+                $area = $day->area;
+                $day->offsetUnset('area');
+                $day->offsetUnset('formatted_abbr_month_day');
+                $day->offsetUnset('formatted_date');
+                $day->offsetUnset('formatted_day_of_week');
+                $day->offsetUnset('formatted_month_day');
+                $day->offsetUnset('formatted_year');
+                $day->setRelation('area', $area);
+                $day->save();
+
+                foreach ($day->periods as $period) {
+                    $period->day_id = $day->id;
+                    $period->type = (string) $period->type;
+                    $period->save();
+                    $period->type = (int) $period->type;
+                    $activities = clone $period->activities;
+
+                    foreach ($activities as $activity) {
+                        $activity->period_id = $period->id;
+                        $resource = $activity->resource;
+                        $activity->offsetUnset('resource');
+                        $activity->setRelation('resource', $resource);
+                        $activity->resource_table = $resource->getTable();
+                        $activity->resource_id = $resource->id;
+                        $activityType = $activity->activity_type;
+                        $activity->offsetUnset('activity_type');
+                        $activity->activity_type_id = $activity->activity_type_id ?? 0;
+                        $activity->save();
+                        $activity->activity_type = $activityType;
+                    }
+                }
+            }
+        });
     }
 
     public function getRepository()
@@ -116,22 +171,28 @@ class ItineraryService
         // If this is the first day and they're arriving at a normal late time, let's not plan any activities. Just
         // grocery shopping, maybe fast food.
         if ($dayNum === 0 && !$this->getItinerary()->getUseFirstDay()) {
-            $task = new Task([
-                'name' => 'Arrival',
-                'description' => $this->phraseService->getPhraseForCheckingIn() . ' ' . $this->phraseService->getPhraseForArrivingLateFood(),
-            ]);
-            $this->getItinerary()->addActivity($task, 'checking-in', Day::DEFAULT_ARRIVAL_TIME, '23:59:59', $dayNum, Period::EVENING);
+//            $accommodation = Accommodation::with('images')->where('id', 1)->first();
+            $accommodation = Accommodation::where('id', 1)->first();
+            $accommodation->accommodation_name = $accommodation->name;
+//            $task = new Task([
+//                'name' => 'Arrival',
+//                'description' => $this->phraseService->getPhraseForCheckingIn() . ' ' . $this->phraseService->getPhraseForArrivingLateFood(),
+//            ]);
+            $this->getItinerary()->addActivity($accommodation, 'checking-in', Day::DEFAULT_ARRIVAL_TIME, '23:59:59', $dayNum, Period::EVENING);
             return;
         }
 
-        // If this is the last day and they're departing at a normal early time, let's not plan any activities.
+        // If this is the last day and they're departing at a normal early time, let's not plan any activities. We'll
+        // also want to use the same accommodation they checked in with on their first day.
         if ($dayNum === ($durationDays - 1) && !$this->getItinerary()->getUseLastDay()) {
-            $task = new Task([
-                'name' => 'Departure',
-                'description' => $this->phraseService->getPhraseForCheckingOut(),
-            ]);
+            $accommodation = Accommodation::where('id', 1)->first();
+            $accommodation->accommodation_name = $accommodation->name;
+//            $task = new Task([
+//                'name' => 'Departure',
+//                'description' => $this->phraseService->getPhraseForCheckingOut(),
+//            ]);
             $this->getItinerary()->addActivity(
-                $task,
+                $accommodation,
                 'checking-out',
                 Day::DEFAULT_DEPARTURE_TIME,
                 '23:59:59',
@@ -382,7 +443,7 @@ class ItineraryService
         // Add a restaurant in the area for the period.
         if ($this->shouldAddDining($day, $period)) {
             $restaurant = Restaurant::with(['location' => function($query) {
-                $query->with('images');
+//                $query->with('images');
             }])->whereNotIn('restaurants.id', $this->getItinerary()->restaurant_ids)
 //                ->whereIsOpen($date . ' ' . $mealTime['startTime'])
                 ->whereHas('location', function($query) use ($day) {
@@ -451,7 +512,7 @@ class ItineraryService
             if (!$dayPeriod->hasRestaurant() && $dayPeriod->hasActivityType('cooking'))
             {
                 $restaurant = Restaurant::with(['location' => function($query) {
-                    $query->with('images');
+//                    $query->with('images');
                 }])->whereIsOpen($day->date . ' ' . $mealTime['startTime'])
                     ->whereHas('location', function($query) use ($day) {
                         $query->where('area_id', $day->area_id);
@@ -620,19 +681,19 @@ class ItineraryService
 
             // If the user's adventurousness is < 0.8, only pick any area besides Kanab or Zion once, unless it's their base area.
             // TODO: Fix this.
-//            if ($adventurousness < 0.8) {
-//                $numPossible = 1;
-//                $areaCounts = array_count_values($allAreaIds);
-//                $filteredAreaIds = array_filter($allAreaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
-//                    return (
-//                        $areaId !== Area::KANAB &&
-//                        $areaId !== $baseArea->id &&
-//                        $areaId !== Area::ZION &&
-//                        $areaCounts[$areaId] <= $numPossible
-//                    );
-//                });
-//                $query->whereNotIn('id', $filteredAreaIds);
-//            }
+            if ($adventurousness < 0.8) {
+                $numPossible = 1;
+                $areaCounts = array_count_values($areaIds);
+                $filteredAreaIds = array_filter($allAreaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
+                    return (
+                        $areaId !== Area::KANAB &&
+                        $areaId !== $baseArea->id &&
+                        $areaId !== Area::ZION &&
+                        isset($areaCounts[$areaId]) ? $areaCounts[$areaId] : 9999999 <= $numPossible
+                    );
+                });
+                $query->whereNotIn('id', $filteredAreaIds);
+            }
 
             // If the user's adventurousness is < 0.9, only pick the remaining non-base area(s) once per 10 days of the trip.
             // TODO: Fix this.
@@ -722,12 +783,12 @@ class ItineraryService
      * a. Morning is okay, especially if they're hiking a Zion trail that morning.
      * b. Lunch is out of the question.
      * c. Dinner is okay if their afternoon activity will end and they can travel back by 5pm.
-     * back If they've already done a trail today, only add another
+     * back. If they've already done a trail today, only add another
      * trail if their adventurousness is >= 0.7.
      */
     public function shouldAddCooking(Day $day, string $period): bool {
         // Make sure there isn't already a restaurant or cooking activity during the period.
-        $dayPeriod = $day->getPeriods()[$period];
+        $dayPeriod = $day->getPeriod($period);
         if ($dayPeriod->hasRestaurant() || $dayPeriod->hasActivityType('cooking')) {
             return false;
         }
@@ -867,8 +928,6 @@ class ItineraryService
     public function setupItinerary(Request $request)
     {
         $accommodationPreference = $request->get('accommodation_preference');
-        $arrivalDateTime = $request->get('arrival_datetime');
-        $departureDateTime = $request->get('departure_datetime');
         $interests = $request->get('interests');
         $tripPreference = $request->get('trip_preference');
 
@@ -880,6 +939,8 @@ class ItineraryService
             }
         }
 
+        $this->getItinerary()->arrival_date_time = $request->get('arrival_datetime');
+        $this->getItinerary()->departure_date_time = $request->get('departure_datetime');
         $this->getItinerary()->setCheckInTime($request->get('check_in'));
         $this->getItinerary()->setCheckOutTime($request->get('check_out'));
         $this->getItinerary()->setDurationDays($request->get('duration_days'));
@@ -1029,8 +1090,11 @@ class ItineraryService
         // Reinsert the first and last days and update the dayNum.
         $days = array_merge([$first], $shuffledGroups, [$last]);
 
+        $startDate = $this->getItinerary()->getStartDate();
         foreach ($days as $dayNum => $day) {
-            $day->dayNum = $dayNum;
+//            $day->dayNum = $dayNum;
+            $day->day_num = $dayNum;
+            $day->date = date('Y-m-d', strtotime($startDate . ' +' . $dayNum . ' days'));
         }
 
         // Set the shuffled and grouped days back to the itinerary.

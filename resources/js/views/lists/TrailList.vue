@@ -28,7 +28,7 @@
                       <ActivityStats :trail="resource" :align="'left'" class="pt-4" />
                     </div>
                     <div class="flex-auto text-left">
-<!--                  <ActivityButtons class="text-right my-4 lg:text-left" type="trail" :unique="unique" />-->
+<!--                  <ActivityButtons class="text-right my-4 lg:text-left" type="trail" />-->
                     </div>
                   </div>
                 </div>
@@ -38,7 +38,7 @@
                 </div>
               </div>
               <div class="w-full 2xl:w-1/3 mt-4 2xl:mt-0 lg:pl-4" v-if="resource.images">
-                <Side :resource="resource" :unique="resource.id" :type="'trail'" :images="resource.images" />
+                <Side :resource="resource" :type="'trail'" :images="resource.images" />
               </div>
             </div>
           </div>
@@ -79,7 +79,7 @@ export default {
 
 <script setup>
 import axios from 'axios';
-import ActivityStats from '../panels/ActivityStats.vue';
+import ActivityStats from '../stats/ActivityStats.vue';
 import Side from '../panels/Side.vue';
 import Trail from '../activities/Trail.vue';
 </script>

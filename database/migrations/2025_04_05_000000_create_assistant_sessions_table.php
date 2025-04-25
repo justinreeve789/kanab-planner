@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('session_key', 512);
             $table->bigInteger('user_id')->unsigned()->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
         });
 

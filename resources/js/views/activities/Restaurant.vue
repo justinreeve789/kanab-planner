@@ -22,7 +22,7 @@
       <div class="lg:flex lg:justify-between">
         <div class="w-full lg:w-2/3 lg:flex lg:flex-col">
           <div class="lg:order-2">
-            <ActivityButtons class="text-right my-4 lg:text-left" type="restaurant" :hash="activity.id" />
+            <ActivityButtons class="text-right my-4 lg:text-left" type="restaurant" :resource_table="'restaurants'" :resource_id="resource.id" />
           </div>
           <div class="lg:order-1">
             <p class="mb-4" v-if="resource.description_alt">{{ resource.description_alt }}</p>
@@ -31,7 +31,7 @@
           </div>
         </div>
         <div class="w-[calc(100%+16px)] -ml-2 -mb-4 lg:w-1/3 mt-4 lg:pl-4 lg:-mt-2 lg:-mr-2" v-if="resource.location.images">
-          <Side :resource="restaurant" :unique="resource.id" :type="'restaurant'" :images="resource.location.images" />
+          <Side :resource="restaurant" :type="'restaurant'" :images="resource.location.images" />
         </div>
       </div>
     </div>
@@ -56,19 +56,19 @@ export default {
     return {
       expanded: false,
       restaurant: this.activity.data,
+      unique: this.$generateUnique(),
     }
   },
   props: {
       activity: Object,
       phrase: String,
       resource: Object,
-      unique: String,
   },
 };
 </script>
 
 <script setup>
-import ActivityButtons from '../panels/ActivityButtons.vue'
+import ActivityButtons from '../components/ActivityButtons.vue'
 import RestaurantStats from '../stats/RestaurantStats.vue'
 import Side from '../panels/Side.vue'
 </script>

@@ -13,7 +13,7 @@ trait ImportTable
         $sql = base_path() . '/database/dumps/' . $table . '.sql';
 
         if (file_exists($gz)) {
-            $cmd = 'gunzip -f ' . $gz;
+            $cmd = 'gunzip -f -k ' . $gz;
             exec($cmd);
         }
 
@@ -26,7 +26,10 @@ trait ImportTable
                 DB::unprepared($line);
             }
             fclose($file);
-            exec('gzip -f ' . $sql);
+            if (!file_exists($gz)) {
+                exec('gzip -f -k ' . $sql);
+            }
+            unlink($sql);
         }
     }
 }

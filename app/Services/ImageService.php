@@ -41,10 +41,10 @@ class ImageService
     const THUNDERFOREST_OUTDOORS_PATH = 'visitkanab/maptiles/thunderforest/outdoors';
     const THUNDERFOREST_OUTDOORS_URL = 'https://tile.thunderforest.com/outdoors';
 
+    public $conversionService;
+    public $s3;
     private $client;
-    private $conversionService;
     private $images = [];
-    private $s3;
     private $s3Client;
 
     public function __construct() {
@@ -92,6 +92,7 @@ class ImageService
         }
 
         switch (get_class($obj)) {
+            case 'App\\Models\\AccommodationImage':
             case 'App\\Models\\EventImage':
             case 'App\\Models\\LocationImage':
             case 'App\\Models\\TrailImage':
@@ -380,9 +381,9 @@ class ImageService
         try {
             $originalImage = \imagecreatefromstring(file_get_contents($filename));
         } catch (\Throwable $e) {
-                    echo 'Skipping ' . $filename . '
+            echo 'Skipping ' . $filename . '
 ';
-                    return null;
+            return null;
         }
 
         // Get the original image's width and height.

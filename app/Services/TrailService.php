@@ -223,6 +223,7 @@ class TrailService
         $data = json_decode($geoJson, true);
         $trailPoints = $data['features'][0]['geometry']['coordinates'];
         $totalTime = 0;
+        $totalDist = 0;
         $cumulativeTime = 0;
         $hourlyCoordinates = [];
         $currentHour = 0;
@@ -233,7 +234,7 @@ class TrailService
 
             $lat1 = $point1[1];
             $lon1 = $point1[0];
-            $elev1 = isset($point1[2]) ? $point1[2] : 0; // Elevation in feet
+            $elev1 = isset($point1[2]) ? $point1[2] : 0;
 
             $lat2 = $point2[1];
             $lon2 = $point2[0];
@@ -241,6 +242,7 @@ class TrailService
 
             // Calculate the distance between the two points in miles
             $dist = $this->haversine($lat1, $lon1, $lat2, $lon2);
+            $totalDist += $dist;
 
             // Calculate the elevation change in feet
             $elevationChange = $elev2 - $elev1;
@@ -287,7 +289,8 @@ class TrailService
         }
         return [
             'total_hours' => round($totalTime, $roundPrecision),
-            'time_hours' => $hourLatLng
+            'time_hours' => $hourLatLng,
+            'total_dist' => $totalDist,
         ];
     }
 }

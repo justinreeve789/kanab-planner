@@ -2,8 +2,11 @@
 /data.ms
 /drivers
 /node_modules
+/public/.well-known
+/public/apk
 /public/build
 /public/hot
+/public/js
 /public/storage
 /public/temp
 /search

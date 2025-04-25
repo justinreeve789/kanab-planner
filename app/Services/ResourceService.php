@@ -10,9 +10,10 @@ use App\Models\Location;
 use App\Models\OpenAIPrompt;
 use App\Models\Resource;
 use App\Models\ResourceData;
+use App\Models\ResourceMerge;
 use App\Models\ResourceText;
 use App\Models\Restaurant;
-use App\Models\Scopes\UsableScope;
+use App\Models\Scopes\DataScope;
 use App\Models\Trail;
 use App\Models\TrailGeoJson;
 use App\Models\TrailImage;
@@ -47,11 +48,11 @@ class ResourceService
         }
 
         if (!is_object($resource1)) {
-            $resource1 = $model::withoutGlobalScope(UsableScope::class)->where('id', $resource1)->first();
+            $resource1 = $model::withoutGlobalScope(DataScope::class)->where('id', $resource1)->first();
         }
 
         if (!is_object($resource2)) {
-            $resource2 = $model::withoutGlobalScope(UsableScope::class)->where('id', $resource2)->first();
+            $resource2 = $model::withoutGlobalScope(DataScope::class)->where('id', $resource2)->first();
         }
 
         if (get_class($resource1) !== get_class($resource2)) {
@@ -121,8 +122,8 @@ class ResourceService
             $secondaryId = $resource2->id;
         }
 
-        $primary = Trail::withoutGlobalScope(UsableScope::class)->with(['area', 'images'])->where('id', $primaryId)->first();
-        $secondary = Trail::withoutGlobalScope(UsableScope::class)->with(['area', 'images'])->where('id', $secondaryId)->first();
+        $primary = Trail::withoutGlobalScope(DataScope::class)->with(['area', 'images'])->where('id', $primaryId)->first();
+        $secondary = Trail::withoutGlobalScope(DataScope::class)->with(['area', 'images'])->where('id', $secondaryId)->first();
 
         // Create a new record that combines $primary and $secondary.
         try {
@@ -163,12 +164,14 @@ class ResourceService
                 ]);
             }
 
-            TrailMerge::insert([[
+            ResourceMerge::insert([[
+                'resource_table' => $newResource->getTable(),
                 'merged_from' => $primary->id,
                 'merged_to' => $newResource->id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ], [
+                'resource_table' => $newResource->getTable(),
                 'merged_from' => $secondary->id,
                 'merged_to' => $newResource->id,
                 'created_at' => now(),
@@ -189,15 +192,15 @@ class ResourceService
     }
 
     public function combineResourceData(Model $newResource, Model $primary, Model $secondary) {
-        $primaryData = ResourceData::where(['resource_table' => $secondary->getTable(), 'resource_id' => $secondary->id])->first();
+        $primaryData = ResourceData::where(['resource_table' => $primary->getTable(), 'resource_id' => $primary->id])->first();
         $secondaryData = ResourceData::where(['resource_table' => $secondary->getTable(), 'resource_id' => $secondary->id])->first();
         ResourceData::insert([
             'resource_table' => $newResource->getTable(),
             'resource_id' => $newResource->id,
-            'activity_type_id' => $primaryData->activity_id,
-            'adventurousness' => max($primaryData->adventurousness, $secondaryData->adventurousness),
-            'solitariness' => max($primaryData->solitariness, $secondaryData->solitariness),
-            'strenuousness' => max($primaryData->strenuousness, $secondaryData->strenuousness),
+            'activity_type_id' => $primaryData->activity_type_id ?? $secondaryData->activity_type_id,
+            'adventurousness' => max($primaryData->adventurousness ?? null, $secondaryData->adventurousness ?? null),
+            'solitariness' => max($primaryData->solitariness ?? null, $secondaryData->solitariness ?? null),
+            'strenuousness' => max($primaryData->strenuousness ?? null, $secondaryData->strenuousness ?? null),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ]);

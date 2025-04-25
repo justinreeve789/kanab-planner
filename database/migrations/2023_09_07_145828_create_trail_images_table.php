@@ -1,11 +1,14 @@
 <?php
 
+use App\Traits\ImportTable;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    use ImportTable;
+
     /**
      * Run the migrations.
      */
@@ -29,9 +32,7 @@ return new class extends Migration
             $table->foreign('trail_id')->references('id')->on('trails')->onDelete('cascade');
         });
 
-        if (file_exists('./database/dumps/trail_images.sql')) {
-            DB::unprepared(file_get_contents('./database/dumps/trail_images.sql'));
-        }
+        self::importTable('trail_images');
     }
 
     /**

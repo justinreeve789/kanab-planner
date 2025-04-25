@@ -19,6 +19,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('v1')->group(function() {
+    Route::prefix('activity_type')->group(function() {
+        Route::get('/', 'App\Http\Controllers\ActivityController@getSelectableActivityTypes');
+    });
+
     Route::prefix('area')->group(function() {
         Route::get('/', 'App\Http\Controllers\AreaController@index');
         Route::get('/{id}/trail', 'App\Http\Controllers\AreaController@getTrails');
@@ -29,7 +33,14 @@ Route::prefix('v1')->group(function() {
     });
 
     Route::prefix('assistant')->group(function() {
-        Route::post('/', 'App\Http\Controllers\AssistantController@sendMessage');
+        Route::get('/', 'App\Http\Controllers\AssistantController@getAssistants');
+        Route::prefix('message')->group(function() {
+            Route::post('/', 'App\Http\Controllers\AssistantController@sendMessage');
+        });
+        Route::prefix('thread')->group(function() {
+            Route::get('/', 'App\Http\Controllers\AssistantController@getMessages');
+            Route::delete('/', 'App\Http\Controllers\AssistantController@deleteMessages');
+        });
     });
 
     Route::prefix('event')->group(function() {
@@ -37,10 +48,14 @@ Route::prefix('v1')->group(function() {
         Route::get('/{id}', 'App\Http\Controllers\EventController@getEvent');
     });
 
+    Route::prefix('feature')->group(function() {
+        Route::get('/', 'App\Http\Controllers\FeatureController@index');
+    });
+
     Route::prefix('itinerary')->group(function() {
-//        Route::get('/', 'App\Http\Controllers\ItineraryController@index');
-        Route::get('/{id}', 'App\Http\Controllers\ItineraryController@getItinerary');
+        // TODO: Make this a POST to create the itinerary. A GET should return a list of itineraries.
         Route::get('/', 'App\Http\Controllers\ItineraryController@createItinerary');
+        Route::get('/{id}', 'App\Http\Controllers\ItineraryController@loadItinerary');
         Route::put('/{id}', 'App\Http\Controllers\ItineraryController@updateItinerary');
     });
 

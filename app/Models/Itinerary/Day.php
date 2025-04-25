@@ -6,6 +6,7 @@ use App\Models\Area;
 use App\Models\AreaWeather;
 use App\ResourceEnum;
 use App\Traits\ReturnAllProperties;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,8 +22,24 @@ class Day extends CachedModel
     const DEFAULT_ARRIVAL_TIME = '16:00:00';
     const DEFAULT_DEPARTURE_TIME = '10:00:00';
 
+    protected $appends = [
+        'area',
+    ];
+    protected $attributes = [
+        'formatted_abbr_month_day' => '',
+        'formatted_date' => '',
+        'formatted_day_of_week' => '',
+        'formatted_month_day' => '',
+        'formatted_year' => '',
+    ];
     protected $casts = ['id' => 'string', 'itinerary_id' => 'string', 'stats' => 'json'];
-    protected $guarded = [];
+    protected $guarded = [
+        'formatted_abbr_month_day',
+        'formatted_date',
+        'formatted_day_of_week',
+        'formatted_month_day',
+        'formatted_year',
+    ];
     protected $table = 'itinerary_days';
 
 //    public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
@@ -52,13 +69,13 @@ class Day extends CachedModel
         $this->start_time = '07:00';
         $this->end_time = '22:00';
 
-        if (isset($attributes['date'])) {
-            $this->formatted_abbr_month_day = date('M j', strtotime($this->date));
-            $this->formatted_date = date('l, F j, Y', strtotime($this->date));
-            $this->formatted_day_of_week = date('l', strtotime($this->date));
-            $this->formatted_month_day = date('F j', strtotime($this->date));
-            $this->formatted_year = date('Y', strtotime($this->date));
-        }
+//        if (isset($attributes['date'])) {
+//            $this->formatted_abbr_month_day = date('M j', strtotime($this->date));
+//            $this->formatted_date = date('l, F j, Y', strtotime($this->date));
+//            $this->formatted_day_of_week = date('l', strtotime($this->date));
+//            $this->formatted_month_day = date('F j', strtotime($this->date));
+//            $this->formatted_year = date('Y', strtotime($this->date));
+//        }
 
 //        if (is_integer($this->area)) {
 //            $this->area = Area::where('id', $this->area)->first();
@@ -69,6 +86,31 @@ class Day extends CachedModel
         $this->temperatures = $this->getTemperatures();
 
         parent::__construct($attributes);
+    }
+
+    public function getFormattedAbbrMonthDayAttribute()
+    {
+        return Carbon::parse($this->date)->format('M j');
+    }
+
+    public function getFormattedDateAttribute()
+    {
+        return Carbon::parse($this->date)->format('l, F j, Y');
+    }
+
+    public function getFormattedDayOfWeekAttribute()
+    {
+        return Carbon::parse($this->date)->format('l');
+    }
+
+    public function getFormattedMonthDayAttribute()
+    {
+        return Carbon::parse($this->date)->format('F j');
+    }
+
+    public function getFormattedYearAttribute()
+    {
+        return Carbon::parse($this->date)->format('Y');
     }
 
     protected function createPeriodsIfNotExist()

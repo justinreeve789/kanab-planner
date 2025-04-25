@@ -19,14 +19,16 @@ return new class extends Migration
             $table->smallInteger('day_num')->unsigned();
             $table->time('start_time');
             $table->time('end_time');
-            $table->string('formatted_date');
-            $table->string('formatted_day_of_week');
-            $table->string('formatted_month_day');
-            $table->string('formatted_year');
+//            $table->string('formatted_date');
+//            $table->string('formatted_day_of_week');
+//            $table->string('formatted_month_day');
+//            $table->string('formatted_year');
             $table->json('stats')->nullable();
+            $table->timestamps();
+            $table->unique(['itinerary_id', 'date']);
+            $table->unique(['itinerary_id', 'day_num']);
             $table->foreign('itinerary_id')->references('id')->on('itineraries')->onDelete('cascade');
             $table->foreign('area_id')->references('id')->on('areas')->onDelete('cascade');
-            $table->timestamps();
         });
     }
 

@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use App\Traits\ActivityData;
 use App\Traits\ResourceScopes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\SearchableResource;
 
 class Restaurant extends Resource
 {
-    use ActivityData;
     use HasFactory;
     use ResourceScopes;
     use SearchableResource;

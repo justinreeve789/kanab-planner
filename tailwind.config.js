@@ -1,7 +1,8 @@
 const defaultTheme = require('tailwindcss/defaultTheme');
 
 module.exports = {
-    content: [
+  darkMode: ['selector', '[data-mode="dark"]'],
+  content: [
       "./resources/**/*.blade.php",
       "./resources/**/*.js",
       "./resources/**/*.vue",
@@ -19,4 +20,4 @@ module.exports = {
     plugins: [
         require('daisyui')
     ],
-  }
+}

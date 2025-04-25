@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('itinerary_activities', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('period_id');
-            $table->string('name');
             $table->time('start_time');
             $table->time('end_time');
             $table->text('description')->nullable();
             $table->string('phrase')->nullable();
-            $table->integer('activity_type_id')->unsigned()->nullable();
+            $table->integer('activity_type_id')->unsigned();
             $table->string('resource_table')->nullable();
             $table->integer('resource_id')->unsigned()->nullable();
+            $table->json('stats')->nullable();
             $table->timestamps();
             $table->foreign('period_id')->references('id')->on('itinerary_periods')->onDelete('cascade');
         });

@@ -1,0 +1,27 @@
+{
+  "name": "Kanab Trip Planner",
+  "short_name": "Kanab Trip",
+  "start_url": "https://alpha.visitkanab.org",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "./images/icons/trip-planner-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "description": "An itinerary and trip planner for Kanab, Utah and the surrounding national parks: Zion, Bryce, and the Grand Canyon. Kanab is the perfect basecamp for your Southern Utah and Northern Arizona adventures.",
+  "id": "kanab-trip-planner",
+  "categories": [
+    "travel"
+  ],
+  "lang": "en",
+  "display_override": [
+    "standalone",
+    "window-controls-overlay"
+  ]
+}

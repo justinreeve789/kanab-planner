@@ -29,20 +29,26 @@ class BlogService
         }
 
         if ($blogPost) {
-            $prompts = $this->openAIService->generatePromptsWIthOpenAI($blogPost->content);
-            return json_decode($prompts);
+            // $prompts = $this->openAIService->generatePromptsWithOpenAI($blogPost->content);
+            // return json_decode($prompts);
         }
     }
 
-    public function import($blogId)
+    public function import($blogId, $storeData = false)
     {
         $blog = Blog::find($blogId);
         if ($blog) {
-            $this->savePostsFromBlog($blog);
+            $this->savePostsFromBlog($blog, $storeData);
         }
     }
 
-    public function savePostsFromBlog(Blog $blog, int $perPage = 50) {
+    /**
+     * @param Blog $blog
+     * @param bool $storeData If true, the content and raw_data is stored if there's no resource, otherwise it's omitted.
+     * @param int $perPage
+     * @return array
+     */
+    public function savePostsFromBlog(Blog $blog, bool $storeData = false, int $perPage = 25) {
         $page = 1;
         $allPosts = [];
 
@@ -58,14 +64,28 @@ class BlogService
             }
 
             foreach ($posts as $post) {
+                $keepData = $storeData;
+                if (!$storeData) {
+                    $postObj = Post::where(['blog_id' => $blog->id, 'post_id' => $post['id']])->whereNotNull('resource_table')->whereNotNull('resource_id')->first();
+                    if ($postObj) {
+                        $keepData = true;
+                    }
+                }
+
+                $title = str_replace('&#8217;', "'", $post['title']['rendered']);
+                $title = str_replace('&#8211;', "--", $title);
+                $title = str_replace('&#038;', "&", $title);
+                $content = str_replace('&#8217;', "'", $post['content']['rendered']);
+                $content = str_replace('&#8211;', "--", $content);
+
                 Post::updateOrCreate([
-                    'title' => $post['title']['rendered'],
-                    'content' => $post['content']['rendered'],
-                    'raw_data' => json_encode($post),
-                    'posted_at' => date('Y-m-d H:i:s', strtotime($post['date'])),
-                ], [
                     'blog_id' => $blog->id,
                     'post_id' => $post['id'],
+                ], [
+                    'title' => $title,
+                    'content' => $keepData ? $content : null,
+                    'raw_data' => $keepData ? json_encode($post) : null,
+                    'posted_at' => date('Y-m-d H:i:s', strtotime($post['date'])),
                 ]);
             }
             $page++;

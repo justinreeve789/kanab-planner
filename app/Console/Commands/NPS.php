@@ -8,6 +8,7 @@ use App\Models\Image;
 use App\Models\Location;
 use App\Models\LocationImage;
 use App\Models\LocationTag;
+use App\Models\ResourceStatus;
 use App\Models\ResourceText;
 use App\Models\Restaurant;
 use App\Models\Trail;
@@ -25,7 +26,7 @@ class NPS extends Command
      *
      * @var string
      */
-    protected $signature = 'import:nps {--events} {--restaurants} {--trails}';
+    protected $signature = 'import:nps {--alerts} {--events} {--restaurants} {--trails}';
 
     /**
      * The console command description.
@@ -42,6 +43,7 @@ class NPS extends Command
      */
     public function handle()
     {
+        $doAlerts = $this->option('alerts');
         $doEvents = $this->option('events');
         $doRestaurants = $this->option('restaurants');
         $doTrails = $this->options('trails');
@@ -57,6 +59,13 @@ class NPS extends Command
             'rabr' => ['name' => 'Rainbow Bridge National Monument', 'area_id' => Area::LAKE_POWELL],
             'zion' => ['name' => 'Zion National Park', 'area_id' => Area::ZION]
         ];
+
+        if ($doAlerts !== false) {
+            foreach ($parks as $parkCode => $parkData) {
+                $events = $this->npsService->getAlerts(['parkCode' => $parkCode]);
+                $this->processAlerts($events, $parkData);
+            }
+        }
 
         if ($doEvents !== false) {
             foreach ($parks as $parkCode => $parkData) {
@@ -189,6 +198,27 @@ class NPS extends Command
 //                    ]);
 //                }
 //            }
+        }
+    }
+
+    protected function processAlerts(array $alerts, array $parkData)
+    {
+        foreach ($alerts as $obj) {
+            $id = $this->getProp($obj, 'id');
+            $url = $this->getProp($obj, 'url');
+            $title = $this->getProp($obj, 'title');
+            $parkCode = $this->getProp($obj, 'parkCode');
+            $description = $this->getProp($obj, 'description');
+            $category = $this->getProp($obj, 'parkClosure');
+            $relatedRoadEvent = json_decode($this->getProp($obj, 'relatedRoadEvent'));
+            $lastIndexedDate = $this->getProp($obj, 'lastIndexedDate');
+
+            $resourceStatus = ResourceStatus::updateOrCreate([
+                'source_type' => self::SOURCE_TYPE,
+                'source_id' => $id,
+            ], [
+                'raw_data' => json_encode($obj),
+            ]);
         }
     }
 }

@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Blog\Post;
 use App\Models\Builder\CustomQueryBuilder;
+use App\Models\Itinerary\Task;
 use App\ResourceEnum;
+use App\Traits\ActivityData;
 use App\Traits\ResourceScopes;
 use App\Traits\SearchableResource;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,8 +21,8 @@ abstract class Resource extends Model
 
     const DEFAULT_AVERAGE_HOURS = 2;
 
-    protected $appends = ['description_short', 'adventurousness', 'solitariness', 'strenuousness'];
-    protected $with = ['data', 'images', 'text'];
+    protected $appends = ['description_short', 'adventurousness', 'solitariness', 'strenuousness', 'type'];
+//    protected $with = ['data', 'images', 'text'];
 
     /**
      * @return \App\Models\Builder\CustomQueryBuilder
@@ -87,6 +91,11 @@ abstract class Resource extends Model
     public function getStrenuousnessAttribute()
     {
         return $this->getASS('strenuousness');
+    }
+
+    public function getTypeAttribute()
+    {
+        return substr($this->getTable(), 0, -1);
     }
 
     /**
@@ -158,5 +167,20 @@ abstract class Resource extends Model
 
     public function isTrail() {
         return get_class($this) === ResourceEnum::TRAILS_CLASS;
+    }
+
+    public static function getModelForResourceTable($resourceTable)
+    {
+        return match ($resourceTable) {
+            ResourceEnum::ACCOMMODATIONS_TABLE => Accommodation::class,
+            ResourceEnum::BLOG_POSTS_TABLE => Post::class,
+            ResourceEnum::EVENTS_TABLE => Event::class,
+            ResourceEnum::GUIDES_TABLE => Guide::class,
+            ResourceEnum::LOCATIONS_TABLE => Location::class,
+            ResourceEnum::RESTAURANTS_TABLE => Restaurant::class,
+            ResourceEnum::TASKS_TABLE => Task::class,
+            ResourceEnum::TRAILS_TABLE => Trail::class,
+            default => throw new Exception('Invalid table: ' . $resourceTable),
+        };
     }
 }

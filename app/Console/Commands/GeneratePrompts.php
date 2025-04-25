@@ -106,7 +106,15 @@ class GeneratePrompts extends Command
 
     public function processPosts($resourceTable = null, $maxPrompts = self::MAX_PROMPTS)
     {
-        $postsQuery = Post::with('openai_prompts')->inRandomOrder();
+        $postsQuery = Post::with('openai_prompts')
+            ->leftJoin('openai_prompts', function ($join) {
+                $join->on('blog_posts.id', '=', 'openai_prompts.source_id')
+                    ->where('openai_prompts.source_table', '=', 'blog_posts');
+            })
+            ->select('blog_posts.*')  // Select only columns from blog_posts
+            ->groupBy('blog_posts.id')
+            ->havingRaw('COUNT(openai_prompts.id) < ' . $maxPrompts)
+            ->orderByDesc('blog_posts.id');
         if ($resourceTable !== null) {
             $postsQuery = $postsQuery->where('resource_table', $resourceTable);
         } else {
@@ -116,9 +124,14 @@ class GeneratePrompts extends Command
         foreach ($posts as $obj) {
             $promptsCount = count($obj->openai_prompts);
             while ($promptsCount <= $maxPrompts) {
-                switch ($resourceTable) {
+                switch ($obj->resource_table) {
                     case 'guides':
-                        $promptsJson = $this->openAIService->generateGuidePrompts(strip_tags($obj->content));
+                        $guide = Guide::where(['id' => $obj->resource_id, 'is_usable' => 1])->first();
+                        if ($guide) {
+                            $promptsJson = $this->openAIService->generateGuidePrompts(strip_tags($obj->content));
+                        } else {
+                            continue 2;
+                        }
                         break;
                     default:
                         $promptsJson = $this->openAIService->generateTrailPrompts(strip_tags($obj->content));
@@ -147,7 +160,7 @@ class GeneratePrompts extends Command
 
     public function processTrails($maxPrompts = self::MAX_PROMPTS)
     {
-        $trails = Trail::with(['openai_prompts', 'text'])->whereHas('text')->inRandomOrder()->get();
+        $trails = Trail::with(['openai_prompts', 'text'])->inRandomOrder()->get();
         foreach ($trails as $obj) {
             if (count($obj->openai_prompts) <= $maxPrompts) {
                 $prompt = '';
@@ -159,7 +172,7 @@ class GeneratePrompts extends Command
                     $prompt .= 'Difficulty: ' . $obj->difficulty . '\n';
                 }
                 if ($obj->elevation_high_ft) {
-                    $prompt .= 'Highest elevation (in feet): ' . $obj->elevation_low_ft . '\n';
+                    $prompt .= 'Highest elevation (in feet): ' . $obj->elevation_high_ft . '\n';
                 }
                 if ($obj->elevation_low_ft) {
                     $prompt .= 'Lowest elevation (in feet): ' . $obj->elevation_low_ft . '\n';
@@ -177,10 +190,10 @@ class GeneratePrompts extends Command
                     $prompt .= 'Decline (in feet): ' . $obj->decline_ft . '\n';
                 }
                 if ($obj->average_grade_pt) {
-                    $prompt .= 'Average grade (in percentage): ' . $obj->average_grade_pt . '\n';
+                    $prompt .= 'Average grade (in percentage): ' . ($obj->average_grade_pt * 100) . '\n';
                 }
                 if ($obj->max_grade_pt) {
-                    $prompt .= 'Maximum grade (in percentage): ' . $obj->max_grade_pt . '\n';
+                    $prompt .= 'Maximum grade (in percentage): ' . ($obj->max_grade_pt * 100) . '\n';
                 }
                 if ($obj->features) {
                     $prompt .= 'Features: ' . $obj->features . '\n';

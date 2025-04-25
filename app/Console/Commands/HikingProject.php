@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Area;
-use App\Models\Scopes\UsableScope;
+use App\Models\Scopes\DataScope;
 use App\Models\Trail;
 use App\Models\TrailImage;
 use App\Services\ConversionService;
@@ -68,6 +68,7 @@ class HikingProject extends Command
         ];
 
         $this->areaUrls = [
+            'https://www.hikingproject.com/directory/8010547/grand-staircase-escalante-national-monument',
             'https://www.hikingproject.com/directory/8015386/beaver',
             'https://www.hikingproject.com/directory/8010573/brian-head-resort',
             'https://www.hikingproject.com/directory/8010545/bryce-canyon-national-park',
@@ -78,7 +79,6 @@ class HikingProject extends Command
             'https://www.hikingproject.com/directory/8013435/dixie-national-forest',
             'https://www.hikingproject.com/directory/8013360/enoch',
             'https://www.hikingproject.com/directory/8014261/escalante',
-            'https://www.hikingproject.com/directory/8010547/grand-staircase-escalante-national-monument',
             'https://www.hikingproject.com/directory/8012285/hurricane-and-la-verkin',
             'https://www.hikingproject.com/directory/8018421/junction',
             'https://www.hikingproject.com/directory/8019059/kanab',
@@ -94,6 +94,7 @@ class HikingProject extends Command
             'https://www.hikingproject.com/directory/8010544/zion-national-park',
             'https://www.hikingproject.com/directory/8013242/north-rim',
             'https://www.hikingproject.com/directory/8011899/glen-canyon-national-recreation-area',
+            'https://www.hikingproject.com/directory/8010574/glen-canyon-national-recreation-area',
         ];
         $this->trailUrls = [];
         if (empty($this->areaUrls)) {
@@ -145,7 +146,6 @@ class HikingProject extends Command
                 $crawler = $client->request('GET', $url);
                 $crawler = $client->refreshCrawler();
             }
-
             $client->waitFor('#user');
             $client->waitFor('#toolbox');
             $client->executeScript("document.querySelector('#toolbox a.mt-threequarter.btn.btn-xs.btn-secondary.width100.require-user').click()");
@@ -200,6 +200,7 @@ class HikingProject extends Command
         $dom = new HTML5DOMDocument();
         $dom->loadHTML($trailHtml, HTML5DOMDocument::ALLOW_DUPLICATE_IDS);
         $name = trim($dom->querySelector('#trail-title')->textContent);
+        $name = str_replace("html5-dom-document-internal-entity2-039-end", "'", $name);
         $difficulty = trim($dom->querySelector('.difficulty-text')->textContent);
         $distanceMiles = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(0)->querySelector('.imperial')->textContent);
         $distanceType = trim($dom->querySelectorAll('#trail-stats-bar .stat-block')->item(0)->querySelectorAll('h3')->item(2)->textContent);
@@ -268,9 +269,9 @@ class HikingProject extends Command
 
         $sourceId = $this->getTrailIdFromUrl($trailUrl);
         try {
-            $trail = Trail::withoutGlobalScope(UsableScope::class)->updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
+            $trail = Trail::withoutGlobalScope(DataScope::class)->updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
                 'name' => $name,
-                'name_alt' => $areaId,
+                'name_alt' => '',
                 'area_id' => $areaId ?? 0,
                 'description' => $description,
                 'description_alt' => $descriptionAlt ?? null,
@@ -300,7 +301,7 @@ class HikingProject extends Command
                 'raw_data' => $areaId . ' | ' . $trailUrl,
             ]);
         } catch (\Illuminate\Database\QueryException $e) {
-            $trail = Trail::withoutGlobalScope(UsableScope::class)->updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
+            $trail = Trail::withoutGlobalScope(DataScope::class)->updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
                 'name' => $name,
                 'name_alt' => $areaId,
                 'area_id' => 0,
@@ -369,7 +370,25 @@ class HikingProject extends Command
 
     private function getTrailUrlsForArea($areaId) {
         $trailUrls = [];
-        $page = -3; // For some reason, the first 10 trails are only retrieved if we start at -3.
+        // For some reason, the first 10 trails are only retrieved if we start at -3, for /trails.
+        // It starts at -1 for /featured (Recommended Routes).
+        $page = -1;
+        do {
+            $url = 'https://www.hikingproject.com/ajax/area/' . $areaId . '/featured?idx=' . $page;
+            $json = json_decode(file_get_contents($url));
+            $urls = [];
+            if ($json) {
+                if ($json->success === true) {
+                    $urls = $this->conversionService->extractUrlsFromHtml($json->markup);
+                    $urls = array_filter($urls, fn($url) => str_starts_with($url, 'https://www.hikingproject.com/trail/'));
+                    if (!empty($urls)) {
+                        $trailUrls = array_merge($trailUrls, $urls);
+                    }
+                }
+            }
+        } while (!empty($urls) && $page++ < 100);
+
+        $page = -3;
         do {
             $url = 'https://www.hikingproject.com/ajax/area/' . $areaId . '/trails?idx=' . $page;
             $json = json_decode(file_get_contents($url));
@@ -377,12 +396,14 @@ class HikingProject extends Command
             if ($json) {
                 if ($json->success === true) {
                     $urls = $this->conversionService->extractUrlsFromHtml($json->markup);
+                    $urls = array_filter($urls, fn($url) => str_starts_with($url, 'https://www.hikingproject.com/trail/'));
                     if (!empty($urls)) {
                         $trailUrls = array_merge($trailUrls, $urls);
                     }
                 }
             }
         } while (!empty($urls) && $page++ < 100);
+
         return array_values(array_unique($trailUrls));
     }
 
@@ -430,7 +451,7 @@ class HikingProject extends Command
             $itemReservation = $this->getProp($item, 'isReservationRequired') ? true : false;
             $itemFee = $this->getProp($item, 'doFeesApply') ? true : false;
 
-            $trail = Trail::withoutGlobalScope(UsableScope::class)->updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $item->id], [
+            $trail = Trail::withoutGlobalScope(DataScope::class)->updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $item->id], [
                 'name' => $itemName,
                 'name_alt' => $itemNameAlt,
                 'area_id' => $parkData['area_id'],

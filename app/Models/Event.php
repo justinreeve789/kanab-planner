@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Event extends Resource
 {
-    use ActivityData;
     use HasFactory;
     use SearchableResource;
 

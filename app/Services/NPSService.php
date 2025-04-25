@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Log;
 
 class NPSService
 {
@@ -22,7 +23,7 @@ class NPSService
             ]);
             return json_decode($response->getBody()->getContents());
         } catch (\GuzzleHttp\Exception\ClientException $e) {
-            \Log::info((string) $e);
+            Log::error((string) $e);
 
             // TODO: Figure out why Guzzle doesn't work sometimes (i.e. for /thingstodo).
             if ($type == 'GET') {
@@ -31,6 +32,23 @@ class NPSService
                 return json_decode($response);
             }
         }
+    }
+
+    public function getAlerts($params = [])
+    {
+        $alerts = [];
+        $start = 0;
+        $limit = 50;
+        do {
+            $params['start'] = $start;
+            $params['limit'] = $limit;
+            $response = $this->request('GET', '/alerts', $params);
+            if ($response) {
+                $alerts = array_merge($alerts, $response->data);
+            }
+            $start += $limit;
+        } while (!empty($response->data));
+        return $alerts;
     }
 
     public function getEvents($params = [])
