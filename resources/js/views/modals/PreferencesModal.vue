@@ -12,7 +12,7 @@
           </button>
         </div>
       </div>
-      <div class="modal-box ass overflow-x-hidden max-h-[90vh] w-full max-w-full sm:max-w-lg">
+      <div class="modal-box ass overflow-x-hidden max-h-[90vh] bg-white text-black w-full max-w-full sm:max-w-lg">
         <p class="mb-4 text-sm">Adjust the sliders, and your activities will match as close to your preferences as possible.</p>
         <div class="sliders origin-center">
           <div class="-mx-6 px-6 pt-4 pb-2 bg-gradient-to-r from-red-50 to-orange-100">
