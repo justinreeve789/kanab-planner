@@ -51,8 +51,8 @@ export default {
       this.preferencesStore.isPreferencesOpen = false;
     },
     openPreferences() {
-      this.assistantStore.isAssistantOpen = false;
       this.preferencesStore.isPreferencesOpen = true;
+      this.assistantStore.isAssistantOpen = false;
     },
     toggleAssistant() {
       this.assistantStore.isAssistantOpen = !this.assistantStore.isAssistantOpen;

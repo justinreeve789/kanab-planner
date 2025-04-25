@@ -25318,8 +25318,8 @@ __webpack_require__.r(__webpack_exports__);
       this.preferencesStore.isPreferencesOpen = false;
     },
     openPreferences: function openPreferences() {
-      this.assistantStore.isAssistantOpen = false;
       this.preferencesStore.isPreferencesOpen = true;
+      this.assistantStore.isAssistantOpen = false;
     },
     toggleAssistant: function toggleAssistant() {
       this.assistantStore.isAssistantOpen = !this.assistantStore.isAssistantOpen;
