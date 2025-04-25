@@ -5042,6 +5042,10 @@ calendar-month::part(td) {
     margin-right: 0.5rem;
   }
 
+  .sm\:block {
+    display: block;
+  }
+
   .sm\:inline {
     display: inline;
   }
