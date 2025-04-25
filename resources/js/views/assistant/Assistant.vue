@@ -17,7 +17,7 @@
           <button class="tooltip tooltip-bottom btn btn-sm btn-ghost hover:bg-cyan-100" @click="deleteHistory" data-tip="Clear chat history">
             <img class="h-4" src="images/icons/sweep.svg"/>
           </button>
-          <button class="btn btn-sm btn-ghost hover:bg-cyan-100" @click="toggleWindow">✕</button>
+          <button class="btn btn-sm btn-ghost hover:bg-cyan-100 hidden md:flex" @click="toggleWindow">✕</button>
         </div>
       </div>
       <div class="assistant-panels carousel bg-white w-full">

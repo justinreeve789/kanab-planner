@@ -2173,8 +2173,14 @@ video {
 .dock > * .dock-label {
   font-size: 0.6875rem;
 }
+.dock-xs .dock-active:after {
+  bottom: -0.1rem;
+}
 .dock-xs .dock-label {
   font-size: 0.625rem;
+}
+.dock-sm .dock-active:after {
+  bottom: -0.1rem;
 }
 .dock-sm .dock-label {
   font-size: 0.625rem;
@@ -2186,8 +2192,14 @@ video {
 .dock-md .dock-label {
   font-size: 0.6875rem;
 }
+.dock-lg .dock-active:after {
+  bottom: 0.4rem;
+}
 .dock-lg .dock-label {
   font-size: 0.6875rem;
+}
+.dock-xl .dock-active:after {
+  bottom: 0.4rem;
 }
 .dock-xl .dock-label {
   font-size: 0.75rem;
@@ -3336,6 +3348,9 @@ video {
 .-mb-4 {
   margin-bottom: -1rem;
 }
+.-mb-6 {
+  margin-bottom: -1.5rem;
+}
 .-ml-2 {
   margin-left: -0.5rem;
 }
@@ -3362,12 +3377,6 @@ video {
 }
 .mb-8 {
   margin-bottom: 2rem;
-}
-.me-2 {
-  margin-inline-end: 0.5rem;
-}
-.me-2\.5 {
-  margin-inline-end: 0.625rem;
 }
 .ml-2 {
   margin-left: 0.5rem;
@@ -3419,9 +3428,6 @@ video {
 }
 .mt-6 {
   margin-top: 1.5rem;
-}
-.-mb-6 {
-  margin-bottom: -1.5rem;
 }
 .block {
   display: block;
@@ -3486,8 +3492,14 @@ video {
 .max-h-\[90vh\] {
   max-height: 90vh;
 }
+.max-h-\[calc\(100vh-128px\)\] {
+  max-height: calc(100vh - 128px);
+}
 .max-h-full {
   max-height: 100%;
+}
+.max-h-\[calc\(100vh-64px\)\] {
+  max-height: calc(100vh - 64px);
 }
 .min-h-\[150px\] {
   min-height: 150px;
@@ -3552,6 +3564,9 @@ video {
 .max-w-\[250px\] {
   max-width: 250px;
 }
+.max-w-\[640px\] {
+  max-width: 640px;
+}
 .max-w-full {
   max-width: 100%;
 }
@@ -3563,12 +3578,6 @@ video {
 }
 .max-w-xl {
   max-width: 36rem;
-}
-.max-w-\[640px\] {
-  max-width: 640px;
-}
-.max-w-\[720px\] {
-  max-width: 720px;
 }
 .flex-1 {
   flex: 1 1 0%;
@@ -3584,6 +3593,10 @@ video {
 }
 .origin-right {
   transform-origin: right;
+}
+.-translate-x-1\/2 {
+  --tw-translate-x: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 .-translate-x-full {
   --tw-translate-x: -100%;
@@ -4403,7 +4416,6 @@ h1, h2 {
 .modal {
   position: fixed;
   background-color: transparent;
-  height: 100%;
   width: 100%;
   z-index: 999;
 }
@@ -4424,11 +4436,7 @@ h1, h2 {
 .modal .modal-container {
   position: fixed;
   background-color: #ffffff;
-  border-radius: 15px;
-  border: solid 5px #d0e0f0;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
   z-index: 1000;
 }
 .modal .modal-container .modal-box {
@@ -5099,10 +5107,6 @@ calendar-month::part(td) {
     width: 100%;
   }
 
-  .sm\:max-w-lg {
-    max-width: 32rem;
-  }
-
   .sm\:max-w-md {
     max-width: 28rem;
   }
@@ -5143,10 +5147,6 @@ calendar-month::part(td) {
 
 @media (min-width: 768px) {
 
-  .md\:visible {
-    visibility: visible;
-  }
-
   .md\:bottom-20 {
     bottom: 5rem;
   }
@@ -5157,6 +5157,10 @@ calendar-month::part(td) {
 
   .md\:right-4 {
     right: 1rem;
+  }
+
+  .md\:top-1\/2 {
+    top: 50%;
   }
 
   .md\:top-auto {
@@ -5220,6 +5224,11 @@ calendar-month::part(td) {
     max-width: 90vw;
   }
 
+  .md\:-translate-y-1\/2 {
+    --tw-translate-y: -50%;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+  }
+
   .md\:flex-row {
     flex-direction: row;
   }
@@ -5246,6 +5255,10 @@ calendar-month::part(td) {
     margin-bottom: calc(0px * var(--tw-space-y-reverse));
   }
 
+  .md\:rounded-\[15px\] {
+    border-radius: 15px;
+  }
+
   .md\:rounded-xl {
     border-radius: 0.75rem;
   }
@@ -5257,6 +5270,15 @@ calendar-month::part(td) {
 
   .md\:border {
     border-width: 1px;
+  }
+
+  .md\:border-\[5px\] {
+    border-width: 5px;
+  }
+
+  .md\:border-\[\#d0e0f0\] {
+    --tw-border-opacity: 1;
+    border-color: rgb(208 224 240 / var(--tw-border-opacity));
   }
 
   .md\:p-4 {
