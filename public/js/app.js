@@ -25174,7 +25174,7 @@ __webpack_require__.r(__webpack_exports__);
       } else if (this.adventurousness >= 0.4 && this.adventurousness < 0.6) {
         return 'You\'re happy to chase petroglyphs, ghost towns, or an oddly shaped rock with a good backstory. You\'re down for exploring, as long as it doesn\'t involve ropes, scrambling, or ambiguous forks in the path.';
       } else if (this.adventurousness >= 0.6 && this.adventurousness < 0.8) {
-        return 'You\'re willing to explore the local legends and secret slot canyons, and aren\'t afraid to get dirty. You\'ll possibly get lost, but you\'ll definitely get a cool story out of it.';
+        return 'You\'re willing to explore the secret slot canyons and places only the locals know, and aren\'t afraid to get dirty. You\'ll possibly get lost, but you\'ll definitely get a cool story out of it.';
       } else if (this.adventurousness >= 0.8) {
         return 'You crave the uncharted. If it looks like alien terrain, requires a headlamp, and maybe a backup plan, you\'re already packing your boots.';
       }
@@ -25207,28 +25207,28 @@ __webpack_require__.r(__webpack_exports__);
     },
     strenuousnessTitle: function strenuousnessTitle() {
       if (this.strenuousness < 0.2) {
-        return 'I Came for the Gift Shop';
+        return 'Flat as a Pancake, Just Like I Like It';
       } else if (this.strenuousness >= 0.2 && this.strenuousness < 0.4) {
-        return 'I Brake for Scenic Pullouts';
+        return 'A Bit of a Puff, Nothing Rough';
       } else if (this.strenuousness >= 0.4 && this.strenuousness < 0.6) {
-        return 'The Trail Less Traveled';
+        return 'The Altitude Achiever';
       } else if (this.strenuousness >= 0.6 && this.strenuousness < 0.8) {
-        return 'Let\'s Get Dirt On Our Shoes';
+        return 'Panting with Scenic Interruptions';
       } else if (this.strenuousness >= 0.8) {
-        return 'Did I Just Discover a New Planet?';
+        return 'I Didn\'t Know I Could Sweat There';
       }
     },
     strenuousnessDescription: function strenuousnessDescription() {
       if (this.strenuousness < 0.2) {
-        return 'You prefer a nice view through the window, and destinations with indoor plumbing. No surprises, thanks.';
+        return 'If you can do it in flip-flops while holding an iced latte, that’s your pace.';
       } else if (this.strenuousness >= 0.2 && this.strenuousness < 0.4) {
-        return 'You admire the wild, and want to make sure you hit the good spots. If it\'s on a postcard, you\'re there, as long as there\'s a paved path.';
+        return 'You might breathe heavy, but you\’ll still look cute doing it.';
       } else if (this.strenuousness >= 0.4 && this.strenuousness < 0.6) {
-        return 'You\'re happy to chase petroglyphs, ghost towns, or an oddly shaped rock with a good backstory. You\'re down for exploring, as long as it doesn\'t involve ropes, scrambling, or ambiguous forks in the path.';
+        return 'You want to feel like you did something today, but you also want to walk tomorrow.';
       } else if (this.strenuousness >= 0.6 && this.strenuousness < 0.8) {
-        return 'You\'re willing to explore the local legends and secret slot canyons, and aren\'t afraid to get dirty. You\'ll possibly get lost, but you\'ll definitely get a cool story out of it.';
+        return 'You expect to breathe hard, sweat considerably, and maybe even question your life choices.';
       } else if (this.strenuousness >= 0.8) {
-        return 'You crave the uncharted. If it looks like alien terrain, requires a headlamp, and maybe a backup plan, you\'re already packing your boots.';
+        return 'You don\'t hike mountains, you summit them. Your thighs are forged in stone.';
       }
     }
   },
@@ -27358,7 +27358,7 @@ var _hoisted_20 = {
   "class": "text-sm"
 };
 var _hoisted_21 = {
-  "class": "-mx-6 px-6 pt-4 pb-2 bg-gradient-to-r from-blue-50 to-purple-100"
+  "class": "-mx-6 -mb-6 px-6 pt-4 pb-2 bg-gradient-to-r from-blue-50 to-purple-100"
 };
 var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"flex justify-between items-center -mx-6 px-6 -mt-4 mb-2 py-2 bg-gradient-to-r from-blue-100 to-purple-200\"><div class=\"font-bold text-black text-md\"> Strenuousness </div><div class=\"tooltip tooltip-left\"><div class=\"tooltip-content max-w-[250px] md:max-w-[400px]\"><p class=\"text-left\"><span class=\"font-bold\">Strenuousness</span> is a measure of how physically exerting the experience is. Set this higher if you want more challenging hikes or you&#39;re the sporty type. </p></div><svg class=\"w-6 h-6 text-gray-800 dark:text-white\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"none\" viewBox=\"0 0 24 24\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z\"></path></svg></div></div>", 1);
 var _hoisted_23 = {

@@ -67,7 +67,7 @@
             </div>
           </div>
 
-          <div class="-mx-6 px-6 pt-4 pb-2 bg-gradient-to-r from-blue-50 to-purple-100">
+          <div class="-mx-6 -mb-6 px-6 pt-4 pb-2 bg-gradient-to-r from-blue-50 to-purple-100">
             <div class="flex justify-between items-center -mx-6 px-6 -mt-4 mb-2 py-2 bg-gradient-to-r from-blue-100 to-purple-200">
               <div class="font-bold text-black text-md">
                 Strenuousness
@@ -140,7 +140,7 @@ export default {
       } else if (this.adventurousness >= 0.4 && this.adventurousness < 0.6) {
         return 'You\'re happy to chase petroglyphs, ghost towns, or an oddly shaped rock with a good backstory. You\'re down for exploring, as long as it doesn\'t involve ropes, scrambling, or ambiguous forks in the path.';
       } else if (this.adventurousness >= 0.6 && this.adventurousness < 0.8) {
-        return 'You\'re willing to explore the local legends and secret slot canyons, and aren\'t afraid to get dirty. You\'ll possibly get lost, but you\'ll definitely get a cool story out of it.';
+        return 'You\'re willing to explore the secret slot canyons and places only the locals know, and aren\'t afraid to get dirty. You\'ll possibly get lost, but you\'ll definitely get a cool story out of it.';
       } else if (this.adventurousness >= 0.8) {
         return 'You crave the uncharted. If it looks like alien terrain, requires a headlamp, and maybe a backup plan, you\'re already packing your boots.';
       }
@@ -173,28 +173,28 @@ export default {
     },
     strenuousnessTitle() {
       if (this.strenuousness < 0.2) {
-        return 'I Came for the Gift Shop';
+        return 'Flat as a Pancake, Just Like I Like It';
       } else if (this.strenuousness >= 0.2 && this.strenuousness < 0.4) {
-        return 'I Brake for Scenic Pullouts';
+        return 'A Bit of a Puff, Nothing Rough';
       } else if (this.strenuousness >= 0.4 && this.strenuousness < 0.6) {
-        return 'The Trail Less Traveled';
+        return 'The Altitude Achiever';
       } else if (this.strenuousness >= 0.6 && this.strenuousness < 0.8) {
-        return 'Let\'s Get Dirt On Our Shoes';
+        return 'Panting with Scenic Interruptions';
       } else if (this.strenuousness >= 0.8) {
-        return 'Did I Just Discover a New Planet?';
+        return 'I Didn\'t Know I Could Sweat There';
       }
     },
     strenuousnessDescription() {
       if (this.strenuousness < 0.2) {
-        return 'You prefer a nice view through the window, and destinations with indoor plumbing. No surprises, thanks.';
+        return 'If you can do it in flip-flops while holding an iced latte, that’s your pace.';
       } else if (this.strenuousness >= 0.2 && this.strenuousness < 0.4) {
-        return 'You admire the wild, and want to make sure you hit the good spots. If it\'s on a postcard, you\'re there, as long as there\'s a paved path.';
+        return 'You might breathe heavy, but you\’ll still look cute doing it.';
       } else if (this.strenuousness >= 0.4 && this.strenuousness < 0.6) {
-        return 'You\'re happy to chase petroglyphs, ghost towns, or an oddly shaped rock with a good backstory. You\'re down for exploring, as long as it doesn\'t involve ropes, scrambling, or ambiguous forks in the path.';
+        return 'You want to feel like you did something today, but you also want to walk tomorrow.';
       } else if (this.strenuousness >= 0.6 && this.strenuousness < 0.8) {
-        return 'You\'re willing to explore the local legends and secret slot canyons, and aren\'t afraid to get dirty. You\'ll possibly get lost, but you\'ll definitely get a cool story out of it.';
+        return 'You expect to breathe hard, sweat considerably, and maybe even question your life choices.';
       } else if (this.strenuousness >= 0.8) {
-        return 'You crave the uncharted. If it looks like alien terrain, requires a headlamp, and maybe a backup plan, you\'re already packing your boots.';
+        return 'You don\'t hike mountains, you summit them. Your thighs are forged in stone.';
       }
     },
   },
