@@ -1,11 +1,11 @@
 <template>
   <input type="checkbox" id="preferences-modal" class="modal-toggle" v-model="preferencesStore.isPreferencesOpen" />
   <div class="modal" id="preferences-modal">
-    <div class="modal-container w-full sm:w-auto">
+    <div class="modal-container bg-white w-full sm:w-auto">
       <div class="flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full">
         <h2 class="text-black text-lg">Preferences</h2>
         <div class="flex align-right">
-          <button class="btn btn-sm btn-ghost hover:bg-cyan-100">
+          <button class="btn btn-sm btn-ghost hover:bg-cyan-100 text-black">
             <label for="preferences-modal">
               <span>✕</span>
             </label>

@@ -27307,9 +27307,9 @@ var _hoisted_1 = {
   id: "preferences-modal"
 };
 var _hoisted_2 = {
-  "class": "modal-container w-full sm:w-auto"
+  "class": "modal-container bg-white w-full sm:w-auto"
 };
-var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full\"><h2 class=\"text-black text-lg\">Preferences</h2><div class=\"flex align-right\"><button class=\"btn btn-sm btn-ghost hover:bg-cyan-100\"><label for=\"preferences-modal\"><span>✕</span></label></button></div></div>", 1);
+var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full\"><h2 class=\"text-black text-lg\">Preferences</h2><div class=\"flex align-right\"><button class=\"btn btn-sm btn-ghost hover:bg-cyan-100 text-black\"><label for=\"preferences-modal\"><span>✕</span></label></button></div></div>", 1);
 var _hoisted_4 = {
   "class": "modal-box ass overflow-x-hidden max-h-[90vh] w-full max-w-full sm:max-w-lg"
 };
