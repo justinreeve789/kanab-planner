@@ -3,7 +3,7 @@
   <div class="modal" id="preferences-modal">
     <div class="modal-container w-full sm:w-auto">
       <div class="flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full">
-        <h2 class="text-lg">Preferences</h2>
+        <h2 class="text-black text-lg">Preferences</h2>
         <div class="flex align-right">
           <button class="btn btn-sm btn-ghost hover:bg-cyan-100">
             <label for="preferences-modal">
