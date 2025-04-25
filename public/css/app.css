@@ -3564,6 +3564,12 @@ video {
 .max-w-xl {
   max-width: 36rem;
 }
+.max-w-\[640px\] {
+  max-width: 640px;
+}
+.max-w-\[720px\] {
+  max-width: 720px;
+}
 .flex-1 {
   flex: 1 1 0%;
 }

@@ -25200,7 +25200,7 @@ __webpack_require__.r(__webpack_exports__);
       } else if (this.solitariness >= 0.4 && this.solitariness < 0.6) {
         return 'You\'re okay with crossing paths with someone else, just not every ten steps. Others can exist, as long as they don\'t cramp your zen.';
       } else if (this.solitariness >= 0.6 && this.solitariness < 0.8) {
-        return 'You want open space and quiet, but a distant human or two to confirm you\'re not in a survival movie.';
+        return 'You want open space and quiet, and maybe a distant human or two to confirm you\'re not in a survival movie.';
       } else if (this.solitariness >= 0.8) {
         return 'You prefer to be alone in the wilderness, talking to moss. If you see footprints, you\'re walking the other way.';
       }
@@ -27307,11 +27307,11 @@ var _hoisted_1 = {
   id: "preferences-modal"
 };
 var _hoisted_2 = {
-  "class": "modal-container bg-white w-full sm:w-auto"
+  "class": "modal-container bg-white max-w-[640px] w-full"
 };
 var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full\"><h2 class=\"text-black text-lg\">Preferences</h2><div class=\"flex align-right\"><button class=\"btn btn-sm btn-ghost hover:bg-cyan-100 text-black\"><label for=\"preferences-modal\"><span>✕</span></label></button></div></div>", 1);
 var _hoisted_4 = {
-  "class": "modal-box ass overflow-x-hidden max-h-[90vh] bg-white text-black w-full max-w-full sm:max-w-lg"
+  "class": "modal-box ass overflow-x-hidden max-h-[90vh] bg-white text-black w-full max-w-[640px]"
 };
 var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", {
   "class": "mb-4 text-sm"

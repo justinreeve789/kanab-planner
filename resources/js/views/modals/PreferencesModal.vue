@@ -1,7 +1,7 @@
 <template>
   <input type="checkbox" id="preferences-modal" class="modal-toggle" v-model="preferencesStore.isPreferencesOpen" />
   <div class="modal" id="preferences-modal">
-    <div class="modal-container bg-white w-full sm:w-auto">
+    <div class="modal-container bg-white max-w-[640px] w-full">
       <div class="flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full">
         <h2 class="text-black text-lg">Preferences</h2>
         <div class="flex align-right">
@@ -12,7 +12,7 @@
           </button>
         </div>
       </div>
-      <div class="modal-box ass overflow-x-hidden max-h-[90vh] bg-white text-black w-full max-w-full sm:max-w-lg">
+      <div class="modal-box ass overflow-x-hidden max-h-[90vh] bg-white text-black w-full max-w-[640px]">
         <p class="mb-4 text-sm">Adjust the sliders, and your activities will match as close to your preferences as possible.</p>
         <div class="sliders origin-center">
           <div class="-mx-6 px-6 pt-4 pb-2 bg-gradient-to-r from-red-50 to-orange-100">
@@ -166,7 +166,7 @@ export default {
       } else if (this.solitariness >= 0.4 && this.solitariness < 0.6) {
         return 'You\'re okay with crossing paths with someone else, just not every ten steps. Others can exist, as long as they don\'t cramp your zen.';
       } else if (this.solitariness >= 0.6 && this.solitariness < 0.8) {
-        return 'You want open space and quiet, but a distant human or two to confirm you\'re not in a survival movie.';
+        return 'You want open space and quiet, and maybe a distant human or two to confirm you\'re not in a survival movie.';
       } else if (this.solitariness >= 0.8) {
         return 'You prefer to be alone in the wilderness, talking to moss. If you see footprints, you\'re walking the other way.';
       }
