@@ -25152,6 +25152,84 @@ __webpack_require__.r(__webpack_exports__);
     },
     strenuousnessPercent: function strenuousnessPercent() {
       return Math.max(0.01, Math.min(100, Math.round(this.strenuousness * 100)));
+    },
+    adventurousnessTitle: function adventurousnessTitle() {
+      if (this.adventurousness < 0.2) {
+        return 'I Came for the Gift Shop';
+      } else if (this.adventurousness >= 0.2 && this.adventurousness < 0.4) {
+        return 'I Brake for Scenic Pullouts';
+      } else if (this.adventurousness >= 0.4 && this.adventurousness < 0.6) {
+        return 'The Trail Less Traveled';
+      } else if (this.adventurousness >= 0.6 && this.adventurousness < 0.8) {
+        return 'Let\'s Get Dirt On Our Shoes';
+      } else if (this.adventurousness >= 0.8) {
+        return 'Did I Just Discover a New Planet?';
+      }
+    },
+    adventurousnessDescription: function adventurousnessDescription() {
+      if (this.adventurousness < 0.2) {
+        return 'You prefer a nice view through the window, and destinations with indoor plumbing. No surprises, thanks.';
+      } else if (this.adventurousness >= 0.2 && this.adventurousness < 0.4) {
+        return 'You admire the wild, and want to make sure you hit the good spots. If it\'s on a postcard, you\'re there, as long as there\'s a paved path.';
+      } else if (this.adventurousness >= 0.4 && this.adventurousness < 0.6) {
+        return 'You\'re happy to chase petroglyphs, ghost towns, or an oddly shaped rock with a good backstory. You\'re down for exploring, as long as it doesn\'t involve ropes, scrambling, or ambiguous forks in the path.';
+      } else if (this.adventurousness >= 0.6 && this.adventurousness < 0.8) {
+        return 'You\'re willing to explore the local legends and secret slot canyons, and aren\'t afraid to get dirty. You\'ll possibly get lost, but you\'ll definitely get a cool story out of it.';
+      } else if (this.adventurousness >= 0.8) {
+        return 'You crave the uncharted. If it looks like alien terrain, requires a headlamp, and maybe a backup plan, you\'re already packing your boots.';
+      }
+    },
+    solitarinessTitle: function solitarinessTitle() {
+      if (this.solitariness < 0.2) {
+        return 'The More the Merrier';
+      } else if (this.solitariness >= 0.2 && this.solitariness < 0.4) {
+        return 'A Few Friendly Faces';
+      } else if (this.solitariness >= 0.4 && this.solitariness < 0.6) {
+        return 'Where is Everybody?';
+      } else if (this.solitariness >= 0.6 && this.solitariness < 0.8) {
+        return 'Just Me and the Squirrels';
+      } else if (this.solitariness >= 0.8) {
+        return 'Unplug Me from Society';
+      }
+    },
+    solitarinessDescription: function solitarinessDescription() {
+      if (this.solitariness < 0.2) {
+        return 'You\'re here for the social experience — swap stories, share snacks, maybe form a hiking gang.';
+      } else if (this.solitariness >= 0.2 && this.solitariness < 0.4) {
+        return 'If you don’t see at least three dogs, five kids, and someone blasting music, its not a hike.';
+      } else if (this.solitariness >= 0.4 && this.solitariness < 0.6) {
+        return 'You\'re okay with crossing paths with someone else, just not every ten steps. Others can exist, as long as they don\'t cramp your zen.';
+      } else if (this.solitariness >= 0.6 && this.solitariness < 0.8) {
+        return 'You want open space and quiet, but a distant human or two to confirm you\'re not in a survival movie.';
+      } else if (this.solitariness >= 0.8) {
+        return 'You prefer to be alone in the wilderness, talking to moss. If you see footprints, you\'re walking the other way.';
+      }
+    },
+    strenuousnessTitle: function strenuousnessTitle() {
+      if (this.strenuousness < 0.2) {
+        return 'I Came for the Gift Shop';
+      } else if (this.strenuousness >= 0.2 && this.strenuousness < 0.4) {
+        return 'I Brake for Scenic Pullouts';
+      } else if (this.strenuousness >= 0.4 && this.strenuousness < 0.6) {
+        return 'The Trail Less Traveled';
+      } else if (this.strenuousness >= 0.6 && this.strenuousness < 0.8) {
+        return 'Let\'s Get Dirt On Our Shoes';
+      } else if (this.strenuousness >= 0.8) {
+        return 'Did I Just Discover a New Planet?';
+      }
+    },
+    strenuousnessDescription: function strenuousnessDescription() {
+      if (this.strenuousness < 0.2) {
+        return 'You prefer a nice view through the window, and destinations with indoor plumbing. No surprises, thanks.';
+      } else if (this.strenuousness >= 0.2 && this.strenuousness < 0.4) {
+        return 'You admire the wild, and want to make sure you hit the good spots. If it\'s on a postcard, you\'re there, as long as there\'s a paved path.';
+      } else if (this.strenuousness >= 0.4 && this.strenuousness < 0.6) {
+        return 'You\'re happy to chase petroglyphs, ghost towns, or an oddly shaped rock with a good backstory. You\'re down for exploring, as long as it doesn\'t involve ropes, scrambling, or ambiguous forks in the path.';
+      } else if (this.strenuousness >= 0.6 && this.strenuousness < 0.8) {
+        return 'You\'re willing to explore the local legends and secret slot canyons, and aren\'t afraid to get dirty. You\'ll possibly get lost, but you\'ll definitely get a cool story out of it.';
+      } else if (this.strenuousness >= 0.8) {
+        return 'You crave the uncharted. If it looks like alien terrain, requires a headlamp, and maybe a backup plan, you\'re already packing your boots.';
+      }
     }
   },
   data: function data() {
@@ -27233,40 +27311,72 @@ var _hoisted_2 = {
 };
 var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full\"><h2 class=\"text-black text-lg\">Preferences</h2><div class=\"flex align-right\"><button class=\"btn btn-sm btn-ghost hover:bg-cyan-100\"><label for=\"preferences-modal\"><span>✕</span></label></button></div></div>", 1);
 var _hoisted_4 = {
-  "class": "modal-box ass w-full max-w-full sm:max-w-lg"
+  "class": "modal-box ass overflow-x-hidden max-h-[90vh] w-full max-w-full sm:max-w-lg"
 };
-var _hoisted_5 = {
-  "class": "sliders -rotate-90 xs:rotate-0 origin-center mt-24 mb-20 xs:my-0"
-};
+var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", {
+  "class": "mb-4 text-sm"
+}, "Adjust the sliders, and your activities will match as close to your preferences as possible.", -1 /* HOISTED */);
 var _hoisted_6 = {
-  "class": "flex mb-8 xs:mb-4"
+  "class": "sliders origin-center"
 };
-var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
-  "class": "name text-right rotate-45 xs:rotate-0 origin-right"
-}, "Adventurousness", -1 /* HOISTED */);
-var _hoisted_8 = {
-  "class": "value badge badge-neutral badge-md rotate-90 xs:rotate-0"
+var _hoisted_7 = {
+  "class": "-mx-6 px-6 pt-4 pb-2 bg-gradient-to-r from-red-50 to-orange-100"
 };
+var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"flex justify-between items-center -mx-6 px-6 -mt-4 mb-2 py-2 bg-gradient-to-r from-red-100 to-orange-200\"><div class=\"font-bold text-black text-md\"> Adventurousness </div><div class=\"tooltip tooltip-left\"><div class=\"tooltip-content max-w-[250px] md:max-w-[400px]\"><p class=\"text-left\"><span class=\"font-bold\">Adventurousness</span> is the uniqueness of the experience, and how outside an average person&#39;s comfort zone it is. Set this higher if you&#39;re feeling like exploring, spending more time outdoors, or maybe trying something new. </p></div><svg class=\"w-6 h-6 text-gray-800 dark:text-white\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"none\" viewBox=\"0 0 24 24\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z\"></path></svg></div></div>", 1);
 var _hoisted_9 = {
-  "class": "flex mb-8 xs:mb-4"
+  "class": "flex mb-4 w-full"
 };
-var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
-  "class": "name text-right rotate-45 xs:rotate-0 origin-right"
-}, "Solitariness", -1 /* HOISTED */);
+var _hoisted_10 = {
+  "class": "value badge badge-neutral badge-md hidden"
+};
 var _hoisted_11 = {
-  "class": "value badge badge-neutral badge-md rotate-90 xs:rotate-0"
+  "class": "h-32"
 };
 var _hoisted_12 = {
-  "class": "flex xs:mb-4"
+  "class": "font-bold text-sm"
 };
-var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
-  "class": "name text-right rotate-45 xs:rotate-0 origin-right"
-}, "Strenuousness", -1 /* HOISTED */);
+var _hoisted_13 = {
+  "class": "text-sm"
+};
 var _hoisted_14 = {
-  "class": "value badge badge-neutral badge-md rotate-90 xs:rotate-0"
+  "class": "-mx-6 px-6 pt-4 pb-2 bg-gradient-to-r from-green-50 to-cyan-100"
 };
-var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"text-sm md:text-base\"><p class=\"mb-4\">Adjust the sliders and this day will automatically update with activities as close to your specifications as possible.</p><ul><li class=\"mb-2\"><strong>Adventurousness</strong> is the uniqueness of the experience, and how outside an average person&#39;s comfort zone it is. Set this higher if you&#39;re feeling like exploring, spending more time outdoors, or maybe trying something new.</li><li class=\"mb-2\"><strong>Solitariness</strong> is how much weight you place on less-crowded areas or non-human-interacting experiences would enjoy it. Set this higher if you want to be alone, or lower if you enjoy the interaction.</li><li class=\"mb-2\"><strong>Strenuousness</strong> is a measure of how physically exerting the experience is. Set this higher if you want more challenging hikes or you&#39;re the sporty type.</li></ul></div>", 1);
-var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"flex justify-between items-center -mx-6 px-6 -mt-4 mb-2 py-2 bg-gradient-to-r from-green-100 to-cyan-200\"><div class=\"font-bold text-black text-md\"> Solitariness </div><div class=\"tooltip tooltip-left\"><div class=\"tooltip-content max-w-[250px] md:max-w-[400px]\"><p class=\"text-left\"><span class=\"font-bold\">Solitariness</span> is how much weight you place on less-crowded areas and non-human interactions. Set this higher if you want to be alone, or lower if you don&#39;t mind when areas a little busy. </p></div><svg class=\"w-6 h-6 text-gray-800 dark:text-white\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"none\" viewBox=\"0 0 24 24\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z\"></path></svg></div></div>", 1);
+var _hoisted_16 = {
+  "class": "flex mb-4 w-full"
+};
+var _hoisted_17 = {
+  "class": "value badge badge-neutral badge-md hidden"
+};
+var _hoisted_18 = {
+  "class": "h-32"
+};
+var _hoisted_19 = {
+  "class": "font-bold text-sm"
+};
+var _hoisted_20 = {
+  "class": "text-sm"
+};
+var _hoisted_21 = {
+  "class": "-mx-6 px-6 pt-4 pb-2 bg-gradient-to-r from-blue-50 to-purple-100"
+};
+var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"flex justify-between items-center -mx-6 px-6 -mt-4 mb-2 py-2 bg-gradient-to-r from-blue-100 to-purple-200\"><div class=\"font-bold text-black text-md\"> Strenuousness </div><div class=\"tooltip tooltip-left\"><div class=\"tooltip-content max-w-[250px] md:max-w-[400px]\"><p class=\"text-left\"><span class=\"font-bold\">Strenuousness</span> is a measure of how physically exerting the experience is. Set this higher if you want more challenging hikes or you&#39;re the sporty type. </p></div><svg class=\"w-6 h-6 text-gray-800 dark:text-white\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"none\" viewBox=\"0 0 24 24\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z\"></path></svg></div></div>", 1);
+var _hoisted_23 = {
+  "class": "flex mb-4 w-full"
+};
+var _hoisted_24 = {
+  "class": "value badge badge-neutral badge-md hidden"
+};
+var _hoisted_25 = {
+  "class": "h-32"
+};
+var _hoisted_26 = {
+  "class": "font-bold text-sm"
+};
+var _hoisted_27 = {
+  "class": "text-sm"
+};
+var _hoisted_28 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
   "for": "preferences-modal",
   "class": "modal-backdrop"
 }, null, -1 /* HOISTED */);
@@ -27278,34 +27388,43 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
       return $setup.preferencesStore.isPreferencesOpen = $event;
     })
-  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $setup.preferencesStore.isPreferencesOpen]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [_hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [_hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    "class": "adventurousness ml-2 mr-2 cursor-ns-resize xs:cursor-ew-resize",
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $setup.preferencesStore.isPreferencesOpen]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [_hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [_hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [_hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    "class": "adventurousness cursor-ns-resize xs:cursor-ew-resize",
     type: "range",
     min: "0",
     max: "1",
-    step: "0.05",
+    step: "0.1",
+    style: {
+      "width": "100%"
+    },
     "onUpdate:modelValue": _cache[1] || (_cache[1] = function ($event) {
       return $data.adventurousness = $event;
     })
-  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.adventurousness]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(($data.adventurousness * 100).toFixed(0)) + "%", 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [_hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    "class": "solitariness ml-2 mr-2 cursor-ns-resize xs:cursor-ew-resize",
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.adventurousness]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(($data.adventurousness * 100).toFixed(0)) + "%", 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_12, "\"" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.adventurousnessTitle) + "\"", 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.adventurousnessDescription), 1 /* TEXT */)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [_hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    "class": "solitariness cursor-ns-resize xs:cursor-ew-resize",
     type: "range",
     min: "0",
     max: "1",
-    step: "0.05",
+    step: "0.1",
+    style: {
+      "width": "100%"
+    },
     "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
       return $data.solitariness = $event;
     })
-  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.solitariness]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(($data.solitariness * 100).toFixed(0)) + "%", 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [_hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    "class": "strenuousness ml-2 mr-2 cursor-ns-resize xs:cursor-ew-resize",
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.solitariness]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(($data.solitariness * 100).toFixed(0)) + "%", 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_19, "\"" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.solitarinessTitle) + "\"", 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.solitarinessDescription), 1 /* TEXT */)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_21, [_hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    "class": "strenuousness cursor-ns-resize xs:cursor-ew-resize",
     type: "range",
     min: "0",
     max: "1",
-    step: "0.05",
+    step: "0.1",
+    style: {
+      "width": "100%"
+    },
     "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
       return $data.strenuousness = $event;
     })
-  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.strenuousness]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(($data.strenuousness * 100).toFixed(0)) + "%", 1 /* TEXT */)])]), _hoisted_15])])]), _hoisted_16], 64 /* STABLE_FRAGMENT */);
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.strenuousness]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(($data.strenuousness * 100).toFixed(0)) + "%", 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_26, "\"" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.strenuousnessTitle) + "\"", 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_27, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.strenuousnessDescription), 1 /* TEXT */)])])])])])]), _hoisted_28], 64 /* STABLE_FRAGMENT */);
 }
 
 /***/ }),
