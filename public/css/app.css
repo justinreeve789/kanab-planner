@@ -3575,6 +3575,9 @@ video {
 .h-\[calc\(100vh-64px\)\] {
   height: calc(100vh - 64px);
 }
+.h-\[1em\] {
+  height: 1em;
+}
 .max-h-\[350px\] {
   max-height: 350px;
 }
@@ -3592,6 +3595,18 @@ video {
 }
 .max-h-full {
   max-height: 100%;
+}
+.max-h-60 {
+  max-height: 15rem;
+}
+.max-h-16 {
+  max-height: 4rem;
+}
+.max-h-32 {
+  max-height: 8rem;
+}
+.max-h-48 {
+  max-height: 12rem;
 }
 .min-h-\[150px\] {
   min-height: 150px;
@@ -3679,6 +3694,9 @@ video {
 }
 .shrink-0 {
   flex-shrink: 0;
+}
+.grow {
+  flex-grow: 1;
 }
 .origin-center {
   transform-origin: center;
@@ -3796,6 +3814,11 @@ video {
 }
 .overflow-x-hidden {
   overflow-x: hidden;
+}
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .break-words {
   overflow-wrap: break-word;
@@ -4296,6 +4319,12 @@ video {
 }
 .opacity-90 {
   opacity: 0.9;
+}
+.opacity-60 {
+  opacity: 0.6;
+}
+.opacity-50 {
+  opacity: 0.5;
 }
 .shadow {
   --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
@@ -5346,6 +5375,18 @@ calendar-month::part(td) {
     height: auto;
   }
 
+  .md\:h-\[90vh\] {
+    height: 90vh;
+  }
+
+  .md\:h-full {
+    height: 100%;
+  }
+
+  .md\:h-\[calc\(100\%-4rem\)\] {
+    height: calc(100% - 4rem);
+  }
+
   .md\:max-h-\[90vh\] {
     max-height: 90vh;
   }
@@ -5371,6 +5412,14 @@ calendar-month::part(td) {
     width: fit-content;
   }
 
+  .md\:w-\[90vw\] {
+    width: 90vw;
+  }
+
+  .md\:w-full {
+    width: 100%;
+  }
+
   .md\:max-w-\[400px\] {
     max-width: 400px;
   }
@@ -5381,6 +5430,10 @@ calendar-month::part(td) {
 
   .md\:max-w-\[640px\] {
     max-width: 640px;
+  }
+
+  .md\:max-w-\[90vh\] {
+    max-width: 90vh;
   }
 
   .md\:-translate-y-1\/2 {

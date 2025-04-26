@@ -33,8 +33,8 @@
         </ul>
       </div>
       <div class="navbar-end">
-        <button class="btn btn-ghost btn-circle">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /> </svg>
+        <button class="btn btn-ghost btn-circle hidden md:flex" @click="toggleSearch">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
         </button>
         <button class="btn btn-ghost btn-circle">
           <div class="indicator">
@@ -75,11 +75,13 @@
 import { ref } from "vue";
 import { usePreferencesStore } from "../../stores/preferences";
 import CallyCalendar from "../components/CallyCalendar.vue";
+import {useSearchStore} from "../../stores/search";
 
 export default {
   setup() {
     const preferencesStore = usePreferencesStore();
-    return { preferencesStore };
+    const searchStore = useSearchStore();
+    return { preferencesStore, searchStore };
   },
   components: {
     CallyCalendar,
@@ -109,6 +111,9 @@ export default {
     },
     togglePreferences() {
       this.preferencesStore.isPreferencesOpen = !this.preferencesStore.isPreferencesOpen;
+    },
+    toggleSearch() {
+      this.searchStore.isSearchOpen = !this.searchStore.isSearchOpen;
     },
   },
   mounted() {

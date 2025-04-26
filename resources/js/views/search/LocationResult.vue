@@ -2,8 +2,7 @@
   <div class="card image-full bg-white md:card-side">
     <figure>
       <img
-        src="https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp"
-        alt="Movie" />
+        class="max-h-48" src="https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp" alt="Movie" />
     </figure>
     <div class="card-body">
       <h2 class="card-title">The Narrows</h2>

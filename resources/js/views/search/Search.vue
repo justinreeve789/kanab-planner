@@ -1,29 +1,33 @@
 <template>
   <div class="search">
     <div class="search-box">
+      <label class="input">
+        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <g
+            stroke-linejoin="round"
+            stroke-linecap="round"
+            stroke-width="2.5"
+            fill="none"
+            stroke="currentColor"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </g>
+        </svg>
+        <input type="search" class="w-full" placeholder="Search" />
+      </label>
     </div>
     <div class="filters">
       <AreaSelect @update:selected="handleSelectedAreas" />
-
-      <div class="mt-4">
-        <h2 class="text-lg font-bold mb-2">Selected Area IDs:</h2>
-        <p>{{ selectedAreaIds.join(', ') }}</p>
-      </div>
-
       <ResourceSelect @update:selected="handleSelectedResources" />
-
-      <div class="mt-4">
-        <h2 class="text-lg font-bold mb-2">Selected Resource Tables:</h2>
-        <p>{{ selectedResourceTables.join(', ') }}</p>
-      </div>
     </div>
     <div class="results">
       <div class="result-item">
-        <AccommodationResult />
-        <EventResult />
-        <LocationResult />
-        <RestaurantResult />
-        <TrailResult />
+        <AccommodationResult v-if="selectedResourceTables.includes('accommodations')" />
+        <EventResult v-if="selectedResourceTables.includes('events')" />
+        <LocationResult v-if="selectedResourceTables.includes('locations')" />
+        <RestaurantResult v-if="selectedResourceTables.includes('restaurants')" />
+        <TrailResult v-if="selectedResourceTables.includes('trails')" />
       </div>
     </div>
   </div>
@@ -39,6 +43,7 @@ import RestaurantResult from "./RestaurantResult.vue";
 import TrailResult from "./TrailResult.vue";
 import AreaSelect from "./AreaSelect.vue";
 import ResourceSelect from "./ResourceSelect.vue";
+import { useSearchStore } from "../../stores/search";
 
 export default {
   components: {
@@ -51,14 +56,16 @@ export default {
     TrailResult,
   },
   setup() {
+    const searchStore = useSearchStore();
+    return { searchStore };
   },
   mounted() {
   },
   data() {
     return {
+      query: '',
       selectedAreaIds: [1,2,3,4,5,6,7],
       selectedResourceTables: [],
-      query: '',
     };
   },
   methods: {
@@ -66,6 +73,8 @@ export default {
       axios
         .get('/api/v1/search', {
           q: this.query,
+          ar: this.selectedAreaIds,
+          rt: this.selectedResourceTables,
         })
         .then((response) => {
         })

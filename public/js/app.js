@@ -25287,12 +25287,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _search_Search_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../search/Search.vue */ "./resources/js/views/search/Search.vue");
+/* harmony import */ var _stores_search__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../stores/search */ "./resources/js/stores/search.js");
+
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {
     Search: _search_Search_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
-  setup: function setup() {},
+  setup: function setup() {
+    var searchStore = (0,_stores_search__WEBPACK_IMPORTED_MODULE_1__.useSearchStore)();
+    return {
+      searchStore: searchStore
+    };
+  },
   mounted: function mounted() {},
   data: function data() {
     return {};
@@ -25315,6 +25322,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _stores_assistant__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../stores/assistant */ "./resources/js/stores/assistant.js");
 /* harmony import */ var _stores_preferences__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../stores/preferences */ "./resources/js/stores/preferences.js");
+/* harmony import */ var _stores_search__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../stores/search */ "./resources/js/stores/search.js");
+
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -25322,9 +25331,11 @@ __webpack_require__.r(__webpack_exports__);
   setup: function setup() {
     var assistantStore = (0,_stores_assistant__WEBPACK_IMPORTED_MODULE_0__.useAssistantStore)();
     var preferencesStore = (0,_stores_preferences__WEBPACK_IMPORTED_MODULE_1__.usePreferencesStore)();
+    var searchStore = (0,_stores_search__WEBPACK_IMPORTED_MODULE_2__.useSearchStore)();
     return {
       assistantStore: assistantStore,
-      preferencesStore: preferencesStore
+      preferencesStore: preferencesStore,
+      searchStore: searchStore
     };
   },
   data: function data() {
@@ -25340,17 +25351,28 @@ __webpack_require__.r(__webpack_exports__);
     isPreferencesOpen: function isPreferencesOpen() {
       return this.preferencesStore.isPreferencesOpen;
     },
+    isSearchOpen: function isSearchOpen() {
+      return this.searchStore.isSearchOpen;
+    },
     openItinerary: function openItinerary() {
       this.assistantStore.isAssistantOpen = false;
       this.preferencesStore.isPreferencesOpen = false;
+      this.searchStore.isSearchOpen = false;
     },
     openAssistant: function openAssistant() {
       this.assistantStore.isAssistantOpen = true;
       this.preferencesStore.isPreferencesOpen = false;
+      this.searchStore.isSearchOpen = false;
     },
     openPreferences: function openPreferences() {
       this.preferencesStore.isPreferencesOpen = true;
       this.assistantStore.isAssistantOpen = false;
+      this.searchStore.isSearchOpen = false;
+    },
+    openSearch: function openSearch() {
+      this.preferencesStore.isPreferencesOpen = false;
+      this.assistantStore.isAssistantOpen = false;
+      this.searchStore.isSearchOpen = true;
     },
     toggleAssistant: function toggleAssistant() {
       this.assistantStore.isAssistantOpen = !this.assistantStore.isAssistantOpen;
@@ -25376,14 +25398,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 /* harmony import */ var _stores_preferences__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../stores/preferences */ "./resources/js/stores/preferences.js");
 /* harmony import */ var _components_CallyCalendar_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../components/CallyCalendar.vue */ "./resources/js/views/components/CallyCalendar.vue");
+/* harmony import */ var _stores_search__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../stores/search */ "./resources/js/stores/search.js");
+
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   setup: function setup() {
     var preferencesStore = (0,_stores_preferences__WEBPACK_IMPORTED_MODULE_1__.usePreferencesStore)();
+    var searchStore = (0,_stores_search__WEBPACK_IMPORTED_MODULE_3__.useSearchStore)();
     return {
-      preferencesStore: preferencesStore
+      preferencesStore: preferencesStore,
+      searchStore: searchStore
     };
   },
   components: {
@@ -25413,6 +25439,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     togglePreferences: function togglePreferences() {
       this.preferencesStore.isPreferencesOpen = !this.preferencesStore.isPreferencesOpen;
+    },
+    toggleSearch: function toggleSearch() {
+      this.searchStore.isSearchOpen = !this.searchStore.isSearchOpen;
     }
   },
   mounted: function mounted() {
@@ -25731,7 +25760,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 /* harmony import */ var _AccommodationResult_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./AccommodationResult.vue */ "./resources/js/views/search/AccommodationResult.vue");
 /* harmony import */ var _EventResult_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./EventResult.vue */ "./resources/js/views/search/EventResult.vue");
@@ -25740,6 +25769,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _TrailResult_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./TrailResult.vue */ "./resources/js/views/search/TrailResult.vue");
 /* harmony import */ var _AreaSelect_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./AreaSelect.vue */ "./resources/js/views/search/AreaSelect.vue");
 /* harmony import */ var _ResourceSelect_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./ResourceSelect.vue */ "./resources/js/views/search/ResourceSelect.vue");
+/* harmony import */ var _stores_search__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../stores/search */ "./resources/js/stores/search.js");
+
 
 
 
@@ -25759,19 +25790,26 @@ __webpack_require__.r(__webpack_exports__);
     RestaurantResult: _RestaurantResult_vue__WEBPACK_IMPORTED_MODULE_4__["default"],
     TrailResult: _TrailResult_vue__WEBPACK_IMPORTED_MODULE_5__["default"]
   },
-  setup: function setup() {},
+  setup: function setup() {
+    var searchStore = (0,_stores_search__WEBPACK_IMPORTED_MODULE_8__.useSearchStore)();
+    return {
+      searchStore: searchStore
+    };
+  },
   mounted: function mounted() {},
   data: function data() {
     return {
+      query: '',
       selectedAreaIds: [1, 2, 3, 4, 5, 6, 7],
-      selectedResourceTables: [],
-      query: ''
+      selectedResourceTables: []
     };
   },
   methods: {
     query: function query() {
-      axios__WEBPACK_IMPORTED_MODULE_8__["default"].get('/api/v1/search', {
-        q: this.query
+      axios__WEBPACK_IMPORTED_MODULE_9__["default"].get('/api/v1/search', {
+        q: this.query,
+        ar: this.selectedAreaIds,
+        rt: this.selectedResourceTables
       }).then(function (response) {})["catch"](function (error) {
         console.error('Error fetching assistant response:', error);
       });
@@ -27805,15 +27843,30 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "modal modal-open",
-  id: "modal-search"
+  "class": "modal max-h-[calc(100vh-64px)] md:max-h-full",
+  id: "search-modal"
 };
 var _hoisted_2 = {
-  "class": "modal-box"
+  "class": "modal-container bg-white max-w-full w-full h-calc(100vh-64px) -translate-x-1/2 md:-translate-y-1/2 top-0 md:w-[90vw] md:h-[90vh] md:top-1/2 md:rounded-[15px] md:border-[5px] md:border-[#d0e0f0]"
 };
+var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full\"><h2 class=\"text-black text-lg\">Search</h2><div class=\"flex align-right\"><button class=\"btn btn-sm btn-ghost hover:bg-cyan-100 text-black hidden md:flex\"><label for=\"search-modal\"><span>✕</span></label></button></div></div>", 1);
+var _hoisted_4 = {
+  "class": "modal-box overflow-x-hidden bg-white text-black w-full max-w-full h-[calc(100vh-64px)] max-h-[calc(100vh-128px)] md:w-full md:h-[calc(100%-4rem)]"
+};
+var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  "for": "search-modal",
+  "class": "modal-backdrop hidden md:block"
+}, null, -1 /* HOISTED */);
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_Search = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Search");
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Search)])]);
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "checkbox",
+    id: "search-modal",
+    "class": "modal-toggle",
+    "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
+      return $setup.searchStore.isSearchOpen = $event;
+    })
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $setup.searchStore.isSearchOpen]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [_hoisted_3, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Search)])])]), _hoisted_5], 64 /* STABLE_FRAGMENT */);
 }
 
 /***/ }),
@@ -27850,8 +27903,24 @@ var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
   "class": "dock-label"
 }, "Assistant", -1 /* HOISTED */);
 var _hoisted_7 = [_hoisted_5, _hoisted_6];
-var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<svg class=\"h-8\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><g fill=\"currentColor\" stroke-linejoin=\"miter\" stroke-linecap=\"butt\"><circle cx=\"12\" cy=\"12\" r=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"square\" stroke-miterlimit=\"10\" stroke-width=\"2\"></circle><path d=\"m22,13.25v-2.5l-2.318-.966c-.167-.581-.395-1.135-.682-1.654l.954-2.318-1.768-1.768-2.318.954c-.518-.287-1.073-.515-1.654-.682l-.966-2.318h-2.5l-.966,2.318c-.581.167-1.135.395-1.654.682l-2.318-.954-1.768,1.768.954,2.318c-.287.518-.515,1.073-.682,1.654l-2.318.966v2.5l2.318.966c.167.581.395,1.135.682,1.654l-.954,2.318,1.768,1.768,2.318-.954c.518.287,1.073.515,1.654.682l.966,2.318h2.5l.966-2.318c.581-.167,1.135-.395,1.654-.682l2.318.954,1.768-1.768-.954-2.318c.287-.518.515-1.073.682-1.654l2.318-.966Z\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"square\" stroke-miterlimit=\"10\" stroke-width=\"2\"></path></g></svg><span class=\"dock-label\">Preferences</span>", 2);
-var _hoisted_10 = [_hoisted_8];
+var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  "class": "h-8 w-8",
+  fill: "none",
+  viewBox: "0 0 24 24",
+  stroke: "currentColor"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  "stroke-linecap": "round",
+  "stroke-linejoin": "round",
+  "stroke-width": "2",
+  d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+})], -1 /* HOISTED */);
+var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "dock-label"
+}, "Search", -1 /* HOISTED */);
+var _hoisted_10 = [_hoisted_8, _hoisted_9];
+var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<svg class=\"h-8\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><g fill=\"currentColor\" stroke-linejoin=\"miter\" stroke-linecap=\"butt\"><circle cx=\"12\" cy=\"12\" r=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"square\" stroke-miterlimit=\"10\" stroke-width=\"2\"></circle><path d=\"m22,13.25v-2.5l-2.318-.966c-.167-.581-.395-1.135-.682-1.654l.954-2.318-1.768-1.768-2.318.954c-.518-.287-1.073-.515-1.654-.682l-.966-2.318h-2.5l-.966,2.318c-.581.167-1.135.395-1.654.682l-2.318-.954-1.768,1.768.954,2.318c-.287.518-.515,1.073-.682,1.654l-2.318.966v2.5l2.318.966c.167.581.395,1.135.682,1.654l-.954,2.318,1.768,1.768,2.318-.954c.518.287,1.073.515,1.654.682l.966,2.318h2.5l.966-2.318c.581-.167,1.135-.395,1.654-.682l2.318.954,1.768-1.768-.954-2.318c.287-.518.515-1.073.682-1.654l2.318-.966Z\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"square\" stroke-miterlimit=\"10\" stroke-width=\"2\"></path></g></svg><span class=\"dock-label\">Preferences</span>", 2);
+var _hoisted_13 = [_hoisted_11];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)({
@@ -27869,12 +27938,19 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     })
   }, _hoisted_7, 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)({
-      'dock-active': $options.isPreferencesOpen()
+      'dock-active': $options.isSearchOpen()
     }),
     onClick: _cache[2] || (_cache[2] = function () {
+      return $options.openSearch && $options.openSearch.apply($options, arguments);
+    })
+  }, _hoisted_10, 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)({
+      'dock-active': $options.isPreferencesOpen()
+    }),
+    onClick: _cache[3] || (_cache[3] = function () {
       return $options.openPreferences && $options.openPreferences.apply($options, arguments);
     })
-  }, _hoisted_10, 2 /* CLASS */)]);
+  }, _hoisted_13, 2 /* CLASS */)]);
 }
 
 /***/ }),
@@ -27947,8 +28023,21 @@ var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
 var _hoisted_9 = {
   "class": "navbar-end"
 };
-var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<button class=\"btn btn-ghost btn-circle\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z\"></path></svg></button><button class=\"btn btn-ghost btn-circle\"><div class=\"indicator\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9\"></path></svg><span class=\"badge badge-xs badge-primary indicator-item\"></span></div></button>", 2);
-var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  "class": "h-5 w-5",
+  fill: "none",
+  viewBox: "0 0 24 24",
+  stroke: "currentColor"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  "stroke-linecap": "round",
+  "stroke-linejoin": "round",
+  "stroke-width": "2",
+  d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+})], -1 /* HOISTED */);
+var _hoisted_11 = [_hoisted_10];
+var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<button class=\"btn btn-ghost btn-circle\"><div class=\"indicator\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9\"></path></svg><span class=\"badge badge-xs badge-primary indicator-item\"></span></div></button>", 1);
+var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   "class": "w-6 h-6 text-gray-800 text-white",
   "aria-hidden": "true",
   xmlns: "http://www.w3.org/2000/svg",
@@ -27960,8 +28049,8 @@ var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
   d: "M10.83 5a3.001 3.001 0 0 0-5.66 0H4a1 1 0 1 0 0 2h1.17a3.001 3.001 0 0 0 5.66 0H20a1 1 0 1 0 0-2h-9.17ZM4 11h9.17a3.001 3.001 0 0 1 5.66 0H20a1 1 0 1 1 0 2h-1.17a3.001 3.001 0 0 1-5.66 0H4a1 1 0 1 1 0-2Zm1.17 6H4a1 1 0 1 0 0 2h1.17a3.001 3.001 0 0 0 5.66 0H20a1 1 0 1 0 0-2h-9.17a3.001 3.001 0 0 0-5.66 0Z"
 })], -1 /* HOISTED */);
-var _hoisted_13 = [_hoisted_12];
-var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_14 = [_hoisted_13];
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "dropdown dropdown-end"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   tabindex: "0",
@@ -27987,14 +28076,19 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[0] || (_cache[0] = function () {
       return $options.selectDates && $options.selectDates.apply($options, arguments);
     })
-  }, _hoisted_7)]), _hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [_hoisted_10, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  }, _hoisted_7)]), _hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     "class": "btn btn-ghost btn-circle hidden md:flex",
     onClick: _cache[1] || (_cache[1] = function () {
+      return $options.toggleSearch && $options.toggleSearch.apply($options, arguments);
+    })
+  }, _hoisted_11), _hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    "class": "btn btn-ghost btn-circle hidden md:flex",
+    onClick: _cache[2] || (_cache[2] = function () {
       return $options.togglePreferences && $options.togglePreferences.apply($options, arguments);
     })
-  }, _hoisted_13), _hoisted_14])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_CallyCalendar, {
+  }, _hoisted_14), _hoisted_15])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_CallyCalendar, {
     modelValue: $data.dateRange,
-    "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
+    "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
       return $data.dateRange = $event;
     }),
     modelModifiers: {
@@ -28110,7 +28204,7 @@ __webpack_require__.r(__webpack_exports__);
 var _hoisted_1 = {
   "class": "card image-full bg-white md:card-side"
 };
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img class=\"max-h-48\" src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
 var _hoisted_4 = [_hoisted_2];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, _hoisted_4);
@@ -28132,16 +28226,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "dropdown"
+  "class": "dropdown w-full"
 };
 var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   tabindex: "0",
   role: "button",
-  "class": "btn m-1"
-}, " Select Areas ", -1 /* HOISTED */);
+  "class": "input input-bordered w-full flex justify-between items-center cursor-pointer"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "truncate"
+}, " Select Areas "), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  "class": "w-4 h-4 ml-2 opacity-60",
+  fill: "none",
+  stroke: "currentColor",
+  viewBox: "0 0 24 24"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  "stroke-linecap": "round",
+  "stroke-linejoin": "round",
+  "stroke-width": "2",
+  d: "M19 9l-7 7-7-7"
+})])], -1 /* HOISTED */);
 var _hoisted_3 = {
   tabindex: "0",
-  "class": "dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+  "class": "dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-full max-h-92 overflow-y-auto"
 };
 var _hoisted_4 = ["value"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
@@ -28185,7 +28291,7 @@ __webpack_require__.r(__webpack_exports__);
 var _hoisted_1 = {
   "class": "card image-full bg-white md:card-side"
 };
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img class=\"max-h-48\" src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
 var _hoisted_4 = [_hoisted_2];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, _hoisted_4);
@@ -28209,7 +28315,7 @@ __webpack_require__.r(__webpack_exports__);
 var _hoisted_1 = {
   "class": "card image-full bg-white md:card-side"
 };
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img class=\"max-h-48\" src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
 var _hoisted_4 = [_hoisted_2];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, _hoisted_4);
@@ -28231,16 +28337,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "dropdown"
+  "class": "dropdown w-full"
 };
 var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   tabindex: "0",
   role: "button",
-  "class": "btn m-1"
-}, " Select... ", -1 /* HOISTED */);
+  "class": "input input-bordered w-full flex justify-between items-center cursor-pointer"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "truncate"
+}, " Select Activities "), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  "class": "w-4 h-4 ml-2 opacity-60",
+  fill: "none",
+  stroke: "currentColor",
+  viewBox: "0 0 24 24"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  "stroke-linecap": "round",
+  "stroke-linejoin": "round",
+  "stroke-width": "2",
+  d: "M19 9l-7 7-7-7"
+})])], -1 /* HOISTED */);
 var _hoisted_3 = {
   tabindex: "0",
-  "class": "dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+  "class": "dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-full max-h-92 overflow-y-auto"
 };
 var _hoisted_4 = ["value"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
@@ -28249,7 +28367,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       key: resourceTable.table
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["flex items-center gap-2 p-2 rounded cursor-pointer", {
-        'bg-primary text-primary-content': $data.resourceTables.includes(resourceTable.table),
+        'bg-primary text-primary-content': $data.selectedResourceTables.includes(resourceTable.table),
         'hover:bg-base-200': true
       }])
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
@@ -28284,7 +28402,7 @@ __webpack_require__.r(__webpack_exports__);
 var _hoisted_1 = {
   "class": "card image-full bg-white md:card-side"
 };
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img class=\"max-h-48\" src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
 var _hoisted_4 = [_hoisted_2];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, _hoisted_4);
@@ -28308,28 +28426,14 @@ __webpack_require__.r(__webpack_exports__);
 var _hoisted_1 = {
   "class": "search"
 };
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-  "class": "search-box"
-}, null, -1 /* HOISTED */);
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"search-box\"><label class=\"input\"><svg class=\"h-[1em] opacity-50\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><g stroke-linejoin=\"round\" stroke-linecap=\"round\" stroke-width=\"2.5\" fill=\"none\" stroke=\"currentColor\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle><path d=\"m21 21-4.3-4.3\"></path></g></svg><input type=\"search\" class=\"w-full\" placeholder=\"Search\"></label></div>", 1);
 var _hoisted_3 = {
   "class": "filters"
 };
 var _hoisted_4 = {
-  "class": "mt-4"
-};
-var _hoisted_5 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
-  "class": "text-lg font-bold mb-2"
-}, "Selected Area IDs:", -1 /* HOISTED */);
-var _hoisted_6 = {
-  "class": "mt-4"
-};
-var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
-  "class": "text-lg font-bold mb-2"
-}, "Selected Resource Tables:", -1 /* HOISTED */);
-var _hoisted_8 = {
   "class": "results"
 };
-var _hoisted_9 = {
+var _hoisted_5 = {
   "class": "result-item"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
@@ -28342,9 +28446,19 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_TrailResult = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("TrailResult");
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AreaSelect, {
     "onUpdate:selected": $options.handleSelectedAreas
-  }, null, 8 /* PROPS */, ["onUpdate:selected"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [_hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.selectedAreaIds.join(', ')), 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ResourceSelect, {
+  }, null, 8 /* PROPS */, ["onUpdate:selected"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ResourceSelect, {
     "onUpdate:selected": $options.handleSelectedResources
-  }, null, 8 /* PROPS */, ["onUpdate:selected"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [_hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.selectedResourceTables.join(', ')), 1 /* TEXT */)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AccommodationResult), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_EventResult), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_LocationResult), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_RestaurantResult), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_TrailResult)])])]);
+  }, null, 8 /* PROPS */, ["onUpdate:selected"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [$data.selectedResourceTables.includes('accommodations') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_AccommodationResult, {
+    key: 0
+  })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.selectedResourceTables.includes('events') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_EventResult, {
+    key: 1
+  })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.selectedResourceTables.includes('locations') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_LocationResult, {
+    key: 2
+  })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.selectedResourceTables.includes('restaurants') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_RestaurantResult, {
+    key: 3
+  })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.selectedResourceTables.includes('trails') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_TrailResult, {
+    key: 4
+  })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])]);
 }
 
 /***/ }),
@@ -28365,7 +28479,7 @@ __webpack_require__.r(__webpack_exports__);
 var _hoisted_1 = {
   "class": "card image-full bg-white md:card-side"
 };
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img class=\"max-h-48\" src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
 var _hoisted_4 = [_hoisted_2];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, _hoisted_4);
@@ -46229,6 +46343,33 @@ var usePreferencesStore = (0,pinia__WEBPACK_IMPORTED_MODULE_0__.defineStore)('pr
       return Math.round(this.strenuousness * 100);
     }
   }
+});
+
+/***/ }),
+
+/***/ "./resources/js/stores/search.js":
+/*!***************************************!*\
+  !*** ./resources/js/stores/search.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   useSearchStore: () => (/* binding */ useSearchStore)
+/* harmony export */ });
+/* harmony import */ var pinia__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! pinia */ "./node_modules/pinia/dist/pinia.mjs");
+
+var useSearchStore = (0,pinia__WEBPACK_IMPORTED_MODULE_0__.defineStore)('search', {
+  state: function state() {
+    return {
+      isSearchOpen: false,
+      query: '',
+      selectedAreaIds: [],
+      selectedResourceTables: []
+    };
+  },
+  actions: {}
 });
 
 /***/ }),
