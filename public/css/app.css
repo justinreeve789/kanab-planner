@@ -3733,6 +3733,9 @@ video {
 .border-b {
   border-bottom-width: 1px;
 }
+.border-l-2 {
+  border-left-width: 2px;
+}
 .border-solid {
   border-style: solid;
 }
@@ -3773,6 +3776,10 @@ video {
 }
 .border-transparent {
   border-color: transparent;
+}
+.border-l-red-50 {
+  --tw-border-opacity: 1;
+  border-left-color: rgb(254 242 242 / var(--tw-border-opacity));
 }
 .bg-base-100 {
   background-color: var(--color-base-100);
@@ -4069,6 +4076,9 @@ video {
 }
 .pt-8 {
   padding-top: 2rem;
+}
+.pr-6 {
+  padding-right: 1.5rem;
 }
 .text-left {
   text-align: left;

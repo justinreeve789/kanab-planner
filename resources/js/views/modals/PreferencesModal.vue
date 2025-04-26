@@ -1,6 +1,6 @@
 <template>
   <input type="checkbox" id="preferences-modal" class="modal-toggle" v-model="preferencesStore.isPreferencesOpen" />
-  <div class="modal max-h-[calc(100vh-64px)]" id="preferences-modal">
+  <div class="modal max-h-[calc(100vh-64px)] md:max-h-full" id="preferences-modal">
     <div class="modal-container bg-white max-w-full w-full h-calc(100vh-64px) -translate-x-1/2 md:-translate-y-1/2 top-0 md:max-w-[640px] md:h-auto md:top-1/2 md:rounded-[15px] md:border-[5px] md:border-[#d0e0f0]">
       <div class="flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full">
         <h2 class="text-black text-lg">Preferences</h2>
@@ -49,7 +49,7 @@
               <div class="tooltip tooltip-left">
                 <div class="tooltip-content max-w-[250px] md:max-w-[400px]">
                   <p class="text-left">
-                    <span class="font-bold">Solitariness</span> is how much weight you place on less-crowded areas and non-human interactions. Set this higher if you want to be alone, or lower if you don't mind when areas a little busy.
+                    <span class="font-bold">Solitariness</span> is how much weight you place on less-crowded areas and non-human interactions. Set this higher if you want to be alone, or lower if you don't mind when an area is a little busy.
                   </p>
                 </div>
                 <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">

@@ -27322,7 +27322,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "modal max-h-[calc(100vh-64px)]",
+  "class": "modal max-h-[calc(100vh-64px)] md:max-h-full",
   id: "preferences-modal"
 };
 var _hoisted_2 = {
@@ -27360,7 +27360,7 @@ var _hoisted_13 = {
 var _hoisted_14 = {
   "class": "-mx-6 px-6 pt-4 pb-2 bg-gradient-to-r from-green-50 to-cyan-100"
 };
-var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"flex justify-between items-center -mx-6 px-6 -mt-4 mb-2 py-2 bg-gradient-to-r from-green-100 to-cyan-200\"><div class=\"font-bold text-black text-md\"> Solitariness </div><div class=\"tooltip tooltip-left\"><div class=\"tooltip-content max-w-[250px] md:max-w-[400px]\"><p class=\"text-left\"><span class=\"font-bold\">Solitariness</span> is how much weight you place on less-crowded areas and non-human interactions. Set this higher if you want to be alone, or lower if you don&#39;t mind when areas a little busy. </p></div><svg class=\"w-6 h-6 text-gray-800 dark:text-white\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"none\" viewBox=\"0 0 24 24\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z\"></path></svg></div></div>", 1);
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"flex justify-between items-center -mx-6 px-6 -mt-4 mb-2 py-2 bg-gradient-to-r from-green-100 to-cyan-200\"><div class=\"font-bold text-black text-md\"> Solitariness </div><div class=\"tooltip tooltip-left\"><div class=\"tooltip-content max-w-[250px] md:max-w-[400px]\"><p class=\"text-left\"><span class=\"font-bold\">Solitariness</span> is how much weight you place on less-crowded areas and non-human interactions. Set this higher if you want to be alone, or lower if you don&#39;t mind when an area is a little busy. </p></div><svg class=\"w-6 h-6 text-gray-800 dark:text-white\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"none\" viewBox=\"0 0 24 24\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z\"></path></svg></div></div>", 1);
 var _hoisted_16 = {
   "class": "flex mb-4 w-full"
 };
