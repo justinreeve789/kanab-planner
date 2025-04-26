@@ -13,7 +13,7 @@
         <label
           class="flex items-center gap-2 p-2 rounded cursor-pointer"
           :class="{
-            'bg-primary text-primary-content': selectedResourceTables.includes(resourceTable.table),
+            'bg-primary text-primary-content': localSelectedResourceTables.includes(resourceTable.table),
             'hover:bg-base-200': true
           }"
         >
@@ -21,7 +21,7 @@
             type="checkbox"
             class="checkbox checkbox-sm"
             :value="resourceTable.table"
-            v-model="selectedResourceTables"
+            v-model="localSelectedResourceTables"
             @change="emitSelection"
           />
           {{ resourceTable.typeName }}
@@ -33,6 +33,12 @@
 
 <script>
 export default {
+  props: {
+    selectedResourceTables: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
       resourceTables: [
@@ -42,12 +48,15 @@ export default {
         { table: 'restaurants', typeName: 'Restaurants' },
         { table: 'trails', typeName: 'Trails' },
       ],
-      selectedResourceTables: [],
+      localSelectedResourceTables: [],
     }
+  },
+  mounted() {
+    this.localSelectedResourceTables = [...this.selectedResourceTables];
   },
   methods: {
     emitSelection() {
-      this.$emit('update:selected', this.selectedResourceTables);
+      this.$emit('update:selected', this.localSelectedResourceTables);
     }
   }
 }

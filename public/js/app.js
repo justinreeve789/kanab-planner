@@ -25343,7 +25343,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     isItineraryOpen: function isItineraryOpen() {
-      return !this.assistantStore.isAssistantOpen && !this.preferencesStore.isPreferencesOpen;
+      return !this.assistantStore.isAssistantOpen && !this.preferencesStore.isPreferencesOpen && !this.searchStore.isSearchOpen;
     },
     isAssistantOpen: function isAssistantOpen() {
       return this.assistantStore.isAssistantOpen;
@@ -25597,8 +25597,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  name: 'AreaMultiSelect',
+  props: {
+    selectedAreaIds: {
+      type: Array,
+      "default": function _default() {
+        return [];
+      }
+    }
+  },
   data: function data() {
     return {
       areas: [{
@@ -25623,12 +25636,15 @@ __webpack_require__.r(__webpack_exports__);
         id: 7,
         name: 'Zion National Park'
       }],
-      selectedAreaIds: []
+      localSelectedAreaIds: []
     };
+  },
+  mounted: function mounted() {
+    this.localSelectedAreaIds = _toConsumableArray(this.selectedAreaIds);
   },
   methods: {
     emitSelection: function emitSelection() {
-      this.$emit('update:selected', this.selectedAreaIds);
+      this.$emit('update:selected', this.localSelectedAreaIds);
     }
   }
 });
@@ -25694,7 +25710,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  props: {
+    selectedResourceTables: {
+      type: Array,
+      "default": function _default() {
+        return [];
+      }
+    }
+  },
   data: function data() {
     return {
       resourceTables: [{
@@ -25713,12 +25743,15 @@ __webpack_require__.r(__webpack_exports__);
         table: 'trails',
         typeName: 'Trails'
       }],
-      selectedResourceTables: []
+      localSelectedResourceTables: []
     };
+  },
+  mounted: function mounted() {
+    this.localSelectedResourceTables = _toConsumableArray(this.selectedResourceTables);
   },
   methods: {
     emitSelection: function emitSelection() {
-      this.$emit('update:selected', this.selectedResourceTables);
+      this.$emit('update:selected', this.localSelectedResourceTables);
     }
   }
 });
@@ -25796,12 +25829,15 @@ __webpack_require__.r(__webpack_exports__);
       searchStore: searchStore
     };
   },
-  mounted: function mounted() {},
+  mounted: function mounted() {
+    // this.selectedAreaIds = this.searchStore.selectedAreaIds;
+    // this.selectedResourceTables = this.searchStore.selectedResourceTables;
+  },
   data: function data() {
     return {
       query: '',
-      selectedAreaIds: [1, 2, 3, 4, 5, 6, 7],
-      selectedResourceTables: []
+      selectedAreaIds: [1, 3, 4, 5, 7],
+      selectedResourceTables: ['events', 'locations', 'restaurants', 'trails']
     };
   },
   methods: {
@@ -25816,9 +25852,11 @@ __webpack_require__.r(__webpack_exports__);
     },
     handleSelectedAreas: function handleSelectedAreas(newSelectedIds) {
       this.selectedAreaIds = newSelectedIds;
+      // this.searchStore.selectedAreaIds = newSelectedIds;
     },
     handleSelectedResources: function handleSelectedResources(newSelectedTables) {
       this.selectedResourceTables = newSelectedTables;
+      // this.searchStore.selectedResourceTables = newSelectedTables;
     }
   }
 });
@@ -28256,7 +28294,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       key: area.id
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["flex items-center gap-2 p-2 rounded cursor-pointer", {
-        'bg-primary text-primary-content': $data.selectedAreaIds.includes(area.id),
+        'bg-primary text-primary-content': $data.localSelectedAreaIds.includes(area.id),
         'hover:bg-base-200': true
       }])
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
@@ -28264,12 +28302,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "class": "checkbox checkbox-sm",
       value: area.id,
       "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
-        return $data.selectedAreaIds = $event;
+        return $data.localSelectedAreaIds = $event;
       }),
       onChange: _cache[1] || (_cache[1] = function () {
         return $options.emitSelection && $options.emitSelection.apply($options, arguments);
       })
-    }, null, 40 /* PROPS, HYDRATE_EVENTS */, _hoisted_4), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.selectedAreaIds]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(area.name), 1 /* TEXT */)], 2 /* CLASS */)]);
+    }, null, 40 /* PROPS, HYDRATE_EVENTS */, _hoisted_4), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.localSelectedAreaIds]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(area.name), 1 /* TEXT */)], 2 /* CLASS */)]);
   }), 128 /* KEYED_FRAGMENT */))])]);
 }
 
@@ -28367,7 +28405,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       key: resourceTable.table
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["flex items-center gap-2 p-2 rounded cursor-pointer", {
-        'bg-primary text-primary-content': $data.selectedResourceTables.includes(resourceTable.table),
+        'bg-primary text-primary-content': $data.localSelectedResourceTables.includes(resourceTable.table),
         'hover:bg-base-200': true
       }])
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
@@ -28375,12 +28413,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "class": "checkbox checkbox-sm",
       value: resourceTable.table,
       "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
-        return $data.selectedResourceTables = $event;
+        return $data.localSelectedResourceTables = $event;
       }),
       onChange: _cache[1] || (_cache[1] = function () {
         return $options.emitSelection && $options.emitSelection.apply($options, arguments);
       })
-    }, null, 40 /* PROPS, HYDRATE_EVENTS */, _hoisted_4), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.selectedResourceTables]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(resourceTable.typeName), 1 /* TEXT */)], 2 /* CLASS */)]);
+    }, null, 40 /* PROPS, HYDRATE_EVENTS */, _hoisted_4), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.localSelectedResourceTables]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(resourceTable.typeName), 1 /* TEXT */)], 2 /* CLASS */)]);
   }), 128 /* KEYED_FRAGMENT */))])]);
 }
 
@@ -28434,7 +28472,7 @@ var _hoisted_4 = {
   "class": "results"
 };
 var _hoisted_5 = {
-  "class": "result-item"
+  "class": "result-item -mx-6"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_AreaSelect = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("AreaSelect");
@@ -28445,10 +28483,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_RestaurantResult = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("RestaurantResult");
   var _component_TrailResult = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("TrailResult");
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AreaSelect, {
-    "onUpdate:selected": $options.handleSelectedAreas
-  }, null, 8 /* PROPS */, ["onUpdate:selected"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ResourceSelect, {
-    "onUpdate:selected": $options.handleSelectedResources
-  }, null, 8 /* PROPS */, ["onUpdate:selected"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [$data.selectedResourceTables.includes('accommodations') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_AccommodationResult, {
+    "onUpdate:selected": $options.handleSelectedAreas,
+    selectedAreaIds: $data.selectedAreaIds
+  }, null, 8 /* PROPS */, ["onUpdate:selected", "selectedAreaIds"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ResourceSelect, {
+    "onUpdate:selected": $options.handleSelectedResources,
+    selectedResourceTables: $data.selectedResourceTables
+  }, null, 8 /* PROPS */, ["onUpdate:selected", "selectedResourceTables"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [$data.selectedResourceTables.includes('accommodations') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_AccommodationResult, {
     key: 0
   })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.selectedResourceTables.includes('events') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_EventResult, {
     key: 1

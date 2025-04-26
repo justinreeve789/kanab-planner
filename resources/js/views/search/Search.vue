@@ -18,11 +18,11 @@
       </label>
     </div>
     <div class="filters">
-      <AreaSelect @update:selected="handleSelectedAreas" />
-      <ResourceSelect @update:selected="handleSelectedResources" />
+      <AreaSelect @update:selected="handleSelectedAreas" :selectedAreaIds="selectedAreaIds" />
+      <ResourceSelect @update:selected="handleSelectedResources" :selectedResourceTables="selectedResourceTables" />
     </div>
     <div class="results">
-      <div class="result-item">
+      <div class="result-item -mx-6">
         <AccommodationResult v-if="selectedResourceTables.includes('accommodations')" />
         <EventResult v-if="selectedResourceTables.includes('events')" />
         <LocationResult v-if="selectedResourceTables.includes('locations')" />
@@ -60,12 +60,14 @@ export default {
     return { searchStore };
   },
   mounted() {
+    // this.selectedAreaIds = this.searchStore.selectedAreaIds;
+    // this.selectedResourceTables = this.searchStore.selectedResourceTables;
   },
   data() {
     return {
       query: '',
-      selectedAreaIds: [1,2,3,4,5,6,7],
-      selectedResourceTables: [],
+      selectedAreaIds: [1, 3, 4, 5, 7],
+      selectedResourceTables: ['events', 'locations', 'restaurants', 'trails'],
     };
   },
   methods: {
@@ -84,9 +86,11 @@ export default {
     },
     handleSelectedAreas(newSelectedIds) {
       this.selectedAreaIds = newSelectedIds;
+      // this.searchStore.selectedAreaIds = newSelectedIds;
     },
     handleSelectedResources(newSelectedTables) {
       this.selectedResourceTables = newSelectedTables;
+      // this.searchStore.selectedResourceTables = newSelectedTables;
     },
   },
 }

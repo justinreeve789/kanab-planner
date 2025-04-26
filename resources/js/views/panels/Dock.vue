@@ -41,7 +41,7 @@ export default {
   },
   methods: {
     isItineraryOpen() {
-      return !this.assistantStore.isAssistantOpen && !this.preferencesStore.isPreferencesOpen;
+      return !this.assistantStore.isAssistantOpen && !this.preferencesStore.isPreferencesOpen && !this.searchStore.isSearchOpen;
     },
     isAssistantOpen() {
       return this.assistantStore.isAssistantOpen;

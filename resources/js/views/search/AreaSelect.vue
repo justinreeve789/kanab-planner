@@ -13,14 +13,14 @@
         <label
           class="flex items-center gap-2 p-2 rounded cursor-pointer"
           :class="{
-            'bg-primary text-primary-content': selectedAreaIds.includes(area.id),
+            'bg-primary text-primary-content': localSelectedAreaIds.includes(area.id),
             'hover:bg-base-200': true,
           }">
           <input
             type="checkbox"
             class="checkbox checkbox-sm"
             :value="area.id"
-            v-model="selectedAreaIds"
+            v-model="localSelectedAreaIds"
             @change="emitSelection"
           />
           {{ area.name }}
@@ -32,7 +32,12 @@
 
 <script>
 export default {
-  name: 'AreaMultiSelect',
+  props: {
+    selectedAreaIds: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
       areas: [
@@ -44,13 +49,16 @@ export default {
         { id: 6, name: 'St. George, UT' },
         { id: 7, name: 'Zion National Park' },
       ],
-      selectedAreaIds: [],
+      localSelectedAreaIds: [],
     }
+  },
+  mounted() {
+    this.localSelectedAreaIds = [...this.selectedAreaIds];
   },
   methods: {
     emitSelection() {
-      this.$emit('update:selected', this.selectedAreaIds);
+      this.$emit('update:selected', this.localSelectedAreaIds);
     }
-  }
+  },
 }
 </script>
