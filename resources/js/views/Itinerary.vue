@@ -46,6 +46,8 @@
 
   <PreferencesModal />
 
+  <SearchModal />
+
   <Dock v-if="itineraryData" />
 
 </template>
@@ -61,6 +63,7 @@ import PreferencesModal from './modals/PreferencesModal.vue';
 import Backdrop from './Backdrop.vue';
 import Select from './components/Select.vue';
 import { usePreferencesStore } from "../stores/preferences";
+import SearchModal from "./modals/SearchModal.vue";
 
 export default {
   setup() {
@@ -111,6 +114,7 @@ export default {
     Dock,
     Header,
     PreferencesModal,
+    SearchModal,
   },
 };
 </script>
