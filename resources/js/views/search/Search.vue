@@ -15,6 +15,7 @@
           </g>
         </svg>
         <input type="search" class="w-full" placeholder="Search" v-model="query" />
+        <span class="loading loading-spinner loading-sm absolute right-8" v-if="loading"></span>
       </label>
     </div>
     <div class="filters">
@@ -27,9 +28,9 @@
       <div class="standard-results">
         <div class="result-item -mx-6" v-for="resource in results" :key="result_id">
 <!--          <AccommodationResult v-if="resource.type === 'accommodation' && selectedResourceTables.includes('accommodations')" />-->
-          <EventResult v-if="resource.type === 'event' && selectedResourceTables.includes('events')" />
-          <LocationResult v-if="resource.type === 'location' && selectedResourceTables.includes('locations')" />
-          <RestaurantResult v-if="resource.type == 'restaurant' && selectedResourceTables.includes('restaurants')" />
+<!--          <EventResult v-if="resource.type === 'event' && selectedResourceTables.includes('events')" />-->
+<!--          <LocationResult v-if="resource.type === 'location' && selectedResourceTables.includes('locations')" />-->
+<!--          <RestaurantResult v-if="resource.type == 'restaurant' && selectedResourceTables.includes('restaurants')" />-->
           <TrailResult v-if="resource.type === 'trail' && selectedResourceTables.includes('trails')" :resource="resource" />
         </div>
       </div>
@@ -109,13 +110,15 @@ export default {
   },
   watch: {
     query(newQuery) {
-      console.log(newQuery);
-      if (this.debounceTimeout) {
-        clearTimeout(this.debounceTimeout);
+      if (newQuery.trim() !== '') {
+        this.debouncedQueryChange();
       }
-      this.debounceTimeout = setTimeout(() => {
-        this.executeQuery(newQuery);
-      }, 500);
+    },
+    selectedAreaIds(newAreaIds) {
+      this.debouncedQueryChange();
+    },
+    selectedResourceTables(newResourceTables) {
+      this.debouncedQueryChange();
     },
   },
   mounted() {
@@ -125,13 +128,23 @@ export default {
   data() {
     return {
       query: this.propQuery || '',
+      loading: false,
       results: [],
       selectedAreaIds: [...this.propSelectedAreaIds],
       selectedResourceTables: [...this.propSelectedResourceTables],
     };
   },
   methods: {
+    debouncedQueryChange() {
+      if (this.debounceTimeout) {
+        clearTimeout(this.debounceTimeout);
+      }
+      this.debounceTimeout = setTimeout(() => {
+        this.executeQuery();
+      }, 300);
+    },
     executeQuery() {
+      this.loading = true,
       axios
         .get('/api/v1/search/', {
           params: {
@@ -142,10 +155,11 @@ export default {
         })
         .then((response) => {
           this.results = response.data;
-          console.log(this.results);
+          this.loading = false;
         })
         .catch((error) => {
           console.error('Error fetching assistant response:', error);
+          this.loading = false;
         });
     },
     handleSelectedAreas(newSelectedIds) {

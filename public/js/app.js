@@ -25893,14 +25893,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   },
   watch: {
     query: function query(newQuery) {
-      var _this = this;
-      console.log(newQuery);
-      if (this.debounceTimeout) {
-        clearTimeout(this.debounceTimeout);
+      if (newQuery.trim() !== '') {
+        this.debouncedQueryChange();
       }
-      this.debounceTimeout = setTimeout(function () {
-        _this.executeQuery(newQuery);
-      }, 500);
+    },
+    selectedAreaIds: function selectedAreaIds(newAreaIds) {
+      this.debouncedQueryChange();
+    },
+    selectedResourceTables: function selectedResourceTables(newResourceTables) {
+      this.debouncedQueryChange();
     }
   },
   mounted: function mounted() {
@@ -25910,15 +25911,25 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   data: function data() {
     return {
       query: this.propQuery || '',
+      loading: false,
       results: [],
       selectedAreaIds: _toConsumableArray(this.propSelectedAreaIds),
       selectedResourceTables: _toConsumableArray(this.propSelectedResourceTables)
     };
   },
   methods: {
+    debouncedQueryChange: function debouncedQueryChange() {
+      var _this = this;
+      if (this.debounceTimeout) {
+        clearTimeout(this.debounceTimeout);
+      }
+      this.debounceTimeout = setTimeout(function () {
+        _this.executeQuery();
+      }, 300);
+    },
     executeQuery: function executeQuery() {
       var _this2 = this;
-      axios__WEBPACK_IMPORTED_MODULE_9__["default"].get('/api/v1/search/', {
+      this.loading = true, axios__WEBPACK_IMPORTED_MODULE_9__["default"].get('/api/v1/search/', {
         params: {
           q: this.query,
           ar: this.selectedAreaIds,
@@ -25926,9 +25937,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }).then(function (response) {
         _this2.results = response.data;
-        console.log(_this2.results);
+        _this2.loading = false;
       })["catch"](function (error) {
         console.error('Error fetching assistant response:', error);
+        _this2.loading = false;
       });
     },
     handleSelectedAreas: function handleSelectedAreas(newSelectedIds) {
@@ -28664,23 +28676,24 @@ var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
   d: "m21 21-4.3-4.3"
 })])], -1 /* HOISTED */);
 var _hoisted_5 = {
-  "class": "filters"
+  key: 0,
+  "class": "loading loading-spinner loading-sm absolute right-8"
 };
 var _hoisted_6 = {
+  "class": "filters"
+};
+var _hoisted_7 = {
   "class": "results"
 };
-var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "featured-results"
 }, null, -1 /* HOISTED */);
-var _hoisted_8 = {
+var _hoisted_9 = {
   "class": "standard-results"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_AreaSelect = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("AreaSelect");
   var _component_ResourceSelect = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("ResourceSelect");
-  var _component_EventResult = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("EventResult");
-  var _component_LocationResult = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("LocationResult");
-  var _component_RestaurantResult = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("RestaurantResult");
   var _component_TrailResult = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("TrailResult");
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", _hoisted_3, [_hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "search",
@@ -28689,24 +28702,18 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
       return $data.query = $event;
     })
-  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.query]])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AreaSelect, {
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.query]]), $data.loading ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_5)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AreaSelect, {
     "onUpdate:selected": $options.handleSelectedAreas,
     selectedAreaIds: $data.selectedAreaIds
   }, null, 8 /* PROPS */, ["onUpdate:selected", "selectedAreaIds"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ResourceSelect, {
     "onUpdate:selected": $options.handleSelectedResources,
     selectedResourceTables: $data.selectedResourceTables
-  }, null, 8 /* PROPS */, ["onUpdate:selected", "selectedResourceTables"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [_hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($data.results, function (resource) {
+  }, null, 8 /* PROPS */, ["onUpdate:selected", "selectedResourceTables"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [_hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($data.results, function (resource) {
     return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
       "class": "result-item -mx-6",
       key: _ctx.result_id
-    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          <AccommodationResult v-if=\"resource.type === 'accommodation' && selectedResourceTables.includes('accommodations')\" />"), resource.type === 'event' && $data.selectedResourceTables.includes('events') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_EventResult, {
-      key: 0
-    })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), resource.type === 'location' && $data.selectedResourceTables.includes('locations') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_LocationResult, {
-      key: 1
-    })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), resource.type == 'restaurant' && $data.selectedResourceTables.includes('restaurants') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_RestaurantResult, {
-      key: 2
-    })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), resource.type === 'trail' && $data.selectedResourceTables.includes('trails') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_TrailResult, {
-      key: 3,
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          <AccommodationResult v-if=\"resource.type === 'accommodation' && selectedResourceTables.includes('accommodations')\" />"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          <EventResult v-if=\"resource.type === 'event' && selectedResourceTables.includes('events')\" />"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          <LocationResult v-if=\"resource.type === 'location' && selectedResourceTables.includes('locations')\" />"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          <RestaurantResult v-if=\"resource.type == 'restaurant' && selectedResourceTables.includes('restaurants')\" />"), resource.type === 'trail' && $data.selectedResourceTables.includes('trails') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_TrailResult, {
+      key: 0,
       resource: resource
     }, null, 8 /* PROPS */, ["resource"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
   }), 128 /* KEYED_FRAGMENT */))])])]);
@@ -28730,26 +28737,20 @@ __webpack_require__.r(__webpack_exports__);
 var _hoisted_1 = {
   "class": "card bg-white shadow-xl px-0 py-4 flex flex-col lg:px-4 md:flex-row"
 };
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-  "class": "w-full h-auto md:w-24 md:relative"
-}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
-  src: "https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp",
-  "class": "absolute inset-0 w-full h-full object-cover opacity-30 md:opacity-100 md:rounded-r-lg lg:rounded-lg"
-})], -1 /* HOISTED */);
-var _hoisted_3 = {
+var _hoisted_2 = {
+  "class": "w-full h-auto md:w-24 lg:w-48 md:relative"
+};
+var _hoisted_3 = ["src"];
+var _hoisted_4 = {
   "class": "card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg"
 };
-var _hoisted_4 = {
+var _hoisted_5 = {
   "class": "card-title text-xl font-bold"
 };
-var _hoisted_5 = {
+var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, "# miles from Kanab", -1 /* HOISTED */);
+var _hoisted_7 = {
   "class": "text-gray-600 line-clamp-3"
 };
-var _hoisted_6 = {
-  key: 0,
-  "class": "features mt-2 text-sm text-gray-500"
-};
-var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("strong", null, "Features:", -1 /* HOISTED */);
 var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   "class": "card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
@@ -28758,7 +28759,10 @@ var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
   "class": "btn btn-secondary"
 }, "Add to Itinerary")], -1 /* HOISTED */);
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */), $props.resource.features !== '' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [_hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.features), 1 /* TEXT */)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_8])]);
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+    src: '/image/trail/' + $props.resource.images[0].id + '?size=thumbnail',
+    "class": "absolute inset-0 w-full h-full object-cover opacity-30 md:opacity-100 md:rounded-r-lg lg:rounded-lg"
+  }, null, 8 /* PROPS */, _hoisted_3)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.name), 1 /* TEXT */), _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("      <div class=\"features mt-2 text-sm text-gray-500\" v-if=\"resource.features !== ''\">"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("        <p><strong>Features:</strong> {{ resource.features }}</p>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("      </div>"), _hoisted_8])]);
 }
 
 /***/ }),
