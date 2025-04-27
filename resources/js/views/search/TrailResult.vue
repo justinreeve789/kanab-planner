@@ -5,6 +5,7 @@
     </div>
 
     <div class="card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg">
+      <div class="badge badge-info absolute top-2 right-2 md:bottom-2 md:left-2 md:top-auto md:right-auto">Zion</div>
       <h2 class="card-title text-xl font-bold">{{ resource.name }}</h2>
       <p># miles from Kanab</p>
       <p class="text-gray-600 line-clamp-3">{{ resource.description }}</p>
