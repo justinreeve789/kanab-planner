@@ -17,22 +17,29 @@ class Location extends Resource
 
     public function toSearchableArray()
     {
-        return [
-            'name' => $this->name,
-            'description' => $this->description,
-            'address' => $this->address,
-            'city' => $this->city,
-            'state' => $this->state,
-            'zip' => $this->zip,
-            'phone' => $this->phone,
-            'email' => $this->email,
-            'url' => $this->url,
-        ];
+        return $this->toArray();
+//        return [
+//            'area_id' => $this->area_id,
+//            'name' => $this->name,
+//            'description' => $this->description,
+//            'address' => $this->address,
+//            'city' => $this->city,
+//            'state' => $this->state,
+//            'zip' => $this->zip,
+//            'phone' => $this->phone,
+//            'email' => $this->email,
+//            'url' => $this->url,
+//        ];
     }
 
     public function area()
     {
         return $this->belongsTo(Area::class, 'area_id', 'id');
+    }
+
+    public function events()
+    {
+        return $this->hasMany(Event::class, 'location_id', 'id');
     }
 
     public function hours()

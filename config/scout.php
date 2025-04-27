@@ -133,16 +133,20 @@ return [
         'host' => env('MEILISEARCH_HOST', 'http://localhost:7700'),
         'key' => env('MEILISEARCH_KEY'),
         'index-settings' => [
+            'accommodations' => [
+                'filterableAttributes'=> ['name', 'is_usable', 'type'],
+                'sortableAttributes'=> ['name'],
+            ],
             'blog_posts' => [
                  'filterableAttributes'=> ['blog_id', 'resource_table', 'resource_id', 'posted_at'],
                  'sortableAttributes'=> ['title', 'posted_at'],
             ],
             'events' => [
-                'filterableAttributes'=> ['name', 'source_type', 'location_id', 'is_usable'],
+                'filterableAttributes'=> ['name', 'source_type', 'area_id', 'location_id', 'start_date', 'end_date', 'is_usable', 'type'],
                 'sortableAttributes'=> ['name'],
             ],
             'locations' => [
-                'filterableAttributes'=> ['name', 'source_type', 'area_id', 'address', 'city', 'state', 'zip', 'phone', 'email', 'url', 'is_usable'],
+                'filterableAttributes'=> ['name', 'source_type', 'area_id', 'address', 'city', 'state', 'zip', 'phone', 'email', 'url', 'is_usable', 'type'],
                 'sortableAttributes'=> ['name'],
             ],
             'openai_prompts' => [
@@ -154,11 +158,11 @@ return [
                 'sortableAttributes'=> [],
             ],
             'restaurants' => [
-                'filterableAttributes'=> ['name', 'source_type', 'location_id', 'curbside_pickup', 'dine_in', 'reservable', 'is_usable'],
+                'filterableAttributes'=> ['name', 'source_type', 'area_id', 'location_id', 'curbside_pickup', 'dine_in', 'reservable', 'is_usable', 'type'],
                 'sortableAttributes'=> ['name', 'average_price'],
             ],
             'trails' => [
-                'filterableAttributes'=> ['name', 'source_type', 'area_id', 'unique', 'difficulty', 'is_usable', 'reservation', 'fee'],
+                'filterableAttributes'=> ['name', 'source_type', 'area_id', 'unique', 'difficulty', 'is_usable', 'reservation', 'fee', 'type'],
                 'sortableAttributes'=> ['name', 'distance_miles', 'average_hours', 'average_grade_pt', 'max_grade_pt'],
             ],
             // 'users' => [

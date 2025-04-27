@@ -59,15 +59,59 @@ export default {
     const searchStore = useSearchStore();
     return { searchStore };
   },
+  props: {
+    propShowHeader: {
+      type: Boolean,
+      default: true,
+    },
+    propShowInput: {
+      type: Boolean,
+      default: true,
+    },
+    propShowFilters: {
+      type: Boolean,
+      default: true,
+    },
+    propShowAreaSelect: {
+      type: Boolean,
+      default: true,
+    },
+    propShowResourceSelect: {
+      type: Boolean,
+      default: true,
+    },
+    propSelectedAreaIds: {
+      type: Array,
+      default: () => [1, 3, 4, 5, 7],
+    },
+    propSelectedResourceTables: {
+      type: Array,
+      default: () => ['events', 'locations', 'restaurants', 'trails'],
+    },
+    // We may want to disable resources that have already been selected in the itinerary.
+    propDisabledResources: {
+      type: Array,
+      default: () => [],
+    },
+    // We may want to hide resources that have already been selected in the itinerary.
+    propHideResources: {
+      type: Array,
+      default: () => [],
+    },
+    propQuery: {
+      type: String,
+      default: '',
+    },
+  },
   mounted() {
     // this.selectedAreaIds = this.searchStore.selectedAreaIds;
     // this.selectedResourceTables = this.searchStore.selectedResourceTables;
   },
   data() {
     return {
-      query: '',
-      selectedAreaIds: [1, 3, 4, 5, 7],
-      selectedResourceTables: ['events', 'locations', 'restaurants', 'trails'],
+      query: this.propQuery || '',
+      selectedAreaIds: [...this.propSelectedAreaIds],
+      selectedResourceTables: [...this.propSelectedResourceTables],
     };
   },
   methods: {

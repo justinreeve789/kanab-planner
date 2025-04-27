@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 use Laravel\Scout\Searchable;
 
 class UpdateIndex extends Command
@@ -29,7 +31,7 @@ class UpdateIndex extends Command
      */
     public function handle()
     {
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
 
         $accommodations = $this->option('accommodations');
         $events = $this->option('events');
@@ -59,7 +61,12 @@ class UpdateIndex extends Command
                 $model = new $modelClass;
                 $model::chunk(self::CHUNK_SIZE, function ($items) {
                     foreach ($items as $item) {
-                        $item->searchable();
+                        try {
+                            $item->searchable();
+                        }
+                        catch (Exception $e) {
+                            Log::error('Could not index ' . get_class($item) . ' ' . $item->id);
+                       }
                     }
                 });
             }

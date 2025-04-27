@@ -25803,6 +25803,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _AreaSelect_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./AreaSelect.vue */ "./resources/js/views/search/AreaSelect.vue");
 /* harmony import */ var _ResourceSelect_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./ResourceSelect.vue */ "./resources/js/views/search/ResourceSelect.vue");
 /* harmony import */ var _stores_search__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../stores/search */ "./resources/js/stores/search.js");
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 
 
@@ -25829,15 +25835,67 @@ __webpack_require__.r(__webpack_exports__);
       searchStore: searchStore
     };
   },
+  props: {
+    propShowHeader: {
+      type: Boolean,
+      "default": true
+    },
+    propShowInput: {
+      type: Boolean,
+      "default": true
+    },
+    propShowFilters: {
+      type: Boolean,
+      "default": true
+    },
+    propShowAreaSelect: {
+      type: Boolean,
+      "default": true
+    },
+    propShowResourceSelect: {
+      type: Boolean,
+      "default": true
+    },
+    propSelectedAreaIds: {
+      type: Array,
+      "default": function _default() {
+        return [1, 3, 4, 5, 7];
+      }
+    },
+    propSelectedResourceTables: {
+      type: Array,
+      "default": function _default() {
+        return ['events', 'locations', 'restaurants', 'trails'];
+      }
+    },
+    // We may want to disable resources that have already been selected in the itinerary.
+    propDisabledResources: {
+      type: Array,
+      "default": function _default() {
+        return [];
+      }
+    },
+    // We may want to hide resources that have already been selected in the itinerary.
+    propHideResources: {
+      type: Array,
+      "default": function _default() {
+        return [];
+      }
+    },
+    propQuery: {
+      type: String,
+      "default": ''
+    }
+  },
   mounted: function mounted() {
     // this.selectedAreaIds = this.searchStore.selectedAreaIds;
     // this.selectedResourceTables = this.searchStore.selectedResourceTables;
   },
   data: function data() {
     return {
-      query: '',
-      selectedAreaIds: [1, 3, 4, 5, 7],
-      selectedResourceTables: ['events', 'locations', 'restaurants', 'trails']
+      query: this.propQuery || '',
+      selectedAreaIds: _toConsumableArray(this.propSelectedAreaIds),
+      selectedResourceTables: _toConsumableArray(this.propSelectedResourceTables)
     };
   },
   methods: {

@@ -23,9 +23,9 @@
   document.documentElement.classList.remove('dark');
 </script>
 <script>
-  if (typeof navigator.serviceWorker !== 'undefined') {
-    navigator.serviceWorker.register('sw.js')
-  }
+  // if (typeof navigator.serviceWorker !== 'undefined') {
+  //   navigator.serviceWorker.register('sw.js')
+  // }
 </script>
 <div id="app">
     <app :itinerary-id="'{{ $id ?? null }}'"></app>

@@ -122,6 +122,16 @@ class AssistantService
         return $this->queryResourceNames($query, $trails, $exactMatch);
     }
 
+    /**
+     * If Meilisearch can find a prompt for the resource that matches extremely closely, we can simply return the answer
+     * we've already saved.
+     * TODO: Is this really a good idea? Subsequent questions won't keep the same context, unless it's included in the
+     * next request.
+     */
+    private function analyzeQueryForExistingPromptAndAnswer(string $query, $resource)
+    {
+    }
+
     private function analyzeQueryForRestaurant(string $query)
     {
         $resource = $this->findMentionedRestaurant($query);

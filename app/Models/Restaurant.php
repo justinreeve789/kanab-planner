@@ -12,9 +12,19 @@ class Restaurant extends Resource
     use ResourceScopes;
     use SearchableResource;
 
+    protected $appends = ['area_id', 'type'];
     protected $casts = ['deviation_percent' => 'float'];
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'location_id'];
+//    protected $with = ['location'];
+
+    public function toSearchableArray()
+    {
+        $searchableArray = $this->getAttributes();
+        $searchableArray['area_id'] = $this->location->area_id;
+        $searchableArray['type'] = $this->type;
+        return $searchableArray;
+    }
 
     public function images()
     {
@@ -29,6 +39,11 @@ class Restaurant extends Resource
     public function tags()
     {
         return $this->hasMany(LocationTag::class, 'location_id', 'location_id');
+    }
+
+    public function getAreaIdAttribute()
+    {
+        return $this->location->area_id;
     }
 
     public function getImagesAttribute()

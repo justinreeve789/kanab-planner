@@ -183,4 +183,16 @@ abstract class Resource extends Model
             default => throw new Exception('Invalid table: ' . $resourceTable),
         };
     }
+
+    public static function getTypeForResourceTable($resourceTable)
+    {
+        return match ($resourceTable) {
+            ResourceEnum::ACCOMMODATIONS_TABLE => ResourceEnum::ACCOMMODATIONS_TYPE,
+            ResourceEnum::EVENTS_TABLE => ResourceEnum::EVENTS_TYPE,
+            ResourceEnum::LOCATIONS_TABLE => ResourceEnum::LOCATIONS_TYPE,
+            ResourceEnum::RESTAURANTS_TABLE => ResourceEnum::RESTAURANTS_TYPE,
+            ResourceEnum::TRAILS_TABLE => ResourceEnum::TRAILS_TYPE,
+            default => throw new Exception('Invalid table: ' . $resourceTable),
+        };
+    }
 }

@@ -27,6 +27,13 @@ class Trail extends Resource
         $this->trailService = new TrailService();
     }
 
+    public function toSearchableArray()
+    {
+        $array = $this->toArray();
+        $array['area_id'] = $this->area_id;
+        return $array;
+    }
+
     public function area()
     {
         return $this->belongsTo(Area::class, 'area_id', 'id');
