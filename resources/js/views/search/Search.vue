@@ -14,7 +14,7 @@
             <path d="m21 21-4.3-4.3"></path>
           </g>
         </svg>
-        <input type="search" class="w-full" placeholder="Search" />
+        <input type="search" class="w-full" placeholder="Search" v-model="query" />
       </label>
     </div>
     <div class="filters">
@@ -22,12 +22,16 @@
       <ResourceSelect @update:selected="handleSelectedResources" :selectedResourceTables="selectedResourceTables" />
     </div>
     <div class="results">
-      <div class="result-item -mx-6">
-        <AccommodationResult v-if="selectedResourceTables.includes('accommodations')" />
-        <EventResult v-if="selectedResourceTables.includes('events')" />
-        <LocationResult v-if="selectedResourceTables.includes('locations')" />
-        <RestaurantResult v-if="selectedResourceTables.includes('restaurants')" />
-        <TrailResult v-if="selectedResourceTables.includes('trails')" />
+      <div class="featured-results">
+      </div>
+      <div class="standard-results">
+        <div class="result-item -mx-6" v-for="resource in results" :key="result_id">
+<!--          <AccommodationResult v-if="resource.type === 'accommodation' && selectedResourceTables.includes('accommodations')" />-->
+          <EventResult v-if="resource.type === 'event' && selectedResourceTables.includes('events')" />
+          <LocationResult v-if="resource.type === 'location' && selectedResourceTables.includes('locations')" />
+          <RestaurantResult v-if="resource.type == 'restaurant' && selectedResourceTables.includes('restaurants')" />
+          <TrailResult v-if="resource.type === 'trail' && selectedResourceTables.includes('trails')" :resource="resource" />
+        </div>
       </div>
     </div>
   </div>
@@ -103,6 +107,17 @@ export default {
       default: '',
     },
   },
+  watch: {
+    query(newQuery) {
+      console.log(newQuery);
+      if (this.debounceTimeout) {
+        clearTimeout(this.debounceTimeout);
+      }
+      this.debounceTimeout = setTimeout(() => {
+        this.executeQuery(newQuery);
+      }, 500);
+    },
+  },
   mounted() {
     // this.selectedAreaIds = this.searchStore.selectedAreaIds;
     // this.selectedResourceTables = this.searchStore.selectedResourceTables;
@@ -110,19 +125,24 @@ export default {
   data() {
     return {
       query: this.propQuery || '',
+      results: [],
       selectedAreaIds: [...this.propSelectedAreaIds],
       selectedResourceTables: [...this.propSelectedResourceTables],
     };
   },
   methods: {
-    query() {
+    executeQuery() {
       axios
-        .get('/api/v1/search', {
-          q: this.query,
-          ar: this.selectedAreaIds,
-          rt: this.selectedResourceTables,
+        .get('/api/v1/search/', {
+          params: {
+            q: this.query,
+            ar: this.selectedAreaIds,
+            rt: this.selectedResourceTables,
+          },
         })
         .then((response) => {
+          this.results = response.data;
+          console.log(this.results);
         })
         .catch((error) => {
           console.error('Error fetching assistant response:', error);

@@ -32,18 +32,9 @@ class SearchService
 {
     const BASE_RANKING_SCORE_THRESHOLD = 0.5;
     const MAX_RANKING_SCORE_THRESHOLD = 0.9;
-    const RESTAURANTS = 'restaurants';
-    const TRAILS = 'trails';
 
     public float $rankingScoreThreshold = self::BASE_RANKING_SCORE_THRESHOLD;
     public $client;
-    public $indexesFromTables = [
-        ResourceEnum::ACCOMMODATIONS_TABLE => 'accommodations',
-        ResourceEnum::EVENTS_TABLE => 'events',
-        ResourceEnum::LOCATIONS_TABLE => 'locations',
-        ResourceEnum::RESTAURANTS_TABLE => 'restaurants',
-        ResourceEnum::TRAILS_TABLE => 'trails',
-    ];
     public array $results = [];
     public array $stats = [];
 
@@ -57,9 +48,6 @@ class SearchService
         $areaIdList = implode(',', array_filter(array_map('intval', $areaIds), function($value) {
             return $value > 0;
         }));
-        $resourceTableList = implode(',', array_map(function($resourceTable) {
-            return Resource::getTypeForResourceTable($resourceTable);
-        }, $resourceTables));
         $results = [];
 
         foreach ($resourceTables as $resourceTable) {
@@ -79,7 +67,8 @@ class SearchService
                     ];
                     $this->stats[$resourceTable . '_' . $hit['id']] = $stats;
                     $result = $hit;
-                    $results[$resourceTable . '_' . $hit['id']] = $result;
+                    $result['result_id'] = $resourceTable . '_' . $hit['id'];
+                    $results[$result['result_id']] = $result;
                 }
             }
         }

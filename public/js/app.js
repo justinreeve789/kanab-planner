@@ -25573,14 +25573,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
-
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {},
   setup: function setup() {},
   mounted: function mounted() {},
   data: function data() {
     return {};
+  },
+  props: {
+    resource: Object
   }
 });
 
@@ -25662,14 +25663,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
-
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {},
   setup: function setup() {},
   mounted: function mounted() {},
   data: function data() {
     return {};
+  },
+  props: {
+    resource: Object
   }
 });
 
@@ -25686,14 +25688,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
-
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {},
   setup: function setup() {},
   mounted: function mounted() {},
   data: function data() {
     return {};
+  },
+  props: {
+    resource: Object
   }
 });
 
@@ -25769,14 +25772,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
-
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {},
   setup: function setup() {},
   mounted: function mounted() {},
   data: function data() {
     return {};
+  },
+  props: {
+    resource: Object
   }
 });
 
@@ -25887,6 +25891,18 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       "default": ''
     }
   },
+  watch: {
+    query: function query(newQuery) {
+      var _this = this;
+      console.log(newQuery);
+      if (this.debounceTimeout) {
+        clearTimeout(this.debounceTimeout);
+      }
+      this.debounceTimeout = setTimeout(function () {
+        _this.executeQuery(newQuery);
+      }, 500);
+    }
+  },
   mounted: function mounted() {
     // this.selectedAreaIds = this.searchStore.selectedAreaIds;
     // this.selectedResourceTables = this.searchStore.selectedResourceTables;
@@ -25894,17 +25910,24 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   data: function data() {
     return {
       query: this.propQuery || '',
+      results: [],
       selectedAreaIds: _toConsumableArray(this.propSelectedAreaIds),
       selectedResourceTables: _toConsumableArray(this.propSelectedResourceTables)
     };
   },
   methods: {
-    query: function query() {
-      axios__WEBPACK_IMPORTED_MODULE_9__["default"].get('/api/v1/search', {
-        q: this.query,
-        ar: this.selectedAreaIds,
-        rt: this.selectedResourceTables
-      }).then(function (response) {})["catch"](function (error) {
+    executeQuery: function executeQuery() {
+      var _this2 = this;
+      axios__WEBPACK_IMPORTED_MODULE_9__["default"].get('/api/v1/search/', {
+        params: {
+          q: this.query,
+          ar: this.selectedAreaIds,
+          rt: this.selectedResourceTables
+        }
+      }).then(function (response) {
+        _this2.results = response.data;
+        console.log(_this2.results);
+      })["catch"](function (error) {
         console.error('Error fetching assistant response:', error);
       });
     },
@@ -25932,14 +25955,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
-
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {},
   setup: function setup() {},
   mounted: function mounted() {},
   data: function data() {
     return {};
+  },
+  props: {
+    resource: Object
   }
 });
 
@@ -28298,12 +28322,35 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "card image-full bg-white md:card-side"
+  "class": "card bg-white shadow-xl px-0 py-4 flex flex-col lg:px-4 md:flex-row"
 };
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img class=\"max-h-48\" src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
-var _hoisted_4 = [_hoisted_2];
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "w-full h-auto md:w-24 md:relative"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+  src: "https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp",
+  "class": "absolute inset-0 w-full h-full object-cover opacity-30 md:opacity-100 md:rounded-r-lg lg:rounded-lg"
+})], -1 /* HOISTED */);
+var _hoisted_3 = {
+  "class": "card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg"
+};
+var _hoisted_4 = {
+  "class": "card-title text-xl font-bold"
+};
+var _hoisted_5 = {
+  "class": "text-gray-600 line-clamp-3"
+};
+var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "features mt-2 text-sm text-gray-500"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("strong", null, "Features:")])], -1 /* HOISTED */);
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "btn btn-primary"
+}, "View Map"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "btn btn-secondary"
+}, "Add to Itinerary")], -1 /* HOISTED */);
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, _hoisted_4);
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */), _hoisted_6, _hoisted_7])]);
 }
 
 /***/ }),
@@ -28386,12 +28433,35 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "card image-full bg-white md:card-side"
+  "class": "card bg-white shadow-xl px-0 py-4 flex flex-col lg:px-4 md:flex-row"
 };
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img class=\"max-h-48\" src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
-var _hoisted_4 = [_hoisted_2];
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "w-full h-auto md:w-24 md:relative"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+  src: "https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp",
+  "class": "absolute inset-0 w-full h-full object-cover opacity-30 md:opacity-100 md:rounded-r-lg lg:rounded-lg"
+})], -1 /* HOISTED */);
+var _hoisted_3 = {
+  "class": "card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg"
+};
+var _hoisted_4 = {
+  "class": "card-title text-xl font-bold"
+};
+var _hoisted_5 = {
+  "class": "text-gray-600 line-clamp-3"
+};
+var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "features mt-2 text-sm text-gray-500"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("strong", null, "Features:")])], -1 /* HOISTED */);
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "btn btn-primary"
+}, "View Map"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "btn btn-secondary"
+}, "Add to Itinerary")], -1 /* HOISTED */);
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, _hoisted_4);
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */), _hoisted_6, _hoisted_7])]);
 }
 
 /***/ }),
@@ -28410,12 +28480,35 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "card image-full bg-white md:card-side"
+  "class": "card bg-white shadow-xl px-0 py-4 flex flex-col lg:px-4 md:flex-row"
 };
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img class=\"max-h-48\" src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
-var _hoisted_4 = [_hoisted_2];
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "w-full h-auto md:w-24 md:relative"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+  src: "https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp",
+  "class": "absolute inset-0 w-full h-full object-cover opacity-30 md:opacity-100 md:rounded-r-lg lg:rounded-lg"
+})], -1 /* HOISTED */);
+var _hoisted_3 = {
+  "class": "card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg"
+};
+var _hoisted_4 = {
+  "class": "card-title text-xl font-bold"
+};
+var _hoisted_5 = {
+  "class": "text-gray-600 line-clamp-3"
+};
+var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "features mt-2 text-sm text-gray-500"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("strong", null, "Features:")])], -1 /* HOISTED */);
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "btn btn-primary"
+}, "View Map"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "btn btn-secondary"
+}, "Add to Itinerary")], -1 /* HOISTED */);
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, _hoisted_4);
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */), _hoisted_6, _hoisted_7])]);
 }
 
 /***/ }),
@@ -28498,12 +28591,35 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "card image-full bg-white md:card-side"
+  "class": "card bg-white shadow-xl px-0 py-4 flex flex-col lg:px-4 md:flex-row"
 };
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img class=\"max-h-48\" src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
-var _hoisted_4 = [_hoisted_2];
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "w-full h-auto md:w-24 md:relative"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+  src: "https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp",
+  "class": "absolute inset-0 w-full h-full object-cover opacity-30 md:opacity-100 md:rounded-r-lg lg:rounded-lg"
+})], -1 /* HOISTED */);
+var _hoisted_3 = {
+  "class": "card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg"
+};
+var _hoisted_4 = {
+  "class": "card-title text-xl font-bold"
+};
+var _hoisted_5 = {
+  "class": "text-gray-600 line-clamp-3"
+};
+var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "features mt-2 text-sm text-gray-500"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("strong", null, "Features:")])], -1 /* HOISTED */);
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "btn btn-primary"
+}, "View Map"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "btn btn-secondary"
+}, "Add to Itinerary")], -1 /* HOISTED */);
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, _hoisted_4);
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */), _hoisted_6, _hoisted_7])]);
 }
 
 /***/ }),
@@ -28524,41 +28640,76 @@ __webpack_require__.r(__webpack_exports__);
 var _hoisted_1 = {
   "class": "search"
 };
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"search-box\"><label class=\"input\"><svg class=\"h-[1em] opacity-50\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><g stroke-linejoin=\"round\" stroke-linecap=\"round\" stroke-width=\"2.5\" fill=\"none\" stroke=\"currentColor\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle><path d=\"m21 21-4.3-4.3\"></path></g></svg><input type=\"search\" class=\"w-full\" placeholder=\"Search\"></label></div>", 1);
+var _hoisted_2 = {
+  "class": "search-box"
+};
 var _hoisted_3 = {
+  "class": "input"
+};
+var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  "class": "h-[1em] opacity-50",
+  xmlns: "http://www.w3.org/2000/svg",
+  viewBox: "0 0 24 24"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("g", {
+  "stroke-linejoin": "round",
+  "stroke-linecap": "round",
+  "stroke-width": "2.5",
+  fill: "none",
+  stroke: "currentColor"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("circle", {
+  cx: "11",
+  cy: "11",
+  r: "8"
+}), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+  d: "m21 21-4.3-4.3"
+})])], -1 /* HOISTED */);
+var _hoisted_5 = {
   "class": "filters"
 };
-var _hoisted_4 = {
+var _hoisted_6 = {
   "class": "results"
 };
-var _hoisted_5 = {
-  "class": "result-item -mx-6"
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "featured-results"
+}, null, -1 /* HOISTED */);
+var _hoisted_8 = {
+  "class": "standard-results"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_AreaSelect = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("AreaSelect");
   var _component_ResourceSelect = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("ResourceSelect");
-  var _component_AccommodationResult = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("AccommodationResult");
   var _component_EventResult = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("EventResult");
   var _component_LocationResult = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("LocationResult");
   var _component_RestaurantResult = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("RestaurantResult");
   var _component_TrailResult = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("TrailResult");
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AreaSelect, {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", _hoisted_3, [_hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "search",
+    "class": "w-full",
+    placeholder: "Search",
+    "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
+      return $data.query = $event;
+    })
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.query]])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AreaSelect, {
     "onUpdate:selected": $options.handleSelectedAreas,
     selectedAreaIds: $data.selectedAreaIds
   }, null, 8 /* PROPS */, ["onUpdate:selected", "selectedAreaIds"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ResourceSelect, {
     "onUpdate:selected": $options.handleSelectedResources,
     selectedResourceTables: $data.selectedResourceTables
-  }, null, 8 /* PROPS */, ["onUpdate:selected", "selectedResourceTables"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [$data.selectedResourceTables.includes('accommodations') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_AccommodationResult, {
-    key: 0
-  })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.selectedResourceTables.includes('events') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_EventResult, {
-    key: 1
-  })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.selectedResourceTables.includes('locations') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_LocationResult, {
-    key: 2
-  })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.selectedResourceTables.includes('restaurants') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_RestaurantResult, {
-    key: 3
-  })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.selectedResourceTables.includes('trails') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_TrailResult, {
-    key: 4
-  })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])]);
+  }, null, 8 /* PROPS */, ["onUpdate:selected", "selectedResourceTables"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [_hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($data.results, function (resource) {
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
+      "class": "result-item -mx-6",
+      key: _ctx.result_id
+    }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          <AccommodationResult v-if=\"resource.type === 'accommodation' && selectedResourceTables.includes('accommodations')\" />"), resource.type === 'event' && $data.selectedResourceTables.includes('events') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_EventResult, {
+      key: 0
+    })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), resource.type === 'location' && $data.selectedResourceTables.includes('locations') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_LocationResult, {
+      key: 1
+    })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), resource.type == 'restaurant' && $data.selectedResourceTables.includes('restaurants') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_RestaurantResult, {
+      key: 2
+    })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), resource.type === 'trail' && $data.selectedResourceTables.includes('trails') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_TrailResult, {
+      key: 3,
+      resource: resource
+    }, null, 8 /* PROPS */, ["resource"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
+  }), 128 /* KEYED_FRAGMENT */))])])]);
 }
 
 /***/ }),
@@ -28577,12 +28728,37 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "card image-full bg-white md:card-side"
+  "class": "card bg-white shadow-xl px-0 py-4 flex flex-col lg:px-4 md:flex-row"
 };
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<figure><img class=\"max-h-48\" src=\"https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp\" alt=\"Movie\"></figure><div class=\"card-body\"><h2 class=\"card-title\">The Narrows</h2><p>Stuff</p><div class=\"card-actions justify-end\"><button class=\"btn btn-primary\">Add to Itinerary</button><button class=\"btn btn-primary\">View Map</button></div></div>", 2);
-var _hoisted_4 = [_hoisted_2];
+var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "w-full h-auto md:w-24 md:relative"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+  src: "https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp",
+  "class": "absolute inset-0 w-full h-full object-cover opacity-30 md:opacity-100 md:rounded-r-lg lg:rounded-lg"
+})], -1 /* HOISTED */);
+var _hoisted_3 = {
+  "class": "card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg"
+};
+var _hoisted_4 = {
+  "class": "card-title text-xl font-bold"
+};
+var _hoisted_5 = {
+  "class": "text-gray-600 line-clamp-3"
+};
+var _hoisted_6 = {
+  key: 0,
+  "class": "features mt-2 text-sm text-gray-500"
+};
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("strong", null, "Features:", -1 /* HOISTED */);
+var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end"
+}, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "btn btn-primary"
+}, "View Map"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  "class": "btn btn-secondary"
+}, "Add to Itinerary")], -1 /* HOISTED */);
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, _hoisted_4);
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */), $props.resource.features !== '' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [_hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.features), 1 /* TEXT */)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _hoisted_8])]);
 }
 
 /***/ }),
