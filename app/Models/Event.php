@@ -12,7 +12,7 @@ class Event extends Resource
     use HasFactory;
     use SearchableResource;
 
-    protected $appends = ['area_id', 'type'];
+    protected $appends = ['type'];
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'location_id'];
 //    protected $with = ['dates', 'location'];

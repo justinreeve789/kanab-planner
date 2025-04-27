@@ -12,7 +12,7 @@ class Restaurant extends Resource
     use ResourceScopes;
     use SearchableResource;
 
-    protected $appends = ['area_id', 'type'];
+    protected $appends = ['type'];
     protected $casts = ['deviation_percent' => 'float'];
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'location_id'];
