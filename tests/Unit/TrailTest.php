@@ -19,4 +19,8 @@ class TrailTest extends TestCase
             $this->assertTrue((bool) $trail->is_usable);
         }
     }
+
+    public function test_difficulty_derived_from_strenuousness_matches_difficulty_derived_from_imports(): void
+    {
+    }
 }

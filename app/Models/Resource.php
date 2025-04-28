@@ -12,6 +12,7 @@ use App\Traits\SearchableResource;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 abstract class Resource extends Model
 {
@@ -30,6 +31,22 @@ abstract class Resource extends Model
     public function newEloquentBuilder($query)
     {
         return new CustomQueryBuilder($query);
+    }
+
+    public function toSearchableArray()
+    {
+        $array = $this->toArray();
+        $array['area_id'] = $this->area_id;
+        $array['area_name'] = $this->area->name;
+        $array['area_short_name'] = $this->area->short_name;
+        $array['area_abbreviation'] = $this->area->abbreviation;
+        $array['area_slug'] = $this->area->slug;
+        return $array;
+    }
+
+    public function area()
+    {
+        return $this->hasOne(Area::class, 'area_id', 'id');
     }
 
     public function busy()

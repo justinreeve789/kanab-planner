@@ -9,11 +9,11 @@
             </svg>
           </div>
           <ul class="menu menu-lg dropdown-content bg-base-100 bg-neutral text-neutral-content rounded-b-box z-1 mt-3 w-52 p-2 shadow" tabindex="0">
-            <li><a>Accommodations</a></li>
-            <li><a>Events</a></li>
-            <li><a>Locations</a></li>
-            <li><a>Restaurants</a></li>
-            <li><a>Trails</a></li>
+            <li><a @click="openAccommodations">Accommodations</a></li>
+            <li><a @click="openEvents">Events</a></li>
+            <li><a @click="openLocations">Locations</a></li>
+            <li><a @click="openRestaurants">Restaurants</a></li>
+            <li><a @click="openTrails">Trails</a></li>
           </ul>
         </div>
         <span class="font-bold text-xl hidden sm:block">Trip Planner</span>
@@ -105,6 +105,8 @@ export default {
   },
   methods: {
     getFeatureFlags() {
+    },
+    openEvents() {
     },
     selectDates() {
       this.isCalendarOpen = !this.isCalendarOpen;

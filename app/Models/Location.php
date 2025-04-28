@@ -17,7 +17,7 @@ class Location extends Resource
 
     public function toSearchableArray()
     {
-        $searchableArray = $this->toArray();
+        $searchableArray = parent::toSearchableArray();
         $searchableArray['location_id'] = $this->id;
         $searchableArray['is_restaurant'] = $this->restaurant ? 1 : 0;
         return $searchableArray;

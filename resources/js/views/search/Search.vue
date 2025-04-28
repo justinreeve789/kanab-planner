@@ -77,6 +77,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    propShowFeatured: {
+      type: Boolean,
+      default: false,
+    },
     propShowAreaSelect: {
       type: Boolean,
       default: true,

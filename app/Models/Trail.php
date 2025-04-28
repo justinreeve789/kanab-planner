@@ -29,9 +29,7 @@ class Trail extends Resource
 
     public function toSearchableArray()
     {
-        $array = $this->toArray();
-        $array['area_id'] = $this->area_id;
-        return $array;
+        return parent::toSearchableArray();
     }
 
     public function area()
