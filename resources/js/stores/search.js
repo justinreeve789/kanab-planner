@@ -3,10 +3,13 @@ import { defineStore } from 'pinia'
 export const useSearchStore = defineStore('search', {
   state: () => ({
     isSearchOpen: false,
-    title: 'Search',
+    title: '',
+    target: {},
+    sortField: '',
     query: '',
-    selectedAreaIds: [1, 3, 4, 5, 7],
-    selectedResourceTables: ['events', 'locations', 'restaurants', 'trails'],
+    selectedAreaIds: [],
+    selectedResourceTables: [],
+    showCloseButtonOnMobile: false,
     showHeader: true,
     showInput: true,
     showFilters: true,
@@ -21,18 +24,36 @@ export const useSearchStore = defineStore('search', {
   actions: {
     adjustSettingsForGeneralSearch() {
       this.clearSettings();
+      this.title = 'Search';
+      this.selectedResourceTables = ['events', 'locations', 'restaurants', 'trails'];
+      this.selectedAreaIds = [1, 3, 4, 5, 7];
     },
     adjustSettingsForResourceListForTable(resourceTable) {
       this.clearSettings();
+      this.title = resourceTable.charAt(0).toUpperCase() + resourceTable.slice(1);
+      this.showCloseButtonOnMobile = true;
       this.selectedResourceTables = [resourceTable];
       this.showResourceSelect = false;
+      this.sortField = 'name';
+    },
+    adjustSettingsForPage(resourceTable) {
+      this.clearSettings();
+      this.title = resourceTable.charAt(0).toUpperCase() + resourceTable.slice(1);
+      this.showCloseButtonOnMobile = true;
+      this.selectedResourceTables = [resourceTable];
+      this.showResourceSelect = false;
+      this.showFeatured = true;
+      this.sortField = 'name';
     },
     clearSettings() {
       this.isSearchOpen = false;
-      this.title = 'Search';
+      this.title = '';
+      this.showCloseButtonOnMobile = false;
+      this.target = {};
+      this.sortField = '';
       this.query = '';
-      this.selectedAreaIds = [1, 3, 4, 5, 7];
-      this.selectedResourceTables = ['events', 'locations', 'restaurants', 'trails'];
+      this.selectedAreaIds = [];
+      this.selectedResourceTables = [];
       this.showHeader = true;
       this.showInput = true;
       this.showFilters = true;

@@ -5,7 +5,7 @@
       <div class="flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full">
         <h2 class="text-black text-lg">{{ title }}</h2>
         <div class="flex align-right">
-          <button class="btn btn-sm btn-ghost hover:bg-cyan-100 text-black hidden md:flex">
+          <button class="btn btn-sm btn-ghost text-black hover:bg-cyan-100 md:flex" :class="hiddenClass">
             <label for="search-modal">
               <span>✕</span>
             </label>
@@ -33,28 +33,18 @@ export default {
     return { searchStore };
   },
   computed: {
-    // selectedAreaIds() {
-    //   return [this.areaId];
-    // },
-    // selectedResourceTables() {
-    //   return [this.resourceTable];
-    // },
+    hiddenClass() {
+      return this.searchStore.showCloseButtonOnMobile ? 'flex' : 'hidden';
+    },
+    isSearchOpen() {
+      return this.searchStore.isSearchOpen;
+    },
+    title() {
+      return this.searchStore.title;
+    },
   },
   data() {
     return {
-      isSearchOpen: this.searchStore.isSearchOpen,
-      title: this.searchStore.title,
-      // query: this.searchStore.query,
-      // selectedAreaIds: this.searchStore.selectedAreaIds,
-      // selectedResourceTables: this.searchStore.selectedResourceTables,
-      // showHeader: this.searchStore.showHeader,
-      // showInput: this.searchStore.showInput,
-      // showFilters: this.searchStore.showFilters,
-      // showFeatured: this.searchStore.showFeatured,
-      // showAreaSelect: this.searchStore.showAreaSelect,
-      // showResourceSelect: this.searchStore.showResourceSelect,
-      // disabledResources: this.searchStore.disabledResources,
-      // hiddenResources: this.searchStore.hiddenResources,
     };
   },
   methods: {

@@ -106,7 +106,25 @@ export default {
   methods: {
     getFeatureFlags() {
     },
+    openAccommodations() {
+      this.searchStore.adjustSettingsForResourceListForTable('accommodations');
+      this.searchStore.isSearchOpen = true;
+    },
     openEvents() {
+      this.searchStore.adjustSettingsForResourceListForTable('events');
+      this.searchStore.isSearchOpen = true;
+    },
+    openLocations() {
+      this.searchStore.adjustSettingsForResourceListForTable('locations');
+      this.searchStore.isSearchOpen = true;
+    },
+    openRestaurants() {
+      this.searchStore.adjustSettingsForResourceListForTable('restaurants');
+      this.searchStore.isSearchOpen = true;
+    },
+    openTrails() {
+      this.searchStore.adjustSettingsForResourceListForTable('trails');
+      this.searchStore.isSearchOpen = true;
     },
     selectDates() {
       this.isCalendarOpen = !this.isCalendarOpen;

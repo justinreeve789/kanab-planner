@@ -59,6 +59,8 @@ export default {
   methods: {
     changeActivity() {
       this.searchStore.adjustSettingsForResourceListForTable('restaurants');
+      this.searchStore.selectedAreaIds = [this.resource.area_id];
+      this.searchStore.showAreaSelect = false;
       this.searchStore.isSearchOpen = true;
     },
   },

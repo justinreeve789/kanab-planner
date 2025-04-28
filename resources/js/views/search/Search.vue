@@ -19,19 +19,19 @@
       </label>
     </div>
     <div class="filters">
-      <AreaSelect @update:selected="handleSelectedAreas" :selectedAreaIds="selectedAreaIds" v-if="showAreaSelect" />
-      <ResourceSelect @update:selected="handleSelectedResources" :selectedResourceTables="selectedResourceTables" v-if="showResourceSelect" />
+      <AreaSelect @update:selected="handleSelectedAreas" :selectedAreaIds="getSelectedAreaIds()" v-if="showAreaSelect" />
+      <ResourceSelect @update:selected="handleSelectedResources" :selectedResourceTables="getSelectedResourceTables()" v-if="showResourceSelect" />
     </div>
-    <div class="results">
+    <div class="results mt-4">
       <div class="featured-results">
       </div>
       <div class="standard-results">
         <div class="result-item -mx-6" v-for="resource in results" :key="result_id">
 <!--          <AccommodationResult v-if="resource.type === 'accommodation' && selectedResourceTables.includes('accommodations')" />-->
-          <EventResult v-if="resource.type === 'event' && selectedResourceTables.includes('events')" :resource="resource" />
-          <LocationResult v-if="resource.type === 'location' && selectedResourceTables.includes('locations')" :resource="resource" />
-          <RestaurantResult v-if="resource.type === 'restaurant' && selectedResourceTables.includes('restaurants')" :resource="resource" />
-          <TrailResult v-if="resource.type === 'trail' && selectedResourceTables.includes('trails')" :resource="resource" />
+          <EventResult v-if="resource.type === 'event'" :resource="resource" />
+          <LocationResult v-if="resource.type === 'location'" :resource="resource" />
+          <RestaurantResult v-if="resource.type === 'restaurant'" :resource="resource" />
+          <TrailResult v-if="resource.type === 'trail'" :resource="resource" />
         </div>
       </div>
     </div>
@@ -40,7 +40,6 @@
 
 <script>
 import axios from 'axios';
-import {ref, watch} from "vue";
 import AccommodationResult from "./AccommodationResult.vue";
 import EventResult from "./EventResult.vue";
 import LocationResult from "./LocationResult.vue";
@@ -67,11 +66,12 @@ export default {
   },
   computed: {
     ...mapState(useSearchStore, [
-      'title',
       'isSearchOpen',
-      'query',
+      'title',
+      'target',
       'selectedAreaIds',
       'selectedResourceTables',
+      'sortField',
       'showHeader',
       'showInput',
       'showFilters',
@@ -84,6 +84,7 @@ export default {
   },
   data() {
     return {
+      query: '',
       loading: false,
       results: [],
     };
@@ -106,6 +107,20 @@ export default {
     // this.selectedResourceTables = this.searchStore.selectedResourceTables;
   },
   methods: {
+    getSelectedAreaIds() {
+      if (this.selectedAreaIds.length === 0) {
+        return [1, 2, 3, 4, 5, 6, 7];
+      } else {
+        return this.selectedAreaIds;
+      }
+    },
+    getSelectedResourceTables() {
+      if (this.selectedResourceTables.length === 0) {
+        return ['events', 'locations', 'restaurants', 'trails'];
+      } else {
+        return this.selectedResourceTables;
+      }
+    },
     debouncedQueryChange() {
       if (this.debounceTimeout) {
         clearTimeout(this.debounceTimeout);
@@ -115,13 +130,13 @@ export default {
       }, 300);
     },
     executeQuery() {
-      this.loading = true,
+      this.loading = true;
       axios
         .get('/api/v1/search/', {
           params: {
             q: this.query,
-            ar: this.selectedAreaIds,
-            rt: this.selectedResourceTables,
+            ar: this.getSelectedAreaIds(),
+            rt: this.getSelectedResourceTables(),
           },
         })
         .then((response) => {
@@ -129,17 +144,15 @@ export default {
           this.loading = false;
         })
         .catch((error) => {
-          console.error('Error fetching assistant response:', error);
+          console.error('Error fetching search response:', error);
           this.loading = false;
         });
     },
     handleSelectedAreas(newSelectedIds) {
-      this.selectedAreaIds = newSelectedIds;
-      // this.searchStore.selectedAreaIds = newSelectedIds;
+      this.searchStore.selectedAreaIds = newSelectedIds;
     },
     handleSelectedResources(newSelectedTables) {
-      this.selectedResourceTables = newSelectedTables;
-      // this.searchStore.selectedResourceTables = newSelectedTables;
+      this.searchStore.selectedResourceTables = newSelectedTables;
     },
   },
 }

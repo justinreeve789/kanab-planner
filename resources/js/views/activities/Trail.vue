@@ -15,7 +15,7 @@
       <div class="flex space-x-4 items-center mr-8 h-full">
         <TrailStats :align="'right'" :trail="resource" class="hidden lg:flex"/>
         <label for="trail-list">
-          <span class="icon btn btn-sm btn-ghost relative z-10 h-full" @click="select">
+          <span @click="changeActivity" class="icon btn btn-sm btn-ghost relative z-10 h-full">
             <img alt="Change Activity" src="/images/icons/edit.svg">
           </span>
         </label>
@@ -73,10 +73,21 @@
 </template>
 
 <script>
+import ActivityButtons from "../components/ActivityButtons.vue";
+import MapModal from "../modals/MapModal.vue";
+import Side from "../panels/Side.vue";
+import TrailStats from "../stats/TrailStats.vue";
+import {useSearchStore} from "../../stores/search";
+
 export default {
+  setup() {
+    const searchStore = useSearchStore();
+    return { searchStore };
+  },
   components: {
     ActivityButtons,
     MapModal,
+    Side,
     TrailStats,
   },
   data() {
@@ -85,17 +96,16 @@ export default {
     }
   },
   methods: {
+    changeActivity() {
+      this.searchStore.adjustSettingsForResourceListForTable('trails');
+      this.searchStore.selectedAreaIds = [this.resource.area_id];
+      this.searchStore.showAreaSelect = false;
+      this.searchStore.isSearchOpen = true;
+    },
     zoom() {
       // TODO: We'll want to include their base area on the map, so they have an idea where the trail is in relation to
       // it. If it's far away, zoom out. If it's close, zoom in.
       return 15;
-    },
-    select() {
-      // this.sendResource();
-    },
-    sendResource() {
-      // const store = useListStore();
-      // store.setResource(this.resource);
     },
   },
   props: {
@@ -104,13 +114,4 @@ export default {
     resource: Object,
   },
 };
-</script>
-
-<script setup>
-import {ref, onMounted, onUnmounted, defineProps, watch} from 'vue';
-import {useListStore} from '../../stores/list.js';
-import ActivityButtons from '../components/ActivityButtons.vue'
-import MapModal from '../modals/MapModal.vue'
-import Side from '../panels/Side.vue'
-import TrailStats from '../stats/TrailStats.vue'
 </script>
