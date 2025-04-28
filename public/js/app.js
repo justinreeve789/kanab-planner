@@ -28386,7 +28386,7 @@ var _hoisted_1 = {
 var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   tabindex: "0",
   role: "button",
-  "class": "input input-bordered w-full flex justify-between items-center cursor-pointer"
+  "class": "input input-bordered bg-white text-black w-full flex justify-between items-center cursor-pointer"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
   "class": "bg-white text-black truncate"
 }, " Select Areas "), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
@@ -28544,7 +28544,7 @@ var _hoisted_1 = {
 var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
   tabindex: "0",
   role: "button",
-  "class": "input input-bordered w-full flex justify-between items-center cursor-pointer"
+  "class": "input input-bordered bg-white text-black w-full flex justify-between items-center cursor-pointer"
 }, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
   "class": "bg-white text-black truncate"
 }, " Select Activities "), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
@@ -28656,7 +28656,7 @@ var _hoisted_2 = {
   "class": "search-box"
 };
 var _hoisted_3 = {
-  "class": "input"
+  "class": "input bg-white text-black"
 };
 var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
   "class": "h-[1em] opacity-50",

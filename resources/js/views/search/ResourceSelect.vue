@@ -1,6 +1,6 @@
 <template>
   <div class="dropdown bg-white w-full">
-    <div tabindex="0" role="button" class="input input-bordered w-full flex justify-between items-center cursor-pointer">
+    <div tabindex="0" role="button" class="input input-bordered bg-white text-black w-full flex justify-between items-center cursor-pointer">
       <span class="bg-white text-black truncate">
         Select Activities
       </span>
