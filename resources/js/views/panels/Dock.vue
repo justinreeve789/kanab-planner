@@ -50,7 +50,7 @@ export default {
       return this.preferencesStore.isPreferencesOpen;
     },
     isSearchOpen() {
-      return this.searchStore.isSearchOpen;
+      return this.searchStore.isSearchOpen && this.searchStore.highlightSearchInMenu;
     },
     openItinerary() {
       this.assistantStore.isAssistantOpen = false;

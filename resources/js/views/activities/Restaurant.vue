@@ -18,30 +18,15 @@
       </div>
     </div>
 
-    <div class="collapse-content min-h-[150px] items-stretch bg-gray-200 p-2 bg-gradient-to-r from-white to-green-100" v-if="expanded">
-      <div class="lg:flex lg:justify-between">
-        <div class="w-full lg:w-2/3 lg:flex lg:flex-col">
-          <div class="lg:order-2">
-            <ActivityButtons class="text-right my-4 lg:text-left" type="restaurant" :resource_table="'restaurants'" :resource_id="resource.id" />
-          </div>
-          <div class="lg:order-1">
-            <p class="mb-4" v-if="resource.description_alt">{{ resource.description_alt }}</p>
-            <p class="mb-4" v-if="resource.description">{{ resource.description }}</p>
-            <p v-if="phrase"><em>{{ phrase }}</em></p>
-          </div>
-        </div>
-        <div class="w-[calc(100%+16px)] -ml-2 -mb-4 lg:w-1/3 mt-4 lg:pl-4 lg:-mt-2 lg:-mr-2" v-if="resource.location.images">
-          <Side :resource="restaurant" :type="'restaurant'" :images="resource.location.images" />
-        </div>
-      </div>
+    <div class="collapse-content p-0" v-if="expanded">
+      <RestaurantContent :phrase="phrase" :resource="resource" />
     </div>
   </div>
 </template>
 
 <script>
-import ActivityButtons from "../components/ActivityButtons.vue";
+import RestaurantContent from "./content/RestaurantContent.vue";
 import RestaurantStats from "../stats/RestaurantStats.vue";
-import Side from "../panels/Side.vue";
 import {useSearchStore} from "../../stores/search";
 
 export default {
@@ -50,17 +35,18 @@ export default {
     return { searchStore };
   },
   components: {
-    ActivityButtons,
+    RestaurantContent,
     RestaurantStats,
-    Side,
   },
   computed: {
   },
   methods: {
     changeActivity() {
       this.searchStore.adjustSettingsForResourceListForTable('restaurants');
+      this.searchStore.title += ' @ ' + this.resource.area.short_name;
       this.searchStore.selectedAreaIds = [this.resource.area_id];
       this.searchStore.showAreaSelect = false;
+      this.searchStore.disabledResources = [{ type: 'restaurant', id: this.resource.id }];
       this.searchStore.isSearchOpen = true;
     },
   },

@@ -22,24 +22,18 @@
         </button>
       </div>
     </div>
-    <div class="collapse-content text-sm bg-gradient-to-r from-white to-green-100">
-      <div class="card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg">
-        <p># miles from Kanab</p>
-        <p class="text-gray-600 line-clamp-3">{{ resource.description }}</p>
-        <div class="card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end">
-          <ViewMenu :resource="resource" />
-        </div>
-      </div>
+    <div class="collapse-content">
+      <RestaurantContent :resource="resource" />
     </div>
   </div>
 </template>
 
 <script>
-import ViewMenu from "../buttons/ViewMenu.vue";
+import RestaurantContent from "../activities/content/RestaurantContent.vue";
 
 export default {
   components: {
-    ViewMenu,
+    RestaurantContent,
   },
   setup() {
   },
@@ -61,8 +55,6 @@ export default {
   },
   methods: {
     addToItinerary(resultId) {
-    },
-    viewMap(resultId) {
     },
   },
 }

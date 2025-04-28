@@ -107,23 +107,23 @@ export default {
     getFeatureFlags() {
     },
     openAccommodations() {
-      this.searchStore.adjustSettingsForResourceListForTable('accommodations');
+      this.searchStore.adjustSettingsForPage('accommodations');
       this.searchStore.isSearchOpen = true;
     },
     openEvents() {
-      this.searchStore.adjustSettingsForResourceListForTable('events');
+      this.searchStore.adjustSettingsForPage('events');
       this.searchStore.isSearchOpen = true;
     },
     openLocations() {
-      this.searchStore.adjustSettingsForResourceListForTable('locations');
+      this.searchStore.adjustSettingsForPage('locations');
       this.searchStore.isSearchOpen = true;
     },
     openRestaurants() {
-      this.searchStore.adjustSettingsForResourceListForTable('restaurants');
+      this.searchStore.adjustSettingsForPage('restaurants');
       this.searchStore.isSearchOpen = true;
     },
     openTrails() {
-      this.searchStore.adjustSettingsForResourceListForTable('trails');
+      this.searchStore.adjustSettingsForPage('trails');
       this.searchStore.isSearchOpen = true;
     },
     selectDates() {

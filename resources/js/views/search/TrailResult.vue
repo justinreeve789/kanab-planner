@@ -26,26 +26,30 @@
         </button>
       </div>
     </div>
-    <div class="collapse-content text-sm bg-gradient-to-r from-white to-red-50">
-      <div class="card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg">
-        <p># miles from Kanab</p>
-        <p class="text-gray-600 line-clamp-3">{{ resource.description }}</p>
-        <div class="card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end">
-          <ViewMap :resource="resource" />
-        </div>
-      </div>
+    <div class="collapse-content p-0">
+      <TrailContent :resource="resource" />
     </div>
+<!--      text-sm bg-gradient-to-r from-white to-red-50">-->
+<!--      <div class="card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg">-->
+<!--        <p># miles from Kanab</p>-->
+<!--        <p class="text-gray-600 line-clamp-3">{{ resource.description }}</p>-->
+<!--        <div class="card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end">-->
+<!--          <ViewMap :resource="resource" />-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
   </div>
 </template>
 
 <script>
 import TrailStats from "../stats/TrailStats.vue";
 import ViewMap from "../buttons/ViewMap.vue";
+import TrailContent from "../activities/content/TrailContent.vue";
 
 export default {
   components: {
+    TrailContent,
     TrailStats,
-    ViewMap,
   },
   setup() {
   },
@@ -78,8 +82,6 @@ export default {
   },
   methods: {
     addToItinerary(resultId) {
-    },
-    viewMap(resultId) {
     },
   },
 }

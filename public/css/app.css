@@ -995,10 +995,6 @@ video {
   --badge-color: var(--color-neutral);
   --badge-fg: var(--color-neutral-content);
 }
-.badge-info {
-  --badge-color: var(--color-info);
-  --badge-fg: var(--color-info-content);
-}
 .badge-xs {
   --size: calc(var(--size-selector, 0.25rem) * 4);
   font-size: 0.625rem;
@@ -3356,6 +3352,9 @@ video {
 .left-0 {
   left: 0px;
 }
+.left-1\/2 {
+  left: 50%;
+}
 .left-5 {
   left: 1.25rem;
 }
@@ -3388,9 +3387,6 @@ video {
 }
 .top-2\.5 {
   top: 0.625rem;
-}
-.left-1\/2 {
-  left: 50%;
 }
 .z-10 {
   z-index: 10;
@@ -3432,6 +3428,9 @@ video {
 .my-4 {
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+.-mb-2 {
+  margin-bottom: -0.5rem;
 }
 .-mb-4 {
   margin-bottom: -1rem;
@@ -3519,9 +3518,6 @@ video {
 }
 .mt-6 {
   margin-top: 1.5rem;
-}
-.mt-8 {
-  margin-top: 2rem;
 }
 .line-clamp-2 {
   overflow: hidden;
@@ -3955,9 +3951,6 @@ video {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-.bg-info {
-  background-color: var(--color-info);
 }
 .bg-opacity-90 {
   --tw-bg-opacity: 0.9;
@@ -4810,6 +4803,9 @@ h1, h2 {
 
 .resource-details .icon img, .resource-details img.icon {
   width: 24px;
+}
+.resource-details .collapse-content {
+  padding-bottom: 0 !important;
 }
 
 hiking-project-map {
