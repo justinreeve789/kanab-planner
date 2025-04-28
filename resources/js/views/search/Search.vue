@@ -14,7 +14,7 @@
             <path d="m21 21-4.3-4.3"></path>
           </g>
         </svg>
-        <input type="search" class="w-full" placeholder="Search" v-model="query" />
+        <input type="search" class="bg-white w-full" placeholder="Search" v-model="query" />
         <span class="loading loading-spinner loading-sm absolute right-8" v-if="loading"></span>
       </label>
     </div>

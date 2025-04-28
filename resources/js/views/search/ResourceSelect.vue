@@ -1,7 +1,7 @@
 <template>
   <div class="dropdown bg-white w-full">
     <div tabindex="0" role="button" class="input input-bordered w-full flex justify-between items-center cursor-pointer">
-      <span class="truncate">
+      <span class="bg-white text-black truncate">
         Select Activities
       </span>
       <svg class="w-4 h-4 ml-2 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -9,7 +9,7 @@
       </svg>
     </div>
     <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-full max-h-92 overflow-y-auto">
-      <li v-for="resourceTable in resourceTables" :key="resourceTable.table" class="bg-white">
+      <li v-for="resourceTable in resourceTables" :key="resourceTable.table" class="bg-white text-black">
         <label
           class="flex items-center gap-2 p-2 rounded cursor-pointer"
           :class="{
