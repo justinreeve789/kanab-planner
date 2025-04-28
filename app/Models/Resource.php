@@ -35,18 +35,15 @@ abstract class Resource extends Model
 
     public function toSearchableArray()
     {
-        $array = $this->toArray();
-        $array['area_id'] = $this->area_id;
-        $array['area_name'] = $this->area->name;
-        $array['area_short_name'] = $this->area->short_name;
-        $array['area_abbreviation'] = $this->area->abbreviation;
-        $array['area_slug'] = $this->area->slug;
-        return $array;
-    }
-
-    public function area()
-    {
-        return $this->hasOne(Area::class, 'area_id', 'id');
+        $searchableArray = $this->toArray();
+        if (isset($this->area)) {
+            $searchableArray['area_id'] = $this->area_id ?? null;
+            $searchableArray['area_name'] = $this->area->name ?? '';
+            $searchableArray['area_short_name'] = $this->area->short_name ?? '';
+            $searchableArray['area_abbreviation'] = $this->area->abbreviation ?? '';
+            $searchableArray['area_slug'] = $this->area->slug ?? '';
+        }
+        return $searchableArray;
     }
 
     public function busy()

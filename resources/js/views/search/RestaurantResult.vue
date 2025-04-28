@@ -1,26 +1,45 @@
 <template>
-  <div class="card bg-white shadow-xl px-0 py-4 flex flex-col lg:px-4 md:flex-row">
-    <div class="w-full h-auto md:w-24 md:relative">
-      <img src="https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.webp" class="absolute inset-0 w-full h-full object-cover opacity-30 md:opacity-100 md:rounded-r-lg lg:rounded-lg" />
-    </div>
-
-    <div class="card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg">
-      <h2 class="card-title text-xl font-bold">{{ resource.name }}</h2>
-      <p class="text-gray-600 line-clamp-3">{{ resource.description }}</p>
-      <div class="features mt-2 text-sm text-gray-500">
-        <p><strong>Features:</strong></p>
+  <div tabindex="0" class="collapse collapse-arrow mb-2 bg-base-100 border-base-300 border rounded-none lg:rounded-xl lg:px-4">
+    <input type="checkbox" class="peer" />
+    <div class="collapse-title h-4 bg-gradient-to-r from-green-100 to-green-200 flex items-stretch justify-between">
+      <div class="flex items-center">
+        <div class="-my-8 -ml-4 h-16 w-12 sm:w-16 relative">
+          <img :src="getImageUrl" class="object-cover h-full w-full">
+          <div :class="resource.area_slug" class="absolute top-0 bg-primary w-full max-h-6 opacity-80 text-center text-xs text-white">
+            {{ resource.area_short_name }}
+          </div>
+        </div>
+        <div class="icon pr-1 shrink-0">
+        </div>
+        <div class="text-md line-clamp-2 ml-2">{{ resource.name }}</div>
       </div>
-      <div class="card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end">
-        <button class="btn btn-primary">View Menu</button>
-        <button class="btn btn-secondary">Add to Itinerary</button>
+      <div class="flex items-center">
+        <div class="mr-2 text-xs">
+        </div>
+        <button class="btn btn-primary btn-sm mr-2" @click="addToItinerary(resource.result_id)">
+          +
+          <span class="hidden md:flex">Add</span>
+        </button>
+      </div>
+    </div>
+    <div class="collapse-content text-sm bg-gradient-to-r from-white to-green-100">
+      <div class="card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg">
+        <p># miles from Kanab</p>
+        <p class="text-gray-600 line-clamp-3">{{ resource.description }}</p>
+        <div class="card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end">
+          <ViewMenu :resource="resource" />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import ViewMenu from "../buttons/ViewMenu.vue";
+
 export default {
   components: {
+    ViewMenu,
   },
   setup() {
   },
@@ -32,6 +51,19 @@ export default {
   },
   props: {
     resource: Object,
+  },
+  computed: {
+    getImageUrl() {
+      if (this.resource.images && this.resource.images[0]) {
+        return 'image/restaurant/' + this.resource.images[0].id + '?size=thumbnail';
+      }
+    },
+  },
+  methods: {
+    addToItinerary(resultId) {
+    },
+    viewMap(resultId) {
+    },
   },
 }
 </script>

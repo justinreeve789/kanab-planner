@@ -18,12 +18,15 @@ class Event extends Resource
 
     public function toSearchableArray()
     {
-        $searchableArray = $this->getAttributes();
+        $searchableArray = parent::toSearchableArray();
         $searchableArray['start_date'] = strtotime($this->start_date);
         $searchableArray['end_date'] = strtotime($this->end_date);
-        $searchableArray['area_id'] = $this->location->area_id;
-        $searchableArray['type'] = $this->type;
         return $searchableArray;
+    }
+
+    public function area()
+    {
+        return $this->hasOneThrough(Area::class, Location::class, 'id', 'id', 'location_id', 'area_id');
     }
 
     public function dates()

@@ -65,6 +65,8 @@ class UpdateIndex extends Command
                             $item->searchable();
                         }
                         catch (Exception $e) {
+                            echo $e->getMessage() . '
+';
                             Log::error('Could not index ' . get_class($item) . ' ' . $item->id);
                        }
                     }

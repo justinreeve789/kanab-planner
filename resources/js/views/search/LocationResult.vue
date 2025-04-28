@@ -16,7 +16,7 @@
       <div>
         <div class="mr-2">
         </div>
-        <button class="btn btn-sm mr-2 z-10" @click="addToItinerary(resource.result_id)">
+        <button class="btn btn-primary btn-sm mr-2 z-10" @click="addToItinerary(resource.result_id)">
           +
           <span class="hidden md:flex">Add</span>
         </button>
@@ -27,7 +27,6 @@
         <p># miles from Kanab</p>
         <p class="text-gray-600 line-clamp-3">{{ resource.description }}</p>
         <div class="card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end">
-          <button class="btn btn-primary">View Map</button>
         </div>
       </div>
     </div>

@@ -31,7 +31,7 @@
         <p># miles from Kanab</p>
         <p class="text-gray-600 line-clamp-3">{{ resource.description }}</p>
         <div class="card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end">
-          <button class="btn btn-primary">View Map</button>
+          <ViewMap :resource="resource" />
         </div>
       </div>
     </div>
@@ -40,10 +40,12 @@
 
 <script>
 import TrailStats from "../stats/TrailStats.vue";
+import ViewMap from "../buttons/ViewMap.vue";
 
 export default {
   components: {
     TrailStats,
+    ViewMap,
   },
   setup() {
   },

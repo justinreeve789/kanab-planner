@@ -68,6 +68,7 @@ export default {
       this.searchStore.isSearchOpen = false;
     },
     openSearch() {
+      this.searchStore.adjustSettingsForGeneralSearch();
       this.preferencesStore.isPreferencesOpen = false;
       this.assistantStore.isAssistantOpen = false;
       this.searchStore.isSearchOpen = true;

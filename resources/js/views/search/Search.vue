@@ -14,13 +14,13 @@
             <path d="m21 21-4.3-4.3"></path>
           </g>
         </svg>
-        <input type="search" class="bg-white w-full" placeholder="Search" v-model="query" />
+        <input type="search" class="bg-white w-full" placeholder="Search" v-model="query" v-if="showInput" />
         <span class="loading loading-spinner loading-sm absolute right-8" v-if="loading"></span>
       </label>
     </div>
     <div class="filters">
-      <AreaSelect @update:selected="handleSelectedAreas" :selectedAreaIds="selectedAreaIds" />
-      <ResourceSelect @update:selected="handleSelectedResources" :selectedResourceTables="selectedResourceTables" />
+      <AreaSelect @update:selected="handleSelectedAreas" :selectedAreaIds="selectedAreaIds" v-if="showAreaSelect" />
+      <ResourceSelect @update:selected="handleSelectedResources" :selectedResourceTables="selectedResourceTables" v-if="showResourceSelect" />
     </div>
     <div class="results">
       <div class="featured-results">
@@ -49,6 +49,7 @@ import TrailResult from "./TrailResult.vue";
 import AreaSelect from "./AreaSelect.vue";
 import ResourceSelect from "./ResourceSelect.vue";
 import { useSearchStore } from "../../stores/search";
+import {mapState} from "pinia";
 
 export default {
   components: {
@@ -64,53 +65,28 @@ export default {
     const searchStore = useSearchStore();
     return { searchStore };
   },
-  props: {
-    propShowHeader: {
-      type: Boolean,
-      default: true,
-    },
-    propShowInput: {
-      type: Boolean,
-      default: true,
-    },
-    propShowFilters: {
-      type: Boolean,
-      default: true,
-    },
-    propShowFeatured: {
-      type: Boolean,
-      default: false,
-    },
-    propShowAreaSelect: {
-      type: Boolean,
-      default: true,
-    },
-    propShowResourceSelect: {
-      type: Boolean,
-      default: true,
-    },
-    propSelectedAreaIds: {
-      type: Array,
-      default: () => [1, 3, 4, 5, 7],
-    },
-    propSelectedResourceTables: {
-      type: Array,
-      default: () => ['events', 'locations', 'restaurants', 'trails'],
-    },
-    // We may want to disable resources that have already been selected in the itinerary.
-    propDisabledResources: {
-      type: Array,
-      default: () => [],
-    },
-    // We may want to hide resources that have already been selected in the itinerary.
-    propHideResources: {
-      type: Array,
-      default: () => [],
-    },
-    propQuery: {
-      type: String,
-      default: '',
-    },
+  computed: {
+    ...mapState(useSearchStore, [
+      'title',
+      'isSearchOpen',
+      'query',
+      'selectedAreaIds',
+      'selectedResourceTables',
+      'showHeader',
+      'showInput',
+      'showFilters',
+      'showFeatured',
+      'showAreaSelect',
+      'showResourceSelect',
+      'disabledResources',
+      'hiddenResources',
+    ]),
+  },
+  data() {
+    return {
+      loading: false,
+      results: [],
+    };
   },
   watch: {
     query(newQuery) {
@@ -128,15 +104,6 @@ export default {
   mounted() {
     // this.selectedAreaIds = this.searchStore.selectedAreaIds;
     // this.selectedResourceTables = this.searchStore.selectedResourceTables;
-  },
-  data() {
-    return {
-      query: this.propQuery || '',
-      loading: false,
-      results: [],
-      selectedAreaIds: [...this.propSelectedAreaIds],
-      selectedResourceTables: [...this.propSelectedResourceTables],
-    };
   },
   methods: {
     debouncedQueryChange() {

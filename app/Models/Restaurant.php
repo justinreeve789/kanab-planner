@@ -19,14 +19,17 @@ class Restaurant extends Resource
 
     public function toSearchableArray()
     {
-        $searchableArray = $this->toArray();
-        $searchableArray['area_id'] = $this->location->area_id;
-        return $searchableArray;
+        return parent::toSearchableArray();
     }
 
     public function getAppends()
     {
         return array_merge(parent::getAppends(), $this->appends);
+    }
+
+    public function area()
+    {
+        return $this->hasOneThrough(Area::class, Location::class, 'id', 'id', 'location_id', 'area_id');
     }
 
     public function images()

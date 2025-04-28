@@ -11,7 +11,7 @@
       <div class="flex space-x-4 items-center mr-8 h-full">
         <RestaurantStats :restaurant="resource" :align="'right'" class="hidden lg:flex" />
         <label for="restaurant-list">
-          <span @click="select" class="icon btn btn-sm btn-ghost relative z-10 h-full">
+          <span @click="changeActivity" class="icon btn btn-sm btn-ghost relative z-10 h-full">
             <img src="/images/icons/edit.svg" alt="Change Activity">
           </span>
         </label>
@@ -39,16 +39,28 @@
 </template>
 
 <script>
+import ActivityButtons from "../components/ActivityButtons.vue";
 import RestaurantStats from "../stats/RestaurantStats.vue";
+import Side from "../panels/Side.vue";
+import {useSearchStore} from "../../stores/search";
 
 export default {
+  setup() {
+    const searchStore = useSearchStore();
+    return { searchStore };
+  },
   components: {
     ActivityButtons,
     RestaurantStats,
+    Side,
   },
   computed: {
   },
   methods: {
+    changeActivity() {
+      this.searchStore.adjustSettingsForResourceListForTable('restaurants');
+      this.searchStore.isSearchOpen = true;
+    },
   },
   created() {
   },
@@ -65,10 +77,4 @@ export default {
       resource: Object,
   },
 };
-</script>
-
-<script setup>
-import ActivityButtons from '../components/ActivityButtons.vue'
-import RestaurantStats from '../stats/RestaurantStats.vue'
-import Side from '../panels/Side.vue'
 </script>

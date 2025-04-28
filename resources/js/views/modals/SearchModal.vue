@@ -3,7 +3,7 @@
   <div class="modal max-h-[calc(100vh-64px)] md:max-h-full" id="search-modal">
     <div class="modal-container bg-white max-w-full w-full h-calc(100vh-64px) -translate-x-1/2 md:-translate-y-1/2 top-0 md:w-[90vw] md:h-[90vh] md:top-1/2 md:rounded-[15px] md:border-[5px] md:border-[#d0e0f0]">
       <div class="flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full">
-        <h2 class="text-black text-lg">Search</h2>
+        <h2 class="text-black text-lg">{{ title }}</h2>
         <div class="flex align-right">
           <button class="btn btn-sm btn-ghost hover:bg-cyan-100 text-black hidden md:flex">
             <label for="search-modal">
@@ -32,10 +32,29 @@ export default {
     const searchStore = useSearchStore();
     return { searchStore };
   },
-  mounted() {
+  computed: {
+    // selectedAreaIds() {
+    //   return [this.areaId];
+    // },
+    // selectedResourceTables() {
+    //   return [this.resourceTable];
+    // },
   },
   data() {
     return {
+      isSearchOpen: this.searchStore.isSearchOpen,
+      title: this.searchStore.title,
+      // query: this.searchStore.query,
+      // selectedAreaIds: this.searchStore.selectedAreaIds,
+      // selectedResourceTables: this.searchStore.selectedResourceTables,
+      // showHeader: this.searchStore.showHeader,
+      // showInput: this.searchStore.showInput,
+      // showFilters: this.searchStore.showFilters,
+      // showFeatured: this.searchStore.showFeatured,
+      // showAreaSelect: this.searchStore.showAreaSelect,
+      // showResourceSelect: this.searchStore.showResourceSelect,
+      // disabledResources: this.searchStore.disabledResources,
+      // hiddenResources: this.searchStore.hiddenResources,
     };
   },
   methods: {
