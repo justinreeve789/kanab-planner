@@ -8,7 +8,7 @@
       <h2 class="card-title text-xl font-bold">{{ resource.name }}</h2>
       <p class="text-gray-600 line-clamp-3">{{ resource.description }}</p>
       <div class="features mt-2 text-sm text-gray-500">
-        <p><strong>Features:</strong></p>
+        <p><strong>{{ formatDateFromTimestamp(resource.start_date) }}</strong></p>
       </div>
       <div class="card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end">
         <button class="btn btn-primary">View Map</button>
@@ -32,6 +32,12 @@ export default {
   },
   props: {
     resource: Object,
+  },
+  methods: {
+    formatDateFromTimestamp(timestamp) {
+      const date = new Date(timestamp * 1000);
+      return date.toLocaleString();
+    },
   },
 }
 </script>

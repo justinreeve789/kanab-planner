@@ -146,7 +146,7 @@ return [
                 'sortableAttributes'=> ['name'],
             ],
             'locations' => [
-                'filterableAttributes'=> ['name', 'source_type', 'area_id', 'address', 'city', 'state', 'zip', 'phone', 'email', 'url', 'is_usable', 'type'],
+                'filterableAttributes'=> ['name', 'source_type', 'area_id', 'address', 'city', 'state', 'zip', 'phone', 'email', 'url', 'is_usable', 'type', 'is_restaurant'],
                 'sortableAttributes'=> ['name'],
             ],
             'openai_prompts' => [

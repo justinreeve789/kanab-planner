@@ -13,23 +13,14 @@ class Location extends Resource
     use SearchableResource;
 
     protected $guarded = ['id'];
-    protected $hidden = ['raw_data', 'area_id'];
+    protected $hidden = ['raw_data'];
 
     public function toSearchableArray()
     {
-        return $this->toArray();
-//        return [
-//            'area_id' => $this->area_id,
-//            'name' => $this->name,
-//            'description' => $this->description,
-//            'address' => $this->address,
-//            'city' => $this->city,
-//            'state' => $this->state,
-//            'zip' => $this->zip,
-//            'phone' => $this->phone,
-//            'email' => $this->email,
-//            'url' => $this->url,
-//        ];
+        $searchableArray = $this->toArray();
+        $searchableArray['location_id'] = $this->id;
+        $searchableArray['is_restaurant'] = $this->restaurant ? 1 : 0;
+        return $searchableArray;
     }
 
     public function area()

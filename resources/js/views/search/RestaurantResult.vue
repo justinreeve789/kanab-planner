@@ -11,7 +11,7 @@
         <p><strong>Features:</strong></p>
       </div>
       <div class="card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end">
-        <button class="btn btn-primary">View Map</button>
+        <button class="btn btn-primary">View Menu</button>
         <button class="btn btn-secondary">Add to Itinerary</button>
       </div>
     </div>

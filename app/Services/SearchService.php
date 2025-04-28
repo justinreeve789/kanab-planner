@@ -51,12 +51,20 @@ class SearchService
         $results = [];
 
         foreach ($resourceTables as $resourceTable) {
+            $filter = 'area_id IN [' . $areaIdList . ']';
+            if ($resourceTable === ResourceEnum::EVENTS_TABLE) {
+                $filter .= ' AND start_date >= ' . time();
+            }
+            if ($resourceTable === ResourceEnum::LOCATIONS_TABLE) {
+                $filter .= ' AND is_restaurant = 0';
+            }
+
             $hits = $this->client->index($resourceTable)->search($query, [
                 'attributesToSearchOn' => ['name'],
                 'matchingStrategy' => 'frequency',
                 'rankingScoreThreshold' => $this->calculateRankingScoreThreshold($areaIds, $resourceTables),
                 'showRankingScore' => true,
-                'filter' => 'area_id IN [' . $areaIdList . ']',
+                'filter' => $filter,
             ])->getHits();
             if ($hits) {
                 foreach ($hits as $hit) {
@@ -90,7 +98,7 @@ class SearchService
 
         // Don't include events that have already passed.
         if (get_class($resource) === Event::class) {
-//            $queryObj->where('start_date', '>=', date('Y-m-d 00:00:00'));
+            $queryObj->where('start_date', '>=', date('Y-m-d 00:00:00'));
         }
         return $queryObj;
     }

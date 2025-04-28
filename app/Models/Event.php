@@ -12,14 +12,15 @@ class Event extends Resource
     use HasFactory;
     use SearchableResource;
 
-    protected $appends = ['type'];
     protected $guarded = ['id'];
-    protected $hidden = ['raw_data', 'location_id'];
+    protected $hidden = ['raw_data'];
 //    protected $with = ['dates', 'location'];
 
     public function toSearchableArray()
     {
         $searchableArray = $this->getAttributes();
+        $searchableArray['start_date'] = strtotime($this->start_date);
+        $searchableArray['end_date'] = strtotime($this->end_date);
         $searchableArray['area_id'] = $this->location->area_id;
         $searchableArray['type'] = $this->type;
         return $searchableArray;

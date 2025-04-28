@@ -12,7 +12,6 @@ class Restaurant extends Resource
     use ResourceScopes;
     use SearchableResource;
 
-    protected $appends = ['type'];
     protected $casts = ['deviation_percent' => 'float'];
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'location_id'];
@@ -20,10 +19,14 @@ class Restaurant extends Resource
 
     public function toSearchableArray()
     {
-        $searchableArray = $this->getAttributes();
+        $searchableArray = $this->toArray();
         $searchableArray['area_id'] = $this->location->area_id;
-        $searchableArray['type'] = $this->type;
         return $searchableArray;
+    }
+
+    public function getAppends()
+    {
+        return array_merge(parent::getAppends(), $this->appends);
     }
 
     public function images()

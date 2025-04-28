@@ -28,9 +28,9 @@
       <div class="standard-results">
         <div class="result-item -mx-6" v-for="resource in results" :key="result_id">
 <!--          <AccommodationResult v-if="resource.type === 'accommodation' && selectedResourceTables.includes('accommodations')" />-->
-<!--          <EventResult v-if="resource.type === 'event' && selectedResourceTables.includes('events')" />-->
-<!--          <LocationResult v-if="resource.type === 'location' && selectedResourceTables.includes('locations')" />-->
-<!--          <RestaurantResult v-if="resource.type == 'restaurant' && selectedResourceTables.includes('restaurants')" />-->
+          <EventResult v-if="resource.type === 'event' && selectedResourceTables.includes('events')" :resource="resource" />
+          <LocationResult v-if="resource.type === 'location' && selectedResourceTables.includes('locations')" :resource="resource" />
+          <RestaurantResult v-if="resource.type === 'restaurant' && selectedResourceTables.includes('restaurants')" :resource="resource" />
           <TrailResult v-if="resource.type === 'trail' && selectedResourceTables.includes('trails')" :resource="resource" />
         </div>
       </div>

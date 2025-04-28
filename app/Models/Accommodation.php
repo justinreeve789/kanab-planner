@@ -16,13 +16,18 @@ class Accommodation extends Resource
 
     public function toSearchableArray()
     {
-        $searchableArray = $this->getAttributes();
-//        $searchableArray['area_id'] = $this->location->area_id;
-        $searchableArray['type'] = $this->type;
+        $searchableArray = $this->toArray();
+        $searchableArray['area_id'] = $this->area_id;
         return $searchableArray;
     }
 
-    public function images(): HasMany {
+    public function getAreaIdAttribute()
+    {
+        return Area::KANAB;
+    }
+
+    public function images(): HasMany
+    {
         return $this->hasMany(AccommodationImage::class, 'accommodation_id', 'id');
     }
 }
