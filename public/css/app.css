@@ -3903,6 +3903,9 @@ video {
 .border-b {
   border-bottom-width: 1px;
 }
+.border-t-0 {
+  border-top-width: 0px;
+}
 .border-solid {
   border-style: solid;
 }
@@ -3943,6 +3946,10 @@ video {
 }
 .border-transparent {
   border-color: transparent;
+}
+.border-red-300 {
+  --tw-border-opacity: 1;
+  border-color: rgb(252 165 165 / var(--tw-border-opacity));
 }
 .bg-base-100 {
   background-color: var(--color-base-100);

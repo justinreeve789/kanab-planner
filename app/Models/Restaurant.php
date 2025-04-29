@@ -19,7 +19,9 @@ class Restaurant extends Resource
 
     public function toSearchableArray()
     {
-        return parent::toSearchableArray();
+        $searchableArray = parent::toSearchableArray();
+        $searchableArray['area_id'] = $this->area->id;
+        return $searchableArray;
     }
 
     public function getAppends()

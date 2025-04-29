@@ -11,8 +11,8 @@
           <p v-if="phrase"><em>{{ phrase }}</em></p>
         </div>
       </div>
-      <div class="w-[calc(100%+16px)] -ml-2 -mb-4 lg:w-1/3 mt-4 lg:pl-4 lg:-mt-2 lg:-mr-2" v-if="resource.location.images">
-        <Side :resource="restaurant" :type="'restaurant'" :images="resource.location.images" />
+      <div class="w-[calc(100%+16px)] -ml-2 -mb-4 lg:w-1/3 mt-4 lg:pl-4 lg:-mt-2 lg:-mr-2" v-if="resource.images">
+        <Side :resource="restaurant" :type="'restaurant'" :images="resource.images" />
       </div>
     </div>
   </div>

@@ -23,6 +23,7 @@ abstract class Resource extends Model
     const DEFAULT_AVERAGE_HOURS = 2;
 
     protected $appends = ['description_short', 'adventurousness', 'solitariness', 'strenuousness', 'type'];
+    protected $with = ['area'];
 //    protected $with = ['data', 'images', 'text'];
 
     /**

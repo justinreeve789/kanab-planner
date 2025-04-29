@@ -26,6 +26,11 @@ class Accommodation extends Resource
         return Area::KANAB;
     }
 
+    public function area()
+    {
+        return $this->hasOneThrough(Area::class, Location::class, 'id', 'id', 'location_id', 'area_id');
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(AccommodationImage::class, 'accommodation_id', 'id');

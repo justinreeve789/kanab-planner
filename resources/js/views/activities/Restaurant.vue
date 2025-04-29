@@ -44,7 +44,7 @@ export default {
     changeActivity() {
       this.searchStore.adjustSettingsForResourceListForTable('restaurants');
       this.searchStore.title += ' @ ' + this.resource.area.short_name;
-      this.searchStore.selectedAreaIds = [this.resource.area_id];
+      this.searchStore.selectedAreaIds = [this.resource.area.id];
       this.searchStore.showAreaSelect = false;
       this.searchStore.disabledResources = [{ type: 'restaurant', id: this.resource.id }];
       this.searchStore.isSearchOpen = true;
@@ -56,7 +56,6 @@ export default {
     return {
       expanded: false,
       restaurant: this.activity.data,
-      unique: this.$generateUnique(),
     }
   },
   props: {

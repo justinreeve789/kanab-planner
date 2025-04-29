@@ -24,6 +24,7 @@
 
 <script>
 import {useAssistantStore} from '../../stores/assistant';
+import {useAuthStore} from "../../stores/auth";
 import {usePreferencesStore} from "../../stores/preferences";
 import {useSearchStore} from "../../stores/search";
 
@@ -31,9 +32,10 @@ export default {
   emits: ['openAssistant'],
   setup() {
     const assistantStore = useAssistantStore();
+    const authStore = useAuthStore();
     const preferencesStore = usePreferencesStore();
     const searchStore = useSearchStore();
-    return { assistantStore, preferencesStore, searchStore };
+    return { assistantStore, authStore, preferencesStore, searchStore };
   },
   data() {
     return {
@@ -41,7 +43,7 @@ export default {
   },
   methods: {
     isItineraryOpen() {
-      return !this.assistantStore.isAssistantOpen && !this.preferencesStore.isPreferencesOpen && !this.searchStore.isSearchOpen;
+      return !this.assistantStore.isAssistantOpen && !this.preferencesStore.isPreferencesOpen && !this.searchStore.isSearchOpen && !this.authStore.isLoginOpen;
     },
     isAssistantOpen() {
       return this.assistantStore.isAssistantOpen;
@@ -54,23 +56,27 @@ export default {
     },
     openItinerary() {
       this.assistantStore.isAssistantOpen = false;
+      this.authStore.isLoginOpen = false;
       this.preferencesStore.isPreferencesOpen = false;
       this.searchStore.isSearchOpen = false;
     },
     openAssistant() {
       this.assistantStore.isAssistantOpen = true;
+      this.authStore.isLoginOpen = false;
       this.preferencesStore.isPreferencesOpen = false;
       this.searchStore.isSearchOpen = false;
     },
     openPreferences() {
       this.preferencesStore.isPreferencesOpen = true;
+      this.authStore.isLoginOpen = false;
       this.assistantStore.isAssistantOpen = false;
       this.searchStore.isSearchOpen = false;
     },
     openSearch() {
       this.searchStore.adjustSettingsForGeneralSearch();
-      this.preferencesStore.isPreferencesOpen = false;
       this.assistantStore.isAssistantOpen = false;
+      this.authStore.isLoginOpen = false;
+      this.preferencesStore.isPreferencesOpen = false;
       this.searchStore.isSearchOpen = true;
     },
     toggleAssistant() {

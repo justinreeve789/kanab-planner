@@ -24116,7 +24116,7 @@ __webpack_require__.r(__webpack_exports__);
     changeActivity: function changeActivity() {
       this.searchStore.adjustSettingsForResourceListForTable('restaurants');
       this.searchStore.title += ' @ ' + this.resource.area.short_name;
-      this.searchStore.selectedAreaIds = [this.resource.area_id];
+      this.searchStore.selectedAreaIds = [this.resource.area.id];
       this.searchStore.showAreaSelect = false;
       this.searchStore.disabledResources = [{
         type: 'restaurant',
@@ -24129,8 +24129,7 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       expanded: false,
-      restaurant: this.activity.data,
-      unique: this.$generateUnique()
+      restaurant: this.activity.data
     };
   },
   props: {
@@ -25284,8 +25283,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _stores_assistant__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../stores/assistant */ "./resources/js/stores/assistant.js");
-/* harmony import */ var _stores_preferences__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../stores/preferences */ "./resources/js/stores/preferences.js");
-/* harmony import */ var _stores_search__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../stores/search */ "./resources/js/stores/search.js");
+/* harmony import */ var _stores_auth__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../stores/auth */ "./resources/js/stores/auth.js");
+/* harmony import */ var _stores_preferences__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../stores/preferences */ "./resources/js/stores/preferences.js");
+/* harmony import */ var _stores_search__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../stores/search */ "./resources/js/stores/search.js");
+
 
 
 
@@ -25293,10 +25294,12 @@ __webpack_require__.r(__webpack_exports__);
   emits: ['openAssistant'],
   setup: function setup() {
     var assistantStore = (0,_stores_assistant__WEBPACK_IMPORTED_MODULE_0__.useAssistantStore)();
-    var preferencesStore = (0,_stores_preferences__WEBPACK_IMPORTED_MODULE_1__.usePreferencesStore)();
-    var searchStore = (0,_stores_search__WEBPACK_IMPORTED_MODULE_2__.useSearchStore)();
+    var authStore = (0,_stores_auth__WEBPACK_IMPORTED_MODULE_1__.useAuthStore)();
+    var preferencesStore = (0,_stores_preferences__WEBPACK_IMPORTED_MODULE_2__.usePreferencesStore)();
+    var searchStore = (0,_stores_search__WEBPACK_IMPORTED_MODULE_3__.useSearchStore)();
     return {
       assistantStore: assistantStore,
+      authStore: authStore,
       preferencesStore: preferencesStore,
       searchStore: searchStore
     };
@@ -25306,7 +25309,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     isItineraryOpen: function isItineraryOpen() {
-      return !this.assistantStore.isAssistantOpen && !this.preferencesStore.isPreferencesOpen && !this.searchStore.isSearchOpen;
+      return !this.assistantStore.isAssistantOpen && !this.preferencesStore.isPreferencesOpen && !this.searchStore.isSearchOpen && !this.authStore.isLoginOpen;
     },
     isAssistantOpen: function isAssistantOpen() {
       return this.assistantStore.isAssistantOpen;
@@ -25319,23 +25322,27 @@ __webpack_require__.r(__webpack_exports__);
     },
     openItinerary: function openItinerary() {
       this.assistantStore.isAssistantOpen = false;
+      this.authStore.isLoginOpen = false;
       this.preferencesStore.isPreferencesOpen = false;
       this.searchStore.isSearchOpen = false;
     },
     openAssistant: function openAssistant() {
       this.assistantStore.isAssistantOpen = true;
+      this.authStore.isLoginOpen = false;
       this.preferencesStore.isPreferencesOpen = false;
       this.searchStore.isSearchOpen = false;
     },
     openPreferences: function openPreferences() {
       this.preferencesStore.isPreferencesOpen = true;
+      this.authStore.isLoginOpen = false;
       this.assistantStore.isAssistantOpen = false;
       this.searchStore.isSearchOpen = false;
     },
     openSearch: function openSearch() {
       this.searchStore.adjustSettingsForGeneralSearch();
-      this.preferencesStore.isPreferencesOpen = false;
       this.assistantStore.isAssistantOpen = false;
+      this.authStore.isLoginOpen = false;
+      this.preferencesStore.isPreferencesOpen = false;
       this.searchStore.isSearchOpen = true;
     },
     toggleAssistant: function toggleAssistant() {
@@ -26972,10 +26979,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     type: "restaurant",
     resource_table: 'restaurants',
     resource_id: $props.resource.id
-  }, null, 8 /* PROPS */, ["resource_id"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [$props.resource.description_alt ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_alt), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.resource.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), $props.resource.location.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Side, {
+  }, null, 8 /* PROPS */, ["resource_id"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [$props.resource.description_alt ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_alt), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.resource.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), $props.resource.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Side, {
     resource: _ctx.restaurant,
     type: 'restaurant',
-    images: $props.resource.location.images
+    images: $props.resource.images
   }, null, 8 /* PROPS */, ["resource", "images"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]);
 }
 
@@ -28214,7 +28221,8 @@ var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
   "class": "badge"
 }, "New", -1 /* HOISTED */);
 var _hoisted_22 = {
-  key: 0
+  key: 0,
+  "class": ""
 };
 var _hoisted_23 = {
   key: 1
@@ -28554,7 +28562,7 @@ var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
   "class": "hidden md:flex"
 }, "Add", -1 /* HOISTED */);
 var _hoisted_12 = {
-  "class": "collapse-content text-sm bg-gradient-to-r from-white to-cyan-100"
+  "class": "collapse-content border border-solid border-gray-300 border-t-0 text-sm bg-gradient-to-r from-white to-cyan-100"
 };
 var _hoisted_13 = {
   "class": "card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg"
@@ -28623,7 +28631,7 @@ var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
   "class": "hidden md:flex"
 }, "Add", -1 /* HOISTED */);
 var _hoisted_11 = {
-  "class": "collapse-content text-sm bg-gradient-to-r from-white to-red-50"
+  "class": "collapse-content border border-solid border-red-300 border-t-0 text-sm bg-gradient-to-r from-white to-red-50"
 };
 var _hoisted_12 = {
   "class": "card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg"
@@ -28762,7 +28770,7 @@ var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
   "class": "hidden md:flex"
 }, "Add", -1 /* HOISTED */);
 var _hoisted_12 = {
-  "class": "collapse-content"
+  "class": "collapse-content p-0 border border-solid border-green-300 border-t-0"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_RestaurantContent = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("RestaurantContent");
@@ -28931,7 +28939,7 @@ var _hoisted_12 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
   "class": "hidden md:flex"
 }, "Add", -1 /* HOISTED */);
 var _hoisted_13 = {
-  "class": "collapse-content p-0"
+  "class": "collapse-content p-0 border border-solid border-orange-300 border-t-0"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_TrailStats = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("TrailStats");
@@ -47093,22 +47101,6 @@ var map = {
 		"./resources/js/views/components/Weather.vue",
 		"resources_js_views_components_Weather_vue"
 	],
-	"./lists/RestaurantList": [
-		"./resources/js/views/lists/RestaurantList.vue",
-		"resources_js_views_lists_RestaurantList_vue"
-	],
-	"./lists/RestaurantList.vue": [
-		"./resources/js/views/lists/RestaurantList.vue",
-		"resources_js_views_lists_RestaurantList_vue"
-	],
-	"./lists/TrailList": [
-		"./resources/js/views/lists/TrailList.vue",
-		"resources_js_views_lists_TrailList_vue"
-	],
-	"./lists/TrailList.vue": [
-		"./resources/js/views/lists/TrailList.vue",
-		"resources_js_views_lists_TrailList_vue"
-	],
 	"./login/Login": [
 		"./resources/js/views/login/Login.vue"
 	],
@@ -50109,7 +50101,7 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames not based on template
-/******/ 			if ({"node_modules_leaflet_dist_images_marker-icon-2x_png":1,"node_modules_leaflet_dist_images_marker-shadow_png":1,"node_modules_leaflet_dist_leaflet-src_esm_js":1,"node_modules_leaflet_dist_leaflet-src_js":1,"resources_js_views_Backdrop_vue":1,"resources_js_views_Dates_vue":1,"resources_js_views_buttons_Blank_vue":1,"resources_js_views_components_DatePicker_vue":1,"resources_js_views_components_Weather_vue":1,"resources_js_views_lists_RestaurantList_vue":1,"resources_js_views_lists_TrailList_vue":1,"resources_js_views_modals_ActivityStatsModal_vue":1,"resources_js_views_modals_ResourceListModal_vue":1,"resources_js_views_stats_ActivityStats_vue":1}[chunkId]) return "js/" + chunkId + ".js";
+/******/ 			if ({"node_modules_leaflet_dist_images_marker-icon-2x_png":1,"node_modules_leaflet_dist_images_marker-shadow_png":1,"node_modules_leaflet_dist_leaflet-src_esm_js":1,"node_modules_leaflet_dist_leaflet-src_js":1,"resources_js_views_Backdrop_vue":1,"resources_js_views_Dates_vue":1,"resources_js_views_buttons_Blank_vue":1,"resources_js_views_components_DatePicker_vue":1,"resources_js_views_components_Weather_vue":1,"resources_js_views_modals_ActivityStatsModal_vue":1,"resources_js_views_modals_ResourceListModal_vue":1,"resources_js_views_stats_ActivityStats_vue":1}[chunkId]) return "js/" + chunkId + ".js";
 /******/ 			// return url for filenames based on template
 /******/ 			return undefined;
 /******/ 		};

@@ -22,7 +22,7 @@
         </button>
       </div>
     </div>
-    <div class="collapse-content text-sm bg-gradient-to-r from-white to-red-50">
+    <div class="collapse-content border border-solid border-red-300 border-t-0 text-sm bg-gradient-to-r from-white to-red-50">
       <div class="card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg">
         <p># miles from Kanab</p>
         <p class="text-gray-600 line-clamp-3">{{ resource.description }}</p>

@@ -22,7 +22,7 @@
         </button>
       </div>
     </div>
-    <div class="collapse-content">
+    <div class="collapse-content p-0 border border-solid border-green-300 border-t-0">
       <RestaurantContent :resource="resource" />
     </div>
   </div>

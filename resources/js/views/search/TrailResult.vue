@@ -26,7 +26,7 @@
         </button>
       </div>
     </div>
-    <div class="collapse-content p-0">
+    <div class="collapse-content p-0 border border-solid border-orange-300 border-t-0">
       <TrailContent :resource="resource" />
     </div>
 <!--      text-sm bg-gradient-to-r from-white to-red-50">-->
