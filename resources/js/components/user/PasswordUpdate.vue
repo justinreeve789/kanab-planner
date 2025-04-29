@@ -38,7 +38,7 @@
 
 <script>
 import { mapActions } from 'pinia'
-import { useAuthStore } from '@/stores/auth.js'
+import {useAuthStore} from "../../stores/auth";
 
 export default {
   data() {

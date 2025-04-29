@@ -1960,6 +1960,60 @@ video {
   padding-bottom: 1rem;
   transition: padding 0.2sease-out, background-color 0.2sease-out;
 }
+.divider {
+  display: flex;
+  height: calc(0.25rem * 4);
+  flex-direction: row;
+  align-items: center;
+  align-self: stretch;
+  white-space: nowrap;
+  margin: var(--divider-m, 1rem 0);
+}
+.divider:before, .divider:after {
+  content: "";
+  height: calc(0.25rem * 0.5);
+  width: 100%;
+  flex-grow: 1;
+  background-color: color-mix(in oklab, var(--color-base-content) 10%, transparent);
+}
+@media print {
+
+  .divider:before, .divider:after {
+    border: 0.5px solid;
+  }
+}
+.divider:not(:empty) {
+  gap: calc(0.25rem * 4);
+}
+.divider-horizontal.divider {
+  height: auto;
+  width: calc(0.25rem * 4);
+  flex-direction: column;
+}
+.divider-horizontal.divider:before {
+  height: 100%;
+  width: calc(0.25rem * 0.5);
+}
+.divider-horizontal.divider:after {
+  height: 100%;
+  width: calc(0.25rem * 0.5);
+}
+.divider-vertical.divider {
+  height: calc(0.25rem * 4);
+  width: auto;
+  flex-direction: row;
+}
+.divider-vertical.divider:before {
+  height: calc(0.25rem * 0.5);
+  width: 100%;
+}
+.divider-vertical.divider:after {
+  height: calc(0.25rem * 0.5);
+  width: 100%;
+}
+.divider-primary:before, .divider-primary:after {
+  background-color: var(--color-primary);
+}
 .checkbox {
   border: var(--border) solid var(--input-color, color-mix(in oklab, var(--color-base-content) 20%, #0000));
   position: relative;
@@ -3409,6 +3463,9 @@ video {
 .order-3 {
   order: 3;
 }
+.m-0 {
+  margin: 0px;
+}
 .-mx-6 {
   margin-left: -1.5rem;
   margin-right: -1.5rem;
@@ -3428,9 +3485,6 @@ video {
 .my-4 {
   margin-top: 1rem;
   margin-bottom: 1rem;
-}
-.-mb-2 {
-  margin-bottom: -0.5rem;
 }
 .-mb-4 {
   margin-bottom: -1rem;
@@ -3552,9 +3606,6 @@ video {
 .hidden {
   display: none;
 }
-.h-10 {
-  height: 2.5rem;
-}
 .h-16 {
   height: 4rem;
 }
@@ -3581,6 +3632,9 @@ video {
 }
 .h-\[1em\] {
   height: 1em;
+}
+.h-\[85vh\] {
+  height: 85vh;
 }
 .h-\[calc\(100vh-64px\)\] {
   height: calc(100vh - 64px);
@@ -3615,9 +3669,6 @@ video {
 .min-h-\[150px\] {
   min-height: 150px;
 }
-.min-h-full {
-  min-height: 100%;
-}
 .min-h-screen {
   min-height: 100vh;
 }
@@ -3626,9 +3677,6 @@ video {
 }
 .w-10 {
   width: 2.5rem;
-}
-.w-11\/12 {
-  width: 91.666667%;
 }
 .w-12 {
   width: 3rem;
@@ -3776,6 +3824,9 @@ video {
 }
 .gap-4 {
   gap: 1rem;
+}
+.gap-8 {
+  gap: 2rem;
 }
 .space-x-1 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
@@ -4142,10 +4193,6 @@ video {
   padding-top: 0.375rem;
   padding-bottom: 0.375rem;
 }
-.py-12 {
-  padding-top: 3rem;
-  padding-bottom: 3rem;
-}
 .py-2 {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
@@ -4172,8 +4219,8 @@ video {
 .pb-4 {
   padding-bottom: 1rem;
 }
-.pb-\[80px\] {
-  padding-bottom: 80px;
+.pb-\[85px\] {
+  padding-bottom: 85px;
 }
 .pl-4 {
   padding-left: 1rem;
@@ -4218,10 +4265,6 @@ video {
   font-size: 1.5rem;
   line-height: 2rem;
 }
-.text-2xl\/9 {
-  font-size: 1.5rem;
-  line-height: 2.25rem;
-}
 .text-3xl {
   font-size: 1.875rem;
   line-height: 2.25rem;
@@ -4241,10 +4284,6 @@ video {
 .text-sm {
   font-size: 0.875rem;
   line-height: 1.25rem;
-}
-.text-sm\/6 {
-  font-size: 0.875rem;
-  line-height: 1.5rem;
 }
 .text-xl {
   font-size: 1.25rem;
@@ -4367,9 +4406,6 @@ video {
 }
 .outline-1 {
   outline-width: 1px;
-}
-.-outline-offset-1 {
-  outline-offset: -1px;
 }
 .outline-gray-300 {
   outline-color: #d1d5db;
@@ -5021,6 +5057,132 @@ calendar-month::part(td) {
     width: 100%;
   }
 }
+.bg-bubbles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+
+.bg-bubbles li {
+  position: absolute;
+  list-style: none;
+  display: block;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.15);
+  bottom: -160px;
+  animation: square 25s infinite;
+  transition-timing-function: linear;
+}
+
+.bg-bubbles li:nth-child(1) {
+  left: 10%;
+}
+
+.bg-bubbles li:nth-child(2) {
+  left: 20%;
+  width: 80px;
+  height: 80px;
+  animation-delay: 2s;
+  animation-duration: 17s;
+}
+
+.bg-bubbles li:nth-child(3) {
+  left: 25%;
+  animation-delay: 4s;
+}
+
+.bg-bubbles li:nth-child(4) {
+  left: 40%;
+  width: 60px;
+  height: 60px;
+  animation-duration: 22s;
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.bg-bubbles li:nth-child(5) {
+  left: 70%;
+}
+
+.bg-bubbles li:nth-child(6) {
+  left: 80%;
+  width: 120px;
+  height: 120px;
+  animation-delay: 3s;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.bg-bubbles li:nth-child(7) {
+  left: 32%;
+  width: 160px;
+  height: 160px;
+  animation-delay: 7s;
+}
+
+.bg-bubbles li:nth-child(8) {
+  left: 55%;
+  width: 20px;
+  height: 20px;
+  animation-delay: 15s;
+  animation-duration: 40s;
+}
+
+.bg-bubbles li:nth-child(9) {
+  left: 25%;
+  width: 10px;
+  height: 10px;
+  animation-delay: 2s;
+  animation-duration: 40s;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.bg-bubbles li:nth-child(10) {
+  left: 90%;
+  width: 160px;
+  height: 160px;
+  animation-delay: 11s;
+}
+
+@keyframes square {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100vh) rotate(600deg);
+  }
+}
+
+@media (orientation: landscape) {
+
+  .landscape\:divider-horizontal {
+    --divider-m: 0 1rem;
+  }
+
+  .landscape\:divider-horizontal.divider {
+    height: auto;
+    width: calc(0.25rem * 4);
+    flex-direction: column;
+  }
+
+  .landscape\:divider-horizontal.divider:before {
+    height: 100%;
+    width: calc(0.25rem * 0.5);
+  }
+
+  .landscape\:divider-horizontal.divider:after {
+    height: 100%;
+    width: calc(0.25rem * 0.5);
+  }
+}
 
 .placeholder\:text-gray-400::-moz-placeholder {
   --tw-text-opacity: 1;
@@ -5100,11 +5262,6 @@ calendar-month::part(td) {
   color: rgb(17 24 39 / var(--tw-text-opacity));
 }
 
-.hover\:text-indigo-500:hover {
-  --tw-text-opacity: 1;
-  color: rgb(99 102 241 / var(--tw-text-opacity));
-}
-
 .hover\:no-underline:hover {
   text-decoration-line: none;
 }
@@ -5140,10 +5297,6 @@ calendar-month::part(td) {
 
 .focus\:outline-2:focus {
   outline-width: 2px;
-}
-
-.focus\:-outline-offset-2:focus {
-  outline-offset: -2px;
 }
 
 .focus\:outline-indigo-600:focus {
@@ -5199,14 +5352,6 @@ calendar-month::part(td) {
 
 .focus\:ring-opacity-50:focus {
   --tw-ring-opacity: 0.5;
-}
-
-.focus-visible\:outline-2:focus-visible {
-  outline-width: 2px;
-}
-
-.focus-visible\:outline-offset-2:focus-visible {
-  outline-offset: 2px;
 }
 
 .focus-visible\:outline-indigo-600:focus-visible {
@@ -5270,11 +5415,6 @@ calendar-month::part(td) {
 
   .sm\:order-3 {
     order: 3;
-  }
-
-  .sm\:mx-auto {
-    margin-left: auto;
-    margin-right: auto;
   }
 
   .sm\:mb-0 {
@@ -5349,9 +5489,9 @@ calendar-month::part(td) {
     padding-top: 0.5rem;
   }
 
-  .sm\:text-sm\/6 {
+  .sm\:text-sm {
     font-size: 0.875rem;
-    line-height: 1.5rem;
+    line-height: 1.25rem;
   }
 }
 
@@ -5678,10 +5818,6 @@ calendar-month::part(td) {
 
 @media (min-width: 1280px) {
 
-  .xl\:w-9\/12 {
-    width: 75%;
-  }
-
   .xl\:opacity-75 {
     opacity: 0.75;
   }
@@ -5719,5 +5855,20 @@ calendar-month::part(td) {
 
   .\32xl\:justify-between {
     justify-content: space-between;
+  }
+}
+
+@media (orientation: landscape) {
+
+  .landscape\:hidden {
+    display: none;
+  }
+
+  .landscape\:flex-row {
+    flex-direction: row;
+  }
+
+  .landscape\:gap-16 {
+    gap: 4rem;
   }
 }

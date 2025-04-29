@@ -25,11 +25,11 @@
       </div>
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal menu-md px-1">
-          <li><a>Accommodations</a></li>
-          <li><a>Events</a></li>
-          <li><a>Locations</a></li>
-          <li><a>Restaurants</a></li>
-          <li><a>Trails</a></li>
+          <li><a @click="openAccommodations">Accommodations</a></li>
+          <li><a @click="openEvents">Events</a></li>
+          <li><a @click="openLocations">Locations</a></li>
+          <li><a @click="openRestaurants">Restaurants</a></li>
+          <li><a @click="openTrails">Trails</a></li>
         </ul>
       </div>
       <div class="navbar-end">
@@ -56,13 +56,10 @@
             </div>
           </div>
           <ul tabindex="0" class="menu menu-lg dropdown-content bg-base-100 bg-neutral text-neutral-content rounded-b-box z-1 mt-3 w-52 p-2 shadow">
-            <li>
-              <a class="justify-between">
-                Profile
-                <span class="badge">New</span>
-              </a>
-            </li>
-            <li><a>Logout</a></li>
+            <li><a class="justify-between" @click="openItinerary">Itinerary<span class="badge">New</span></a></li>
+            <li v-if="!getUser"><a @click="openLogin">Login</a></li>
+            <li v-if="getUser"><a>Profile</a></li>
+            <li v-if="getUser"><a>Logout</a></li>
           </ul>
         </div>
       </div>
@@ -72,16 +69,17 @@
 </template>
 
 <script>
-import { ref } from "vue";
-import { usePreferencesStore } from "../../stores/preferences";
 import CallyCalendar from "../components/CallyCalendar.vue";
-import {useSearchStore} from "../../stores/search";
+import { useAuthStore } from "../../stores/auth";
+import { usePreferencesStore } from "../../stores/preferences";
+import { useSearchStore } from "../../stores/search";
 
 export default {
   setup() {
+    const authStore = useAuthStore();
     const preferencesStore = usePreferencesStore();
     const searchStore = useSearchStore();
-    return { preferencesStore, searchStore };
+    return { authStore, preferencesStore, searchStore };
   },
   components: {
     CallyCalendar,
@@ -103,6 +101,11 @@ export default {
       },
     };
   },
+  computed: {
+    getUser() {
+      return this.authStore.user;
+    },
+  },
   methods: {
     getFeatureFlags() {
     },
@@ -114,9 +117,15 @@ export default {
       this.searchStore.adjustSettingsForPage('events');
       this.searchStore.isSearchOpen = true;
     },
+    openItinerary() {
+      this.authStore.isLoginOpen = false;
+    },
     openLocations() {
       this.searchStore.adjustSettingsForPage('locations');
       this.searchStore.isSearchOpen = true;
+    },
+    openLogin() {
+      this.authStore.isLoginOpen = true;
     },
     openRestaurants() {
       this.searchStore.adjustSettingsForPage('restaurants');

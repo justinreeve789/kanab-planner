@@ -28,7 +28,7 @@
 
 <script>
 import { mapActions, mapStores } from 'pinia'
-import { useAuthStore } from '@/stores/auth.js'
+import {useAuthStore} from "../stores/auth";
 
 export default {
   computed: {
