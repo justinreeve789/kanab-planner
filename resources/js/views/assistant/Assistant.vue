@@ -44,7 +44,7 @@
           @keyup.enter="sendMessage"
           type="text"
           placeholder="Type a message…"
-          class="input input-bordered input-md input-info bg-white mt-2 w-full"
+          class="input input-bordered input-md input-info bg-white text-black mt-2 w-full"
         />
       </div>
     </div>

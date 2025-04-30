@@ -27247,7 +27247,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }, ["enter"])),
     type: "text",
     placeholder: "Type a message…",
-    "class": "input input-bordered input-md input-info bg-white mt-2 w-full"
+    "class": "input input-bordered input-md input-info bg-white text-black mt-2 w-full"
   }, null, 544 /* HYDRATE_EVENTS, NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.message]])])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
 }
 
