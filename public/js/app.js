@@ -27298,7 +27298,7 @@ var _hoisted_5 = {
   "class": "flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full"
 };
 var _hoisted_6 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
-  "class": "text-lg"
+  "class": "text-black text-lg"
 }, "Virtual Assistant", -1 /* HOISTED */);
 var _hoisted_7 = {
   "class": "flex align-right"

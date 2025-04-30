@@ -9,7 +9,7 @@
     <div v-if="store.isAssistantOpen"
          class="fixed bottom-[64px] right-0 top-0 left-0 md:right-4 md:top-auto md:left-auto md:bottom-20 w-full md:w-96 md:max-w-[90vw] bg-base-100 md:border md:rounded-xl md:shadow-2xl p-0 z-50">
       <div class="flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full">
-        <h2 class="text-lg">Virtual Assistant</h2>
+        <h2 class="text-black text-lg">Virtual Assistant</h2>
         <div class="flex align-right">
           <button class="tooltip tooltip-bottom btn btn-sm btn-ghost hover:bg-cyan-100" @click="showHistory" data-tip="Show chat history">
             <img src="images/icons/history.svg"/>
