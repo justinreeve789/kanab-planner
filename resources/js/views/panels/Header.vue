@@ -56,7 +56,7 @@
             </div>
           </div>
           <ul tabindex="0" class="menu menu-lg dropdown-content bg-base-100 bg-neutral text-neutral-content rounded-b-box z-1 mt-3 w-52 p-2 shadow">
-            <li><a class="justify-between" @click="openItinerary">Itinerary<span class="badge">New</span></a></li>
+            <li class="hidden md:inline"><a class="justify-between" @click="openItinerary">Itinerary<span class="badge">New</span></a></li>
             <li class="" v-if="!getUser"><a @click="openLogin">Login</a></li>
             <li v-if="getUser"><a>Profile</a></li>
             <li v-if="getUser"><a>Logout</a></li>

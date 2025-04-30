@@ -85,7 +85,6 @@ export default {
 
 <script setup>
 import {ref, onMounted, onUnmounted, defineProps, watch} from 'vue';
-import {useListStore} from '../../stores/list.js';
 import ActivityButtons from '../components/ActivityButtons.vue'
 import MapModal from '../modals/MapModal.vue'
 import Side from '../panels/Side.vue'

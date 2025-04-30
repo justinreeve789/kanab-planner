@@ -8,6 +8,7 @@
   <Assistant />
   <PreferencesModal />
   <SearchModal />
+  <MapModal />
 </template>
 
 <script>
@@ -22,6 +23,7 @@ import SearchModal from "./modals/SearchModal.vue";
 import {useAuthStore} from "../stores/auth";
 import {useFeatureStore} from "../stores/feature";
 import Login from "./login/Login.vue";
+import MapModal from "./modals/MapModal.vue";
 
 export default {
   components: {
@@ -34,6 +36,7 @@ export default {
     Itinerary,
     LoginModal,
     QuestionnaireModal,
+    MapModal,
   },
   props: {
     itineraryId: {

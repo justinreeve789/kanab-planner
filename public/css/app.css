@@ -1142,64 +1142,6 @@ video {
   overflow-x: auto;
   border-radius: var(--radius-box);
 }
-.radio {
-  position: relative;
-  flex-shrink: 0;
-  cursor: pointer;
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
-  border-radius: calc(infinity * 1px);
-  padding: calc(0.25rem * 1);
-  vertical-align: middle;
-  border: var(--border) solid var(--input-color, color-mix(in srgb, currentColor 20%, #0000));
-  box-shadow: 0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset;
-  --size: calc(var(--size-selector, 0.25rem) * 6);
-  width: var(--size);
-  height: var(--size);
-  color: var(--input-color, currentColor);
-}
-.radio:before {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: calc(infinity * 1px);
-  --tw-content: "";
-  content: var(--tw-content);
-  background-size: auto, calc(var(--noise) * 100%);
-  background-image: none, var(--fx-noise);
-}
-.radio:focus-visible {
-  outline: 2px solid currentColor;
-}
-.radio:checked, .radio[aria-checked="true"] {
-  animation: radio 0.2s ease-out;
-  border-color: currentColor;
-  background-color: var(--color-base-100);
-}
-.radio:checked:before, .radio[aria-checked="true"]:before {
-  background-color: currentColor;
-  box-shadow: 0 -1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset, 0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1));
-}
-@media (forced-colors: active) {
-
-  .radio:checked:before, .radio[aria-checked="true"]:before {
-    outline-style: var(--tw-outline-style);
-    outline-width: 1px;
-    outline-offset: calc(1px * -1);
-  }
-}
-@media print {
-
-  .radio:checked:before, .radio[aria-checked="true"]:before {
-    outline: 0.25rem solid;
-    outline-offset: -1rem;
-  }
-}
-.radio:disabled {
-  cursor: not-allowed;
-  opacity: 20%;
-}
 @keyframes radio {
 
   0% {
@@ -3741,9 +3683,6 @@ video {
 .flex-1 {
   flex: 1 1 0%;
 }
-.flex-auto {
-  flex: 1 1 auto;
-}
 .shrink-0 {
   flex-shrink: 0;
 }
@@ -3944,12 +3883,12 @@ video {
   --tw-border-opacity: 1;
   border-color: rgb(253 186 116 / var(--tw-border-opacity));
 }
-.border-transparent {
-  border-color: transparent;
-}
 .border-red-300 {
   --tw-border-opacity: 1;
   border-color: rgb(252 165 165 / var(--tw-border-opacity));
+}
+.border-transparent {
+  border-color: transparent;
 }
 .bg-base-100 {
   background-color: var(--color-base-100);
@@ -5080,7 +5019,9 @@ calendar-month::part(td) {
   display: block;
   width: 40px;
   height: 40px;
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 30%;
+  filter: blur(12px);
   bottom: -160px;
   animation: square 25s infinite;
   transition-timing-function: linear;
@@ -5120,7 +5061,7 @@ calendar-month::part(td) {
   width: 120px;
   height: 120px;
   animation-delay: 3s;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 .bg-bubbles li:nth-child(7) {
@@ -5827,41 +5768,6 @@ calendar-month::part(td) {
 
   .xl\:opacity-75 {
     opacity: 0.75;
-  }
-}
-
-@media (min-width: 1536px) {
-
-  .\32xl\:order-1 {
-    order: 1;
-  }
-
-  .\32xl\:order-2 {
-    order: 2;
-  }
-
-  .\32xl\:mt-0 {
-    margin-top: 0px;
-  }
-
-  .\32xl\:flex {
-    display: flex;
-  }
-
-  .\32xl\:w-1\/3 {
-    width: 33.333333%;
-  }
-
-  .\32xl\:w-2\/3 {
-    width: 66.666667%;
-  }
-
-  .\32xl\:flex-col {
-    flex-direction: column;
-  }
-
-  .\32xl\:justify-between {
-    justify-content: space-between;
   }
 }
 

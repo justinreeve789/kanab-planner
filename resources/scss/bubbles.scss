@@ -13,7 +13,9 @@
   display: block;
   width: 40px;
   height: 40px;
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 30%;
+  filter: blur(12px);
   bottom: -160px;
   animation: square 25s infinite;
   transition-timing-function: linear;
@@ -48,7 +50,7 @@
   width: 120px;
   height: 120px;
   animation-delay: 3s;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.15);
 }
 .bg-bubbles li:nth-child(7) {
   left: 32%;

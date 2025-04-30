@@ -63,7 +63,7 @@ class Period extends CachedModel
         ];
     }
 
-    public static function getStartTimeForActivities(string $period): ?string
+    public static function getStartTimeForActivities(int $period): ?string
     {
         switch ($period) {
             case Period::MORNING:
@@ -79,7 +79,7 @@ class Period extends CachedModel
         }
     }
 
-    public static function getTimesForMeals(string $period): ?array
+    public static function getTimesForMeals(int $period): ?array
     {
         switch ($period) {
             case Period::MORNING:
