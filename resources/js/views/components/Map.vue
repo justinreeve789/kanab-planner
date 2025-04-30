@@ -1,5 +1,5 @@
 <template>
-  <l-map ref="map" v-model:zoom="zoom" :center="[latitude, longitude]">
+  <l-map ref="map" v-model:zoom="zoom" :center="[resource.latitude, resource.longitude]">
     <l-tile-layer
         url="https://caltopo.com/tile/mb_hybrid/{z}/{x}/{y}.png"
         layer-type="base"
@@ -13,13 +13,8 @@
 import axios from 'axios';
 import "leaflet/dist/leaflet.css";
 import { LCircleMarker, LGeoJson, LIcon, LMap, LMarker, LTileLayer, LTooltip } from "@vue-leaflet/vue-leaflet";
-import {useMapStore} from "../../stores/map";
 
 export default {
-  setup() {
-    const mapStore = useMapStore;
-    return { mapStore };
-  },
   components: {
     LCircleMarker,
     LGeoJson,
@@ -28,17 +23,6 @@ export default {
     LMarker,
     LTileLayer,
     LTooltip,
-  },
-  computed: {
-    latitude() {
-      return this.mapStore.lat;
-    },
-    longitude() {
-      return this.mapStore.lng;
-    },
-    zoom() {
-      return this.mapStore.zoom;
-    },
   },
   data() {
     return {
@@ -59,7 +43,7 @@ export default {
   methods: {
     getGeoJson() {
       axios
-          .get('/api/v1/trail/' + this.mapStore.resource_id + '/geojson')
+          .get('/api/v1/trail/' + this.resource.id + '/geojson')
           .then((response) => {
             this.geoJson = response.data;
           })
@@ -69,7 +53,7 @@ export default {
     },
       getGeoJsonMarkers() {
           axios
-              .get('/api/v1/trail/' + this.mapStore.resource_id + '/geojson/analyze')
+              .get('/api/v1/trail/' + this.resource.id + '/geojson/analyze')
               .then((response) => {
                   if (response.data.time_hours) {
                       this.geoJsonMarkers = response.data.time_hours;
@@ -91,7 +75,7 @@ export default {
     // this.getGeoJsonMarkers();
   },
   props: {
-    // resource: Object,
+    resource: Object,
   },
 };
 </script>

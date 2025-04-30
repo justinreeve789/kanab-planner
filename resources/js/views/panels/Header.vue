@@ -9,6 +9,7 @@
             </svg>
           </div>
           <ul class="menu menu-lg dropdown-content bg-base-100 bg-neutral text-neutral-content rounded-b-box z-1 mt-3 w-52 p-2 shadow" tabindex="0">
+            <li class="hidden md:inline"><a class="justify-between" @click="openItinerary">Itinerary<span class="badge">New</span></a></li>
             <li><a @click="openAccommodations">Accommodations</a></li>
             <li><a @click="openEvents">Events</a></li>
             <li><a @click="openLocations">Locations</a></li>
@@ -25,6 +26,7 @@
       </div>
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal menu-md px-1">
+          <li><a @click="openItinerary">Itinerary</a></li>
           <li><a @click="openAccommodations">Accommodations</a></li>
           <li><a @click="openEvents">Events</a></li>
           <li><a @click="openLocations">Locations</a></li>
@@ -47,7 +49,10 @@
             <path d="M10.83 5a3.001 3.001 0 0 0-5.66 0H4a1 1 0 1 0 0 2h1.17a3.001 3.001 0 0 0 5.66 0H20a1 1 0 1 0 0-2h-9.17ZM4 11h9.17a3.001 3.001 0 0 1 5.66 0H20a1 1 0 1 1 0 2h-1.17a3.001 3.001 0 0 1-5.66 0H4a1 1 0 1 1 0-2Zm1.17 6H4a1 1 0 1 0 0 2h1.17a3.001 3.001 0 0 0 5.66 0H20a1 1 0 1 0 0-2h-9.17a3.001 3.001 0 0 0-5.66 0Z"/>
           </svg>
         </button>
-        <div class="dropdown dropdown-end">
+        <button class="btn btn-sm flex ml-2" v-if="!getUser" @click="openLogin">
+          Login
+        </button>
+        <div class="dropdown dropdown-end hidden md:flex" v-if="getUser">
           <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
             <div class="w-10 rounded-full">
               <img
@@ -56,8 +61,7 @@
             </div>
           </div>
           <ul tabindex="0" class="menu menu-lg dropdown-content bg-base-100 bg-neutral text-neutral-content rounded-b-box z-1 mt-3 w-52 p-2 shadow">
-            <li class="hidden md:inline"><a class="justify-between" @click="openItinerary">Itinerary<span class="badge">New</span></a></li>
-            <li class="" v-if="!getUser"><a @click="openLogin">Login</a></li>
+<!--            <li class="hidden md:inline" v-if="!getUser"><a @click="openLogin">Login</a></li>-->
             <li v-if="getUser"><a>Profile</a></li>
             <li v-if="getUser"><a>Logout</a></li>
           </ul>

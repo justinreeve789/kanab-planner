@@ -18,8 +18,8 @@ export const useMapStore = defineStore('map', {
     setResource(resource) {
       this.resource_type = resource.type;
       this.resource_id = resource.id;
-      this.lat = resource.latitude;
-      this.lng = resource.longitude;
+      this.lat = resource.latitude ?? '';
+      this.lng = resource.longitude ?? '';
       this.zoom = 15;
     },
   }

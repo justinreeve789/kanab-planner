@@ -8,7 +8,6 @@
   <Assistant />
   <PreferencesModal />
   <SearchModal />
-  <MapModal />
 </template>
 
 <script>
