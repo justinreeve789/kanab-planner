@@ -9,6 +9,7 @@
       <img
         :src="'/image/' + type + '/' + imageUrl.id + '?size=medium'"
         class="w-full object-cover cursor-pointer"
+        loading="lazy"
         @click="toggleFullImage(imageUrl)"
       />
 

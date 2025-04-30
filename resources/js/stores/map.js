@@ -3,12 +3,12 @@ import { defineStore } from 'pinia'
 export const useMapStore = defineStore('map', {
   state: () => ({
     isMapOpen: false,
-    resource_type: '',
-    resource_id: null,
+    resourceType: '',
+    resourceId: null,
     geoJson: {},
     geoJsonMarkers: [],
-    lat: null,
-    lng: null,
+    latitude: null,
+    longitude: null,
     mapStyle: null,
     x: null,
     y: null,
@@ -16,10 +16,10 @@ export const useMapStore = defineStore('map', {
   }),
   actions: {
     setResource(resource) {
-      this.resource_type = resource.type;
-      this.resource_id = resource.id;
-      this.lat = resource.latitude ?? '';
-      this.lng = resource.longitude ?? '';
+      this.resourceType = resource.type;
+      this.resourceId = resource.id;
+      this.latitude = resource.latitude ?? '';
+      this.longitude = resource.longitude ?? '';
       this.zoom = 15;
     },
   }
