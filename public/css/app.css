@@ -949,6 +949,44 @@ video {
   width: var(--size);
   height: var(--size);
 }
+.filter {
+  display: flex;
+  flex-wrap: wrap;
+}
+.filter input[type="radio"] {
+  width: auto;
+}
+.filter input {
+  overflow: hidden;
+  opacity: 100%;
+  scale: 1;
+  transition: margin 0.1s, opacity 0.3s, padding 0.3s, border-width 0.1s;
+}
+.filter input:not(:last-child) {
+  margin-inline-end: calc(0.25rem * 1);
+}
+.filter input.filter-reset {
+  aspect-ratio: 1 / 1;
+}
+.filter input.filter-reset::after {
+  content: "×";
+}
+.filter:not(:has(input:checked:not(.filter-reset))) .filter-reset, .filter:not(:has(input:checked:not(.filter-reset))) input[type="reset"] {
+  scale: 0;
+  border-width: 0;
+  margin-inline: calc(0.25rem * 0);
+  width: calc(0.25rem * 0);
+  padding-inline: calc(0.25rem * 0);
+  opacity: 0%;
+}
+.filter:has(input:checked:not(.filter-reset)) input:not(:checked, .filter-reset, input[type="reset"]) {
+  scale: 0;
+  border-width: 0;
+  margin-inline: calc(0.25rem * 0);
+  width: calc(0.25rem * 0);
+  padding-inline: calc(0.25rem * 0);
+  opacity: 0%;
+}
 .badge {
   display: inline-flex;
   align-items: center;
@@ -4362,6 +4400,9 @@ video {
 }
 .blur {
   --tw-blur: blur(8px);
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+.filter {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 .transition {

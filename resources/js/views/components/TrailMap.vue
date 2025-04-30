@@ -5,7 +5,7 @@
       layer-type="base"
       name="Map"
     ></l-tile-layer>
-    <l-geo-json :geojson="geoJson" :options-style="geoOptions"></l-geo-json>
+<!--    <l-geo-json v-if="geoJson" :key="geoJsonKey" :geojson="geoJson" :options-style="geoOptions"></l-geo-json>-->
   </l-map>
 </template>
 
@@ -20,7 +20,7 @@ export default {
     LGeoJson,
     LIcon,
     LMap,
-    LMarker,
+    // LMarker,
     LTileLayer,
     LTooltip,
   },
@@ -51,23 +51,21 @@ export default {
     },
   },
   methods: {
-    getGeoJson() {
-      axios
-        .get('/api/v1/trail/' + this.resourceId + '/geojson')
-        .then((response) => {
-          this.geoJson = response.data;
-        })
-        .catch((error) => {
-          console.error('Error fetching geoJson data:', error);
-        });
+    async getGeoJson() {
+      try {
+        const response = await axios.get(`/api/v1/trail/${this.resourceId}/geojson`);
+        this.geoJson = response.data;
+      } catch (error) {
+        console.error('Error fetching geoJson data:', error);
+      }
     },
     getGeoJsonMarkers() {
       axios
         .get('/api/v1/trail/' + this.resourceId + '/geojson/analyze')
         .then((response) => {
           if (response.data.time_hours) {
-            this.geoJsonMarkers = response.data.time_hours;
-            const map = L.map('map');
+            // this.geoJsonMarkers = response.data.time_hours;
+            // const map = L.map('map');
             // for (let h = 0; h < this.geoJsonMarkers.length; h++) {
             //     let marker = new L.marker(this.geoJsonMarkers[h]);
             //     marker.bindTooltip(h + 1 + 'h', { permanent: true, className: "hour-label", offset: [0, 0] });
