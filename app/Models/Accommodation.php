@@ -11,7 +11,6 @@ class Accommodation extends Resource
     use HasFactory;
     use SearchableResource;
 
-    protected $appends = ['image_ids'];
     protected $guarded = ['id'];
     protected $table = 'accommodations';
 

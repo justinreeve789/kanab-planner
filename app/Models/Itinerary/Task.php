@@ -11,7 +11,6 @@ class Task extends Resource
 {
     use HasFactory;
 
-    protected $appends = ['image_ids'];
     protected $guarded = [];
 
     public function getImageIdsAttribute()

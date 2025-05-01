@@ -16,7 +16,6 @@ class Trail extends Resource
     use Proximity;
     use SearchableResource;
 
-    protected $appends = ['image_ids'];
     protected $guarded = ['id'];
     protected $hidden = ['source_type', 'source_id', 'raw_data'];
 
@@ -33,10 +32,10 @@ class Trail extends Resource
         return parent::toSearchableArray();
     }
 
-    public function getAppends()
-    {
-        return array_merge(parent::getAppends(), $this->appends);
-    }
+//    public function getAppends()
+//    {
+//        return array_merge(parent::getAppends(), $this->appends);
+//    }
 
     public function area()
     {

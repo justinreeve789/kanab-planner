@@ -22,7 +22,8 @@ abstract class Resource extends Model
 
     const DEFAULT_AVERAGE_HOURS = 2;
 
-    protected $appends = ['description_short', 'adventurousness', 'solitariness', 'strenuousness', 'type'];
+    // TODO: Use $appends and reference it (e.g. via self::$appends)...with Laravel models this doesn't work easily.
+    protected $resourceAppends = ['description_short', 'adventurousness', 'solitariness', 'strenuousness', 'type', 'image_ids'];
     protected $with = ['area'];
 //    protected $with = ['data', 'images', 'text'];
 
@@ -37,14 +38,23 @@ abstract class Resource extends Model
     public function toSearchableArray()
     {
         $searchableArray = $this->toArray();
+        foreach ($this->getAppends() as $append) {
+            $searchableArray[$append] = $this->{$append};
+        }
+        $searchableArray['resource_table'] = $this->getTable();
         if (isset($this->area)) {
-            $searchableArray['area_id'] = $this->area_id ?? null;
+            $searchableArray['area_id'] = $this->area->id ?? null;
             $searchableArray['area_name'] = $this->area->name ?? '';
             $searchableArray['area_short_name'] = $this->area->short_name ?? '';
             $searchableArray['area_abbreviation'] = $this->area->abbreviation ?? '';
             $searchableArray['area_slug'] = $this->area->slug ?? '';
         }
         return $searchableArray;
+    }
+
+    public function getAppends()
+    {
+        return array_merge($this->appends, $this->resourceAppends);
     }
 
     public function busy()
