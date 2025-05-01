@@ -12,6 +12,7 @@ class Event extends Resource
     use HasFactory;
     use SearchableResource;
 
+    protected $appends = ['image_ids'];
     protected $guarded = ['id'];
     protected $hidden = ['raw_data'];
 //    protected $with = ['dates', 'location'];
@@ -22,6 +23,11 @@ class Event extends Resource
         $searchableArray['start_date'] = strtotime($this->start_date);
         $searchableArray['end_date'] = strtotime($this->end_date);
         return $searchableArray;
+    }
+
+    public function getAppends()
+    {
+        return array_merge(parent::getAppends(), $this->appends);
     }
 
     public function area()
@@ -52,6 +58,11 @@ class Event extends Resource
     public function getAreaIdAttribute()
     {
         return $this->location->area_id;
+    }
+
+    public function getImageIdsAttribute()
+    {
+        return $this->images->pluck('id')->all();
     }
 
     public function scopeAfter(Builder $query, $startDateTime)

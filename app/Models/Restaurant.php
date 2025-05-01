@@ -12,6 +12,7 @@ class Restaurant extends Resource
     use ResourceScopes;
     use SearchableResource;
 
+    protected $appends = ['image_ids'];
     protected $casts = ['deviation_percent' => 'float'];
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'location_id'];
@@ -61,9 +62,14 @@ class Restaurant extends Resource
         return $this->location->area_id;
     }
 
-    public function getImagesAttribute()
+//    public function getImagesAttribute()
+//    {
+//        return $this->location->images;
+//    }
+
+    public function getImageIdsAttribute()
     {
-        return $this->location->images;
+        return $this->images->pluck('id')->all();
     }
 
     public function getAveragePrice()

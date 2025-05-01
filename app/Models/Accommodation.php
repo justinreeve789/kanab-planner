@@ -11,6 +11,7 @@ class Accommodation extends Resource
     use HasFactory;
     use SearchableResource;
 
+    protected $appends = ['image_ids'];
     protected $guarded = ['id'];
     protected $table = 'accommodations';
 
@@ -21,9 +22,9 @@ class Accommodation extends Resource
         return $searchableArray;
     }
 
-    public function getAreaIdAttribute()
+    public function getAppends()
     {
-        return Area::KANAB;
+        return array_merge(parent::getAppends(), $this->appends);
     }
 
     public function area()
@@ -34,5 +35,15 @@ class Accommodation extends Resource
     public function images(): HasMany
     {
         return $this->hasMany(AccommodationImage::class, 'accommodation_id', 'id');
+    }
+
+    public function getAreaIdAttribute()
+    {
+        return Area::KANAB;
+    }
+
+    public function getImageIdsAttribute()
+    {
+        return $this->images->pluck('id')->all();
     }
 }

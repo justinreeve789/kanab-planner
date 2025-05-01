@@ -12,6 +12,7 @@ class Location extends Resource
     use Proximity;
     use SearchableResource;
 
+    protected $appends = ['image_ids'];
     protected $guarded = ['id'];
     protected $hidden = ['raw_data'];
 
@@ -21,6 +22,11 @@ class Location extends Resource
         $searchableArray['location_id'] = $this->id;
         $searchableArray['is_restaurant'] = $this->restaurant ? 1 : 0;
         return $searchableArray;
+    }
+
+    public function getAppends()
+    {
+        return array_merge(parent::getAppends(), $this->appends);
     }
 
     public function area()
@@ -57,6 +63,11 @@ class Location extends Resource
     public function restaurant()
     {
         return $this->hasOne(Restaurant::class, 'location_id', 'id');
+    }
+
+    public function getImageIdsAttribute()
+    {
+        return $this->images->pluck('id')->all();
     }
 
     public function getSourceIdAttribute()
