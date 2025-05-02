@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\Proximity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\SearchableResource;
+use Illuminate\Support\Facades\Log;
 
 class Location extends Resource
 {
@@ -13,26 +14,24 @@ class Location extends Resource
     use SearchableResource;
 
     protected $guarded = ['id'];
-    protected $hidden = ['raw_data', 'area_id'];
+    protected $hidden = ['raw_data'];
 
     public function toSearchableArray()
     {
-        return [
-            'name' => $this->name,
-            'description' => $this->description,
-            'address' => $this->address,
-            'city' => $this->city,
-            'state' => $this->state,
-            'zip' => $this->zip,
-            'phone' => $this->phone,
-            'email' => $this->email,
-            'url' => $this->url,
-        ];
+        $searchableArray = parent::toSearchableArray();
+        $searchableArray['location_id'] = $this->id;
+        $searchableArray['is_restaurant'] = $this->restaurant ? 1 : 0;
+        return $searchableArray;
     }
 
     public function area()
     {
         return $this->belongsTo(Area::class, 'area_id', 'id');
+    }
+
+    public function events()
+    {
+        return $this->hasMany(Event::class, 'location_id', 'id');
     }
 
     public function hours()
@@ -59,6 +58,11 @@ class Location extends Resource
     public function restaurant()
     {
         return $this->hasOne(Restaurant::class, 'location_id', 'id');
+    }
+
+    public function getImageIdsAttribute()
+    {
+        return $this->images->pluck('id')->all();
     }
 
     public function getSourceIdAttribute()

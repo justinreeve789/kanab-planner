@@ -310,7 +310,7 @@ class ItineraryService
         return rand(0, 1) ? Period::MORNING : Period::AFTERNOON;
     }
 
-    public function addTrail(Day $day, string $period)
+    public function addTrail(Day $day, int $period)
     {
     }
 
@@ -335,7 +335,7 @@ class ItineraryService
         }
     }
 
-    private function addEventForPeriod(Day $day, string $period, $startTime, $endTime)
+    private function addEventForPeriod(Day $day, int $period, $startTime, $endTime)
     {
         if ($this->getItinerary()->getAdventurousness() < 0.5) {
             return;
@@ -433,7 +433,7 @@ class ItineraryService
     }
 
     // TODO: assessMeal? Split into morning/afternoon/evening functions?
-    public function addMeal(Day $day, string $period)
+    public function addMeal(Day $day, int $period)
     {
         $date = $day->date;
         $dayNum = $day->day_num;
@@ -740,7 +740,7 @@ class ItineraryService
      * Should we add a trail for the period to fill in the gaps? If they've already done a trail today, only add another
      * trail if their adventurousness is >= 0.7.
      */
-    public function shouldAddTrail(Day $day, string $period): bool {
+    public function shouldAddTrail(Day $day, int $period): bool {
         switch ($period) {
             case Period::NIGHT:
                 break;
@@ -762,14 +762,13 @@ class ItineraryService
     }
 
     /**
-     * If it's breakfast, and the day is not in the base location, just say false.
+     * If it's morning (and the day is not in the base location?), just say false.
+     * Generally, restaurants should only be added for dinner. For lunch, check for a suitable restaurant in the area.
      */
-    public function shouldAddDining(Day $day, string $period): bool
+    public function shouldAddDining(Day $day, int $period): bool
     {
-        if ($day->area_id !== $this->getItinerary()->getBaseAreaId()) {
-            if ($period === Period::MORNING) {
-                return false;
-            }
+        if ($period === Period::MORNING) {
+            return false;
         }
         if ($day->periods[$period]->hasRestaurant() || $day->hasActivityTypeInPeriod('cooking', $period)) {
             return false;
@@ -786,7 +785,7 @@ class ItineraryService
      * back. If they've already done a trail today, only add another
      * trail if their adventurousness is >= 0.7.
      */
-    public function shouldAddCooking(Day $day, string $period): bool {
+    public function shouldAddCooking(Day $day, int $period): bool {
         // Make sure there isn't already a restaurant or cooking activity during the period.
         $dayPeriod = $day->getPeriod($period);
         if ($dayPeriod->hasRestaurant() || $dayPeriod->hasActivityType('cooking')) {
@@ -824,7 +823,7 @@ class ItineraryService
         return true;
     }
 
-    public function addRandomTrailToPeriod(Day $day, string $period)
+    public function addRandomTrailToPeriod(Day $day, int $period)
     {
         $trail = $this->trailService->getRandomTrailForPeriod(
             $day->area->id,

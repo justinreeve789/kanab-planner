@@ -282,7 +282,7 @@ class Day extends CachedModel
         return false;
     }
 
-    public function hasActivityTypeInPeriod(string $activityType, string $period): bool
+    public function hasActivityTypeInPeriod(string $activityType, int $period): bool
     {
         return $this->getPeriods()[$period]->hasActivityType($activityType);
     }
@@ -319,7 +319,7 @@ class Day extends CachedModel
         return $this->hasResourceClass(ResourceEnum::TRAILS_CLASS);
     }
 
-    public function shouldAddActivityTypeForPeriod(string $activityType, string $period): bool
+    public function shouldAddActivityTypeForPeriod(string $activityType, int $period): bool
     {
         if ($this->hasActivityTypeInPeriod($activityType, $period)) {
             return false;
@@ -337,7 +337,7 @@ class Day extends CachedModel
         return true;
     }
 
-    public function shouldAddCookingForPeriod(string $period): bool
+    public function shouldAddCookingForPeriod(int $period): bool
     {
         return $this->shouldAddActivityTypeForPeriod('cooking', $period);
     }

@@ -9,7 +9,6 @@ use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
-
     public function redirectToProvider(string $provider)
     {
         return Socialite::driver($provider)->redirect();

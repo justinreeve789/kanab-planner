@@ -12,4 +12,9 @@ class Task extends Resource
     use HasFactory;
 
     protected $guarded = [];
+
+    public function getImageIdsAttribute()
+    {
+        return [];
+    }
 }

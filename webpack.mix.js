@@ -24,9 +24,9 @@ mix.options({
     }
 });
 
-mix.js('resources/js/app.js', 'public/js').vue();
+mix.js('resources/js/app.js', 'public/js').version().vue();
 
-mix.sass('resources/scss/app.scss', 'public/css');
+mix.sass('resources/scss/app.scss', 'public/css').version();
 
 //mix.copyDirectory('resources/fonts', 'public/fonts');
 //mix.copyDirectory('resources/images', 'public/images');

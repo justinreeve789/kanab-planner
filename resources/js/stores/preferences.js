@@ -2,12 +2,13 @@ import { defineStore } from 'pinia'
 
 export const usePreferencesStore = defineStore('preferences', {
   state: () => ({
+    itineraryData: null,
+    refresh: false,
     adventurousness: 0.5,
     solitariness: 0.5,
     strenuousness: 0.5,
     isPreferencesOpen: false,
-    startDate: null,
-    endDate: null,
+    dateRange: null,
     areaIds: null,
     eventIds: null,
     locationIds: null,
@@ -23,6 +24,9 @@ export const usePreferencesStore = defineStore('preferences', {
     },
     getStrenuousnessPercent() {
       return Math.round(this.strenuousness * 100);
+    },
+    refreshItinerary() {
+      this.itineraryData = null;
     },
   }
 })

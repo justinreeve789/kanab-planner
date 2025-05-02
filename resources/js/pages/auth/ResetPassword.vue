@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen flex flex-col justify-center items-center pt-6 sm:pt-0 p-4">
-    <logo></logo>
+<!--    <logo></logo>-->
 
     <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden rounded-lg">
       <form @submit.prevent="resetPassword">
@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import Logo from '@/components/Logo.vue'
+import router from "../../router";
 
 export default {
   data: () => {
@@ -58,7 +58,6 @@ export default {
     }
   },
   components: {
-    Logo,
   },
   methods: {
     resetPassword() {

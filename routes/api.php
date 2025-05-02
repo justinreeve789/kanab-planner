@@ -76,6 +76,7 @@ Route::prefix('v1')->group(function() {
     });
 
     Route::prefix('search')->group(function() {
+        Route::get('/', 'App\Http\Controllers\SearchController@search');
         Route::get('/event', 'App\Http\Controllers\EventController@search');
         Route::get('/location', 'App\Http\Controllers\LocationController@search');
         Route::get('/restaurant', 'App\Http\Controllers\RestaurantController@search');

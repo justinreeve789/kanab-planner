@@ -27,6 +27,16 @@ class Trail extends Resource
         $this->trailService = new TrailService();
     }
 
+    public function toSearchableArray()
+    {
+        return parent::toSearchableArray();
+    }
+
+//    public function getAppends()
+//    {
+//        return array_merge(parent::getAppends(), $this->appends);
+//    }
+
     public function area()
     {
         return $this->belongsTo(Area::class, 'area_id', 'id');
@@ -50,6 +60,11 @@ class Trail extends Resource
     public function openai_prompts()
     {
         return $this->hasMany(OpenAIPrompt::class, 'source_id', 'id')->where('openai_prompts.source_table', $this->getTable());
+    }
+
+    public function getImageIdsAttribute()
+    {
+        return $this->images->pluck('id')->all();
     }
 
     public function getAverageHours()

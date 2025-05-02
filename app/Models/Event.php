@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\ActivityData;
 use App\Traits\SearchableResource;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Event extends Resource
@@ -12,7 +13,21 @@ class Event extends Resource
     use SearchableResource;
 
     protected $guarded = ['id'];
-    protected $hidden = ['raw_data', 'location_id'];
+    protected $hidden = ['raw_data'];
+//    protected $with = ['dates', 'location'];
+
+    public function toSearchableArray()
+    {
+        $searchableArray = parent::toSearchableArray();
+        $searchableArray['start_date'] = strtotime($this->start_date);
+        $searchableArray['end_date'] = strtotime($this->end_date);
+        return $searchableArray;
+    }
+
+    public function area()
+    {
+        return $this->hasOneThrough(Area::class, Location::class, 'id', 'id', 'location_id', 'area_id');
+    }
 
     public function dates()
     {
@@ -32,5 +47,50 @@ class Event extends Resource
     public function location()
     {
         return $this->belongsTo(Location::class, 'location_id', 'id');
+    }
+
+    public function getAreaIdAttribute()
+    {
+        return $this->location->area_id;
+    }
+
+    public function getImageIdsAttribute()
+    {
+        return $this->images->pluck('id')->all();
+    }
+
+    public function scopeAfter(Builder $query, $startDateTime)
+    {
+        return $query->whereHas('dates', function (Builder $subQuery) use ($startDateTime) {
+            $subQuery->whereRaw("
+                    ? >= DATE_FORMAT(DATE(event.start_date), '%Y-%m-%d 10:00:00')
+                ", [$startDateTime]);
+        });
+    }
+
+    public function scopeBetweenDates(Builder $query, $startDateTime, $endDateTime)
+    {
+        return $query->whereHas('dates', function (Builder $subQuery) use ($startDateTime, $endDateTime) {
+            $subQuery->whereRaw("
+                    ? >= COALESCE(
+                        event_dates.start_date,
+                        DATE_FORMAT(DATE(event_dates.start_date), '%Y-%m-%d 10:00:00')
+                    )
+                ", [$startDateTime]);
+            $subQuery->whereRaw("
+                    ? <= COALESCE(
+                        event_dates.end_date,
+                        CASE
+                            WHEN TIME(event_dates.start_date) >= '22:00:00'
+                                THEN DATE_FORMAT(DATE(event_dates.start_date), '%Y-%m-%d 23:59:59')
+                            ELSE
+                                LEAST(
+                                    DATE_ADD(event_dates.start_date, INTERVAL 4 HOUR),
+                                    DATE_FORMAT(DATE(event_dates.start_date), '%Y-%m-%d 22:00:00')
+                                )
+                        END
+                    )
+                ", [$endDateTime]);
+        });
     }
 }

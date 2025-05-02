@@ -3,6 +3,8 @@
 </template>
 
 <script>
+import Gallery from '../components/Gallery.vue'
+
 export default {
   components: {
     Gallery,
@@ -21,8 +23,4 @@ export default {
     type: String,
   },
 };
-</script>
-
-<script setup>
-import Gallery from '../components/Gallery.vue'
 </script>

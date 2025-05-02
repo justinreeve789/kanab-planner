@@ -8,10 +8,10 @@
 <!--    </div>-->
 <!--  </div>-->
 
-<Header v-if="itineraryData" />
+<!--<Header v-if="itineraryData" />-->
 
 <div class="container mx-auto">
-  <div v-if="itineraryData" class="md:pb-0 pb-[80px] text-black">
+  <div v-if="itineraryData" class="md:pb-0 pb-[85px] text-black">
     <div class="itinerary-stats flex justify-end space-x-1 pr-4 pt-4 align-right text-white" title="Estimated total driving distance" v-if="itineraryData && itineraryData.totalTravelDistance">
       <img class="icon mr-1" src="/images/icons/car.svg" alt="Distance">
       <span class="amount">
@@ -30,13 +30,9 @@
 <!--      <ActivityStatsModal :day="day" v-if="day.stats" />-->
 <!--    </div>-->
 
-    <ListModal :type="'trail'" />
-
-    <Assistant />
-
-    <Backdrop />
+<!--    <Backdrop />-->
   </div>
-  <div v-else class="progress w-full h-screen flex justify-center items-center text-6xl relative">
+  <div v-else class="progress w-full h-[85vh] flex justify-center items-center text-6xl relative">
     <span class="text text-center text-6xl text-white font-bold relative">
       Loading
       <span class="loading loading-dots loading-lg text-white absolute ml-2 bottom-0"></span>
@@ -44,21 +40,14 @@
   </div>
 </div>
 
-  <PreferencesModal />
-
-  <Dock v-if="itineraryData" />
+<!--  <Dock v-if="itineraryData" />-->
 
 </template>
 
 <script>
 import axios from 'axios';
-import Assistant from './assistant/Assistant.vue';
 import Day from './Day.vue';
-import Dock from './panels/Dock.vue';
-import Header from './panels/Header.vue';
-import ListModal from './modals/ListModal.vue';
-import PreferencesModal from './modals/PreferencesModal.vue';
-import Backdrop from './Backdrop.vue';
+// import Backdrop from './Backdrop.vue';
 import Select from './components/Select.vue';
 import { usePreferencesStore } from "../stores/preferences";
 
@@ -67,9 +56,55 @@ export default {
     const preferencesStore = usePreferencesStore();
     return { preferencesStore };
   },
+  watch: {
+    'preferencesStore.refresh'(newVal, oldVal) {
+      if (newVal === true && oldVal !== true) {
+        this.preferencesStore.refresh = false;
+        this.itineraryData = null;
+        this.fetchItineraryData();
+      }
+    },
+    // 'preferencesStore.itineraryData'(newItineraryData, oldItineraryData) {
+    //   if (newItineraryData === null) {
+    //     this.itineraryData = null;
+    //     this.fetchItineraryData();
+    //   }
+    // },
+    'preferencesStore.dateRange'(newDateRange) {
+      this.itineraryParams.start_date = newDateRange.start;
+      this.itineraryParams.end_date = newDateRange.end;
+      // this.itineraryData = null;
+      // this.fetchItineraryData();
+      this.preferencesStore.refreshItinerary();
+    },
+    // 'preferencesStore.isPreferencesOpen'(newVal, oldVal) {
+    //   let preferencesChange = false;
+    //   if (newVal !== oldVal && newVal === false) {
+    //     // When the preferences close, update any values.
+    //     if (this.preferencesStore.adventurousness) {
+    //     }
+    //   }
+    // },
+    // 'preferencesStore.adventurousness'(newVal) {
+    //   this.itineraryParams.adventurousness = newVal;
+    //   this.itineraryData = null;
+    //   this.fetchItineraryData();
+    // },
+    // 'preferencesStore.solitariness'(newVal) {
+    //   this.itineraryParams.solitariness = newVal;
+    //   this.itineraryData = null;
+    //   this.fetchItineraryData();
+    // },
+    // 'preferencesStore.strenuousness'(newVal) {
+    //   this.itineraryParams.strenuousness = newVal;
+    //   this.itineraryData = null;
+    //   this.fetchItineraryData();
+    // },
+  },
   data() {
     return {
       itineraryData: null,
+      itineraryParams: {},
     };
   },
   props: {
@@ -80,21 +115,36 @@ export default {
   },
   methods: {
     round(num) {
-        return Math.round(num);
+      return Math.round(num);
+    },
+    getItineraryParams() {
+      return {
+        adventurousness: this.preferencesStore.adventurousness,
+        solitariness: this.preferencesStore.solitariness,
+        strenuousness: this.preferencesStore.strenuousness,
+        start_date: this.preferencesStore.dateRange ? this.preferencesStore.dateRange.start : null,
+        end_date: this.preferencesStore.dateRange ? this.preferencesStore.dateRange.end : null,
+        area_ids: this.preferencesStore.areaIds,
+        event_ids: this.preferencesStore.eventIds,
+        location_ids: this.preferencesStore.locationIds,
+        restaurant_ids: this.preferencesStore.restaurantIds,
+        trail_ids: this.preferencesStore.trailIds,
+      };
     },
     fetchItineraryData() {
+      const itineraryParams = this.getItineraryParams();
+      console.log(itineraryParams);
       const urlParams = new URLSearchParams(window.location.search);
-      const params = {};
       urlParams.forEach((value, key) => {
-        params[key] = value;
+        itineraryParams[key] = value;
       });
       let url = '/api/v1/itinerary';
       if (this.itineraryId) {
-        url += '/' + this.itineraryId
+        url += '/' + this.itineraryId;
       }
       axios
         .get(url, {
-           params: params,
+          params: itineraryParams,
         })
         .then((response) => {
           this.itineraryData = response.data;
@@ -106,17 +156,7 @@ export default {
   },
   components: {
     // ActivityStatsModal,
-    Assistant,
     Day,
-    Dock,
-    Header,
-    PreferencesModal,
   },
 };
-</script>
-
-<script setup>
-import { onMounted } from 'vue'
-// import ActivityStatsModal from './modals/ActivityStatsModal.vue'
-import Side from './panels/Side.vue'
 </script>

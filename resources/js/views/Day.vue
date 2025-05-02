@@ -46,13 +46,13 @@
             <Event :activity="activity" :day="day" />
           </div>
           <div class="mb-8 border border-solid border-green-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'dining'">
-            <Restaurant :day="day" :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
+            <Restaurant :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
           </div>
           <div class="mb-8 border border-solid border-orange-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'hiking'">
             <Trail :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
           </div>
           <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-else>
-            <Task :activity="activity" :day="day" :resource="activity.resource" />
+            <Task :activity="activity" />
           </div>
         </div>
       </section>

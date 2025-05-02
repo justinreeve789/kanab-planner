@@ -15,6 +15,26 @@ class Restaurant extends Resource
     protected $casts = ['deviation_percent' => 'float'];
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'location_id'];
+//    protected $with = ['location'];
+
+    private $hours = [];
+
+    public function toSearchableArray()
+    {
+        $searchableArray = parent::toSearchableArray();
+        $searchableArray['area_id'] = $this->area->id;
+        return $searchableArray;
+    }
+
+    public function area()
+    {
+        return $this->hasOneThrough(Area::class, Location::class, 'id', 'id', 'location_id', 'area_id');
+    }
+
+    public function hours()
+    {
+        return $this->hasMany(LocationHour::class, 'location_id', 'location_id');
+    }
 
     public function images()
     {
@@ -31,13 +51,32 @@ class Restaurant extends Resource
         return $this->hasMany(LocationTag::class, 'location_id', 'location_id');
     }
 
-    public function getImagesAttribute()
+    public function getAreaIdAttribute()
     {
-        return $this->location->images;
+        return $this->location->area_id;
+    }
+
+//    public function getImagesAttribute()
+//    {
+//        return $this->location->images;
+//    }
+
+    public function getImageIdsAttribute()
+    {
+        return $this->images->pluck('id')->all();
     }
 
     public function getAveragePrice()
     {
         return $this->average_price;
+    }
+
+    public function hasBreakfast(string $date)
+    {
+        $dayOfWeek = date('N', strtotime($date));
+        if (!isset($this->hours[$date][$dayOfWeek])) {
+            $this->hours[$date][$dayOfWeek] = $this->hours()->where(['location_id' => $this->location_id, 'day_of_week'])->first();
+        }
+        $hours = $this->hours[$date][$dayOfWeek];
     }
 }

@@ -20,6 +20,7 @@ class Area extends Model
     const ST_GEORGE = 6;
     const ZION = 7;
 
+    protected $appends = ['slug'];
     protected $guarded = [];
     protected $table = 'areas';
 
@@ -44,6 +45,10 @@ class Area extends Model
             Area::ST_GEORGE => 10 * $delta,
             Area::ZION => 150 * $delta,
         ];
+    }
+
+    public function getSlugAttribute() {
+        return trim(strtolower(str_replace(' ', '-', preg_replace("/[^a-zA-Z0-9 ]/", "", $this->short_name))));
     }
 
     public function weather()

@@ -16,5 +16,4 @@ class EventController extends Controller
     {
         return Event::with(['data', 'dates', 'links', 'location', 'text'])->where('id', $id)->first();
     }
-
 }

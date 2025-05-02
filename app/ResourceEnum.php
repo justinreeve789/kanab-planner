@@ -16,20 +16,25 @@ enum ResourceEnum
 {
     const ACCOMMODATIONS_CLASS = Accommodation::class;
     const ACCOMMODATIONS_TABLE = 'accommodations';
+    const ACCOMMODATIONS_TYPE = 'accommodation';
     const AREAS_CLASS = Area::class;
     const AREAS_TABLE = 'areas';
     const BLOG_POSTS_CLASS = Post::class;
     const BLOG_POSTS_TABLE = 'blog_posts';
     const EVENTS_CLASS = Event::class;
     const EVENTS_TABLE = 'events';
+    const EVENTS_TYPE = 'event';
     const GUIDES_CLASS = Guide::class;
     const GUIDES_TABLE = 'guides';
     const LOCATIONS_CLASS = Location::class;
     const LOCATIONS_TABLE = 'locations';
+    const LOCATIONS_TYPE = 'location';
     const RESTAURANTS_CLASS = Restaurant::class;
     const RESTAURANTS_TABLE = 'restaurants';
+    const RESTAURANTS_TYPE = 'restaurant';
     const TASKS_CLASS = Task::class;
     const TASKS_TABLE = 'tasks';
     const TRAILS_CLASS = Trail::class;
     const TRAILS_TABLE = 'trails';
+    const TRAILS_TYPE = 'trail';
 }

@@ -1,7 +1,7 @@
 <template>
   <input type="checkbox" id="preferences-modal" class="modal-toggle" v-model="preferencesStore.isPreferencesOpen" />
-  <div class="modal max-h-[calc(100vh-64px)]" id="preferences-modal">
-    <div class="modal-container bg-white max-w-[640px] w-full -translate-x-1/2 md:-translate-y-1/2 top-0 md:top-1/2 md:rounded-[15px] md:border-[5px] md:border-[#d0e0f0]">
+  <div class="modal max-h-[calc(100vh-64px)] md:max-h-full" id="preferences-modal">
+    <div class="modal-container bg-white max-w-full w-full h-calc(100vh-64px) -translate-x-1/2 md:-translate-y-1/2 top-0 md:max-w-[640px] md:h-auto md:top-1/2 md:rounded-[15px] md:border-[5px] md:border-[#d0e0f0]">
       <div class="flex justify-between items-center mb-0 bg-gradient-to-r from-blue-100 to-cyan-200 p-4 pr-2 md:rounded-t-xl w-full">
         <h2 class="text-black text-lg">Preferences</h2>
         <div class="flex align-right">
@@ -12,7 +12,7 @@
           </button>
         </div>
       </div>
-      <div class="modal-box ass overflow-x-hidden max-h-[90vh] bg-white text-black w-full max-w-[640px] max-h-[calc(100vh-128px)] md:max-h-auto">
+      <div class="modal-box ass overflow-x-hidden bg-white text-black w-full max-w-full h-[calc(100vh-64px)] max-h-[calc(100vh-128px)] md:max-w-[640px] md:h-auto md:max-h-[90vh]">
         <p class="mb-4 text-sm">Adjust the sliders, and your activities will match as close to your preferences as possible.</p>
         <div class="sliders origin-center">
           <div class="-mx-6 px-6 pt-4 pb-2 bg-gradient-to-r from-red-50 to-orange-100">
@@ -32,7 +32,7 @@
               </div>
             </div>
             <div class="flex mb-4 w-full">
-              <input class="adventurousness cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="1" step="0.1" style="width: 100%;" v-model="adventurousness" />
+              <input class="adventurousness cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="1" step="0.1" style="width: 100%;" v-model="preferencesStore.adventurousness" />
               <span class="value badge badge-neutral badge-md hidden">{{ (adventurousness * 100).toFixed(0) }}%</span>
             </div>
             <div class="h-32">
@@ -49,7 +49,7 @@
               <div class="tooltip tooltip-left">
                 <div class="tooltip-content max-w-[250px] md:max-w-[400px]">
                   <p class="text-left">
-                    <span class="font-bold">Solitariness</span> is how much weight you place on less-crowded areas and non-human interactions. Set this higher if you want to be alone, or lower if you don't mind when areas a little busy.
+                    <span class="font-bold">Solitariness</span> is how much weight you place on less-crowded areas and non-human interactions. Set this higher if you want to be alone, or lower if you don't mind when an area is a little busy.
                   </p>
                 </div>
                 <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@
               </div>
             </div>
             <div class="flex mb-4 w-full">
-              <input class="solitariness cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="1" step="0.1" style="width: 100%;" v-model="solitariness" />
+              <input class="solitariness cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="1" step="0.1" style="width: 100%;" v-model="preferencesStore.solitariness" />
               <span class="value badge badge-neutral badge-md hidden">{{ (solitariness * 100).toFixed(0) }}%</span>
             </div>
             <div class="h-32">
@@ -84,7 +84,7 @@
               </div>
             </div>
             <div class="flex mb-4 w-full">
-              <input class="strenuousness cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="1" step="0.1" style="width: 100%;" v-model="strenuousness" />
+              <input class="strenuousness cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="1" step="0.1" style="width: 100%;" v-model="preferencesStore.strenuousness" />
               <span class="value badge badge-neutral badge-md hidden">{{ (strenuousness * 100).toFixed(0) }}%</span>
             </div>
             <div class="h-32">

@@ -12,6 +12,7 @@ use App\Traits\SearchableResource;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 abstract class Resource extends Model
 {
@@ -21,7 +22,9 @@ abstract class Resource extends Model
 
     const DEFAULT_AVERAGE_HOURS = 2;
 
-    protected $appends = ['description_short', 'adventurousness', 'solitariness', 'strenuousness', 'type'];
+    // TODO: Use $appends and reference it (e.g. via self::$appends)...with Laravel models this doesn't work easily.
+    protected $resourceAppends = ['description_short', 'adventurousness', 'solitariness', 'strenuousness', 'type', 'image_ids'];
+    protected $with = ['area'];
 //    protected $with = ['data', 'images', 'text'];
 
     /**
@@ -30,6 +33,28 @@ abstract class Resource extends Model
     public function newEloquentBuilder($query)
     {
         return new CustomQueryBuilder($query);
+    }
+
+    public function toSearchableArray()
+    {
+        $searchableArray = $this->toArray();
+        foreach ($this->getAppends() as $append) {
+            $searchableArray[$append] = $this->{$append};
+        }
+        $searchableArray['resource_table'] = $this->getTable();
+        if (isset($this->area)) {
+            $searchableArray['area_id'] = $this->area->id ?? null;
+            $searchableArray['area_name'] = $this->area->name ?? '';
+            $searchableArray['area_short_name'] = $this->area->short_name ?? '';
+            $searchableArray['area_abbreviation'] = $this->area->abbreviation ?? '';
+            $searchableArray['area_slug'] = $this->area->slug ?? '';
+        }
+        return $searchableArray;
+    }
+
+    public function getAppends()
+    {
+        return array_merge($this->appends, $this->resourceAppends);
     }
 
     public function busy()
@@ -180,6 +205,18 @@ abstract class Resource extends Model
             ResourceEnum::RESTAURANTS_TABLE => Restaurant::class,
             ResourceEnum::TASKS_TABLE => Task::class,
             ResourceEnum::TRAILS_TABLE => Trail::class,
+            default => throw new Exception('Invalid table: ' . $resourceTable),
+        };
+    }
+
+    public static function getTypeForResourceTable($resourceTable)
+    {
+        return match ($resourceTable) {
+            ResourceEnum::ACCOMMODATIONS_TABLE => ResourceEnum::ACCOMMODATIONS_TYPE,
+            ResourceEnum::EVENTS_TABLE => ResourceEnum::EVENTS_TYPE,
+            ResourceEnum::LOCATIONS_TABLE => ResourceEnum::LOCATIONS_TYPE,
+            ResourceEnum::RESTAURANTS_TABLE => ResourceEnum::RESTAURANTS_TYPE,
+            ResourceEnum::TRAILS_TABLE => ResourceEnum::TRAILS_TYPE,
             default => throw new Exception('Invalid table: ' . $resourceTable),
         };
     }
