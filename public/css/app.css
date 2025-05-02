@@ -3518,24 +3518,6 @@ video {
 .mt-6 {
   margin-top: 1.5rem;
 }
-.mb-0\.5 {
-  margin-bottom: 0.125rem;
-}
-.-mb-0 {
-  margin-bottom: -0px;
-}
-.-mb-0\.5 {
-  margin-bottom: -0.125rem;
-}
-.-mb-1 {
-  margin-bottom: -0.25rem;
-}
-.ml-6 {
-  margin-left: 1.5rem;
-}
-.ml-5 {
-  margin-left: 1.25rem;
-}
 .line-clamp-2 {
   overflow: hidden;
   display: -webkit-box;
@@ -3610,9 +3592,6 @@ video {
 }
 .h-screen {
   height: 100vh;
-}
-.h-2 {
-  height: 0.5rem;
 }
 .max-h-6 {
   max-height: 1.5rem;
@@ -4118,6 +4097,9 @@ video {
 .p-2 {
   padding: 0.5rem;
 }
+.p-3 {
+  padding: 0.75rem;
+}
 .p-4 {
   padding: 1rem;
 }
@@ -4126,9 +4108,6 @@ video {
 }
 .p-\[2px\] {
   padding: 2px;
-}
-.p-3 {
-  padding: 0.75rem;
 }
 .px-0 {
   padding-left: 0px;
@@ -5507,12 +5486,12 @@ calendar-month::part(td) {
     order: 3;
   }
 
-  .md\:mt-0 {
-    margin-top: 0px;
-  }
-
   .md\:ml-6 {
     margin-left: 1.5rem;
+  }
+
+  .md\:mt-0 {
+    margin-top: 0px;
   }
 
   .md\:block {
