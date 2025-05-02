@@ -197,7 +197,7 @@ class OpenAIService
             if (isset($prompts)) {
                 foreach ($prompts as $prompt) {
                     $systemPrompt = "You are assisting a traveler looking at an area page about the " . $areaName . " area. The page has an ID and your task is to provide context-sensitive responses about the area and answer their questions.";
-                    $userPrompt = "I'm on the page for the " . $areaName . ", which has ID 'area_" . $areaId . "'. User question: '" . $prompt->prompt . "'";
+                    $userPrompt = "I'm on the page for the " . $areaName . ", which has ID 'area_" . $areaId . "'. Question: '" . $prompt->prompt . "'";
                     $data .= $this->createOpenAIFinetuneJson($systemPrompt, $userPrompt, $prompt->answer);
                 }
             }
@@ -219,7 +219,7 @@ class OpenAIService
             if (isset($prompts)) {
                 foreach ($prompts as $prompt) {
                     $systemPrompt = "You are assisting a traveler looking at a specific location page. Each location is a point of interest that has an ID and your task is to provide context-sensitive responses about the location and answer their questions.";
-                    $userPrompt = "I'm on the location page for " . $resourceName . ", which has ID '" . $resourceType . "_" . $resourceId . "' and is in the " . $areaName . " area. User question: '" . $prompt->prompt . "'";
+                    $userPrompt = "I'm on the location page for " . $resourceName . ", which has ID '" . $resourceType . "_" . $resourceId . "' and is in the " . $areaName . " area. Question: '" . $prompt->prompt . "'";
                     $data .= $this->createOpenAIFinetuneJson($systemPrompt, $userPrompt, $prompt->answer);
                 }
             }
@@ -241,7 +241,7 @@ class OpenAIService
             if (isset($prompts)) {
                 foreach ($prompts as $prompt) {
                     $systemPrompt = "You are assisting a user looking at a specific restaurant page. Each restaurant has an ID and your task is to provide context-sensitive responses about the restaurant and answer their questions.";
-                    $userPrompt = "I'm on the restaurant page for " . $resourceName . ", which has ID '" . $resourceType . "_" . $resourceId . "' and is in the " . $areaName . " area. User question: '" . $prompt->prompt . "'";
+                    $userPrompt = "I'm on the restaurant page for " . $resourceName . ", which has ID '" . $resourceType . "_" . $resourceId . "' and is in the " . $areaName . " area. Question: '" . $prompt->prompt . "'";
                     $data .= $this->createOpenAIFinetuneJson($systemPrompt, $userPrompt, $prompt->answer);
                 }
             }
@@ -263,8 +263,24 @@ class OpenAIService
             if (isset($prompts)) {
                 foreach ($prompts as $prompt) {
                     $systemPrompt = "You are assisting a hiker looking at a specific trail page. Each trail has an ID and your task is to provide context-sensitive responses about the trail and answer their questions.";
-                    $userPrompt = "I'm on the trail page for " . $resourceName . ", which has ID '" . $resourceType . "_" . $resourceId . "' and is in the " . $areaName . " area. User question: '" . $prompt->prompt . "'";
+                    $userPrompt = "I'm on the trail page for " . $resourceName . ", which has ID '" . $resourceType . "_" . $resourceId . "' and is in the " . $areaName . " area. Question: '" . $prompt->prompt . "'";
                     $data .= $this->createOpenAIFinetuneJson($systemPrompt, $userPrompt, $prompt->answer);
+                }
+            }
+
+            // Add some basic questions and answers about the trail.
+            $qa = [];
+            if ($resource->distance_miles !== null && $resource->distance_type !== null) {
+                if (strtolower($resource->distance_type) === 'loop') {
+                    $qa[] = [
+                        'questions' => ["How long is it?", "What's the distance?"],
+                        'answer' => 'The trail ' . (strtolower($resource->distance_type) === 'loop' ? 'loop' : '') . ' is ' . $resource->distance_miles . ' miles.',
+                    ];
+                } else {
+                    $qa[] = [
+                        'questions' => ["How long is it?", "What's the distance?"],
+                        'answer' => 'The trail is ' . $resource->distance_miles . ' miles, ' . strtolower($resource->distance_type) . '.',
+                    ];
                 }
             }
         }

@@ -18,11 +18,22 @@
           </ul>
         </div>
         <span class="font-bold text-xl hidden sm:block">Trip Planner</span>
-        <button class="btn btn-ghost btn-circle" @click="selectDates">
+        <button class="btn btn-ghost btn-circle md:ml-6" @click="selectDates">
           <svg class="w-6 h-6 text-white dark:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-            <path fill-rule="evenodd" d="M5 5a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1h1a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1h1a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1 2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a2 2 0 0 1 2-2ZM3 19v-7a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm6.01-6a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm2 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm6 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm-10 4a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm6 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm2 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0Z" clip-rule="evenodd"/>
+             <path fill-rule="evenodd" d="M5 5a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1h1a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1h1a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1 2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a2 2 0 0 1 2-2ZM3 19v-7a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm6.01-6a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm2 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm6 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm-10 4a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm6 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm2 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0Z" clip-rule="evenodd"/>
           </svg>
         </button>
+        <div class="flex items-center ml-2 space-x-2">
+          <div class="text-center leading-tight">
+            <div class="text-xs">{{ getFormattedDate(getStartDate).month }}</div>
+            <div class="text-md">{{ getFormattedDate(getStartDate).day }}</div>
+          </div>
+          <span class="text-xs" v-if="dateRange.start && dateRange.end">&ndash;</span>
+          <div class="text-center leading-tight">
+            <div class="text-xs">{{ getFormattedDate(getEndDate).month }}</div>
+            <div class="text-md">{{ getFormattedDate(getEndDate).day }}</div>
+          </div>
+        </div>
       </div>
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal menu-md px-1">
@@ -35,6 +46,11 @@
         </ul>
       </div>
       <div class="navbar-end">
+        <button class="btn btn-ghost btn-circle p-3" @click="refreshItinerary" v-if="isItineraryOpen">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" id="refresh">
+            <path fill="#ffffff" d="M2.6 5.6C3.5 3.5 5.6 2 8 2c3 0 5.4 2.2 5.9 5h2c-.5-3.9-3.8-7-7.9-7-3 0-5.6 1.6-6.9 4.1L0 3v4h4L2.6 5.6zM16 9h-4.1l1.5 1.4c-.9 2.1-3 3.6-5.5 3.6C5 14 2.5 11.8 2 9H0c.5 3.9 3.9 7 7.9 7 3 0 5.6-1.7 7-4.1L16 13V9z"></path>
+          </svg>
+        </button>
         <button class="btn btn-ghost btn-circle hidden md:flex" @click="toggleSearch">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
         </button>
@@ -74,16 +90,18 @@
 
 <script>
 import CallyCalendar from "../components/CallyCalendar.vue";
+import { useAssistantStore } from "../../stores/assistant";
 import { useAuthStore } from "../../stores/auth";
 import { usePreferencesStore } from "../../stores/preferences";
 import { useSearchStore } from "../../stores/search";
 
 export default {
   setup() {
+    const assistantStore = useAssistantStore();
     const authStore = useAuthStore();
     const preferencesStore = usePreferencesStore();
     const searchStore = useSearchStore();
-    return { authStore, preferencesStore, searchStore };
+    return { assistantStore, authStore, preferencesStore, searchStore };
   },
   components: {
     CallyCalendar,
@@ -93,6 +111,14 @@ export default {
       type: String,
       required: false,
     }
+  },
+  watch: {
+    dateRange(newDates, oldDates) {
+      if (newDates.start !== oldDates.start && newDates.end !== oldDates.end) {
+        this.preferencesStore.dateRange = newDates;
+        this.isCalendarOpen = false;
+      }
+    },
   },
   data() {
     return {
@@ -106,12 +132,39 @@ export default {
     };
   },
   computed: {
+    getEndDate() {
+      if (this.preferencesStore.dateRange) {
+        return this.preferencesStore.dateRange.end;
+      }
+    },
+    getStartDate() {
+      if (this.preferencesStore.dateRange) {
+        return this.preferencesStore.dateRange.start ?? null;
+      }
+    },
     getUser() {
       return this.authStore.user;
+    },
+    isItineraryOpen() {
+      return !this.assistantStore.isAssistantOpen && !this.preferencesStore.isPreferencesOpen && !this.searchStore.isSearchOpen && !this.authStore.isLoginOpen;
     },
   },
   methods: {
     getFeatureFlags() {
+    },
+    getFormattedDate(date) {
+      if (date) {
+        const dateObj = new Date(date);
+        return {
+          month: dateObj.toLocaleString('en-us', {
+            month: 'short',
+          }),
+          day: dateObj.toLocaleString('en-us', {
+            day: 'numeric',
+          }),
+        };
+      }
+      return { month: '', day: ''};
     },
     openAccommodations() {
       this.searchStore.adjustSettingsForPage('accommodations');
@@ -138,6 +191,10 @@ export default {
     openTrails() {
       this.searchStore.adjustSettingsForPage('trails');
       this.searchStore.isSearchOpen = true;
+    },
+    refreshItinerary() {
+      // this.preferencesStore.refreshItinerary();
+      this.preferencesStore.refresh = true;
     },
     selectDates() {
       this.isCalendarOpen = !this.isCalendarOpen;

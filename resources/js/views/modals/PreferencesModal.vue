@@ -32,7 +32,7 @@
               </div>
             </div>
             <div class="flex mb-4 w-full">
-              <input class="adventurousness cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="1" step="0.1" style="width: 100%;" v-model="adventurousness" />
+              <input class="adventurousness cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="1" step="0.1" style="width: 100%;" v-model="preferencesStore.adventurousness" />
               <span class="value badge badge-neutral badge-md hidden">{{ (adventurousness * 100).toFixed(0) }}%</span>
             </div>
             <div class="h-32">
@@ -58,7 +58,7 @@
               </div>
             </div>
             <div class="flex mb-4 w-full">
-              <input class="solitariness cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="1" step="0.1" style="width: 100%;" v-model="solitariness" />
+              <input class="solitariness cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="1" step="0.1" style="width: 100%;" v-model="preferencesStore.solitariness" />
               <span class="value badge badge-neutral badge-md hidden">{{ (solitariness * 100).toFixed(0) }}%</span>
             </div>
             <div class="h-32">
@@ -84,7 +84,7 @@
               </div>
             </div>
             <div class="flex mb-4 w-full">
-              <input class="strenuousness cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="1" step="0.1" style="width: 100%;" v-model="strenuousness" />
+              <input class="strenuousness cursor-ns-resize xs:cursor-ew-resize" type="range" min="0" max="1" step="0.1" style="width: 100%;" v-model="preferencesStore.strenuousness" />
               <span class="value badge badge-neutral badge-md hidden">{{ (strenuousness * 100).toFixed(0) }}%</span>
             </div>
             <div class="h-32">
