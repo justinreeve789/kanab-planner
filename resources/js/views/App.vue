@@ -5,8 +5,10 @@
     <Login v-if="isLoginOpen" />
   </div>
   <Dock />
-  <Assistant />
-  <PreferencesModal />
+  <Corner />
+  <AssistantModal />
+  <AttributesModal />
+  <QuestionnaireModal />
   <SearchModal />
   <TrailMapModal />
 </template>
@@ -18,21 +20,27 @@ import QuestionnaireModal from './modals/QuestionnaireModal.vue';
 import Dock from "./panels/Dock.vue";
 import Header from "./panels/Header.vue";
 import Assistant from "./assistant/Assistant.vue";
-import PreferencesModal from "./modals/PreferencesModal.vue";
+import AttributesModal from "./modals/AttributesModal.vue";
 import SearchModal from "./modals/SearchModal.vue";
 import {useAuthStore} from "../stores/auth";
 import {useFeatureStore} from "../stores/feature";
 import Login from "./login/Login.vue";
 import TrailMapModal from "./modals/TrailMapModal.vue";
+import QuestionnaireButton from "./preferences/QuestionnaireButton.vue";
+import Corner from "./panels/Corner.vue";
+import AssistantModal from "./modals/AssistantModal.vue";
 
 export default {
   components: {
     Login,
+    AssistantModal,
     SearchModal,
-    PreferencesModal,
+    AttributesModal,
+    QuestionnaireButton,
     Assistant,
     Header,
     Dock,
+    Corner,
     Itinerary,
     LoginModal,
     QuestionnaireModal,

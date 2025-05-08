@@ -8,6 +8,9 @@ export const usePreferencesStore = defineStore('preferences', {
     solitariness: 0.5,
     strenuousness: 0.5,
     isPreferencesOpen: false,
+    isQuestionnaireOpen: false,
+    currentPreferencesStep: 0,
+    preferredActivityTypes: [],
     dateRange: null,
     areaIds: null,
     eventIds: null,
@@ -25,8 +28,50 @@ export const usePreferencesStore = defineStore('preferences', {
     getStrenuousnessPercent() {
       return Math.round(this.strenuousness * 100);
     },
+    hasEventsInPreferredActivities() {
+      for (let i = 0; i < this.preferredActivityTypes.length; i++) {
+        const activityType = this.preferredActivityTypes[i];
+        if (activityType === 'educational-and-fun' ||
+          activityType === 'festivals-and-celebrations' ||
+          activityType === 'museum' ||
+          activityType === 'stargazing' ||
+          activityType === 'night-life') {
+          return true;
+        }
+      }
+      return false;
+    },
+    hasTrailsInPreferredActivities() {
+      for (let i = 0; i < this.preferredActivityTypes.length; i++) {
+        const activityType = this.preferredActivityTypes[i];
+        if (activityType === 'bicycling' ||
+          activityType === 'hiking' ||
+          activityType === 'offroading' ||
+          activityType === 'rock-climbing') {
+          return true;
+        }
+      }
+      return false;
+    },
     refreshItinerary() {
       this.itineraryData = null;
     },
-  }
+    setAttributesFromItineraryData(itineraryData) {
+      if (itineraryData.adventurousness) {
+        this.adventurousness = itineraryData.adventurousness;
+      }
+      if (itineraryData.solitariness) {
+        this.solitariness = itineraryData.solitariness;
+      }
+      if (itineraryData.strenuousness) {
+        this.strenuousness = itineraryData.strenuousness;
+      }
+      if (itineraryData.start_date && itineraryData.end_date) {
+        this.dateRange = {
+          start: itineraryData.start_date,
+          end: itineraryData.end_date,
+        }
+      }
+    },
+  },
 })

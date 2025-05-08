@@ -260,31 +260,94 @@ class OpenAIService
             $resourceId = $resource->id;
             $resourceName = $resource->name;
             $prompts = $resource->openai_prompts;
+
+            $systemPrompt = "You are assisting a hiker looking at a specific trail page. Each trail has an ID and your task is to provide context-sensitive responses about the trail and answer their questions.";
+            $userPromptPrefix = "I'm on the trail page for " . $resourceName . ", which has ID '" . $resourceType . "_" . $resourceId . "' and is in the " . $areaName . " area.";
+
             if (isset($prompts)) {
                 foreach ($prompts as $prompt) {
-                    $systemPrompt = "You are assisting a hiker looking at a specific trail page. Each trail has an ID and your task is to provide context-sensitive responses about the trail and answer their questions.";
-                    $userPrompt = "I'm on the trail page for " . $resourceName . ", which has ID '" . $resourceType . "_" . $resourceId . "' and is in the " . $areaName . " area. Question: '" . $prompt->prompt . "'";
+                    $userPrompt = $userPromptPrefix . " Question: '". $prompt->prompt . "'";
                     $data .= $this->createOpenAIFinetuneJson($systemPrompt, $userPrompt, $prompt->answer);
-                }
-            }
-
-            // Add some basic questions and answers about the trail.
-            $qa = [];
-            if ($resource->distance_miles !== null && $resource->distance_type !== null) {
-                if (strtolower($resource->distance_type) === 'loop') {
-                    $qa[] = [
-                        'questions' => ["How long is it?", "What's the distance?"],
-                        'answer' => 'The trail ' . (strtolower($resource->distance_type) === 'loop' ? 'loop' : '') . ' is ' . $resource->distance_miles . ' miles.',
-                    ];
-                } else {
-                    $qa[] = [
-                        'questions' => ["How long is it?", "What's the distance?"],
-                        'answer' => 'The trail is ' . $resource->distance_miles . ' miles, ' . strtolower($resource->distance_type) . '.',
-                    ];
                 }
             }
         }
         return $data;
+    }
+
+    public function generatePromptsFromResourceData($resource) {
+        $qa = [];
+        if (get_class($resource) === Trail::class) {
+            if ($resource->latitude !== null && $resource->longitude !== null) {
+                // TODO: Return a OSRM map.
+                $questions = ["Where is it?", "How do I get there?", "GPS coordinates?"];
+                $qa[] = [
+                    'questions' => $questions,
+                    'answer' => 'The trail starts at latitude ' . $resource->latitude . ' and longitude ' . $resource->longitude . '.',
+                    'related_fields' => 'latitude,longitude',
+                ];
+            }
+            if ($resource->distance_miles !== null && $resource->distance_type !== null) {
+                $questions = ["How long?", "How long is it?", "What's the distance?", "How many miles?"];
+                $relatedFields = 'distance_miles,distance_type';
+                if (strtolower($resource->distance_type) === 'loop') {
+                    $qa[] = [
+                        'questions' => $questions,
+                        'answer' => 'The trail ' . (strtolower($resource->distance_type) === 'loop' ? 'loop' : '') . ' is ' . $resource->distance_miles . ' miles.',
+                        'related_fields' => $relatedFields,
+                    ];
+                } elseif (strtolower($resource->distance_type) === 'point to point') {
+                    $qa[] = [
+                        'questions' => $questions,
+                        'answer' => 'The trail is ' . $resource->distance_miles . ' miles, point to point. It\'s a total of ' . ($resource->distance_miles * 2) . ' miles, out and back.',
+                        'related_fields' => $relatedFields,
+                    ];
+                } elseif (strtolower($resource->distance_type) === 'out and back') {
+                    $qa[] = [
+                        'questions' => $questions,
+                        'answer' => 'The trail is a total of ' . $resource->distance_miles . ' miles, out and back.',
+                        'related_fields' => $relatedFields,
+                    ];
+                } else {
+                    $qa[] = [
+                        'questions' => $questions,
+                        'answer' => 'The trail is ' . $resource->distance_miles . ' miles.',
+                        'related_fields' => $relatedFields,
+                    ];
+                }
+            }
+            if ($resource->pets_allowed !== null) {
+                $questions = ["Can I bring my dog?", "Are dogs allowed?", "Dogs?"];
+                $relatedFields = 'pets_allowed';
+                if (strtolower($resource->pets_allowed) === 'no dogs') {
+                    $qa[] = [
+                        'questions' => $questions,
+                        'answer' => "Dogs are not allowed on this trail.",
+                        'related_fields' => $relatedFields,
+                    ];
+                } elseif (strtolower($resource->pets_allowed === 'leashed')) {
+                    $qa[] = [
+                        'questions' => ["Can I bring my dog?", "Are dogs allowed?", "Dogs?"],
+                        'answer' => "Dogs are allowed on this trail, but must be leashed.",
+                        'related_fields' => $relatedFields,
+                    ];
+                } elseif (strtolower($resource->pets_allowed === 'off-leash')) {
+                    $qa[] = [
+                        'questions' => ["Can I bring my dog?", "Are dogs allowed?", "Dogs?"],
+                        'answer' => "Dogs are allowed on this trail, and can be off-leash.",
+                        'related_fields' => $relatedFields,
+                    ];
+                }
+            }
+            if ($resource->accessibility !== null) {
+                $questions = ["Is it wheelchair accessible?", "How accessible is it for wheelchairs?", "Can wheelchairs be used?", "Is it ADA accessible?"];
+                $qa[] = [
+                    'questions' => $questions,
+                    'answer' => $resource->accessibility,
+                    'related_fields' => 'accessibility',
+                ];
+            }
+        }
+        return $qa;
     }
 
     public function generateFinetuneData($resource) {

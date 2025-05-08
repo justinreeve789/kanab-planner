@@ -52,6 +52,10 @@ Route::prefix('v1')->group(function() {
         Route::get('/', 'App\Http\Controllers\FeatureController@index');
     });
 
+    Route::prefix('featured')->group(function() {
+        Route::get('/{resourceTable}', 'App\Http\Controllers\SearchController@featured');
+    });
+
     Route::prefix('itinerary')->group(function() {
         // TODO: Make this a POST to create the itinerary. A GET should return a list of itineraries.
         Route::get('/', 'App\Http\Controllers\ItineraryController@createItinerary');
@@ -77,10 +81,6 @@ Route::prefix('v1')->group(function() {
 
     Route::prefix('search')->group(function() {
         Route::get('/', 'App\Http\Controllers\SearchController@search');
-        Route::get('/event', 'App\Http\Controllers\EventController@search');
-        Route::get('/location', 'App\Http\Controllers\LocationController@search');
-        Route::get('/restaurant', 'App\Http\Controllers\RestaurantController@search');
-        Route::get('/trail', 'App\Http\Controllers\TrailController@search');
     });
 
     Route::prefix('trail')->group(function() {

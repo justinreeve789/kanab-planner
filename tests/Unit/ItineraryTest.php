@@ -74,4 +74,20 @@ class ItineraryTest extends TestCase
     {
         $this->assertTrue(true);
     }
+
+    public function test_north_rim_not_selected_during_offseason(): void
+    {
+    }
+
+    public function test_locations_not_selected_when_closed(): void
+    {
+    }
+
+    public function test_restaurants_not_selected_when_closed(): void
+    {
+    }
+
+    public function test_trails_not_selected_when_closed(): void
+    {
+    }
 }

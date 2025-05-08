@@ -20,7 +20,7 @@
         <div class="mr-2 text-xs">
           <TrailStats :trail="resource" :showDistance="true" :showElevation="false" :showGrade="false" v-if="resource.distance_miles"/>
         </div>
-        <button class="btn btn-primary btn-sm mr-2" @click="addToItinerary(resource.result_id)">
+        <button class="btn btn-sm mr-2 bg-gradient-to-r from-indigo-400 to-indigo-500 hover:bg-gradient-to-br text-white" @click="addToItinerary(resource.result_id)">
           +
           <span class="hidden md:flex">Add</span>
         </button>
@@ -74,6 +74,7 @@ export default {
           return { class: 'difficulty-hard', name: 'Hard' };
         }
       }
+      return { class: 'difficulty-unknown', name: 'Unknown' };
     },
     getImageUrl() {
       if (this.resource.images && this.resource.images[0]) {

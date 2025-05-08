@@ -1,30 +1,42 @@
 <template>
   <div class="search">
-    <div class="search-box">
-      <label class="input bg-white text-black">
-        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <g
-            stroke-linejoin="round"
-            stroke-linecap="round"
-            stroke-width="2.5"
-            fill="none"
-            stroke="currentColor"
-          >
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.3-4.3"></path>
-          </g>
-        </svg>
-        <input type="search" class="bg-white w-full" placeholder="Search" v-model="query" v-if="showInput" />
-        <span class="loading loading-spinner loading-sm absolute right-8" v-if="loading"></span>
-      </label>
-    </div>
-    <div class="filters">
-      <AreaSelect @update:selected="handleSelectedAreas" :selectedAreaIds="getSelectedAreaIds()" v-if="showAreaSelect" />
-      <ResourceSelect @update:selected="handleSelectedResources" :selectedResourceTables="getSelectedResourceTables()" v-if="showResourceSelect" />
-    </div>
-    <div class="results mt-4">
-      <div class="featured-results">
+    <div class="flex flex-col md:flex-row gap-2 md:gap-4">
+      <div class="search flex-grow md:flex-grow-0 md:w-1/2">
+        <div class="search-box w-full">
+          <label class="input bg-white text-black w-full">
+            <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <g
+                stroke-linejoin="round"
+                stroke-linecap="round"
+                stroke-width="2.5"
+                fill="none"
+                stroke="currentColor"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </g>
+            </svg>
+            <input type="search" class="bg-white w-full" placeholder="Search" v-model="query" v-if="showInput" @input="debouncedQueryChange()" />
+            <span class="loading loading-spinner loading-sm absolute right-8" v-if="loading"></span>
+          </label>
+        </div>
       </div>
+      <div class="filters w-full md:w-1/2 flex gap-2 md:gap-4 flex-col sm:flex-row">
+        <div class="w-full" v-if="showAreaSelect">
+          <AreaSelect @update:selected="handleSelectedAreas" :selectedAreaIds="getSelectedAreaIds()" />
+        </div>
+        <div class="w-full" v-if="showResourceSelect">
+          <ResourceSelect @update:selected="handleSelectedResources" :selectedResourceTables="getSelectedResourceTables()" />
+        </div>
+      </div>
+    </div>
+    <template v-if="showFeatured">
+      <div class="featured-results" v-show="query === ''" v-for="resourceTable in getSelectedResourceTables()">
+        <EventFeatured :areaIds="getSelectedAreaIds()" v-if="resourceTable === 'events'" />
+        <TrailFeatured :areaIds="getSelectedAreaIds()" v-if="resourceTable === 'trails'" />
+      </div>
+    </template>
+    <div class="results mt-4">
       <div class="standard-results">
         <div class="result-item -mx-6" v-for="resource in results" :key="result_id">
 <!--          <AccommodationResult v-if="resource.type === 'accommodation' && selectedResourceTables.includes('accommodations')" />-->
@@ -49,15 +61,19 @@ import AreaSelect from "./AreaSelect.vue";
 import ResourceSelect from "./ResourceSelect.vue";
 import { useSearchStore } from "../../stores/search";
 import {mapState} from "pinia";
+import TrailFeatured from "./featured/TrailFeatured.vue";
+import EventFeatured from "./featured/EventFeatured.vue";
 
 export default {
   components: {
     AreaSelect,
     ResourceSelect,
     AccommodationResult,
+    EventFeatured,
     EventResult,
     LocationResult,
     RestaurantResult,
+    TrailFeatured,
     TrailResult,
   },
   setup() {
@@ -90,11 +106,11 @@ export default {
     };
   },
   watch: {
-    query(newQuery) {
-      if (newQuery.trim() !== '') {
-        this.debouncedQueryChange();
-      }
-    },
+    // query(newQuery) {
+    //   if (newQuery.trim() !== '') {
+    //     this.debouncedQueryChange();
+    //   }
+    // },
     selectedAreaIds(newAreaIds) {
       this.debouncedQueryChange();
     },
@@ -132,7 +148,7 @@ export default {
     executeQuery() {
       this.loading = true;
       axios
-        .get('/api/v1/search/', {
+        .get('/api/v1/search', {
           params: {
             q: this.query,
             ar: this.getSelectedAreaIds(),
@@ -157,4 +173,3 @@ export default {
   },
 }
 </script>
-

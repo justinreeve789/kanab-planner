@@ -14,6 +14,7 @@ class SearchController extends Controller
     const BASE_RANKING_SCORE_THRESHOLD = 0.5;
     const MAX_RANKING_SCORE_THRESHOLD = 0.9;
     const DEFAULT_NUM_PER_PAGE = 10;
+    const FEATURED_RESULT_COUNT = 4;
 
     public float $rankingScoreThreshold = self::BASE_RANKING_SCORE_THRESHOLD;
 
@@ -25,5 +26,12 @@ class SearchController extends Controller
         $num = $request->get('num') ?? self::DEFAULT_NUM_PER_PAGE;
         $searchService = new SearchService();
         return $searchService->search($query, $areaIds, $resourceTables, $page, $num);
+    }
+
+    public function featured(Request $request, string $resourceTable) {
+        $areaIds = $request->get('area_ids');
+        /** @var Resource $model */
+        $model = Resource::getModelForResourceTable($resourceTable);
+        return $model::getFeatured($areaIds, self::FEATURED_RESULT_COUNT);
     }
 }

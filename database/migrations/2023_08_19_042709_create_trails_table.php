@@ -40,7 +40,7 @@ class CreateTrailsTable extends Migration
             $table->string('difficulty')->nullable();
             $table->smallInteger('elevation_high_ft')->nullable();
             $table->smallInteger('elevation_low_ft')->nullable();
-            $table->string('vehicle')->nullable();
+            $table->text('vehicle')->nullable();
             $table->decimal('distance_miles', 4, 1)->nullable();
             $table->string('distance_type')->nullable();
             $table->decimal('average_hours', 3, 1)->nullable();

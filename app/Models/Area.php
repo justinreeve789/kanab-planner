@@ -51,6 +51,11 @@ class Area extends Model
         return trim(strtolower(str_replace(' ', '-', preg_replace("/[^a-zA-Z0-9 ]/", "", $this->short_name))));
     }
 
+    public function trails()
+    {
+        return $this->hasMany(Trail::class, 'area_id', 'id');
+    }
+
     public function weather()
     {
         return $this->hasMany(AreaWeather::class, 'area_id', 'id');

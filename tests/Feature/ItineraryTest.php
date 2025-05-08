@@ -29,7 +29,7 @@ class ItineraryTest extends TestCase
         $itineraryService->setupItinerary(new Request());
         $itineraryService->assignDaysForAreas($itineraryService->getItinerary()->getUseFirstDay(), $itineraryService->getItinerary()->getUseLastDay());
         $itineraryService->shuffleDays();
-        $itineraryService->getItinerary()->setTotalPossibleTrails($itineraryService->calculateTotalPossibleTrailsForTrip());
+        $itineraryService->getItinerary()->setTotalPossibleTrailDays($itineraryService->calculateTotalPossibleTrailDays());
         foreach ($itineraryService->getItinerary()->getDays() as $dayNum => $day) {
             $itineraryService->fillDay($day);
         }
@@ -55,7 +55,7 @@ class ItineraryTest extends TestCase
         $itineraryService->setupItinerary(new Request());
         $itineraryService->assignDaysForAreas($itineraryService->getItinerary()->getUseFirstDay(), $itineraryService->getItinerary()->getUseLastDay());
         $itineraryService->shuffleDays();
-        $itineraryService->getItinerary()->setTotalPossibleTrails($itineraryService->calculateTotalPossibleTrailsForTrip());
+        $itineraryService->getItinerary()->setTotalPossibleTrailDays($itineraryService->calculateTotalPossibleTrailDays());
         foreach ($itineraryService->getItinerary()->getDays() as $dayNum => $day) {
             $itineraryService->fillDay($day);
         }

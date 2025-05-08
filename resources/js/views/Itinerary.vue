@@ -133,7 +133,6 @@ export default {
     },
     fetchItineraryData() {
       const itineraryParams = this.getItineraryParams();
-      console.log(itineraryParams);
       const urlParams = new URLSearchParams(window.location.search);
       urlParams.forEach((value, key) => {
         itineraryParams[key] = value;
@@ -148,6 +147,7 @@ export default {
         })
         .then((response) => {
           this.itineraryData = response.data;
+          this.preferencesStore.setAttributesFromItineraryData(this.itineraryData);
         })
         .catch((error) => {
           console.error('Error fetching itinerary data:', error);

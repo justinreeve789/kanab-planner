@@ -23,4 +23,8 @@ class TrailTest extends TestCase
     public function test_difficulty_derived_from_strenuousness_matches_difficulty_derived_from_imports(): void
     {
     }
+
+    public function test_higher_adventurousness_and_strenuousness_results_in_longer_tails(): void
+    {
+    }
 }

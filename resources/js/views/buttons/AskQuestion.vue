@@ -29,7 +29,6 @@ export default {
   props: {
     resource_table: String,
     resource: Object,
-    type: String,
   },
 };
 </script>

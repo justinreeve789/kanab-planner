@@ -138,26 +138,43 @@ class ItineraryService
     }
 
     /**
-     * A higher adventurousness rating will result in fewer trails.
-     * 0.1 = ~1/6 of the days spent hiking.
-     * 0.5 = ~1/3 of the days spent hiking.
-     * 1.0 = ~3/5 of the days spent hiking.
-     * TODO: An adventurousness of 1.0 should really be more like 4/5 or 5/6 of the days spent hiking.
+     * A "trail day" is a day in which at least one trail is added. There could be multiple shorter hikes on the same day.
+     * 0.1 = ~25% of the days spent hiking.
+     * 0.5 = ~50% of the days spent hiking.
+     * 1.0 = ~100% of the days spent hiking.
      */
-    public function calculateTotalPossibleTrailsForTrip(): int
+    public function calculateTotalPossibleTrailDays(): int
     {
-        $itinerary = $this->getItinerary();
-        $adventurousness = $itinerary->getAdventurousness();
-        $days = max([$itinerary->getDurationDays() - 2, 2]);
-        return round(min([$days * 2 * (log(1 + (5 * $adventurousness), 10) / 1.5), $itinerary->getDurationDays()]));
+        $adventurousness = $this->getItinerary()->getAdventurousness();
+        $days = ($this->getItinerary()->getDurationDays() - 2);
+
+        // Define the target proportions for the specified adventurousness levels.
+        $proportionLow = 1/4;   // For adventurousness ~0.1
+        $proportionMedium = 1/2;  // For adventurousness ~0.5
+        $proportionHigh = 1.0;  // For adventurousness = 1.0
+
+        // Use a logarithmic function to map adventurousness to a scaling factor.
+        $logScale = log10(1 + ($adventurousness * 9));
+
+        // Interpolate between the base proportions using the logarithmic scale.
+        if ($adventurousness <= 0.5) {
+            $interpolatedProportion = $proportionLow + ($proportionMedium - $proportionLow) * ($logScale / log10(5.5));
+        } else {
+            $interpolatedProportion = $proportionMedium + ($proportionHigh - $proportionMedium) * (($logScale - log10(5.5)) / (log10(10) - log10(5.5)));
+        }
+
+        $calculatedTrailDays = round($days * $interpolatedProportion);
+
+        // Ensure the calculated trail days do not exceed the total days or go below zero.
+        return max(1, min($days, $calculatedTrailDays));
     }
 
     /**
      * Let's go hour by hour and figure out where activities fit. Breakfast ~8:00am, lunch ~12:00pm, dinner ~5:00pm.
-     * Make sure there's at least 3 hours between breakfast and lunch, and 4 hours between lunch and dinner. If lunch
-     * won't be possible, set a "bringSnacks" flag in the overlapping activity to true.
+     * Make sure there's at least 3 hours between breakfast and lunch, and 4 hours between lunch and dinner.
      *
-     * A combined less adventurous and more solitary setting will avoid taking them too far, such as St. George or Page.
+     * TODO: A combined less adventurous and more solitary setting will avoid taking them too far, such as St. George or Page.
+     * TODO: If lunch won't be possible, set a "bringSnacks" flag in the overlapping activity to true.
      */
     public function fillDay(Day $day, $pass = false): void
     {
@@ -652,7 +669,10 @@ class ItineraryService
             // TODO: Don't be so random about the area. Get an area with other events they'd be interested in. Also take
             // into account other preferences like maximum distance they want to travel.
             /** @var CustomQueryBuilder $query */
-            $query = Area::inWeightedRandomOrder($adventurousness);
+            $itinerary = $this->getItinerary();
+            $query = Area::inWeightedRandomOrder($adventurousness)->whereHas('trails', function($q) use ($itinerary) {
+                $q->where('trails.distance_miles', '>=', $itinerary->calculateMinimumTrailDistance());
+            });
 
             // If the user's adventurousness is low (< 0.3, < 0.4), we won't pick areas that are too far from their base area.
             switch ($adventurousness) {
@@ -669,6 +689,8 @@ class ItineraryService
             if ($maxDistance) {
                 $query->whereProximity($baseArea->latitude, $baseArea->longitude, $maxDistance);
             }
+
+            // If there aren't trails with their minimum distance in the area, don't use the area.
 
             // If the user's adventurousness < 0.5, let's focus on Kanab, and not St. George.
             if ($adventurousness < 0.5) {
@@ -712,6 +734,7 @@ class ItineraryService
 
             $area = $query->first();
             if (!$area) {
+                // TODO: If nothing was found, retry it with relaxed settings, particularly on minimum distance for trails.
                 $area = $baseArea;
             }
 

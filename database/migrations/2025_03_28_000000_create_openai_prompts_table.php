@@ -21,8 +21,13 @@ return new class extends Migration
             $table->integer('source_id')->unsigned();
             $table->string('prompt');
             $table->text('answer');
+            $table->string('related_fields')->nullable();
+            $table->string('trained_model')->nullable();
+            $table->timestamp('trained_at')->nullable();
             $table->timestamps();
             $table->index(['source_table', 'source_id']);
+            $table->index(['related_fields']);
+            $table->index(['trained_model']);
         });
 
         self::importTable('openai_prompts');

@@ -89,11 +89,12 @@ class Itinerary extends CachedModel
         $this->duration_days = $this->duration_days ?? self::DEFAULT_DURATION_DAYS;
         $this->event_ids = [];
         $this->location_ids = [];
+        $this->minimum_trail_days = 0;
         $this->restaurant_ids = [];
         $this->solitariness = $this->solitariness ?? self::DEFAULT_SOLITARINESS;
         $this->strenuousness = $this->strenuousness ?? self::DEFAULT_STRENUOUSNESS;
         $this->thriftiness = $this->thriftiness ?? self::DEFAULT_THRIFTINESS;
-        $this->total_possible_trails = 0;
+        $this->total_possible_trail_days = 0;
         $this->total_travel_distance = 0;
         $this->trail_ids = [];
     }
@@ -183,6 +184,28 @@ class Itinerary extends CachedModel
         return $this->days;
     }
 
+    public function calculateMinimumTrailDistance(): float
+    {
+        // A high adventurousness and strenuousness should result in generally longer trails. Note that this isn't the
+        // same as the minimum trail distance per day.
+        if ($this->adventurousness >= 0.7 || $this->strenuousness >= 0.6) {
+            $minimumDistance = 8 * (($this->adventurousness * 0.75) + ($this->strenuousness * 1.25)) / 5;
+            return $minimumDistance;
+        }
+        return 0.1;
+    }
+
+    public function calculateMinimumTrailDistancePerDay(): float
+    {
+        // A high adventurousness and strenuousness should result in generally longer trails. Note that this isn't the
+        // same as the minimum trail distance per day.
+        if ($this->adventurousness >= 0.6 && $this->strenuousness >= 0.6) {
+            $minimumDistance = 8 * (($this->adventurousness * 0.75) + ($this->strenuousness * 1.25)) / 2;
+            return $minimumDistance;
+        }
+        return 0.1;
+    }
+
     public function deleteDay($index): array
     {
         if (isset($this->days[$index])) {
@@ -255,9 +278,9 @@ class Itinerary extends CachedModel
         return $this->departure_date_time;
     }
 
-    public function getTotalPossibleTrails(): ?int
+    public function getTotalPossibleTrailDays(): ?int
     {
-        return $this->total_possible_trails;
+        return $this->total_possible_trail_days;
     }
 
     public function getTotalTravelDistance(): ?int
@@ -363,9 +386,9 @@ class Itinerary extends CachedModel
         $this->days = $days;
     }
 
-    public function setTotalPossibleTrails(int $totalPossibleTrails)
+    public function setTotalPossibleTrailDays(int $totalPossibleTrailDays)
     {
-        $this->total_possible_trails = $totalPossibleTrails;
+        $this->total_possible_trail_days = $totalPossibleTrailDays;
     }
 
     public function setTotalTravelDistance(int $totalTravelDistance)

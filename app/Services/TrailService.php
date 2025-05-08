@@ -7,6 +7,7 @@ use App\Models\Area;
 use App\Models\Itinerary\Period;
 use App\Models\Trail;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class TrailService
 {
@@ -23,16 +24,21 @@ class TrailService
      */
     public function getRandomTrailForPeriod($areaId, $period, $itinerary = null, $existingTrails = []): ?Trail
     {
+        $totalTrailsForArea = Trail::where('area_id', $areaId)->get()->count();
         $trails = Trail::query();
+        $adventurousness = $itinerary->getAdventurousness();
+        $solitariness = $itinerary->getSolitariness();
+        $strenuousness = $itinerary->getStrenuousness();
         if ($itinerary !== null) {
             $trails = $trails->sortByDeviation([
-                'adventurousness' => $itinerary->getAdventurousness(),
-                'solitariness' => $itinerary->getSolitariness(),
-                'strenuousness' => $itinerary->getStrenuousness()], [
+                'adventurousness' => $adventurousness,
+                'solitariness' => $solitariness,
+                'strenuousness' => $strenuousness
+            ], [
                 'adventurousness' => 12,
                 'solitariness' => 7,
                 'strenuousness' => 25,
-            ])->take(10)->inRandomOrder();
+            ])->take(max(20, min(10, ceil($totalTrailsForArea / 9))))->inRandomOrder();
         } else {
             $trails->inRandomOrder();
         }
@@ -41,7 +47,10 @@ class TrailService
             ->whereNotIn('trails.id', $existingTrails);
         if ($period === Period::EVENING) {
             $trails->where('distance_miles', '<=', '1.5');
+        } else {
+            $trails->where('distance_miles', '>=', $itinerary->calculateMinimumTrailDistance());
         }
+
         $trails->with(['area', 'images']);
         $trails = $trails->get();
         foreach ($trails as $trail) {

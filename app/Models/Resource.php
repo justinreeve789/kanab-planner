@@ -6,13 +6,12 @@ use App\Models\Blog\Post;
 use App\Models\Builder\CustomQueryBuilder;
 use App\Models\Itinerary\Task;
 use App\ResourceEnum;
-use App\Traits\ActivityData;
 use App\Traits\ResourceScopes;
 use App\Traits\SearchableResource;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 abstract class Resource extends Model
 {
@@ -153,7 +152,7 @@ abstract class Resource extends Model
 
         $query = $this->select($table . '.*')
             ->join('resource_data', function($join) use ($table) {
-                $join->on('resource_data.resource_table', '=', \DB::raw("'" . $table . "'"))->on($table . '.id', '=', 'resource_data.resource_id');
+                $join->on('resource_data.resource_table', '=', DB::raw("'" . $table . "'"))->on($table . '.id', '=', 'resource_data.resource_id');
             });
 
         if ($order != '') {
@@ -192,6 +191,11 @@ abstract class Resource extends Model
 
     public function isTrail() {
         return get_class($this) === ResourceEnum::TRAILS_CLASS;
+    }
+
+    public static function getFeatured(array $areaIds, int $featuredCount = 3)
+    {
+        return null;
     }
 
     public static function getModelForResourceTable($resourceTable)

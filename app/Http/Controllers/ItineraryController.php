@@ -21,6 +21,7 @@ class ItineraryController extends Controller
     const DEFAULT_DAYS = 5;
     const DEFAULT_SEASON = 'summer';
     const DEFAULT_DISTANCE = 30;
+    const MINIMUM_TRAIL_DAYS_RATIO_TO_TOTAL_POSSIBLE = 0.8;
 
     private $conversionService;
     private $itinerary;
@@ -47,7 +48,8 @@ class ItineraryController extends Controller
         $this->itineraryService->setupItinerary($request);
         $this->itineraryService->assignDaysForAreas($this->getItinerary()->getUseFirstDay(), $this->getItinerary()->getUseLastDay());
         $this->itineraryService->shuffleDays();
-        $this->itineraryService->getItinerary()->setTotalPossibleTrails($this->itineraryService->calculateTotalPossibleTrailsForTrip());
+        $this->itineraryService->getItinerary()->setTotalPossibleTrailDays($this->itineraryService->calculateTotalPossibleTrailDays());
+        $this->itineraryService->getItinerary()->minimum_trail_days = max(1, floor(self::MINIMUM_TRAIL_DAYS_RATIO_TO_TOTAL_POSSIBLE * $this->itineraryService->getItinerary()->getTotalPossibleTrailDays()));
         foreach ($this->itineraryService->getItinerary()->getDays() as $dayNum => $day) {
             $this->itineraryService->fillDay($day);
         }

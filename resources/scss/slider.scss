@@ -20,6 +20,31 @@
     width: 40px;
   }
 
+  &.mini {
+    input[type="range"] {
+      border-radius: 0;
+      display: block;
+      margin-bottom: 5px;
+      pointer-events: none;
+
+      &.adventurousness::-webkit-slider-thumb {
+        box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #FFC300, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #FF8C46, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #FF5733;
+      }
+
+      &.solitariness::-webkit-slider-thumb {
+        box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #33FFEC, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #33FF9E, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #33FF57;
+      }
+
+      &.strenuousness::-webkit-slider-thumb {
+        box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #C833FF, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #8C33FF, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #5733FF;
+      }
+    }
+
+    input[type='range']::-webkit-slider-thumb {
+      filter: blur(5px);
+    }
+  }
+
   input[type="range"] {
     border-radius: calc(var(--slider-height) / 2);
     overflow: hidden;
@@ -28,18 +53,44 @@
       background: none;
     }
 
-    &.adventurousness::-webkit-slider-thumb {
-      box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #FF5733, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #FF8C46, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #FFC300;
+    + .thumb {
+      position: absolute;
+      margin-top: 3px;
+      height: 24px;
+      pointer-events: none;
+      width: 24px;
     }
 
-    &.solitariness::-webkit-slider-thumb {
-      background: linear-gradient(to right, #33FF57, #33FFEC);
-      box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #33FF57, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #33FF9E, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #33FFEC;
+    &.adventurousness {
+      + .thumb {
+        filter: brightness(0.75) invert(0.5) sepia(1.5) saturate(175%) hue-rotate(300deg);
+      }
+
+      &::-webkit-slider-thumb {
+        box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #FF5733, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #FF8C46, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #FFC300;
+      }
     }
 
-    &.strenuousness::-webkit-slider-thumb {
-      background: linear-gradient(to right, #5733FF, #C833FF);
-      box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #5733FF, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #8C33FF, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #C833FF;
+    &.solitariness {
+      + .thumb {
+        filter: brightness(0.75) invert(0.5) sepia(1.5) saturate(250%) hue-rotate(90deg);
+      }
+
+      &::-webkit-slider-thumb {
+        background: linear-gradient(to right, #33FF57, #33FFEC);
+        box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #33FF57, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #33FF9E, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #33FFEC;
+      }
+    }
+
+    &.strenuousness {
+      + .thumb {
+        filter: invert(0.25) sepia(1.0) saturate(1000%) hue-rotate(200deg);
+      }
+
+      &::-webkit-slider-thumb {
+        background: linear-gradient(to right, #5733FF, #C833FF);
+        box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #5733FF, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #8C33FF, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #C833FF;
+      }
     }
   }
 
@@ -58,10 +109,10 @@
     }
 
     input[type='range']::-webkit-slider-thumb {
-      width: 0px;
+      width: 0;
       -webkit-appearance: none;
       height: var(--slider-height);
-      box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #FF5733, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #FF8C46, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #FFC300;
+      //box-shadow: calc(-1.5 * var(--slider-width)) 0 0 var(--slider-width) #FF5733, calc(-1.25 * var(--slider-width)) 0 0 var(--slider-width) #FF8C46, calc(-1 * var(--slider-width)) 0 0 var(--slider-width) #FFC300;
       filter: blur(20px);
     }
   }

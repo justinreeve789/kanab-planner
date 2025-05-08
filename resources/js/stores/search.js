@@ -8,6 +8,7 @@ export const useSearchStore = defineStore('search', {
     sortField: '',
     query: '',
     highlightSearchInMenu: false,
+    closeAfterAddToItinerary: false,
     selectedAreaIds: [],
     selectedResourceTables: [],
     showCloseButtonOnMobile: false,
@@ -28,7 +29,7 @@ export const useSearchStore = defineStore('search', {
       this.highlightSearchInMenu = true;
       this.title = 'Search';
       this.selectedResourceTables = ['events', 'locations', 'restaurants', 'trails'];
-      this.selectedAreaIds = [1, 3, 4, 5, 7];
+      this.selectedAreaIds = [1, 2, 3, 4, 5, 6, 7];
     },
     adjustSettingsForResourceListForTable(resourceTable) {
       this.clearSettings();

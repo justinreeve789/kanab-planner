@@ -117,4 +117,23 @@ class Trail extends Resource
     {
         return strpos(strtolower($this->difficulty), 'difficult') !== false;
     }
+
+    public static function getFeatured(array $areaIds, int $featuredCount = 3)
+    {
+        $index = 0;
+        $resources = self::whereHas('images')->where('description', '!=', '')->where('unique', 1)->whereIn('area_id', $areaIds)->inRandomOrder(date('YmdH'))->take($featuredCount)->get();
+        $resourceIds = [];
+        foreach ($resources as $resource) {
+            $resourceIds[] = $resource->id;
+            $index++;
+        }
+        while ($index++ < $featuredCount) {
+            $resource = self::whereHas('images')->where('description', '!=', '')->whereIn('area_id', $areaIds)->whereNotIn('id', $resourceIds)->inRandomOrder(date('YmdH'))->first();
+            if ($resource) {
+                $resources[] = $resource;
+                $resourceIds[] = $resource->id;
+            }
+        }
+        return $resources;
+    }
 }
