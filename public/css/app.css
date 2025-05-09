@@ -2028,6 +2028,10 @@ video {
   translate: 0 -35%;
   clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 80% 80%, 80% 100%);
 }
+.checkbox-primary {
+  color: var(--color-primary-content);
+  --input-color: var(--color-primary);
+}
 .checkbox:disabled {
   cursor: not-allowed;
   opacity: 20%;
@@ -3423,6 +3427,9 @@ video {
 .-top-6 {
   top: -1.5rem;
 }
+.left-2 {
+  left: 0.5rem;
+}
 .z-10 {
   z-index: 10;
 }
@@ -3576,6 +3583,9 @@ video {
 }
 .-mt-8 {
   margin-top: -2rem;
+}
+.ml-8 {
+  margin-left: 2rem;
 }
 .line-clamp-2 {
   overflow: hidden;
@@ -3762,6 +3772,9 @@ video {
 }
 .min-w-\[128px\] {
   min-width: 128px;
+}
+.min-w-\[500px\] {
+  min-width: 500px;
 }
 .max-w-6xl {
   max-width: 72rem;
@@ -5638,6 +5651,10 @@ calendar-month::part(td) {
     max-width: 24rem;
   }
 
+  .sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .sm\:flex-row {
     flex-direction: row;
   }
@@ -5818,6 +5835,10 @@ calendar-month::part(td) {
 
   .md\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .md\:flex-row {

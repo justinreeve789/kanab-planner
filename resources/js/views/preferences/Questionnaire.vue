@@ -15,7 +15,7 @@
             </button>
           </div>
           <p class="text-center text-sm text-white mt-8">
-            <a class="underline" href="#">No thanks, just create a random itinerary with basic settings</a>
+            <a class="cursor-pointer underline" @click="closePreferences()">No thanks, just create a random itinerary with basic settings</a>
           </p>
         </div>
       </div>
@@ -26,19 +26,23 @@
       </div>
       <div class="h-full overflow-hidden pt-4">
 <!--      <Pagination :step="step" v-model="preferencesStore.currentPreferencesStep" />-->
-      <div class="h-full w-full flex flex-cols justify-center overflow-x-hidden overflow-y-auto" v-if="step !== 0">
-        <div v-show="step === 1">
-          <ActivityTypes />
-        </div>
-        <div class="ass mx-auto max-w-[640px] px-8" v-show="step === 2">
-          <ASS />
-        </div>
-        <div v-if="step === 3">
-          <Destinations />
-        </div>
-        <div v-if="step === 4">
-          <Complete />
-        </div>
+        <div class="h-full w-full flex flex-cols justify-center overflow-x-hidden overflow-y-auto" v-if="step !== 0">
+          <div class="min-w-[500px]" v-show="step === 1">
+            <Dates />
+          </div>
+          <div v-show="step === 2">
+            <div class="divider"></div>
+            <ActivityTypes />
+          </div>
+          <div class="ass mx-auto max-w-[640px] px-8" v-show="step === 3">
+            <ASS />
+          </div>
+          <div v-if="step === 4">
+            <Destinations />
+          </div>
+          <div v-if="step === 5">
+            <Complete />
+          </div>
         </div>
       </div>
     </div>
@@ -47,25 +51,40 @@
 
 <script>
 import ActivityTypes from "./ActivityTypes.vue";
+import ASS from "./ASS.vue";
+import Complete from "./Complete.vue";
+import Dates from "./Dates.vue";
 import Destinations from "./Destinations.vue";
 import Pagination from "./Pagination.vue";
 import Steps from "./Steps.vue";
-import ASS from "./ASS.vue";
-import Complete from "./Complete.vue";
-import {usePreferencesStore} from "../../stores/preferences";
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { usePreferencesStore } from "../../stores/preferences";
 
 export default {
   setup() {
     const preferencesStore = usePreferencesStore();
-    return { preferencesStore };
+    const onSwiper = (swiper) => {
+      console.log(swiper);
+    };
+    const onSlideChange = () => {
+      console.log('slide change');
+    };
+    return {
+      onSwiper,
+      onSlideChange,
+      preferencesStore,
+    };
   },
   components: {
     ActivityTypes,
     ASS,
     Complete,
+    Dates,
     Destinations,
     Pagination,
     Steps,
+    Swiper,
+    SwiperSlide,
   },
   watch: {
     'preferencesStore.currentPreferencesStep'(newVal, oldVal) {
@@ -87,6 +106,9 @@ export default {
   props: {
   },
   methods: {
+    closePreferences() {
+      this.preferencesStore.isPreferencesOpen = false;
+    },
   },
   mounted() {
   },

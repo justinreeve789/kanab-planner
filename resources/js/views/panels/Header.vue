@@ -206,7 +206,7 @@ export default {
       this.isCalendarOpen = !this.isCalendarOpen;
     },
     toggleAttributes() {
-      this.preferencesStore.currentPreferencesStep = 2;
+      this.preferencesStore.currentPreferencesStep = 3;
       this.preferencesStore.isPreferencesOpen = !this.preferencesStore.isPreferencesOpen;
     },
     toggleSearch() {

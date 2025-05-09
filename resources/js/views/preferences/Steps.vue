@@ -1,9 +1,10 @@
 <template>
   <ul class="steps w-full text-sm md:text-md">
-    <li class="step cursor-pointer" :class="step >= 1 ? 'step-primary' : ''" @click="goToStep(1)">Activities</li>
-    <li class="step cursor-pointer" :class="step >= 2 ? 'step-primary' : ''" @click="goToStep(2)">About You</li>
-    <li class="step cursor-pointer" :class="step >= 3 ? 'step-primary' : ''" @click="goToStep(3)">Destinations</li>
-    <li class="step cursor-pointer" :class="step >= 4 ? 'step-primary' : ''" @click="goToStep(4)">Itinerary</li>
+    <li class="step cursor-pointer" :class="step >= 1 ? 'step-primary' : ''" @click="goToStep(1)">Dates</li>
+    <li class="step cursor-pointer" :class="step >= 2 ? 'step-primary' : ''" @click="goToStep(2)">Activities</li>
+    <li class="step cursor-pointer" :class="step >= 3 ? 'step-primary' : ''" @click="goToStep(3)">About You</li>
+    <li class="step cursor-pointer" :class="step >= 4 ? 'step-primary' : ''" @click="goToStep(4)">Destinations</li>
+    <li class="step cursor-pointer" :class="step >= 5 ? 'step-primary' : ''" @click="goToStep(5)">Itinerary</li>
   </ul>
 </template>
 

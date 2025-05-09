@@ -8,9 +8,9 @@ export const usePreferencesStore = defineStore('preferences', {
     solitariness: 0.5,
     strenuousness: 0.5,
     isPreferencesOpen: false,
-    isQuestionnaireOpen: false,
     currentPreferencesStep: 0,
     preferredActivityTypes: [],
+    preferredMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     dateRange: null,
     areaIds: null,
     eventIds: null,
@@ -27,6 +27,12 @@ export const usePreferencesStore = defineStore('preferences', {
     },
     getStrenuousnessPercent() {
       return Math.round(this.strenuousness * 100);
+    },
+    getRandomPreferredMonth() {
+      if (this.preferredMonths.length > 0) {
+        const index = Math.floor(Math.random() * this.preferredMonths);
+        return this.preferredMonths[index];
+      }
     },
     hasEventsInPreferredActivities() {
       for (let i = 0; i < this.preferredActivityTypes.length; i++) {
