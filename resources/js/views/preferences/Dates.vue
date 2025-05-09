@@ -42,7 +42,7 @@
     </div>
   </fieldset>
   <div>
-    <CallyCalendar class="absolute left-1/2 -translate-x-1/2" v-show="isCalendarOpen" v-model.lazy="dateRange" />
+    <CallyCalendar class="absolute left-1/2 -translate-x-1/2 bg-white text-black" v-show="isCalendarOpen" v-model.lazy="dateRange" />
   </div>
 </template>
 

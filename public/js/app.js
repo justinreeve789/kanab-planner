@@ -30228,7 +30228,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       })
     }, null, 8 /* PROPS */, _hoisted_18), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $setup.preferencesStore.preferredMonths]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(month.name), 1 /* TEXT */)])]);
   }), 128 /* KEYED_FRAGMENT */))])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_CallyCalendar, {
-    "class": "absolute left-1/2 -translate-x-1/2",
+    "class": "absolute left-1/2 -translate-x-1/2 bg-white text-black",
     modelValue: $data.dateRange,
     "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
       return $data.dateRange = $event;
