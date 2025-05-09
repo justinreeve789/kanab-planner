@@ -21,9 +21,12 @@
       </div>
     </div>
     <div v-else>
-      <Steps class="mb-6" :step="step" v-model="preferencesStore.currentPreferencesStep" />
+      <div class="sticky -top-6 z-10 -mt-8 bg-white h-[80px]">
+        <Steps class="py-2" :step="step" v-model="preferencesStore.currentPreferencesStep" />
+      </div>
+      <div class="h-full overflow-hidden pt-4">
 <!--      <Pagination :step="step" v-model="preferencesStore.currentPreferencesStep" />-->
-      <div class="h-full w-full flex flex-col justify-center items-center" v-if="step !== 0">
+      <div class="h-full w-full flex flex-cols justify-center overflow-x-hidden overflow-y-auto" v-if="step !== 0">
         <div v-show="step === 1">
           <ActivityTypes />
         </div>
@@ -35,6 +38,7 @@
         </div>
         <div v-if="step === 4">
           <Complete />
+        </div>
         </div>
       </div>
     </div>

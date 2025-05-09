@@ -8,7 +8,7 @@
         <label class="fieldset-label bg-white text-black" v-for="(activityType, index) in activityTypes" :key="index">
             <input
                 type="checkbox"
-                class="checkbox"
+                class="checkbox text-black"
                 :value="activityType.name"
                 v-model="selectedActivityTypes"
             />
@@ -31,7 +31,7 @@ export default {
   data() {
     return {
       activityTypes: [],
-      selectAll: false,
+      selectAll: true,
       selectedActivityTypes: [],
     };
   },
@@ -53,6 +53,7 @@ export default {
         .get('/api/v1/activity_type')
         .then((response) => {
           this.activityTypes = response.data;
+          this.selectAllActivityTypes();
         })
         .catch((error) => {
           console.error('Error fetching activity types:', error);
