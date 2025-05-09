@@ -2,7 +2,7 @@
     <fieldset class="fieldset p-4 border border-base-300 text-lg">
         <legend class="fieldset-legend bg-white text-black">Which activities are you interested in?</legend>
         <label class="fieldset-label">
-            <input type="checkbox" class="checkbox" value="all" v-model="selectAll" />
+            <input type="checkbox" class="checkbox text-black" value="all" v-model="selectAll" />
             <span class="font-semibold bg-white text-black">I'm Up For Anything! (select all)</span>
         </label>
         <label class="fieldset-label bg-white text-black" v-for="(activityType, index) in activityTypes" :key="index">
