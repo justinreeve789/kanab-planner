@@ -26,7 +26,7 @@
     </label>
     <div v-if="noDates">
       <p class="my-4 text-center">Select the months you'd be interested in visiting</p>
-      <ul class="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
+      <ul class="grid gap-2 pl-8 grid-cols-2 md:grid-cols-3">
         <li v-for="month in months" :key="month.id" class="p-4">
           <label class="label">
             <input

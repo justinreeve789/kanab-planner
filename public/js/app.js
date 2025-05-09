@@ -30195,7 +30195,7 @@ var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
   "class": "my-4 text-center"
 }, "Select the months you'd be interested in visiting", -1 /* HOISTED */);
 var _hoisted_16 = {
-  "class": "grid gap-2 sm:grid-cols-2 md:grid-cols-3"
+  "class": "grid gap-2 pl-8 grid-cols-2 md:grid-cols-3"
 };
 var _hoisted_17 = {
   "class": "label"
