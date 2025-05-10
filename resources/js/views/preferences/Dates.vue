@@ -27,7 +27,7 @@
     <div v-if="noDates">
       <p class="my-4 text-center">Select the months you'd be interested in visiting</p>
       <ul class="grid gap-2 pl-8 grid-cols-2 md:grid-cols-3">
-        <li v-for="month in months" :key="month.id" class="p-4">
+        <li v-for="month in months" :key="month.id" class="px-4 py-2">
           <label class="label">
             <input
               class="checkbox checkbox-primary"

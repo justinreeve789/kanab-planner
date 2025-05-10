@@ -1,13 +1,17 @@
 <template>
-  <div class="flex flex-wrap justify-center items-center gap-6 mt-8">
-    <button class="block min-w-[128px] w-full sm:w-auto text-white bg-gradient-to-r from-indigo-400 to-indigo-600 hover:bg-gradient-to-br font-medium rounded-lg text-xs px-5 py-2.5 text-center"
-      v-if="step > 1" @click="previous()">
-      Previous
-    </button>
-    <button class="block min-w-[128px] w-full sm:w-auto text-white bg-gradient-to-r from-indigo-400 to-indigo-600 hover:bg-gradient-to-br font-medium rounded-lg text-xs px-5 py-2.5 text-center"
-      v-if="step < 4" @click="next()">
-      Next
-    </button>
+  <div class="flex flex-wrap justify-between gap-6">
+    <div class="flex-shrink-0">
+      <button class="block min-w-[96px] text-white bg-gradient-to-r from-indigo-400 to-indigo-600 hover:bg-gradient-to-br font-medium rounded-lg text-xs px-5 py-2.5 text-center"
+        v-if="step > 1" @click="previous()">
+       Previous
+      </button>
+    </div>
+    <div class="flex-shrink-0">
+      <button class="block min-w-[96px] text-white bg-gradient-to-r from-indigo-400 to-indigo-600 hover:bg-gradient-to-br font-medium rounded-lg text-xs px-5 py-2.5 text-center"
+        v-if="step < 5" @click="next()">
+        Next
+      </button>
+    </div>
   </div>
 </template>
 

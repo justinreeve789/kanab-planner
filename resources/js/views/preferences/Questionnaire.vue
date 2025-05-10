@@ -21,17 +21,17 @@
       </div>
     </div>
     <div v-else>
-      <div class="sticky -top-6 z-10 -mt-8 bg-white h-[80px]">
+      <div class="sticky -top-6 z-10 -mt-8 bg-white h-[120px]">
         <Steps class="py-2" :step="step" v-model="preferencesStore.currentPreferencesStep" />
+        <Pagination :step="step" v-model="preferencesStore.currentPreferencesStep" />
+        <div class="divider m-0"></div>
       </div>
-      <div class="h-full overflow-hidden pt-4">
-<!--      <Pagination :step="step" v-model="preferencesStore.currentPreferencesStep" />-->
+      <div class="h-full overflow-hidden pt-6">
         <div class="h-full w-full flex flex-cols justify-center overflow-x-hidden overflow-y-auto" v-if="step !== 0">
           <div class="min-w-[500px]" v-show="step === 1">
             <Dates />
           </div>
           <div v-show="step === 2">
-            <div class="divider"></div>
             <ActivityTypes />
           </div>
           <div class="ass mx-auto max-w-[640px] px-8" v-show="step === 3">

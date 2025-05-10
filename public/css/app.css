@@ -3665,6 +3665,15 @@ video {
 .h-screen {
   height: 100vh;
 }
+.h-\[96px\] {
+  height: 96px;
+}
+.h-\[108px\] {
+  height: 108px;
+}
+.h-\[120px\] {
+  height: 120px;
+}
 .max-h-6 {
   max-height: 1.5rem;
 }
@@ -3743,6 +3752,9 @@ video {
 .min-w-\[500px\] {
   min-width: 500px;
 }
+.min-w-\[96px\] {
+  min-width: 96px;
+}
 .max-w-6xl {
   max-width: 72rem;
 }
@@ -3772,6 +3784,9 @@ video {
 }
 .flex-1 {
   flex: 1 1 0%;
+}
+.flex-shrink-0 {
+  flex-shrink: 0;
 }
 .shrink-0 {
   flex-shrink: 0;
@@ -3817,6 +3832,9 @@ video {
 }
 .cursor-pointer {
   cursor: pointer;
+}
+.grid-flow-col {
+  grid-auto-flow: column;
 }
 .grid-cols-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
