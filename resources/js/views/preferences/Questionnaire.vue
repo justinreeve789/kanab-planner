@@ -21,10 +21,9 @@
       </div>
     </div>
     <div v-else>
-      <div class="sticky -top-6 z-10 -mt-8 bg-white h-[120px]">
+      <div class="sticky -top-6 z-10 -mt-8 bg-white h-[128px]" style="border-bottom: solid 1px #c0c0c0;">
         <Steps class="py-2" :step="step" v-model="preferencesStore.currentPreferencesStep" />
         <Pagination :step="step" v-model="preferencesStore.currentPreferencesStep" />
-        <div class="divider m-0"></div>
       </div>
       <div class="h-full overflow-hidden pt-6">
         <div class="h-full w-full flex flex-cols justify-center overflow-x-hidden overflow-y-auto" v-if="step !== 0">

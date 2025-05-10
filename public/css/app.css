@@ -3665,6 +3665,9 @@ video {
 .h-screen {
   height: 100vh;
 }
+.h-\[128px\] {
+  height: 128px;
+}
 .max-h-6 {
   max-height: 1.5rem;
 }
@@ -5760,6 +5763,14 @@ calendar-month::part(td) {
 
   .md\:min-w-\[128px\] {
     min-width: 128px;
+  }
+
+  .md\:min-w-\[124px\] {
+    min-width: 124px;
+  }
+
+  .md\:min-w-\[132px\] {
+    min-width: 132px;
   }
 
   .md\:max-w-\[400px\] {
