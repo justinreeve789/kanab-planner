@@ -67,9 +67,7 @@ export default {
       this.searchStore.isSearchOpen = false;
     },
     openPreferences() {
-      if (this.preferencesStore.currentPreferencesStep === 5) {
-        this.preferencesStore.currentPreferencesStep = 4;
-      }
+      this.preferencesStore.currentPreferencesStep = 4;
       this.preferencesStore.isPreferencesOpen = true;
       this.authStore.isLoginOpen = false;
       this.assistantStore.isAssistantOpen = false;

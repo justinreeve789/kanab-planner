@@ -13,12 +13,31 @@ export const usePreferencesStore = defineStore('preferences', {
     preferredMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     dateRange: null,
     areaIds: null,
-    eventIds: null,
-    locationIds: null,
-    restaurantIds: null,
-    trailIds: null,
+    eventIds: [],
+    locationIds: [],
+    restaurantIds: [],
+    trailIds: [],
   }),
   actions: {
+    addPreferredResource(resource) {
+      if (resource.type === 'event') {
+        if (!this.eventIds.includes(resource.id)) {
+          this.eventIds.push(resource.id);
+        }
+      } else if (resource.type === 'location') {
+        if (!this.locationIds.includes(resource.id)) {
+          this.locationIds.push(resource.id);
+        }
+      } else if (resource.type === 'restaurant') {
+        if (!this.restaurantIds.includes(resource.id)) {
+          this.restaurantIds.push(resource.id);
+        }
+      } else if (resource.type === 'trail') {
+        if (!this.trailIds.includes(resource.id)) {
+          this.trailIds.push(resource.id);
+        }
+      }
+    },
     getAdventurousnessPercent() {
       return Math.round(this.adventurousness * 100);
     },

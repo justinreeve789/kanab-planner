@@ -81,19 +81,19 @@ export default {
     },
     openEvents() {
       this.searchStore.adjustSettingsForResourceListForTable('events');
-      this.searchStore.target = { component: 'questionnaire', store: 'preferences', attribute: 'selectedEventIds' };
+      this.searchStore.target = { component: 'preferences', store: 'preferences', attribute: 'selectedEventIds' };
       this.searchStore.closeAfterAddToItinerary = true;
       this.searchStore.isSearchOpen = true;
     },
     openSearch() {
       this.searchStore.adjustSettingsForGeneralSearch();
-      this.searchStore.target = { component: 'questionnaire', store: 'preferences', attribute: 'selectedActivities' };
+      this.searchStore.target = { component: 'preferences', store: 'preferences', attribute: 'selectedActivities' };
       this.searchStore.closeAfterAddToItinerary = true;
       this.searchStore.isSearchOpen = true;
     },
     openTrails() {
       this.searchStore.adjustSettingsForResourceListForTable('trails');
-      this.searchStore.target = { component: 'questionnaire', store: 'preferences', attribute: 'selectedTrailIds' };
+      this.searchStore.target = { component: 'preferences', store: 'preferences', attribute: 'selectedTrailIds' };
       this.searchStore.closeAfterAddToItinerary = true;
       this.searchStore.isSearchOpen = true;
     },

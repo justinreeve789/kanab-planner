@@ -24749,26 +24749,46 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-// import MapModal from "../modals/MapModal.vue";
-// import {useMapStore} from "../../stores/map";
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _stores_preferences__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../stores/preferences */ "./resources/js/stores/preferences.js");
+/* harmony import */ var _stores_search__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../stores/search */ "./resources/js/stores/search.js");
+
+
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   setup: function setup() {
-    // const mapStore = useMapStore();
-    // return { mapStore };
-  },
-  components: {
-    // MapModal
-  },
-  data: function data() {
+    var preferencesStore = (0,_stores_preferences__WEBPACK_IMPORTED_MODULE_0__.usePreferencesStore)();
+    var searchStore = (0,_stores_search__WEBPACK_IMPORTED_MODULE_1__.useSearchStore)();
     return {
-      // unique: this.$generateUnique(),
+      preferencesStore: preferencesStore,
+      searchStore: searchStore
     };
+  },
+  components: {},
+  data: function data() {
+    return {};
   },
   methods: {
     addToItinerary: function addToItinerary() {
-      // this.mapStore.setResource(this.resource);
-      // this.mapStore.isMapOpen = true;
+      if (this.searchStore.target) {
+        var _this$searchStore$tar, _this$searchStore$tar2, _this$searchStore$tar3;
+        var component = (_this$searchStore$tar = this.searchStore.target.component) !== null && _this$searchStore$tar !== void 0 ? _this$searchStore$tar : null;
+        var store = (_this$searchStore$tar2 = this.searchStore.target.store) !== null && _this$searchStore$tar2 !== void 0 ? _this$searchStore$tar2 : null;
+        var attribute = (_this$searchStore$tar3 = this.searchStore.target.attribute) !== null && _this$searchStore$tar3 !== void 0 ? _this$searchStore$tar3 : null;
+        if (component === 'preferences' && store === 'preferences') {
+          this.preferencesStore.addPreferredResource(this.resource);
+        }
+      } else {
+        var _this$resource$table, _this$resource$id;
+        axios__WEBPACK_IMPORTED_MODULE_2__["default"].put('/api/v1/itinerary', {
+          params: {
+            resource_table: (_this$resource$table = this.resource.table) !== null && _this$resource$table !== void 0 ? _this$resource$table : null,
+            resource_id: (_this$resource$id = this.resource.id) !== null && _this$resource$id !== void 0 ? _this$resource$id : null
+          }
+        }).then(function (response) {})["catch"](function (error) {
+          console.error('Error adding resource to itinerary:', error);
+        });
+      }
     }
   },
   props: {
@@ -24947,12 +24967,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _buttons_AskQuestion_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../buttons/AskQuestion.vue */ "./resources/js/views/buttons/AskQuestion.vue");
-/* harmony import */ var _buttons_FindAccomodations_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../buttons/FindAccomodations.vue */ "./resources/js/views/buttons/FindAccomodations.vue");
-/* harmony import */ var _buttons_ViewAccommodations_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../buttons/ViewAccommodations.vue */ "./resources/js/views/buttons/ViewAccommodations.vue");
-/* harmony import */ var _buttons_ViewMap_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../buttons/ViewMap.vue */ "./resources/js/views/buttons/ViewMap.vue");
-/* harmony import */ var _buttons_ViewMenu_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../buttons/ViewMenu.vue */ "./resources/js/views/buttons/ViewMenu.vue");
-/* harmony import */ var _stores_assistant_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../stores/assistant.js */ "./resources/js/stores/assistant.js");
+/* harmony import */ var _buttons_AddToItinerary_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../buttons/AddToItinerary.vue */ "./resources/js/views/buttons/AddToItinerary.vue");
+/* harmony import */ var _buttons_AskQuestion_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../buttons/AskQuestion.vue */ "./resources/js/views/buttons/AskQuestion.vue");
+/* harmony import */ var _buttons_FindAccomodations_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../buttons/FindAccomodations.vue */ "./resources/js/views/buttons/FindAccomodations.vue");
+/* harmony import */ var _buttons_ViewAccommodations_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../buttons/ViewAccommodations.vue */ "./resources/js/views/buttons/ViewAccommodations.vue");
+/* harmony import */ var _buttons_ViewMap_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../buttons/ViewMap.vue */ "./resources/js/views/buttons/ViewMap.vue");
+/* harmony import */ var _buttons_ViewMenu_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../buttons/ViewMenu.vue */ "./resources/js/views/buttons/ViewMenu.vue");
+/* harmony import */ var _stores_assistant_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../stores/assistant.js */ "./resources/js/stores/assistant.js");
+
 
 
 
@@ -24962,14 +24984,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   emits: ['openAssistant'],
   components: {
-    AskQuestion: _buttons_AskQuestion_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
-    FindAccommodations: _buttons_FindAccomodations_vue__WEBPACK_IMPORTED_MODULE_1__["default"],
-    ViewAccommodations: _buttons_ViewAccommodations_vue__WEBPACK_IMPORTED_MODULE_2__["default"],
-    ViewMap: _buttons_ViewMap_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
-    ViewMenu: _buttons_ViewMenu_vue__WEBPACK_IMPORTED_MODULE_4__["default"]
+    AddToItinerary: _buttons_AddToItinerary_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
+    AskQuestion: _buttons_AskQuestion_vue__WEBPACK_IMPORTED_MODULE_1__["default"],
+    FindAccommodations: _buttons_FindAccomodations_vue__WEBPACK_IMPORTED_MODULE_2__["default"],
+    ViewAccommodations: _buttons_ViewAccommodations_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
+    ViewMap: _buttons_ViewMap_vue__WEBPACK_IMPORTED_MODULE_4__["default"],
+    ViewMenu: _buttons_ViewMenu_vue__WEBPACK_IMPORTED_MODULE_5__["default"]
   },
   setup: function setup() {
-    var store = (0,_stores_assistant_js__WEBPACK_IMPORTED_MODULE_5__.useAssistantStore)();
+    var store = (0,_stores_assistant_js__WEBPACK_IMPORTED_MODULE_6__.useAssistantStore)();
     return {
       store: store
     };
@@ -25814,9 +25837,7 @@ __webpack_require__.r(__webpack_exports__);
       this.searchStore.isSearchOpen = false;
     },
     openPreferences: function openPreferences() {
-      if (this.preferencesStore.currentPreferencesStep === 5) {
-        this.preferencesStore.currentPreferencesStep = 4;
-      }
+      this.preferencesStore.currentPreferencesStep = 4;
       this.preferencesStore.isPreferencesOpen = true;
       this.authStore.isLoginOpen = false;
       this.assistantStore.isAssistantOpen = false;
@@ -26467,7 +26488,7 @@ __webpack_require__.r(__webpack_exports__);
     openEvents: function openEvents() {
       this.searchStore.adjustSettingsForResourceListForTable('events');
       this.searchStore.target = {
-        component: 'questionnaire',
+        component: 'preferences',
         store: 'preferences',
         attribute: 'selectedEventIds'
       };
@@ -26477,7 +26498,7 @@ __webpack_require__.r(__webpack_exports__);
     openSearch: function openSearch() {
       this.searchStore.adjustSettingsForGeneralSearch();
       this.searchStore.target = {
-        component: 'questionnaire',
+        component: 'preferences',
         store: 'preferences',
         attribute: 'selectedActivities'
       };
@@ -26487,7 +26508,7 @@ __webpack_require__.r(__webpack_exports__);
     openTrails: function openTrails() {
       this.searchStore.adjustSettingsForResourceListForTable('trails');
       this.searchStore.target = {
-        component: 'questionnaire',
+        component: 'preferences',
         store: 'preferences',
         attribute: 'selectedTrailIds'
       };
@@ -27217,7 +27238,9 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   methods: {
-    addToItinerary: function addToItinerary(resultId) {}
+    addToItinerary: function addToItinerary(resource) {
+      this.preferencesStore.addToItinerary(resource);
+    }
   }
 });
 
@@ -28758,6 +28781,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_ViewMenu = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("ViewMenu");
   var _component_ViewMap = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("ViewMap");
   var _component_AskQuestion = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("AskQuestion");
+  var _component_AddToItinerary = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("AddToItinerary");
   return $props.type == 'checking-in' || $props.type == 'restaurant' || $props.type == 'trail' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("    <FindAccommodations :resource=\"resource\" v-if=\"type == 'checking-in'\" />"), $props.type == 'checking-in' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_ViewAccommodations, {
     key: 0,
     resource: $props.resource
@@ -28772,7 +28796,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     resource: $props.resource,
     resource_table: $props.resource_table,
     resource_id: _ctx.resource_id
-  }, null, 8 /* PROPS */, ["resource", "resource_table", "resource_id"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true);
+  }, null, 8 /* PROPS */, ["resource", "resource_table", "resource_id"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AddToItinerary, {
+    resource: $props.resource,
+    resource_table: $props.resource_table,
+    resource_id: _ctx.resource_id
+  }, null, 8 /* PROPS */, ["resource", "resource_table", "resource_id"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true);
 }
 
 /***/ }),
@@ -31134,10 +31162,7 @@ var _hoisted_9 = ["data-tip"];
 var _hoisted_10 = {
   "class": "mr-2 text-xs"
 };
-var _hoisted_11 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
-  "class": "hidden md:flex"
-}, "Add", -1 /* HOISTED */);
-var _hoisted_12 = {
+var _hoisted_11 = {
   key: 0,
   "class": "collapse-content p-0 border border-solid border-orange-300 border-t-0"
 };
@@ -31167,14 +31192,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     showDistance: true,
     showElevation: false,
     showGrade: false
-  }, null, 8 /* PROPS */, ["trail"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    "class": "btn btn-sm mr-2 bg-gradient-to-r from-indigo-400 to-indigo-500 hover:bg-gradient-to-br text-white",
-    onClick: _cache[1] || (_cache[1] = function ($event) {
-      return $options.addToItinerary($props.resource.result_id);
-    })
-  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" + "), _hoisted_11])])]), $data.expanded ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_TrailContent, {
-    resource: $props.resource
-  }, null, 8 /* PROPS */, ["resource"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("      text-sm bg-gradient-to-r from-white to-red-50\">"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("      <div class=\"card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg\">"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("        <p># miles from Kanab</p>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("        <p class=\"text-gray-600 line-clamp-3\">{{ resource.description }}</p>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("        <div class=\"card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end\">"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          <ViewMap :resource=\"resource\" />"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("        </div>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("      </div>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("    </div>")]);
+  }, null, 8 /* PROPS */, ["trail"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("        <button class=\"btn btn-sm mr-2 bg-gradient-to-r from-indigo-400 to-indigo-500 hover:bg-gradient-to-br text-white\" @click=\"addToItinerary(resource)\">"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          +"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          <span class=\"hidden md:flex\">Add</span>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("        </button>")])]), $data.expanded ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_TrailContent, {
+    resource: $props.resource,
+    "show-add-to-itinerary": true
+  }, null, 8 /* PROPS */, ["resource"])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
 }
 
 /***/ }),
@@ -53108,13 +53129,32 @@ var usePreferencesStore = (0,pinia__WEBPACK_IMPORTED_MODULE_0__.defineStore)('pr
       preferredMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
       dateRange: null,
       areaIds: null,
-      eventIds: null,
-      locationIds: null,
-      restaurantIds: null,
-      trailIds: null
+      eventIds: [],
+      locationIds: [],
+      restaurantIds: [],
+      trailIds: []
     };
   },
   actions: {
+    addPreferredResource: function addPreferredResource(resource) {
+      if (resource.type === 'event') {
+        if (!this.eventIds.includes(resource.id)) {
+          this.eventIds.push(resource.id);
+        }
+      } else if (resource.type === 'location') {
+        if (!this.locationIds.includes(resource.id)) {
+          this.locationIds.push(resource.id);
+        }
+      } else if (resource.type === 'restaurant') {
+        if (!this.restaurantIds.includes(resource.id)) {
+          this.restaurantIds.push(resource.id);
+        }
+      } else if (resource.type === 'trail') {
+        if (!this.trailIds.includes(resource.id)) {
+          this.trailIds.push(resource.id);
+        }
+      }
+    },
     getAdventurousnessPercent: function getAdventurousnessPercent() {
       return Math.round(this.adventurousness * 100);
     },

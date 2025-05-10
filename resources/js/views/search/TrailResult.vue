@@ -20,24 +20,15 @@
         <div class="mr-2 text-xs">
           <TrailStats :trail="resource" :showDistance="true" :showElevation="false" :showGrade="false" v-if="resource.distance_miles"/>
         </div>
-        <button class="btn btn-sm mr-2 bg-gradient-to-r from-indigo-400 to-indigo-500 hover:bg-gradient-to-br text-white" @click="addToItinerary(resource.result_id)">
-          +
-          <span class="hidden md:flex">Add</span>
-        </button>
+<!--        <button class="btn btn-sm mr-2 bg-gradient-to-r from-indigo-400 to-indigo-500 hover:bg-gradient-to-br text-white" @click="addToItinerary(resource)">-->
+<!--          +-->
+<!--          <span class="hidden md:flex">Add</span>-->
+<!--        </button>-->
       </div>
     </div>
     <div class="collapse-content p-0 border border-solid border-orange-300 border-t-0" v-if="expanded">
-      <TrailContent :resource="resource" />
+      <TrailContent :resource="resource" :show-add-to-itinerary="true" />
     </div>
-<!--      text-sm bg-gradient-to-r from-white to-red-50">-->
-<!--      <div class="card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg">-->
-<!--        <p># miles from Kanab</p>-->
-<!--        <p class="text-gray-600 line-clamp-3">{{ resource.description }}</p>-->
-<!--        <div class="card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end">-->
-<!--          <ViewMap :resource="resource" />-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
   </div>
 </template>
 
@@ -83,7 +74,8 @@ export default {
     },
   },
   methods: {
-    addToItinerary(resultId) {
+    addToItinerary(resource) {
+      this.preferencesStore.addToItinerary(resource);
     },
   },
 }

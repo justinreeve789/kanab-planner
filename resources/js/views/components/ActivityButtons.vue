@@ -5,10 +5,12 @@
     <ViewMenu :resource="resource" v-if="type == 'restaurant'" />
     <ViewMap :resource="resource" v-if="type == 'trail'" />
     <AskQuestion :resource="resource" :resource_table="resource_table" :resource_id="resource_id" v-if="type == 'trail'" />
+    <AddToItinerary :resource="resource" :resource_table="resource_table" :resource_id="resource_id" />
   </div>
 </template>
 
 <script>
+import AddToItinerary from "../buttons/AddToItinerary.vue";
 import AskQuestion from '../buttons/AskQuestion.vue';
 import FindAccommodations from '../buttons/FindAccomodations.vue';
 import ViewAccommodations from '../buttons/ViewAccommodations.vue';
@@ -19,6 +21,7 @@ import { useAssistantStore } from '../../stores/assistant.js';
 export default {
   emits: ['openAssistant'],
   components: {
+    AddToItinerary,
     AskQuestion,
     FindAccommodations,
     ViewAccommodations,
