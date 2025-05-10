@@ -3644,11 +3644,11 @@ video {
 .h-8 {
   height: 2rem;
 }
+.h-\[120px\] {
+  height: 120px;
+}
 .h-\[1em\] {
   height: 1em;
-}
-.h-\[80px\] {
-  height: 80px;
 }
 .h-\[85vh\] {
   height: 85vh;
@@ -3664,15 +3664,6 @@ video {
 }
 .h-screen {
   height: 100vh;
-}
-.h-\[96px\] {
-  height: 96px;
-}
-.h-\[108px\] {
-  height: 108px;
-}
-.h-\[120px\] {
-  height: 120px;
 }
 .max-h-6 {
   max-height: 1.5rem;
@@ -3832,9 +3823,6 @@ video {
 }
 .cursor-pointer {
   cursor: pointer;
-}
-.grid-flow-col {
-  grid-auto-flow: column;
 }
 .grid-cols-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -5770,6 +5758,10 @@ calendar-month::part(td) {
     width: 100%;
   }
 
+  .md\:min-w-\[128px\] {
+    min-width: 128px;
+  }
+
   .md\:max-w-\[400px\] {
     max-width: 400px;
   }
@@ -5805,6 +5797,10 @@ calendar-month::part(td) {
 
   .md\:justify-end {
     justify-content: flex-end;
+  }
+
+  .md\:justify-center {
+    justify-content: center;
   }
 
   .md\:justify-between {
@@ -5881,6 +5877,11 @@ calendar-month::part(td) {
     padding-right: 0px;
   }
 
+  .md\:px-8 {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
   .md\:pb-0 {
     padding-bottom: 0px;
   }
@@ -5902,6 +5903,11 @@ calendar-month::part(td) {
   .md\:text-lg {
     font-size: 1.125rem;
     line-height: 1.75rem;
+  }
+
+  .md\:text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
   }
 
   .md\:opacity-100 {
@@ -5947,6 +5953,10 @@ calendar-month::part(td) {
 
   .lg\:block {
     display: block;
+  }
+
+  .lg\:inline {
+    display: inline;
   }
 
   .lg\:flex {
@@ -6005,6 +6015,11 @@ calendar-month::part(td) {
   .lg\:px-8 {
     padding-left: 2rem;
     padding-right: 2rem;
+  }
+
+  .lg\:px-16 {
+    padding-left: 4rem;
+    padding-right: 4rem;
   }
 
   .lg\:pl-4 {

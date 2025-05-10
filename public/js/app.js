@@ -30318,28 +30318,36 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "flex flex-wrap justify-between gap-6"
+  "class": "flex flex-wrap gap-6 justify-between md:justify-center"
 };
 var _hoisted_2 = {
-  "class": "flex-shrink-0"
+  "class": "flex-shrink-0 md:px-8"
 };
-var _hoisted_3 = {
-  "class": "flex-shrink-0"
+var _hoisted_3 = ["disabled"];
+var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "hidden mr-2 sm:inline"
+}, "<<", -1 /* HOISTED */);
+var _hoisted_5 = {
+  "class": "flex-shrink-0 md:px-8"
 };
+var _hoisted_6 = ["disabled"];
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "hidden ml-2 sm:inline"
+}, ">>", -1 /* HOISTED */);
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [$props.step > 1 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
-    key: 0,
-    "class": "block min-w-[96px] text-white bg-gradient-to-r from-indigo-400 to-indigo-600 hover:bg-gradient-to-br font-medium rounded-lg text-xs px-5 py-2.5 text-center",
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["block min-w-[96px] text-center text-xs text-white font-medium rounded-lg px-5 py-2.5 min-w-[96px] md:min-w-[128px] md:text-sm", $props.step > 1 ? 'bg-gradient-to-r from-indigo-400 to-indigo-600 hover:bg-gradient-to-br' : 'btn btn-primary']),
     onClick: _cache[0] || (_cache[0] = function ($event) {
       return $options.previous();
-    })
-  }, " Previous ")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [$props.step < 5 ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
-    key: 0,
-    "class": "block min-w-[96px] text-white bg-gradient-to-r from-indigo-400 to-indigo-600 hover:bg-gradient-to-br font-medium rounded-lg text-xs px-5 py-2.5 text-center",
+    }),
+    disabled: $props.step === 1
+  }, [_hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Previous ")], 10 /* CLASS, PROPS */, _hoisted_3)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["block min-w-[96px] text-center text-xs text-white font-medium rounded-lg px-5 py-2.5 min-w-[96px] md:min-w-[128px] md:text-sm", $props.step < 5 ? 'bg-gradient-to-r from-indigo-400 to-indigo-600 hover:bg-gradient-to-br' : 'btn btn-primary']),
     onClick: _cache[1] || (_cache[1] = function ($event) {
       return $options.next();
-    })
-  }, " Next ")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]);
+    }),
+    disabled: $props.step === 5
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Next "), _hoisted_7], 10 /* CLASS, PROPS */, _hoisted_6)])]);
 }
 
 /***/ }),

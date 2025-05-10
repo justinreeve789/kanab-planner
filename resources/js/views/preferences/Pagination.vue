@@ -1,15 +1,17 @@
 <template>
-  <div class="flex flex-wrap justify-between gap-6">
-    <div class="flex-shrink-0">
-      <button class="block min-w-[96px] text-white bg-gradient-to-r from-indigo-400 to-indigo-600 hover:bg-gradient-to-br font-medium rounded-lg text-xs px-5 py-2.5 text-center"
-        v-if="step > 1" @click="previous()">
-       Previous
+  <div class="flex flex-wrap gap-6 justify-between md:justify-center">
+    <div class="flex-shrink-0 md:px-8">
+      <button class="block min-w-[96px] text-center text-xs text-white font-medium rounded-lg px-5 py-2.5 min-w-[96px] md:min-w-[128px] md:text-sm"
+        @click="previous()" :class="step > 1 ? 'bg-gradient-to-r from-indigo-400 to-indigo-600 hover:bg-gradient-to-br' : 'btn btn-primary'" :disabled="step === 1">
+        <span class="hidden mr-2 sm:inline">&lt;&lt;</span>
+        Previous
       </button>
     </div>
-    <div class="flex-shrink-0">
-      <button class="block min-w-[96px] text-white bg-gradient-to-r from-indigo-400 to-indigo-600 hover:bg-gradient-to-br font-medium rounded-lg text-xs px-5 py-2.5 text-center"
-        v-if="step < 5" @click="next()">
+    <div class="flex-shrink-0 md:px-8">
+      <button class="block min-w-[96px] text-center text-xs text-white font-medium rounded-lg px-5 py-2.5 min-w-[96px] md:min-w-[128px] md:text-sm"
+        @click="next()" :class="step < 5 ? 'bg-gradient-to-r from-indigo-400 to-indigo-600 hover:bg-gradient-to-br' : 'btn btn-primary'" :disabled="step === 5">
         Next
+        <span class="hidden ml-2 sm:inline">&gt;&gt;</span>
       </button>
     </div>
   </div>
