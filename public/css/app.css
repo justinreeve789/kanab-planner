@@ -3367,6 +3367,9 @@ video {
 .inset-0 {
   inset: 0px;
 }
+.-top-6 {
+  top: -1.5rem;
+}
 .bottom-0 {
   bottom: 0px;
 }
@@ -3417,18 +3420,6 @@ video {
 }
 .top-\[64px\] {
   top: 64px;
-}
-.-top-4 {
-  top: -1rem;
-}
-.-top-8 {
-  top: -2rem;
-}
-.-top-6 {
-  top: -1.5rem;
-}
-.left-2 {
-  left: 0.5rem;
 }
 .z-10 {
   z-index: 10;
@@ -3502,6 +3493,9 @@ video {
 }
 .-mt-4 {
   margin-top: -1rem;
+}
+.-mt-8 {
+  margin-top: -2rem;
 }
 .mb-0 {
   margin-bottom: 0px;
@@ -3581,12 +3575,6 @@ video {
 .mt-8 {
   margin-top: 2rem;
 }
-.-mt-8 {
-  margin-top: -2rem;
-}
-.ml-8 {
-  margin-left: 2rem;
-}
 .line-clamp-2 {
   overflow: hidden;
   display: -webkit-box;
@@ -3659,6 +3647,9 @@ video {
 .h-\[1em\] {
   height: 1em;
 }
+.h-\[80px\] {
+  height: 80px;
+}
 .h-\[85vh\] {
   height: 85vh;
 }
@@ -3673,30 +3664,6 @@ video {
 }
 .h-screen {
   height: 100vh;
-}
-.h-\[128px\] {
-  height: 128px;
-}
-.h-\[96px\] {
-  height: 96px;
-}
-.h-\[64px\] {
-  height: 64px;
-}
-.h-\[72px\] {
-  height: 72px;
-}
-.h-\[80px\] {
-  height: 80px;
-}
-.h-\[92px\] {
-  height: 92px;
-}
-.h-\[84px\] {
-  height: 84px;
-}
-.h-\[calc\(100\%\+80px\)\] {
-  height: calc(100% + 80px);
 }
 .max-h-6 {
   max-height: 1.5rem;
@@ -3937,9 +3904,6 @@ video {
 }
 .overflow-x-hidden {
   overflow-x: hidden;
-}
-.overflow-y-hidden {
-  overflow-y: hidden;
 }
 .truncate {
   overflow: hidden;
@@ -4270,12 +4234,6 @@ video {
 .p-\[2px\] {
   padding: 2px;
 }
-.p-\[96pxz\] {
-  padding: 96pxz;
-}
-.p-\[96px\] {
-  padding: 96px;
-}
 .px-0 {
   padding-left: 0px;
   padding-right: 0px;
@@ -4348,6 +4306,9 @@ video {
 .pl-4 {
   padding-left: 1rem;
 }
+.pl-8 {
+  padding-left: 2rem;
+}
 .pr-1 {
   padding-right: 0.25rem;
 }
@@ -4371,18 +4332,6 @@ video {
 }
 .pt-8 {
   padding-top: 2rem;
-}
-.pb-6 {
-  padding-bottom: 1.5rem;
-}
-.pt-\[96px\] {
-  padding-top: 96px;
-}
-.pt-\[64px\] {
-  padding-top: 64px;
-}
-.pl-8 {
-  padding-left: 2rem;
 }
 .text-left {
   text-align: left;
@@ -4644,6 +4593,10 @@ video {
   --join-es: var(--radius-field);
   --join-ee: var(--radius-field);
 }
+:root {
+  color-scheme: light only;
+}
+
 html, body {
   overscroll-behavior-y: none;
 }
@@ -5654,10 +5607,6 @@ calendar-month::part(td) {
     max-width: 24rem;
   }
 
-  .sm\:grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .sm\:flex-row {
     flex-direction: row;
   }
@@ -5694,10 +5643,6 @@ calendar-month::part(td) {
     position: relative;
   }
 
-  .md\:sticky {
-    position: sticky;
-  }
-
   .md\:bottom-20 {
     bottom: 5rem;
   }
@@ -5716,14 +5661,6 @@ calendar-month::part(td) {
 
   .md\:top-auto {
     top: auto;
-  }
-
-  .md\:top-0 {
-    top: 0px;
-  }
-
-  .md\:z-10 {
-    z-index: 10;
   }
 
   .md\:order-2 {

@@ -28791,13 +28791,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 
 var _hoisted_1 = {
-  "class": "card card-border bg-white text-black card-lg shadow-sm md:flex md:flex-row space-y-8 md:space-x-8 md:space-y-0"
+  "class": "card card-border card-lg shadow-sm md:flex md:flex-row space-y-8 md:space-x-8 md:space-y-0"
 };
 var _hoisted_2 = {
-  "class": "flex flex-col text-black"
+  "class": "flex flex-col"
 };
 var _hoisted_3 = {
-  "class": "flex flex-col text-black"
+  "class": "flex flex-col"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_calendar_month = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("calendar-month");
@@ -28810,9 +28810,9 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
       return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_calendar_month, {
-        "class": "text-black"
+        "class": ""
       })]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_calendar_month, {
-        "class": "text-black",
+        "class": "",
         offset: 1
       })])])];
     }),
