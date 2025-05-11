@@ -6,10 +6,10 @@
     <div class="collapse-title text-xl font-medium">
       <h2 :id="'day-heading-' + day.day_num" class="day-heading relative w-full">
         <div class="flex bg-white items-center justify-between w-full font-medium text-left text-gray-500">
-          <div class="day-title p-4">
-            <span class="day md:inline font-large text-3xl">Day {{ day.day_num + 1 }}</span>
+          <div class="day-title md:p-4">
+            <span class="day font-large md:inline md:text-3xl">Day {{ day.day_num + 1 }}</span>
             <span class="separator hidden md:inline md:text-lg"> - </span>
-            <span class="area font-large md:inline text-md md:text-3xl md:inline-block block">{{ day.area.name }}</span>
+            <span class="area font-large text-sm md:inline md:text-3xl md:inline-block block">{{ day.area.name }}</span>
           </div>
 <!--
           <div class="flex-1 p-4 items-start justify-end">
@@ -22,7 +22,7 @@
 -->
           <div class="flex justify-end items-center flex-grow">
             <Weather class="text-right" :weather="day.weather" />
-            <div class="p-4 text-md text-right">
+            <div class="p-4 text-sm md:text-md text-right">
               <span class="date-day-of-week hidden md:inline">{{ day.formatted_day_of_week }}</span>
               <span class="pr-1 hidden md:inline">,</span>
               <span class="date-month-day sm:hidden">{{ day.formatted_abbr_month_day }}</span>

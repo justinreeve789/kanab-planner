@@ -18,6 +18,9 @@
       <div v-if="short === 'Mostly Sunny'">
         <img class="h-8" src="images/icons/weather/mostly-sunny.png" alt="Mostly Sunny" />
       </div>
+      <div v-if="short === 'Mostly Clear'">
+        <img class="h-8" src="images/icons/weather/mostly-clear.png" alt="Mostly Clear" />
+      </div>
       <div v-else>
       </div>
     </div>
