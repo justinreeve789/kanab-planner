@@ -1,10 +1,10 @@
 <template>
-  <div class="weather flex gap-2">
+  <div class="weather flex items-center gap-2 text-sm md:text-base">
     <div v-if="high && low">
         <span class="temperature">{{ high }}</span>
         <span class="measurement">&deg;</span>
         <span class="unit">F</span>
-        <span v-if="high !== low">
+        <span class="hidden md:inline" v-if="high !== low">
           /
           <span class="temperature">{{ low }}</span>
           <span class="measurement">&deg;</span>
@@ -13,7 +13,7 @@
     </div>
     <div v-if="short">
       <div v-if="short === 'Sunny'">
-        <img class="h-8" src="images/icons/weather/sunny.png" alt="Sunny" />
+        <img class="tooltip h-8" src="images/icons/weather/sunny.png" alt="Sunny" :data-tip="short" />
       </div>
       <div v-if="short === 'Mostly Sunny'">
         <img class="h-8" src="images/icons/weather/mostly-sunny.png" alt="Mostly Sunny" />
@@ -45,9 +45,6 @@ export default {
     short() {
       return this.weather.forecast.short;
     }
-  },
-  mounted() {
-    console.log(this.weather.forecast);
   },
 };
 </script>

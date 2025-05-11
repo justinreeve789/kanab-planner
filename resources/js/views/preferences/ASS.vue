@@ -1,12 +1,12 @@
 <template>
   <div class="p-4 text-center text-lg">
     <p class="font-semibold mb-2">What kind of adventure-seeker are you?</p>
-    <p class="mb-4 text-md">Adjust the sliders, and your activities will match as close to your preferences as possible.</p>
+    <p class="mb-4">Adjust the sliders, and your activities will match as close to your preferences as possible.</p>
   </div>
   <div class="sliders origin-center">
     <div class="-mx-6 px-6 pt-4 pb-2 bg-gradient-to-r from-red-50 to-orange-100">
       <div class="flex justify-between items-center -mx-6 px-6 -mt-4 mb-2 py-2 bg-gradient-to-r from-red-100 to-orange-200">
-        <div class="font-bold text-black text-md">
+        <div class="font-bold text-black">
           Adventurousness
         </div>
         <div class="tooltip tooltip-left">
@@ -32,7 +32,7 @@
 
     <div class="-mx-6 px-6 pt-4 pb-2 bg-gradient-to-r from-green-50 to-cyan-100">
       <div class="flex justify-between items-center -mx-6 px-6 -mt-4 mb-2 py-2 bg-gradient-to-r from-green-100 to-cyan-200">
-        <div class="font-bold text-black text-md">
+        <div class="font-bold text-black">
           Solitariness
         </div>
         <div class="tooltip tooltip-left">
@@ -58,7 +58,7 @@
 
     <div class="-mx-6 -mb-6 px-6 pt-4 pb-2 bg-gradient-to-r from-blue-50 to-purple-100">
       <div class="flex justify-between items-center -mx-6 px-6 -mt-4 mb-2 py-2 bg-gradient-to-r from-blue-100 to-purple-200">
-        <div class="font-bold text-black text-md">
+        <div class="font-bold text-black">
           Strenuousness
         </div>
         <div class="tooltip tooltip-left">

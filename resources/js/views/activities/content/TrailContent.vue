@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-[150px] items-stretch w-full bg-gray-200 p-2 bg-gradient-to-r from-white to-red-50">
     <div class="lg:flex lg:justify-between">
-      <div class="w-full lg:w-2/3 lg:flex lg:flex-col">
+      <div class="p-0 w-full md:p-4 lg:w-2/3 lg:flex lg:flex-col">
         <div class="sm:flex sm:flex-row justify-between lg:flex-col lg:order-2">
           <ActivityButtons
             :resource="resource"

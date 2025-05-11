@@ -3,13 +3,20 @@
     <div class="rounded-lg p-[1px] bg-gradient-to-r from-orange-200 to-red-200">
     <div class="collapse collapse-arrow bg-white">
     <input type="checkbox" />
-    <div class="collapse-title text-xl font-medium">
+    <div class="collapse-title font-medium py-0 md:py-3">
       <h2 :id="'day-heading-' + day.day_num" class="day-heading relative w-full">
         <div class="flex bg-white items-center justify-between w-full font-medium text-left text-gray-500">
           <div class="day-title md:p-4">
-            <span class="day font-large md:inline md:text-3xl">Day {{ day.day_num + 1 }}</span>
-            <span class="separator hidden md:inline md:text-lg"> - </span>
-            <span class="area font-large text-sm md:inline md:text-3xl md:inline-block block">{{ day.area.name }}</span>
+            <span class="day font-large text-xl md:inline md:text-3xl">Day {{ day.day_num + 1 }}</span>
+            <span class="separator hidden md:inline md:text-xl"> - </span>
+            <span class="area font-large md:inline md:text-3xl md:inline-block block">
+              <span class="hidden xl:inline">
+                {{ day.area.name }}
+              </span>
+              <span class="xl:hidden">
+                {{ day.area.short_name }}
+              </span>
+            </span>
           </div>
 <!--
           <div class="flex-1 p-4 items-start justify-end">
@@ -22,7 +29,7 @@
 -->
           <div class="flex justify-end items-center flex-grow">
             <Weather class="text-right" :weather="day.weather" />
-            <div class="p-4 text-sm md:text-md text-right">
+            <div class="p-4 text-sm md:text-lg text-right">
               <span class="date-day-of-week hidden md:inline">{{ day.formatted_day_of_week }}</span>
               <span class="pr-1 hidden md:inline">,</span>
               <span class="date-month-day sm:hidden">{{ day.formatted_abbr_month_day }}</span>
@@ -83,6 +90,14 @@ export default {
     Task,
     Trail,
     Weather,
+  },
+  data() {
+    return {
+      isEditing: false,
+      touchDelaySecondsToTrigger: 0.75,
+      touchStart: null,
+      touchEnd: null,
+    };
   },
   computed: {
     adventurousness() {

@@ -13,12 +13,12 @@
       <div class="flex items-center ml-4 space-x-2" v-if="!noDates">
         <div class="text-center leading-tight">
           <div class="text-xs">{{ getFormattedDate(getStartDate).month }}</div>
-          <div class="text-md">{{ getFormattedDate(getStartDate).day }}</div>
+          <div class="">{{ getFormattedDate(getStartDate).day }}</div>
         </div>
         <span class="text-xs" v-if="hasDateRange">&ndash;</span>
         <div class="text-center leading-tight" v-if="hasDateRange">
           <div class="text-xs">{{ getFormattedDate(getEndDate).month }}</div>
-          <div class="text-md">{{ getFormattedDate(getEndDate).day }}</div>
+          <div class="">{{ getFormattedDate(getEndDate).day }}</div>
         </div>
       </div>
     </div>
