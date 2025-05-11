@@ -6,6 +6,7 @@ use App\Models\Area;
 use App\Models\AreaWeather;
 use App\Models\Itinerary\Period;
 use App\Models\Trail;
+use Carbon\Carbon;
 
 class WeatherService
 {
@@ -30,7 +31,7 @@ class WeatherService
         ];
 
         $context = stream_context_create($opts);
-        $response = file_get_contents($this->getNwsAreaForecastUrls()[$areaId]['forecast_hourly'], false, $context);
+        $response = file_get_contents($this->getNwsAreaForecastUrls()[$areaId]['forecast'], false, $context);
         $data = json_decode($response);
         $this->saveAreaWeather($areaId, $data);
     }
@@ -38,26 +39,27 @@ class WeatherService
     public function saveAreaWeather(int $areaId, $data)
     {
         AreaWeather::where('area_id', $areaId)->delete();
+        AreaWeather::where('area_id', $areaId)->where('end', '<', Carbon::now('America/Denver')->startOfDay())->delete();
 
         foreach ($data->properties->periods as $period) {
-            $areaWeather = new AreaWeather([
+            AreaWeather::updateOrCreate([
                 'area_id' => $areaId,
                 'source_type' => self::SOURCE_TYPE,
                 'start' => date('Y-m-d H:i:s', strtotime($period->startTime)),
                 'end' => date('Y-m-d H:i:s', strtotime($period->endTime)),
+            ], [
                 'temperature' => $period->temperature,
                 'temperature_unit' => $period->temperatureUnit,
                 'temperature_trend' => $period->temperatureTrend,
                 'probability_of_precipitation_pt' => round($period->probabilityOfPrecipitation->value / 100, 2),
-                'dewpoint' => $period->dewpoint->value,
-                'relative_humidity_pt' => round($period->relativeHumidity->value / 100, 2),
+                'dewpoint' => $period->dewpoint->value ?? null,
+                'relative_humidity_pt' => isset($period->relativeHumidity) ? round($period->relativeHumidity->value / 100, 2) : null,
                 'wind_speed' => $period->windSpeed,
                 'wind_direction' => $period->windDirection,
                 'icon' => $period->icon,
-                'short_forecast' > $period->shortForecast,
+                'short_forecast' => $period->shortForecast,
                 'detailed_forecast' => $period->detailedForecast,
             ]);
-            $areaWeather->save();
         }
     }
 

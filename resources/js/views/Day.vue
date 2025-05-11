@@ -21,7 +21,7 @@
           </div>
 -->
           <div class="flex justify-end items-center flex-grow">
-            <Weather class="text-right" :temperatures="day.temperatures" />
+            <Weather class="text-right" :weather="day.weather" />
             <div class="p-4 text-md text-right">
               <span class="date-day-of-week hidden md:inline">{{ day.formatted_day_of_week }}</span>
               <span class="pr-1 hidden md:inline">,</span>

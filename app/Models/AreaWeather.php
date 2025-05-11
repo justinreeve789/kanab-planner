@@ -11,4 +11,5 @@ class AreaWeather extends Model
 
     protected $guarded = ['id'];
     protected $hidden = ['source_type'];
+    protected $table = 'area_weather';
 }

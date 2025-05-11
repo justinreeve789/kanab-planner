@@ -25,7 +25,7 @@ class Day extends CachedModel
 
     protected $appends = [
         'area',
-        'temperatures',
+        'weather',
     ];
     protected $attributes = [
         'formatted_abbr_month_day' => '',
@@ -41,7 +41,7 @@ class Day extends CachedModel
         'formatted_day_of_week',
         'formatted_month_day',
         'formatted_year',
-        'temperatures',
+        'weather',
     ];
     protected $table = 'itinerary_days';
 
@@ -224,28 +224,31 @@ class Day extends CachedModel
         return $this->preamble;
     }
 
-    public function getTemperaturesAttribute()
+    public function getWeatherAttribute()
     {
         $weather = AreaWeather::where('area_id', $this->area->id)
-            ->where('start', '>=', $this->date . ' 00:00:00')
-            ->where('end', '<=', $this->date . ' 23:59:59')
-            ->select(
-                DB::raw('MAX(temperature) as max_temperature'),
-                DB::raw('MIN(temperature) as min_temperature')
-            )->first();
-
-        if ($weather) {
-            $maxTemperature = $weather->max_temperature;
-            $minTemperature = $weather->min_temperature;
-        } else {
-            // Handle the case where no weather data is found for the given date and area
-            $maxTemperature = null;
-            $minTemperature = null;
+            ->whereDate('start', '=', Carbon::parse($this->date)->toDateString())
+            ->get();
+        foreach ($weather as $w) {
+            if (Carbon::parse($w->start)->toTimeString() >= '12:00:00') {
+                $shortForecast = $w->short_forecast;
+                $detailedForecast = $w->detailed_forecast;
+            }
+            if (isset($maxTemperature) && $maxTemperature < $w->temperature) {
+                $minTemperature = $maxTemperature;
+            }
+            $maxTemperature = $w->temperature;
         }
 
-        return [
-            'high' => $maxTemperature,
-            'low' => $minTemperature,
+        return (object) [
+            'forecast' => (object) [
+                'short' => $shortForecast ?? null,
+                'detailed' => $detailedForecast ?? null,
+            ],
+            'temperatures' => (object) [
+                'high' => $maxTemperature ?? null,
+                'low' => $minTemperature ?? null,
+            ],
         ];
     }
 
