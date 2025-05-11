@@ -77,6 +77,10 @@ class Trail extends Resource
         return $this->average_hours;
     }
 
+    public function getPeriodsToStart(TrailService $trailService, string $activityType = ActivityType::HIKING)
+    {
+    }
+
     public function getEstimatedHours(TrailService $trailService, float $averageSpeed, string $activityType = ActivityType::HIKING, $roundPrecision = 1)
     {
         $stats = $trailService->analyzeTrail($this->geoJson()->where('trail_id', $this->id)->first(), $averageSpeed, $activityType, $roundPrecision);

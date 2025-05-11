@@ -53,6 +53,18 @@ export const usePreferencesStore = defineStore('preferences', {
         return this.preferredMonths[index];
       }
     },
+    hasResource(resourceType, resourceId) {
+      if (resourceType === 'event') {
+        return this.eventIds.includes(resourceId);
+      } else if (resourceType === 'location') {
+        return this.locationIds.includes(resourceId);
+      } else if (resourceType === 'restaurant') {
+        return this.restaurantIds.includes(resourceId);
+      } else if (resourceType === 'location') {
+        return this.trailIds.includes(resourceId);
+      }
+      return false;
+    },
     hasEventsInPreferredActivities() {
       for (let i = 0; i < this.preferredActivityTypes.length; i++) {
         const activityType = this.preferredActivityTypes[i];

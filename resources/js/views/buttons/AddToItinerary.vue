@@ -24,6 +24,11 @@ export default {
     return {
     };
   },
+  computed: {
+    showAddToItinerary() {
+      return this.preferencesStore.hasResource(this.resource.type, this.resource.id);
+    },
+  },
   methods: {
     addToItinerary() {
       if (this.searchStore.target) {
@@ -35,7 +40,7 @@ export default {
         }
       } else {
         axios
-          .put('/api/v1/itinerary', {
+          .put('/api/v1/itinerary/{id}', {
             params: {
               resource_table: this.resource.table ?? null,
               resource_id: this.resource.id ?? null,

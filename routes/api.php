@@ -23,6 +23,12 @@ Route::prefix('v1')->group(function() {
         Route::get('/', 'App\Http\Controllers\ActivityController@getSelectableActivityTypes');
     });
 
+    Route::prefix('activity')->group(function() {
+        Route::get('/{activityId}', 'App\Http\Controllers\ItineraryController@getActivity');
+        Route::put('/{activityId}', 'App\Http\Controllers\ItineraryController@updateActivity');
+        Route::delete('/{activityId}', 'App\Http\Controllers\ItineraryController@deleteActivity');
+    });
+
     Route::prefix('area')->group(function() {
         Route::get('/', 'App\Http\Controllers\AreaController@index');
         Route::get('/{id}/trail', 'App\Http\Controllers\AreaController@getTrails');
@@ -34,6 +40,8 @@ Route::prefix('v1')->group(function() {
 
     Route::prefix('assistant')->group(function() {
         Route::get('/', 'App\Http\Controllers\AssistantController@getAssistants');
+        Route::post('/itinerary', 'App\Http\Controllers\AssistantController@createItinerary');
+        Route::put('/itinerary/{itineraryId}', 'App\Http\Controllers\AssistantController@updateItinerary');
         Route::prefix('message')->group(function() {
             Route::post('/', 'App\Http\Controllers\AssistantController@sendMessage');
         });
@@ -41,6 +49,13 @@ Route::prefix('v1')->group(function() {
             Route::get('/', 'App\Http\Controllers\AssistantController@getMessages');
             Route::delete('/', 'App\Http\Controllers\AssistantController@deleteMessages');
         });
+    });
+
+    Route::prefix('day')->group(function() {
+        Route::get('/{dayId}', 'App\Http\Controllers\ItineraryController@getDay');
+        Route::post('/{dayId}/activity', 'App\Http\Controllers\ItineraryController@createActivity');
+        Route::put('/{dayId}', 'App\Http\Controllers\ItineraryController@updateDay');
+        Route::delete('/{dayId}', 'App\Http\Controllers\ItineraryController@deleteDay');
     });
 
     Route::prefix('event')->group(function() {
@@ -61,6 +76,7 @@ Route::prefix('v1')->group(function() {
         Route::get('/', 'App\Http\Controllers\ItineraryController@createItinerary');
         Route::get('/{id}', 'App\Http\Controllers\ItineraryController@loadItinerary');
         Route::put('/{id}', 'App\Http\Controllers\ItineraryController@updateItinerary');
+        Route::delete('/{id}', 'App\Http\Controllers\ItineraryController@deleteItinerary');
     });
 
     Route::prefix('image')->group(function() {
@@ -72,6 +88,10 @@ Route::prefix('v1')->group(function() {
     Route::prefix('location')->group(function() {
         Route::get('/', 'App\Http\Controllers\LocationController@index');
         Route::get('/{id}', 'App\Http\Controllers\LocationController@getLocation');
+    });
+
+    Route::prefix('period')->group(function() {
+        Route::post('/{periodId}/activity', 'App\Http\Controllers\ItineraryController@createActivity');
     });
 
     Route::prefix('restaurant')->group(function() {

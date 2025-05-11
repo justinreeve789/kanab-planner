@@ -1,8 +1,10 @@
 <template>
 <!--  <StepsActivityTypes :show-events="hasEvents()" :show-trails="hasTrails()" />-->
-  <div class="bg-white p-4 text-black text-center text-lg">
-    <p class="font-semibold mb-1">Are there any specific destinations you wish to visit?</p>
-    <p class="mb-1">You don't have to select any, but we'll make sure to add anything you choose to your itinerary, if possible.</p>
+  <div class="bg-white text-black text-center text-lg">
+    <div class="p-4 text-center text-lg">
+      <p class="font-semibold mb-2">Are there any specific destinations you wish to visit?</p>
+      <p class="mb-1">You don't have to select any, but we'll make sure to add anything you choose to your itinerary, if possible.</p>
+    </div>
     <div class="flex flex-wrap justify-center items-center gap-6 my-4">
       <button
         class="text-white text-md font-medium text-center bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-orange-300 dark:focus:ring-orange-800 rounded-lg px-5 py-2"

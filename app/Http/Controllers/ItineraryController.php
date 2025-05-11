@@ -2,16 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityType;
 use App\Models\Area;
 use App\Models\Event;
+use App\Models\Itinerary\Activity;
+use App\Models\Itinerary\Day;
 use App\Models\Itinerary\Itinerary;
+use App\Models\Itinerary\Period;
 use App\Models\Itinerary\Season;
 use App\Models\Location;
+use App\Models\Resource;
 use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Traits\ActivityData;
 use App\Services\ConversionService;
 use App\Services\ItineraryService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -76,6 +82,58 @@ class ItineraryController extends Controller
         return $itinerary;
     }
 
+    public function updateItinerary(Request $request, $id)
+    {
+        $dayNum = $request->get('day_num');
+        $newResourceTable = $request->get('new_resource_table');
+        $newResourceId = $request->get('new_resource_id');
+        $oldResourceTable = $request->get('old_resource_table');
+        $oldResourceId = $request->get('old_resource_id');
+        $data = $request->get('data');
+        $newResource = null;
+        $oldResource = null;
+
+        $itinerary = Itinerary::with(['days.periods.activities'])->where('id', $id)->first();
+        if (!$itinerary) {
+            return false;
+        }
+
+        $newResourceModel = Resource::getModelForResourceTable($newResourceTable);
+        $newResource = $newResourceModel::find($newResourceId);
+        if (!$newResource) {
+            throw new Exception('Invalid new resource: ' . $newResourceTable . '_' . $newResourceId);
+        }
+        if ($oldResourceTable && $oldResourceId) {
+            $oldResourceModel = Resource::getModelForResourceTable($oldResourceTable);
+            $oldResource = $newResourceModel::find($oldResourceId);
+            if (!$oldResource) {
+                throw new Exception('Invalid old resource: ' . $oldResourceTable . '_' . $oldResourceId);
+            }
+        }
+
+        foreach ($itinerary->days as &$day) {
+            if ($day->day_num === $dayNum) {
+                // If the old resource isn't found in the day, throw an error.
+                foreach ($day->periods as &$period) {
+                    foreach ($period->activities as &$activity) {
+                        if (isset($activity->resource)) {
+                            if ($oldResource && $activity->resource->table === $oldResource->table && $activity->resource->id === $oldResource->id) {
+                                // Old resource found. We'll replace it with the new one.
+                                $itinerary->addActivity();
+                                $activity = new Activity([
+                                    'resource' => $newResource,
+                                    'activity_type_id' => ActivityType::where('name', $activityType)->pluck('id')->first(),
+                                    'start_time' => $startTime,
+                                    'end_time' => $endTime,
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * @return Itinerary
      */
@@ -87,5 +145,23 @@ class ItineraryController extends Controller
     private function saveItinerary()
     {
         $this->itineraryService->saveItinerary();
+    }
+
+    public function createActivity(Request $request, string $dayId = null, string $periodId = null)
+    {
+        if ($dayId) {
+            /** @var Day $day */
+            $day = Day::find($dayId);
+            if (!$day) {
+                throw new Exception('Invalid day id: ' . $dayId);
+            }
+        } elseif ($periodId) {
+            /** @var Period $period */
+            $period = Period::find($periodId);
+            if (!$period) {
+                throw new Exception('Invalid period id: ' . $periodId);
+            }
+        }
+        $period->addActivity();
     }
 }

@@ -112,7 +112,9 @@ class AssistantController extends Controller
 
         if ($assistantSession) {
             $newMessages = [];
+
             if ($message && $message !== '') {
+                // Make a general query.
                 $response = $openAIService->query($message, self::MAX_TOKENS, Config::get('openai.finetune_model'), $assistant, $assistantThread->thread_key);
                 if ($response) {
                     // Save the assistant's message.
@@ -144,4 +146,17 @@ class AssistantController extends Controller
             throw new Exception('Session not created.');
         }
     }
+
+    /**
+     * Create a specialized itinerary with AI.
+     */
+    public function createItinerary(Request $request)
+    {}
+
+    /**
+     * Update the existing itinerary with specialized parameters. We'll just retrieve resources and tasks that can be
+     * added to days, or replace existing resources on those days.
+     */
+    public function updateItinerary(Request $request, string $itineraryId)
+    {}
 }

@@ -1,5 +1,8 @@
 <template>
-  <p class="mb-4 text-sm">What kind of adventure-seeker are you? Adjust the sliders, and your activities will match as close to your preferences as possible.</p>
+  <div class="p-4 text-center text-lg">
+    <p class="font-semibold mb-2">What kind of adventure-seeker are you?</p>
+    <p class="mb-4 text-md">Adjust the sliders, and your activities will match as close to your preferences as possible.</p>
+  </div>
   <div class="sliders origin-center">
     <div class="-mx-6 px-6 pt-4 pb-2 bg-gradient-to-r from-red-50 to-orange-100">
       <div class="flex justify-between items-center -mx-6 px-6 -mt-4 mb-2 py-2 bg-gradient-to-r from-red-100 to-orange-200">

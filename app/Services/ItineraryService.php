@@ -1,4 +1,8 @@
 <?php
+/**
+ * If there's a low adventurousness (<= 0.5), stick with the trails that everyone comes to do, such as Angels Landing,
+ * the Narrows, Scout Overlook, etc.
+ */
 
 namespace App\Services;
 
@@ -327,7 +331,10 @@ class ItineraryService
         return rand(0, 1) ? Period::MORNING : Period::AFTERNOON;
     }
 
-    public function addTrail(Day $day, int $period)
+    /**
+     * Add a trail to a day, accounting for how existing activities and how long the activity would take.
+     */
+    public function addTrailToDay(Day $day, Trail $trail = null)
     {
     }
 
@@ -760,10 +767,9 @@ class ItineraryService
     }
 
     /**
-     * Should we add a trail for the period to fill in the gaps? If they've already done a trail today, only add another
-     * trail if their adventurousness is >= 0.7.
+     * Should we add a trail for the period to fill in the gaps? Don't exceed the maximum trail distance.
      */
-    public function shouldAddTrail(Day $day, int $period): bool {
+    public function shouldAddTrail(Day $day, int $period, Trail $trail = null): bool {
         switch ($period) {
             case Period::NIGHT:
                 break;

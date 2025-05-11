@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -24,6 +25,7 @@ class Day extends CachedModel
 
     protected $appends = [
         'area',
+        'temperatures',
     ];
     protected $attributes = [
         'formatted_abbr_month_day' => '',
@@ -39,23 +41,18 @@ class Day extends CachedModel
         'formatted_day_of_week',
         'formatted_month_day',
         'formatted_year',
+        'temperatures',
     ];
     protected $table = 'itinerary_days';
 
-//    public $adventurousness = self::DEFAULT_ADVENTUROUSNESS;
     public $activities;
-//    public $solitariness = self::DEFAULT_SOLITARINESS;
-//    public $strenuousness = self::DEFAULT_STRENUOUSNESS;
-//    public $periods;
     public $preamble;
-    public $temperatures;
 
     /** @var Period[] $periods */
 
     public function __construct(array $attributes = [])
     {
         $this->id = Str::uuid();
-//        $this->periods = new Collection();
 
         foreach ($attributes as $key => $attr) {
             $this->setAttribute($key, $attr);
@@ -65,25 +62,11 @@ class Day extends CachedModel
         // spending time in other areas, if the location is still in a reasonable proximity, but generally all activities
         // should occur in the same area.
 
-//        $this->day_num = $attributes['day_num'] ?? null;
         $this->start_time = '07:00';
         $this->end_time = '22:00';
 
-//        if (isset($attributes['date'])) {
-//            $this->formatted_abbr_month_day = date('M j', strtotime($this->date));
-//            $this->formatted_date = date('l, F j, Y', strtotime($this->date));
-//            $this->formatted_day_of_week = date('l', strtotime($this->date));
-//            $this->formatted_month_day = date('F j', strtotime($this->date));
-//            $this->formatted_year = date('Y', strtotime($this->date));
-//        }
-
-//        if (is_integer($this->area)) {
-//            $this->area = Area::where('id', $this->area)->first();
-//        }
-
         $this->activities = [];
         $this->createPeriodsIfNotExist();
-        $this->temperatures = $this->getTemperatures();
 
         parent::__construct($attributes);
     }
@@ -137,10 +120,6 @@ class Day extends CachedModel
 //            }
 //        }
     }
-//    public function set($date, $area, ?int $dayNum)
-//    {
-//        $this->date = $date;
-//    }
 
     public function itinerary()
     {
@@ -245,14 +224,14 @@ class Day extends CachedModel
         return $this->preamble;
     }
 
-    public function getTemperatures()
+    public function getTemperaturesAttribute()
     {
-        $weather = AreaWeather::where('area_id', $this->area_id)
+        $weather = AreaWeather::where('area_id', $this->area->id)
             ->where('start', '>=', $this->date . ' 00:00:00')
             ->where('end', '<=', $this->date . ' 23:59:59')
             ->select(
-                \DB::raw('MAX(temperature) as max_temperature'),
-                \DB::raw('MIN(temperature) as min_temperature')
+                DB::raw('MAX(temperature) as max_temperature'),
+                DB::raw('MIN(temperature) as min_temperature')
             )->first();
 
         if ($weather) {
@@ -345,11 +324,6 @@ class Day extends CachedModel
     public function shouldAddTrail(): bool
     {
     }
-
-//    public function setAreaId(int $area_id)
-//    {
-//        $this->area->id = $area_id;
-//    }
 
     public function setPreamble(string $preamble): void
     {

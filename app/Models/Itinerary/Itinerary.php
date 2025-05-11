@@ -24,8 +24,6 @@ use Illuminate\Support\Str;
 class Itinerary extends CachedModel
 {
     use Preferences;
-//    use ReturnAllProperties;
-//    use SnakeCaseAttributes;
 
     const DEFAULT_ADVENTUROUSNESS = 0.3;
     const DEFAULT_SOLITARINESS = 0.3;
@@ -155,7 +153,7 @@ class Itinerary extends CachedModel
             'resource' => $resource,
             'activity_type_id' => ActivityType::where('name', $activityType)->pluck('id')->first(),
             'start_time' => $startTime,
-            'end_time' => $endTime
+            'end_time' => $endTime,
         ]);
         $this->days[$dayNum]->periods[$period]->addActivity($activity);
 
@@ -167,6 +165,30 @@ class Itinerary extends CachedModel
             $this->restaurant_ids[] = $resource->id;
         } else if ($resource->isTrail()) {
             $this->trail_ids[] = $resource->id;
+        }
+    }
+
+    public function removeActivity($resource, $activityType, int $dayNum, $period = null)
+    {
+        foreach ($this->days as &$day) {
+            if ($day->day_num === $dayNum) {
+                foreach ($day->periods as &$period) {
+                    foreach ($period->activities as &$activity) {
+                        if (isset($activity->resource)) {
+                            if ($oldResource && $activity->resource->table === $oldResource->table && $activity->resource->id === $oldResource->id) {
+                                // Old resource found. We'll replace it with the new one.
+                                $itinerary->addActivity();
+                                $activity = new Activity([
+                                    'resource' => $newResource,
+                                    'activity_type_id' => ActivityType::where('name', $activityType)->pluck('id')->first(),
+                                    'start_time' => $startTime,
+                                    'end_time' => $endTime,
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
@@ -37,12 +38,7 @@ class Activity extends CachedModel
     protected $with = ['activity_type'];
 
     public $data;
-//    public $activityType;   // hiking, offroading, etc.
-//    public $description;
     public $phrase = '';
-//    public $end_time;
-//    public $name;
-//    public $start_time;
     private $dataService;
     private $phraseService;
 
@@ -338,4 +334,10 @@ class Activity extends CachedModel
 //
 //        }
 //    }
+
+    public static function resolveRequest(Request $request)
+    {
+        $resourceTable = $request->get('resource_table');
+        $resourceId = $request->get('resource_id');
+    }
 }

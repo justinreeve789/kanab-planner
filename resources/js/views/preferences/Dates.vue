@@ -1,6 +1,8 @@
 <template>
-  <fieldset class="fieldset p-4 border border-base-300 text-lg">
-    <legend class="fieldset-legend bg-white text-black text-center">When are you visiting?</legend>
+  <div class="p-4 text-center text-lg">
+    <p class="font-semibold mb-2">When are you visiting?</p>
+  </div>
+  <fieldset class="fieldset text-lg">
     <div class="flex justify-center">
       <button class="btn btn-primary" @click="selectDates" v-if="!noDates">
         <svg class="w-6 h-6 text-white dark:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">

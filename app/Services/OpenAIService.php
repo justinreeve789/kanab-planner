@@ -27,6 +27,7 @@
  * they're trails, find trails of similar or shorter length. Then construct short snippets about the trails.
  * - If asked about how to get to a place, open Google Maps with directions.
  * - If asked about family-friendly activities in the area or stuff to do, reference the events table.
+ * - When asked for something like "Create an itinerary for a wellness retreat," add tasks based on what the AI gives, like "morning meditation."
  */
 namespace App\Services;
 
@@ -477,6 +478,21 @@ class OpenAIService
             'max_tokens' => 2000,
         ]);
         return strtolower($result['choices'][0]['message']['content']);
+    }
+
+    public function createItineraryOutlineFromRequest($text, $daysCount = 5) {
+        $result = OpenAI::chat()->create([
+            'model' => Config::get('openai.model'),
+            'messages' => [[
+                'role' => 'system',
+                'content' => 'You are creating an itinerary for a trip to the Kanab, Utah area, based on specific parameters.',
+            ],[
+                'role' => 'user',
+                'content' => 'Create a JSON of daily things to do for an itinerary, organized into an array of ' . $daysCount. ' days, each day containing these exact fields: morning_tasks, afternoon_tasks, evening_tasks. Each tasks item has a "name" and "type" attribute. If the task involves hiking or bicycling or anything on a trail, "type" is trail. If it involves dining, "type" is restaurant. Anything else, type is "task". ONLY output the JSON, nothing else. Consider the following: ' . $text,
+            ]],
+            'max_tokens' => 2000,
+        ]);
+        return $result['choices'][0]['message']['content'];
     }
 
     public function createShortDescriptionForResourceWithWithOpenAI(string $text): ?string {

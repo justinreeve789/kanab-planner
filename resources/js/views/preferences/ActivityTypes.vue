@@ -1,20 +1,22 @@
 <template>
-    <fieldset class="fieldset p-4 border border-base-300 text-lg">
-        <legend class="fieldset-legend bg-white text-black">Which activities are you interested in?</legend>
-        <label class="fieldset-label">
-            <input type="checkbox" class="checkbox text-black" value="all" v-model="selectAll" />
-            <span class="font-semibold bg-white text-black">I'm Up For Anything! (select all)</span>
-        </label>
-        <label class="fieldset-label bg-white text-black" v-for="(activityType, index) in activityTypes" :key="index">
-            <input
-                type="checkbox"
-                class="checkbox text-black"
-                :value="activityType.name"
-                v-model="selectedActivityTypes"
-            />
-            {{ activityType.description }}
-        </label>
-    </fieldset>
+  <div class="p-4 text-center text-lg">
+    <p class="font-semibold mb-2">Which activities are you interested in?</p>
+  </div>
+  <fieldset class="fieldset text-lg">
+    <label class="fieldset-label">
+      <input type="checkbox" class="checkbox text-black" value="all" v-model="selectAll" />
+      <span class="font-semibold bg-white text-black">I'm Up For Anything! (select all)</span>
+    </label>
+    <label class="fieldset-label bg-white text-black" v-for="(activityType, index) in activityTypes" :key="index">
+      <input
+        type="checkbox"
+        class="checkbox text-black"
+        :value="activityType.name"
+        v-model="selectedActivityTypes"
+      />
+      {{ activityType.description }}
+    </label>
+  </fieldset>
 </template>
 
 <script>

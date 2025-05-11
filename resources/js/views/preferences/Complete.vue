@@ -1,8 +1,8 @@
 <template>
   <div class="p-4 text-center text-lg">
     <div class="hero-content text-center">
-      <div class="max-w-md">
-        <h1 class="mb-6 text-5xl font-bold">You're All Done!</h1>
+      <div class="max-w-lg text-gray-600">
+        <h1 class="font-bold mb-6 text-5xl">You're All Done!</h1>
         <p class="mb-6">
           Now we'll create an itinerary just for you. Feel free to return here to adjust your preferences if you want to change it. You may also make changes on the itinerary itself.
         </p>

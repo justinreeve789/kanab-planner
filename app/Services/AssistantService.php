@@ -26,6 +26,7 @@ class AssistantService
     const TRAILS = 'trails';
 
     public $client;
+    public $openAIService;
     public $phraseService;
     public $wordsToRemove = [
         'backpacking',
@@ -46,6 +47,7 @@ class AssistantService
     public function __construct()
     {
         $this->client = new Client(Config::get('scout.meilisearch.host'), Config::get('scout.meilisearch.key'));
+        $this->openAIService = new OpenAIService();
         $this->phraseService = new PhraseService();
         $this->stats = [
             self::RESTAURANTS => [],
@@ -333,6 +335,16 @@ class AssistantService
             ]);
         }
 
+        // If a specialized itinerary is requested, we'll make it AI-generated with some extra tasks.
+        if ($this->isNewItineraryRequested($query)) {
+            return new Message([
+                'content' => 'Should I create a new itinerary based on your request?',
+                'component' => 'buttons/VerifyCreateSpecializedItinerary',
+                'component_params' => ['query' => $query],
+                'show_in_chat_bubble' => false,
+            ]);
+        }
+
         return null;
     }
 
@@ -366,8 +378,14 @@ class AssistantService
     /**
      * A user may type something like "create a new itinerary," in which case we'll want to refresh the itinerary, with
      * the same dates.
+     *
+     * TODO: Use RubixML to determine that the user is actually requesting for the creation of an itinerary.
      */
     public function isNewItineraryRequested(string $query, $resource): bool {
+        $stripped = strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $query));
+        if (str_contains($stripped, 'itinerary') && (str_contains($stripped, 'build') || str_contains($stripped, 'create') || str_contains($stripped, 'make') || str_contains($stripped, 'revise'))) {
+            return true;
+        }
         return false;
     }
 
