@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('itinerary_activities', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('period_id');
-            $table->time('start_time');
-            $table->time('end_time');
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
             $table->text('description')->nullable();
             $table->string('phrase')->nullable();
             $table->integer('activity_type_id')->unsigned();
