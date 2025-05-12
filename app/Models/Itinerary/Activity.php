@@ -240,8 +240,6 @@ class Activity extends CachedModel
                         $modelClass = Location::class;
                     } elseif ($this->resource_table === ResourceEnum::RESTAURANTS_TABLE) {
                         $modelClass = Restaurant::class;
-                    } elseif ($this->resource_table === ResourceEnum::TASKS_TABLE) {
-                        $modelClass = Task::class;
                     } elseif ($this->resource_table === ResourceEnum::TRAILS_TABLE) {
                         $modelClass = Trail::class;
                     }
@@ -252,6 +250,9 @@ class Activity extends CachedModel
                 }
             },
             set: function($resource) {
+                if ($resource === null) {
+                    return collect();
+                }
                 $this->resource_id = $resource->id;
                 switch (get_class($resource)) {
                     case Accommodation::class:
@@ -265,9 +266,6 @@ class Activity extends CachedModel
                         break;
                     case Restaurant::class:
                         $this->resource_table = ResourceEnum::RESTAURANTS_TABLE;
-                        break;
-                    case Task::class:
-                        $this->resource_table = ResourceEnum::TASKS_TABLE;
                         break;
                     case Trail::class:
                         $this->resource_table = ResourceEnum::TRAILS_TABLE;

@@ -7,7 +7,6 @@ use App\Models\Area;
 use App\Models\Blog\Post;
 use App\Models\Event;
 use App\Models\Guide;
-use App\Models\Itinerary\Task;
 use App\Models\Location;
 use App\Models\Restaurant;
 use App\Models\Trail;
@@ -32,8 +31,6 @@ enum ResourceEnum
     const RESTAURANTS_CLASS = Restaurant::class;
     const RESTAURANTS_TABLE = 'restaurants';
     const RESTAURANTS_TYPE = 'restaurant';
-    const TASKS_CLASS = Task::class;
-    const TASKS_TABLE = 'itinerary_tasks';
     const TRAILS_CLASS = Trail::class;
     const TRAILS_TABLE = 'trails';
     const TRAILS_TYPE = 'trail';

@@ -18,7 +18,6 @@ use App\Models\Itinerary\Day;
 use App\Models\Itinerary\Itinerary;
 use App\Models\Itinerary\Period;
 use App\Models\Itinerary\Season;
-use App\Models\Itinerary\Task;
 use App\Models\Location;
 use App\Models\Restaurant;
 use App\Models\Trail;
@@ -105,8 +104,8 @@ class ItineraryService
                         $resource = $activity->resource;
                         $activity->offsetUnset('resource');
                         $activity->setRelation('resource', $resource);
-                        $activity->resource_table = $resource->getTable();
-                        $activity->resource_id = $resource->id;
+                        $activity->resource_table = isset($resource) ? $resource->getTable() : null;
+                        $activity->resource_id = isset($resource) ? $resource->id : null;
                         $activityType = $activity->activity_type;
                         $activity->offsetUnset('activity_type');
                         $activity->activity_type_id = $activity->activity_type_id ?? 0;
@@ -195,10 +194,6 @@ class ItineraryService
 //            $accommodation = Accommodation::with('images')->where('id', 1)->first();
             $accommodation = Accommodation::where('id', 1)->first();
             $accommodation->accommodation_name = $accommodation->name;
-//            $task = new Task([
-//                'name' => 'Arrival',
-//                'description' => $this->phraseService->getPhraseForCheckingIn() . ' ' . $this->phraseService->getPhraseForArrivingLateFood(),
-//            ]);
             $this->getItinerary()->addActivity($accommodation, 'checking-in', Day::DEFAULT_ARRIVAL_TIME, '23:59:59', $dayNum, Period::EVENING);
             return;
         }
@@ -208,10 +203,6 @@ class ItineraryService
         if ($dayNum === ($durationDays - 1) && !$this->getItinerary()->getUseLastDay()) {
             $accommodation = Accommodation::where('id', 1)->first();
             $accommodation->accommodation_name = $accommodation->name;
-//            $task = new Task([
-//                'name' => 'Departure',
-//                'description' => $this->phraseService->getPhraseForCheckingOut(),
-//            ]);
             $this->getItinerary()->addActivity(
                 $accommodation,
                 'checking-out',
@@ -236,13 +227,10 @@ class ItineraryService
         // If we have a trail for today, and it's in the morning, and in Zion, they probably won't have time to stop
         // to eat in the morning if they want to start on time. They should eat at home.
         if (isset($trail) && isset($trailPeriod) && $trailPeriod === Period::MORNING && $trail->area_id == Area::ZION) {
-            $task = new Task([
-                'name' => 'Breakfast',
-                'description' => 'Eat breakfast at home to make sure you can get to the trail at an early hour. Ideally you\'ll reach the trail by 8:00am to avoid larger crowds.',
-            ]);
-            $this->getItinerary()->addActivity(
-                $task,
+            $this->getItinerary()->addTask(
                 'cooking',
+                'Breakfast',
+                'Eat breakfast at home to make sure you can get to the trail at an early hour. Ideally you\'ll reach the trail by 8:00am to avoid larger crowds.',
                 '06:30',
                 '07:30',
                 $dayNum,
@@ -514,14 +502,10 @@ class ItineraryService
                         $phrase = $this->phraseService->getPhraseForLightMeal();
                 }
 
-                $task = new Task([
-                    'name' => $name,
-                    'description' => $phrase,
-                ]);
-
-                $this->getItinerary()->addActivity(
-                    $task,
+                $this->getItinerary()->addTask(
                     'cooking',
+                    $name,
+                    $phrase,
                     ($date . ' ' . $startTime),
                     ($date . ' ' . $startTime),
                     $dayNum,

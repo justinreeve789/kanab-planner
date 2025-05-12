@@ -16,6 +16,7 @@ return new class extends Migration
             $table->uuid('period_id');
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
+            $table->string('name')->nullable();
             $table->text('description')->nullable();
             $table->string('phrase')->nullable();
             $table->integer('activity_type_id')->unsigned();

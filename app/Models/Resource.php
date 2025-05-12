@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Models\Blog\Post;
 use App\Models\Builder\CustomQueryBuilder;
-use App\Models\Itinerary\Task;
 use App\ResourceEnum;
 use App\Traits\ResourceScopes;
 use App\Traits\SearchableResource;
@@ -185,10 +184,6 @@ abstract class Resource extends Model
         return get_class($this) === ResourceEnum::RESTAURANTS_CLASS;
     }
 
-    public function isTask() {
-        return get_class($this) === ResourceEnum::TASKS_CLASS;
-    }
-
     public function isTrail() {
         return get_class($this) === ResourceEnum::TRAILS_CLASS;
     }
@@ -207,7 +202,6 @@ abstract class Resource extends Model
             ResourceEnum::GUIDES_TABLE => Guide::class,
             ResourceEnum::LOCATIONS_TABLE => Location::class,
             ResourceEnum::RESTAURANTS_TABLE => Restaurant::class,
-            ResourceEnum::TASKS_TABLE => Task::class,
             ResourceEnum::TRAILS_TABLE => Trail::class,
             default => throw new Exception('Invalid table: ' . $resourceTable),
         };

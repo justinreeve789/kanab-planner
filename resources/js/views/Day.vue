@@ -61,7 +61,7 @@
           <div class="mb-8 border border-solid border-orange-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'hiking'">
             <Trail :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
           </div>
-          <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-else>
+          <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-if="activity.name">
             <Task :activity="activity" />
           </div>
         </div>
@@ -120,13 +120,11 @@ export default {
     nextDay(item, i) {
         return function(direction, mouseEvent) {
             console.log("Swiped item ", i, ": ", item, " in direction ", direction);
-            alert("Swiped item " + i + ": " + item + " in direction " + direction);
         };
     },
     previousDay(item, i) {
         return function(direction, mouseEvent) {
             console.log("Swiped item ", i, ": ", item, " in direction ", direction);
-            alert("Swiped item " + i + ": " + item + " in direction " + direction);
         };
     },
   },

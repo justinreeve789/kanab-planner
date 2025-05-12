@@ -29,6 +29,11 @@ class Day extends CachedModel
     protected $appends = [
         'area',
         'weather',
+        'formatted_abbr_month_day',
+        'formatted_date',
+        'formatted_day_of_week',
+        'formatted_month_day',
+        'formatted_year',
     ];
     protected $attributes = [
         'formatted_abbr_month_day' => '',

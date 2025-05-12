@@ -148,24 +148,33 @@ class Itinerary extends CachedModel
         $this->days->each()->saveAll();
     }
 
-    public function addActivity($resource, $activityType, $startTime, $endTime, int $dayNum, $period)
+    public function addTask($activityType, $name, $description, $startTime, $endTime, int $dayNum, $period)
+    {
+        $this->addActivity(null, $activityType, $startTime, $endTime, $dayNum, $period, $name, $description);
+    }
+
+    public function addActivity($resource, $activityType, $startTime, $endTime, int $dayNum, $period, $name = null, $description = null)
     {
         $activity = new Activity([
             'resource' => $resource,
             'activity_type_id' => ActivityType::where('name', $activityType)->pluck('id')->first(),
+            'name' => $name,
+            'description' => $description,
             'start_time' => $startTime,
             'end_time' => $endTime,
         ]);
         $this->days[$dayNum]->periods[$period]->addActivity($activity);
 
-        if ($resource->isEvent()) {
-            $this->event_ids[] = $resource->id;
-        } else if ($resource->isLocation()) {
-            $this->location_ids[] = $resource->id;
-        } else if ($resource->isRestaurant()) {
-            $this->restaurant_ids[] = $resource->id;
-        } else if ($resource->isTrail()) {
-            $this->trail_ids[] = $resource->id;
+        if ($resource) {
+            if ($resource->isEvent()) {
+                $this->event_ids[] = $resource->id;
+            } else if ($resource->isLocation()) {
+                $this->location_ids[] = $resource->id;
+            } else if ($resource->isRestaurant()) {
+                $this->restaurant_ids[] = $resource->id;
+            } else if ($resource->isTrail()) {
+                $this->trail_ids[] = $resource->id;
+            }
         }
     }
 

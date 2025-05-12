@@ -5,7 +5,6 @@ namespace App\Traits;
 use App\Models\ActivityType;
 use App\Models\Event;
 use App\Models\EventTag;
-use App\Models\Itinerary\Task;
 use App\Models\Location;
 use App\Models\ResourceBusy;
 use App\Models\ResourceData;
@@ -13,6 +12,7 @@ use App\Models\Restaurant;
 use App\Models\Trail;
 use App\ResourceEnum;
 use App\Services\DataService;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Adventurousness = The uniqueness of the experience, and how outside an average person's comfort zone it is.
@@ -34,7 +34,6 @@ trait ActivityData
             case Event::class:
             case Location::class:
             case Restaurant::class:
-            case Task::class:
             case Trail::class:
                 return true;
             default:
@@ -51,7 +50,7 @@ trait ActivityData
         try {
             return $this->activities[$name];
         } catch (\Exception $e) {
-            \Log::error('Activity ' . $name . ' not found.');
+            Log::error('Activity ' . $name . ' not found.');
         }
         return null;
     }
