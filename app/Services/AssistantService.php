@@ -381,7 +381,7 @@ class AssistantService
      *
      * TODO: Use RubixML to determine that the user is actually requesting for the creation of an itinerary.
      */
-    public function isNewItineraryRequested(string $query, $resource): bool {
+    public function isNewItineraryRequested(string $query, $resource = null): bool {
         $stripped = strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $query));
         if (str_contains($stripped, 'itinerary') && (str_contains($stripped, 'build') || str_contains($stripped, 'create') || str_contains($stripped, 'make') || str_contains($stripped, 'revise'))) {
             return true;
