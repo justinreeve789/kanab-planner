@@ -33,7 +33,7 @@ enum ResourceEnum
     const RESTAURANTS_TABLE = 'restaurants';
     const RESTAURANTS_TYPE = 'restaurant';
     const TASKS_CLASS = Task::class;
-    const TASKS_TABLE = 'tasks';
+    const TASKS_TABLE = 'itinerary_tasks';
     const TRAILS_CLASS = Trail::class;
     const TRAILS_TABLE = 'trails';
     const TRAILS_TYPE = 'trail';

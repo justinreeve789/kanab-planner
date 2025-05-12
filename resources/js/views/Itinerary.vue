@@ -124,6 +124,7 @@ export default {
         strenuousness: this.preferencesStore.strenuousness,
         start_date: this.preferencesStore.dateRange ? this.preferencesStore.dateRange.start : null,
         end_date: this.preferencesStore.dateRange ? this.preferencesStore.dateRange.end : null,
+        average_hiking_speed: this.preferencesStore.averageHikingSpeed,
         area_ids: this.preferencesStore.areaIds,
         event_ids: this.preferencesStore.eventIds,
         location_ids: this.preferencesStore.locationIds,

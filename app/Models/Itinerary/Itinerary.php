@@ -33,7 +33,7 @@ class Itinerary extends CachedModel
     const DEFAULT_CHECKOUT_TIME = '10:00';
     const DEFAULT_ACTIVITY_PRIORITIES = ['hiking'];
     const DEFAULT_ARRIVAL_TIME = '16:00';
-    const DEFAULT_AVERAGE_HIKING_SPEED = 1.3;
+    const DEFAULT_AVERAGE_HIKING_SPEED = 2;
     const DEFAULT_BASE_AREA_ID = Area::KANAB;
     const DEFAULT_DEPARTURE_TIME = '10:00';
     const DEFAULT_DURATION_DAYS = 5;
@@ -83,6 +83,7 @@ class Itinerary extends CachedModel
         $this->id = Str::uuid();
         $this->activities = [];
         $this->adventurousness = $this->adventurousness ?? self::DEFAULT_ADVENTUROUSNESS;
+        $this->average_hiking_speed = $this->average_hiking_speed ?? self::DEFAULT_AVERAGE_HIKING_SPEED;
         $this->base_area_id = $this->base_area_id ?? self::DEFAULT_BASE_AREA_ID;
         $this->duration_days = $this->duration_days ?? self::DEFAULT_DURATION_DAYS;
         $this->event_ids = [];

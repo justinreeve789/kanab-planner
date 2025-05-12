@@ -23976,6 +23976,7 @@ __webpack_require__.r(__webpack_exports__);
         strenuousness: this.preferencesStore.strenuousness,
         start_date: this.preferencesStore.dateRange ? this.preferencesStore.dateRange.start : null,
         end_date: this.preferencesStore.dateRange ? this.preferencesStore.dateRange.end : null,
+        average_hiking_speed: this.preferencesStore.averageHikingSpeed,
         area_ids: this.preferencesStore.areaIds,
         event_ids: this.preferencesStore.eventIds,
         location_ids: this.preferencesStore.locationIds,
@@ -26260,11 +26261,20 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       activityTypes: [],
+      estimatedMinutesToHikeOneMile: 30,
       selectAll: true,
       selectedActivityTypes: []
     };
   },
   watch: {
+    estimatedMinutesToHikeOneMile: function estimatedMinutesToHikeOneMile(newVal) {
+      if (newVal < 5) {
+        newVal = 5;
+      } else if (newVal > 500) {
+        newVal = 500;
+      }
+      this.preferencesStore.averageHikingSpeed = Math.max(0.1, Math.round(60 / newVal * 10) / 10);
+    },
     selectedActivityTypes: function selectedActivityTypes(newVal) {
       this.preferencesStore.preferredActivityTypes = newVal;
     },
@@ -26274,6 +26284,11 @@ __webpack_require__.r(__webpack_exports__);
       } else {
         this.deselectAllActivityTypes();
       }
+    }
+  },
+  computed: {
+    isHikingSelected: function isHikingSelected() {
+      return this.selectedActivityTypes.includes('hiking');
     }
   },
   methods: {
@@ -30217,7 +30232,7 @@ var _hoisted_1 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
   "class": "font-semibold mb-2"
 }, "Which activities are you interested in?")], -1 /* HOISTED */);
 var _hoisted_2 = {
-  "class": "fieldset text-lg"
+  "class": "fieldset mx-auto max-w-[320px] text-lg"
 };
 var _hoisted_3 = {
   "class": "fieldset-label"
@@ -30226,6 +30241,22 @@ var _hoisted_4 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
   "class": "font-semibold bg-white text-black"
 }, "I'm Up For Anything! (select all)", -1 /* HOISTED */);
 var _hoisted_5 = ["value"];
+var _hoisted_6 = {
+  key: 0,
+  "class": "max-w-[640px] mb-8 p-4"
+};
+var _hoisted_7 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  "class": "divider"
+}, null, -1 /* HOISTED */);
+var _hoisted_8 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", {
+  "class": "mb-4 text-lg"
+}, "How many minutes does it take you to hike 1 mile on a continuous gentle incline (estimate)?", -1 /* HOISTED */);
+var _hoisted_9 = {
+  "class": "flex justify-center items-center text-2xl"
+};
+var _hoisted_10 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "ml-2 text-2xl"
+}, "minutes", -1 /* HOISTED */);
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [_hoisted_1, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("fieldset", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "checkbox",
@@ -30246,7 +30277,16 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         return $data.selectedActivityTypes = $event;
       })
     }, null, 8 /* PROPS */, _hoisted_5), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.selectedActivityTypes]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(activityType.description), 1 /* TEXT */)]);
-  }), 128 /* KEYED_FRAGMENT */))])], 64 /* STABLE_FRAGMENT */);
+  }), 128 /* KEYED_FRAGMENT */))]), $options.isHikingSelected ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_6, [_hoisted_7, _hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    "class": "input px-4 text-2xl w-24",
+    type: "number",
+    step: "5",
+    min: "5",
+    max: "500",
+    "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
+      return $data.estimatedMinutesToHikeOneMile = $event;
+    })
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.estimatedMinutesToHikeOneMile]]), _hoisted_10])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 64 /* STABLE_FRAGMENT */);
 }
 
 /***/ }),
@@ -53272,6 +53312,7 @@ var usePreferencesStore = (0,pinia__WEBPACK_IMPORTED_MODULE_0__.defineStore)('pr
       currentPreferencesStep: 0,
       preferredActivityTypes: [],
       preferredMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      averageHikingSpeed: 2.0,
       dateRange: null,
       areaIds: null,
       eventIds: [],
@@ -53363,6 +53404,9 @@ var usePreferencesStore = (0,pinia__WEBPACK_IMPORTED_MODULE_0__.defineStore)('pr
           start: itineraryData.start_date,
           end: itineraryData.end_date
         };
+      }
+      if (itineraryData.average_hiking_speed) {
+        this.averageHikingSpeed = itineraryData.average_hiking_speed;
       }
     }
   }

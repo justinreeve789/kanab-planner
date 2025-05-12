@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Trail extends Resource
 {
-    const AVERAGE_HIKING_SPEED_MPH = 1.3;
+    const AVERAGE_HIKING_SPEED_MPH = 2;
 
     use HasFactory;
     use Proximity;

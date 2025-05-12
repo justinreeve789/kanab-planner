@@ -11,6 +11,7 @@ export const usePreferencesStore = defineStore('preferences', {
     currentPreferencesStep: 0,
     preferredActivityTypes: [],
     preferredMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    averageHikingSpeed: 2.0,
     dateRange: null,
     areaIds: null,
     eventIds: [],
@@ -108,6 +109,9 @@ export const usePreferencesStore = defineStore('preferences', {
           start: itineraryData.start_date,
           end: itineraryData.end_date,
         }
+      }
+      if (itineraryData.average_hiking_speed) {
+        this.averageHikingSpeed = itineraryData.average_hiking_speed;
       }
     },
   },
