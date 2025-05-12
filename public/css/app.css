@@ -5682,6 +5682,13 @@ calendar-month::part(td) {
     margin-top: 0px;
   }
 
+  .md\:line-clamp-none {
+    overflow: visible;
+    display: block;
+    -webkit-box-orient: horizontal;
+    -webkit-line-clamp: none;
+  }
+
   .md\:block {
     display: block;
   }

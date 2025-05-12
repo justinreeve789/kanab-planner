@@ -4,6 +4,7 @@ namespace App\Models\Itinerary;
 
 use App\Models\Area;
 use App\Models\AreaWeather;
+use App\Models\Trail;
 use App\ResourceEnum;
 use App\Traits\ReturnAllProperties;
 use Carbon\Carbon;
@@ -22,6 +23,8 @@ class Day extends CachedModel
 {
     const DEFAULT_ARRIVAL_TIME = '16:00:00';
     const DEFAULT_DEPARTURE_TIME = '10:00:00';
+    const WEATHER_ICON_DEFAULT = 'cloudy.svg';
+    const WEATHER_ICON_PATH = 'images/icons/weather/';
 
     protected $appends = [
         'area',
@@ -249,7 +252,20 @@ class Day extends CachedModel
                 'high' => $maxTemperature ?? null,
                 'low' => $minTemperature ?? null,
             ],
+            'icon' => isset($shortForecast) ? $this->getWeatherIconFromShortForecast($shortForecast) : null,
         ];
+    }
+
+    private function getWeatherIconFromShortForecast($str): string {
+        $filename = strtolower(trim(preg_replace('/[^a-zA-Z0-9-]+/', '-', $str), '-'));
+        $path = base_path() . '/public/' . self::WEATHER_ICON_PATH . $filename;
+        if (file_exists($path . '.svg')) {
+            return asset(self::WEATHER_ICON_PATH . $filename . '.svg');
+        }
+        if (file_exists($path . '.png')) {
+            return asset(self::WEATHER_ICON_PATH . $filename . '.png');
+        }
+        return asset(self::WEATHER_ICON_PATH . self::WEATHER_ICON_DEFAULT);
     }
 
     public function hasActivityType($activityType): bool
@@ -259,8 +275,7 @@ class Day extends CachedModel
                 if ($activity->activityType === $activityType) {
                     return true;
                 }
-            }
-        }
+            }        }
         return false;
     }
 
@@ -331,5 +346,19 @@ class Day extends CachedModel
     public function setPreamble(string $preamble): void
     {
         $this->preamble = $preamble;
+    }
+
+    /**
+     * After activities are added to periods, we can calculate specific times. Activities may be moved into different periods.
+     */
+    public function chronotizeActivities()
+    {
+        foreach ($this->periods as $period) {
+            foreach ($period->activities as $activity) {
+                if ($period->type === Period::MORNING) {
+                    // Breakfast should always come first.
+                }
+            }
+        }
     }
 }

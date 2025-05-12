@@ -19,8 +19,7 @@
           <p v-if="resource.description_short" class="mb-4">
             {{ resource.description_short }}
           </p>
-          <p
-          >
+          <p class="mb-4 md:line-clamp-none" :class="expanded === false ? 'line-clamp-3': ''" @click="expanded = true">
             {{ resource.description }}
           </p>
           <p v-if="resource.description_alt || phrase" class="mb-4">

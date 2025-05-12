@@ -121,7 +121,7 @@ export default {
       } else if (this.preferencesStore.adventurousness >= 0.4 && this.preferencesStore.adventurousness < 0.6) {
         return 'The Trail Less Traveled';
       } else if (this.preferencesStore.adventurousness >= 0.6 && this.preferencesStore.adventurousness < 0.8) {
-        return 'Let\'s Get Dirt On Our Shoes';
+        return 'Let\'s Get Dirty';
       } else if (this.preferencesStore.adventurousness >= 0.8) {
         return 'Did I Just Discover a New Planet?';
       }

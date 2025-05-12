@@ -11,18 +11,8 @@
           <span class="unit">F</span>
         </span>
     </div>
-    <div v-if="short">
-      <div v-if="short === 'Sunny'">
-        <img class="tooltip h-8" src="images/icons/weather/sunny.png" alt="Sunny" :data-tip="short" />
-      </div>
-      <div v-if="short === 'Mostly Sunny'">
-        <img class="h-8" src="images/icons/weather/mostly-sunny.png" alt="Mostly Sunny" />
-      </div>
-      <div v-if="short === 'Mostly Clear'">
-        <img class="h-8" src="images/icons/weather/mostly-clear.png" alt="Mostly Clear" />
-      </div>
-      <div v-else>
-      </div>
+    <div v-if="icon">
+      <img class="tooltip h-8" :src="icon" :alt="short" :data-tip="short" />
     </div>
   </div>
 </template>
@@ -38,6 +28,9 @@ export default {
     },
     high() {
       return this.weather.temperatures.high;
+    },
+    icon() {
+      return this.weather.icon;
     },
     low() {
       return this.weather.temperatures.low;

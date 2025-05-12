@@ -64,11 +64,11 @@
 </template>
 
 <script>
-import {usePreferencesStore} from "../../../stores/preferences";
 import axios from "axios";
-import ViewMap from "../../buttons/ViewMap.vue";
 import AddToItinerary from "../../buttons/AddToItinerary.vue";
 import AskQuestion from "../../buttons/AskQuestion.vue";
+import ViewMap from "../../buttons/ViewMap.vue";
+import {usePreferencesStore} from "../../../stores/preferences";
 
 export default {
   setup() {
