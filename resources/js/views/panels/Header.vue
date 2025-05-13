@@ -225,7 +225,6 @@ export default {
   },
   mounted() {
     this.getFeatureFlags();
-    this.openQuestionnaire = true;
   },
 };
 </script>

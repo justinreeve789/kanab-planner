@@ -1,7 +1,7 @@
 <template>
   <Header />
   <div class="m-0 p-0">
-    <Itinerary :itinerary-id="itineraryId" v-show="!isLoginOpen" />
+    <Itinerary :itinerary-id="getActiveItineraryId()" v-show="!isLoginOpen" />
     <Login v-if="isLoginOpen" />
   </div>
   <Dock />
@@ -69,12 +69,24 @@ export default {
     },
   },
   methods: {
+    getActiveItineraryId() {
+      if (this.itineraryId) {
+        this.$cookies.set('active_itinerary_id', this.itineraryId);
+        return this.itineraryId;
+      } else {
+        const activeItineraryId = this.$cookies.get('active_itinerary_id');
+        if (activeItineraryId !== '') {
+          return activeItineraryId;
+        }
+      }
+      this.openQuestionnaire = true;
+      return null;
+    },
     getFeatureFlags() {
     },
   },
   mounted() {
     this.getFeatureFlags();
-    this.openQuestionnaire = true;
   },
 };
 </script>

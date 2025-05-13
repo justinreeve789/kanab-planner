@@ -46,9 +46,9 @@ export default {
     };
   },
   mounted() {
-    if (this.preferencesStore.currentPreferencesStep === 0) {
-      this.preferencesStore.isPreferencesOpen = true;
-    }
+    // if (this.preferencesStore.currentPreferencesStep === 0) {
+    //   this.preferencesStore.isPreferencesOpen = true;
+    // }
   },
 };
 </script>

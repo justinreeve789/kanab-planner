@@ -23791,11 +23791,23 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   methods: {
+    getActiveItineraryId: function getActiveItineraryId() {
+      if (this.itineraryId) {
+        this.$cookies.set('active_itinerary_id', this.itineraryId);
+        return this.itineraryId;
+      } else {
+        var activeItineraryId = this.$cookies.get('active_itinerary_id');
+        if (activeItineraryId !== '') {
+          return activeItineraryId;
+        }
+      }
+      this.openQuestionnaire = true;
+      return null;
+    },
     getFeatureFlags: function getFeatureFlags() {}
   },
   mounted: function mounted() {
     this.getFeatureFlags();
-    this.openQuestionnaire = true;
   }
 });
 
@@ -25630,9 +25642,9 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {
-    if (this.preferencesStore.currentPreferencesStep === 0) {
-      this.preferencesStore.isPreferencesOpen = true;
-    }
+    // if (this.preferencesStore.currentPreferencesStep === 0) {
+    //   this.preferencesStore.isPreferencesOpen = true;
+    // }
   }
 });
 
@@ -26022,7 +26034,6 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     this.getFeatureFlags();
-    this.openQuestionnaire = true;
   }
 });
 
@@ -27572,7 +27583,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_SearchModal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("SearchModal");
   var _component_TrailMapModal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("TrailMapModal");
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Header), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Itinerary, {
-    "itinerary-id": $props.itineraryId
+    "itinerary-id": $options.getActiveItineraryId()
   }, null, 8 /* PROPS */, ["itinerary-id"]), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, !$options.isLoginOpen]]), $options.isLoginOpen ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_Login, {
     key: 0
   })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Dock), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Corner), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AssistantModal), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_AttributesModal), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_QuestionnaireModal), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_SearchModal), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_TrailMapModal)], 64 /* STABLE_FRAGMENT */);
@@ -52688,6 +52699,167 @@ const useSwiper = () => {
 
 /***/ }),
 
+/***/ "./node_modules/vue-cookies/vue-cookies.js":
+/*!*************************************************!*\
+  !*** ./node_modules/vue-cookies/vue-cookies.js ***!
+  \*************************************************/
+/***/ ((module) => {
+
+/**
+ * Vue Cookies v1.8.6
+ * https://github.com/cmp-cc/vue-cookies
+ *
+ * Copyright 2016, cmp-cc
+ * Released under the MIT license
+ */
+
+ (function () {
+
+  var defaultConfig = {
+    expires: '1d',
+    path: '; path=/',
+    domain: '',
+    secure: '',
+    sameSite: '; SameSite=Lax',
+    partitioned : ''
+  };
+
+  var VueCookies = {
+    // install of Vue
+    install: function (Vue, options) {
+      if (options) this.config(options.expires, options.path, options.domain, options.secure, options.sameSite, options.partitioned);
+      const isVue3 = Vue.config && Vue.config.globalProperties;
+      if (isVue3) {
+        Vue.config.globalProperties.$cookies = this;
+        Vue.provide && Vue.provide('$cookies', this);
+      }
+      if (!isVue3 || Vue.prototype) {
+        Vue.prototype.$cookies = this;
+      }
+      Vue.$cookies = this;
+    },
+    config: function (expires, path, domain, secure, sameSite, partitioned) {
+      defaultConfig.expires = expires ? expires : '1d';
+      defaultConfig.path = path ? '; path=' + path : '; path=/';
+      defaultConfig.domain = domain ? '; domain=' + domain : '';
+      defaultConfig.secure = secure ? '; Secure' : '';
+      defaultConfig.sameSite = sameSite ? '; SameSite=' + sameSite : '; SameSite=Lax';
+      defaultConfig.partitioned = partitioned ? '; Partitioned' : '';
+    },
+    get: function (key) {
+      var value = decodeURIComponent(document.cookie.replace(new RegExp('(?:(?:^|.*;)\\s*' + encodeURIComponent(key).replace(/[\-\.\+\*]/g, '\\$&') + '\\s*\\=\\s*([^;]*).*$)|^.*$'), '$1')) || null;
+
+      if (value && ((value.substring(0, 1) === '{' && value.substring(value.length - 1, value.length) === '}') || (value.substring(0, 1) === '[' && value.substring(value.length - 1, value.length) === ']'))) {
+        try {
+          value = JSON.parse(value);
+        } catch (e) {
+          return value;
+        }
+      }
+      return value;
+    },
+    set: function (key, value, expires, path, domain, secure, sameSite, partitioned) {
+      if (!key) {
+        throw new Error('Cookie name is not found in the first argument.');
+      } else if (/^(?:expires|max\-age|path|domain|secure|SameSite)$/i.test(key)) {
+        throw new Error('Cookie name illegality. Cannot be set to ["expires","max-age","path","domain","secure","SameSite"]\t current key name: ' + key);
+      }
+      // support json object
+      if (value && typeof value === 'object') {
+        value = JSON.stringify(value);
+      }
+      var _expires = '';
+      expires = expires === undefined ? defaultConfig.expires : expires;
+      if (expires && expires !== 0) {
+        switch (expires.constructor) {
+          case Number:
+            if (expires === Infinity || expires === -1) _expires = '; expires=Fri, 31 Dec 9999 23:59:59 GMT';
+            else _expires = '; max-age=' + expires;
+            break;
+          case String:
+            if (/^(?:\d+(y|m|d|h|min|s))$/i.test(expires)) {
+              // get capture number group
+              var _expireTime = expires.replace(/^(\d+)(?:y|m|d|h|min|s)$/i, '$1');
+              // get capture type group , to lower case
+              switch (expires.replace(/^(?:\d+)(y|m|d|h|min|s)$/i, '$1').toLowerCase()) {
+                  // Frequency sorting
+                case 'm':
+                  _expires = '; max-age=' + +_expireTime * 2592000;
+                  break; // 60 * 60 * 24 * 30
+                case 'd':
+                  _expires = '; max-age=' + +_expireTime * 86400;
+                  break; // 60 * 60 * 24
+                case 'h':
+                  _expires = '; max-age=' + +_expireTime * 3600;
+                  break; // 60 * 60
+                case 'min':
+                  _expires = '; max-age=' + +_expireTime * 60;
+                  break; // 60
+                case 's':
+                  _expires = '; max-age=' + _expireTime;
+                  break;
+                case 'y':
+                  _expires = '; max-age=' + +_expireTime * 31104000;
+                  break; // 60 * 60 * 24 * 30 * 12
+                default:
+                  new Error('unknown exception of "set operation"');
+              }
+            } else {
+              _expires = '; expires=' + expires;
+            }
+            break;
+          case Date:
+            _expires = '; expires=' + expires.toUTCString();
+            break;
+        }
+      }
+      document.cookie =
+          encodeURIComponent(key) + '=' + encodeURIComponent(value) +
+          _expires +
+          (domain ? '; domain=' + domain : defaultConfig.domain) +
+          (path ? '; path=' + path : defaultConfig.path) +
+          (secure === undefined ? defaultConfig.secure : secure ? '; Secure' : '') +
+          (sameSite === undefined ? defaultConfig.sameSite : (sameSite ? '; SameSite=' + sameSite : '')) +
+          (partitioned === undefined ? defaultConfig.partitioned : partitioned ? '; Partitioned' : '');
+      return this;
+    },
+    remove: function (key, path, domain) {
+      if (!key || !this.isKey(key)) {
+        return false;
+      }
+      document.cookie = encodeURIComponent(key) +
+          '=; expires=Thu, 01 Jan 1970 00:00:00 GMT' +
+          (domain ? '; domain=' + domain : defaultConfig.domain) +
+          (path ? '; path=' + path : defaultConfig.path) +
+          '; SameSite=Lax';
+      return true;
+    },
+    isKey: function (key) {
+      return (new RegExp('(?:^|;\\s*)' + encodeURIComponent(key).replace(/[\-\.\+\*]/g, '\\$&') + '\\s*\\=')).test(document.cookie);
+    },
+    keys: function () {
+      if (!document.cookie) return [];
+      var _keys = document.cookie.replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, '').split(/\s*(?:\=[^;]*)?;\s*/);
+      for (var _index = 0; _index < _keys.length; _index++) {
+        _keys[_index] = decodeURIComponent(_keys[_index]);
+      }
+      return _keys;
+    }
+  };
+
+  if (true) {
+    module.exports = VueCookies;
+  } else {}
+  // vue-cookies can exist independently,no dependencies library
+  if (typeof window !== 'undefined') {
+    window.$cookies = VueCookies;
+  }
+
+})();
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/dist/exportHelper.js":
 /*!******************************************************!*\
   !*** ./node_modules/vue-loader/dist/exportHelper.js ***!
@@ -52959,7 +53131,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var swiper_element_bundle__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! swiper/element/bundle */ "./node_modules/swiper/swiper-element-bundle.mjs");
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 /* harmony import */ var _views_App_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./views/App.vue */ "./resources/js/views/App.vue");
-/* harmony import */ var pinia__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! pinia */ "./node_modules/pinia/dist/pinia.mjs");
+/* harmony import */ var pinia__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! pinia */ "./node_modules/pinia/dist/pinia.mjs");
+/* harmony import */ var vue_cookies__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vue-cookies */ "./node_modules/vue-cookies/vue-cookies.js");
+/* harmony import */ var vue_cookies__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(vue_cookies__WEBPACK_IMPORTED_MODULE_3__);
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -52971,16 +53145,30 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 
 
 
+
 var app = (0,vue__WEBPACK_IMPORTED_MODULE_1__.createApp)({});
 app.component('app', _views_App_vue__WEBPACK_IMPORTED_MODULE_2__["default"]);
-var pinia = (0,pinia__WEBPACK_IMPORTED_MODULE_3__.createPinia)();
+var pinia = (0,pinia__WEBPACK_IMPORTED_MODULE_4__.createPinia)();
 app.config.globalProperties.$generateUnique = function () {
   var length = 32;
   return _toConsumableArray(Array(length)).map(function () {
     return Math.random().toString(36).substring(2);
   }).join('').substring(0, length);
 };
+app.config.globalProperties.$setCookie = function (id, value) {
+  document.cookie = id + '=' + value;
+};
+app.config.globalProperties.$getCookie = function (id) {
+  var value = document.cookie.match('(^|;)?' + id + '=([^;]*)(;|$)');
+  return value ? unescape(value[2]) : null;
+};
+app.config.globalProperties.$deleteCookie = function (id) {
+  document.cookie = id + '=;';
+};
 app.use(pinia);
+app.use((vue_cookies__WEBPACK_IMPORTED_MODULE_3___default()), {
+  expires: '1d'
+});
 app.mount('#app');
 
 /***/ }),
