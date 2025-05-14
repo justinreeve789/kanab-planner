@@ -7,6 +7,7 @@ export const usePreferencesStore = defineStore('preferences', {
     adventurousness: 0.5,
     solitariness: 0.5,
     strenuousness: 0.5,
+    isEditing: false,
     isPreferencesOpen: false,
     currentPreferencesStep: 0,
     preferredActivityTypes: [],

@@ -5,6 +5,7 @@ import { createApp } from 'vue'
 import App from './views/App.vue'
 import { createPinia } from 'pinia';
 import VueCookies from 'vue-cookies';
+import Vue3TouchEvents from 'vue3-touch-events';
 
 const app = createApp({});
 app.component('app', App);
@@ -30,5 +31,8 @@ app.config.globalProperties.$deleteCookie = function(id) {
 
 app.use(pinia);
 app.use(VueCookies, { expires: '1d' });
+app.use(Vue3TouchEvents, {
+  disableClick: true,
+});
 
 app.mount('#app');

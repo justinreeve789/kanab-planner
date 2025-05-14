@@ -25,6 +25,7 @@
         "vfonts": "^0.0.3"
     },
     "dependencies": {
+        "@ahultgren/vue3-swipe-actions": "^0.0.6",
         "@christophern/populartimesjs": "^1.0.8",
         "@headlessui/vue": "^1.7.16",
         "@mapbox/mapbox-gl-geocoder": "^5.0.1",
@@ -42,6 +43,6 @@
         "vue-cookies": "^1.8.6",
         "vue-loader": "^17.2.2",
         "vue3-datepicker": "^0.4.0",
-        "vue3-touch-events": "^4.1.6"
+        "vue3-touch-events": "^4.2.0"
     }
 }

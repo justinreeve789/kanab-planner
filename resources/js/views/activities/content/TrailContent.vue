@@ -15,11 +15,11 @@
             class="w-full sm:w-1/2 order-1 my-4 sm:pt-2 justify-center sm:justify-start lg:w-full lg:mb-4 flex lg:hidden xs:space-x-4"
           />
         </div>
-        <div class="lg:order-1">
+        <div class="lg:order-1 md:line-clamp-none" :class="expanded === false ? 'line-clamp-3': ''" @click="expanded = true">
           <p v-if="resource.description_short" class="mb-4">
             {{ resource.description_short }}
           </p>
-          <p class="mb-4 md:line-clamp-none" :class="expanded === false ? 'line-clamp-3': ''" @click="expanded = true">
+          <p class="mb-4">
             {{ resource.description }}
           </p>
           <p v-if="resource.description_alt || phrase" class="mb-4">

@@ -1,16 +1,5 @@
 <template>
-<!--  <div class="itinerary-view-switch flex pl-4 pt-4 align-left" title="Toggle detailed view">-->
-<!--    <div class="form-control">-->
-<!--      <label class="label cursor-pointer">-->
-<!--        <span class="label-text text-white">Detailed view</span>-->
-<!--        <input type="checkbox" class="toggle" checked />-->
-<!--      </label>-->
-<!--    </div>-->
-<!--  </div>-->
-
-<!--<Header v-if="itineraryData" />-->
-
-<div class="container mx-auto">
+  <div class="container mx-auto">
   <div v-if="itineraryData" class="md:pb-0 pb-[85px] text-black">
     <div class="itinerary-stats flex justify-end space-x-1 pr-4 pt-4 align-right text-white" title="Estimated total driving distance" v-if="itineraryData && itineraryData.totalTravelDistance">
       <img class="icon mr-1" src="/images/icons/car.svg" alt="Distance">
@@ -21,16 +10,9 @@
       </span>
       <span class="measurement">mi</span>
     </div>
-
     <div v-for="(day, index) in itineraryData.days" :key="index" class="p-2 md:p-4">
       <Day :day="day" />
     </div>
-
-<!--    <div v-if="itineraryData" v-for="(day, index) in itineraryData.days" :key="index">-->
-<!--      <ActivityStatsModal :day="day" v-if="day.stats" />-->
-<!--    </div>-->
-
-<!--    <Backdrop />-->
   </div>
   <div v-else class="progress w-full h-[85vh] flex justify-center items-center text-6xl relative">
     <span class="text text-center text-6xl text-white font-bold relative">
@@ -39,16 +21,11 @@
     </span>
   </div>
 </div>
-
-<!--  <Dock v-if="itineraryData" />-->
-
 </template>
 
 <script>
 import axios from 'axios';
 import Day from './Day.vue';
-// import Backdrop from './Backdrop.vue';
-import Select from './components/Select.vue';
 import { usePreferencesStore } from "../stores/preferences";
 
 export default {
@@ -60,6 +37,7 @@ export default {
     'preferencesStore.refresh'(newVal, oldVal) {
       if (newVal === true && oldVal !== true) {
         this.preferencesStore.refresh = false;
+        this.$cookies.remove('active_itinerary_id');
         this.itineraryData = null;
         this.fetchItineraryData();
       }
@@ -103,6 +81,7 @@ export default {
   },
   data() {
     return {
+      isEditing: false,
       itineraryData: null,
       itineraryParams: {},
     };
@@ -149,11 +128,12 @@ export default {
         .then((response) => {
           this.itineraryData = response.data;
           this.preferencesStore.setAttributesFromItineraryData(this.itineraryData);
+          this.$cookies.set('active_itinerary_id', this.preferencesStore.itineraryData.id);
         })
         .catch((error) => {
           console.error('Error fetching itinerary data:', error);
         });
-    }
+    },
   },
   components: {
     // ActivityStatsModal,
