@@ -161,13 +161,13 @@ abstract class Resource extends Model
         return $query;
     }
 
-    public function calculateEndTime(string $date, string $startTime)
+    public function calculateEndTime(string $date, string $startTime, array $params = [])
     {
         // TODO: Use busyness and popularity rankings.
-        return date('H:i:s', strtotime($date . ' ' . $startTime) + $this->getAverageHours() * 60 * 60);
+        return date('H:i:s', strtotime($date . ' ' . $startTime) + $this->getAverageHours($params) * 60 * 60);
     }
 
-    public function getAverageHours()
+    public function getAverageHours(array $params = [])
     {
         return self::DEFAULT_AVERAGE_HOURS;
     }

@@ -663,6 +663,7 @@ class ItineraryService
             $itinerary = $this->getItinerary();
             $query = Area::inWeightedRandomOrder($adventurousness)->whereHas('trails', function($q) use ($itinerary) {
                 $q->where('trails.distance_miles', '>=', $itinerary->calculateMinimumTrailDistance());
+                $q->where('trails.distance_miles', '<=', $itinerary->calculateMaximumTrailDistance());
             });
 
             // If the user's adventurousness is low (< 0.3, < 0.4), we won't pick areas that are too far from their base area.

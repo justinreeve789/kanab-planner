@@ -82,10 +82,11 @@ export default {
       return this.preferencesStore.hasTrailsInPreferredActivities();
     },
     openEvents() {
-      this.searchStore.adjustSettingsForResourceListForTable('events');
+      // this.searchStore.adjustSettingsForResourceListForTable('events');
       this.searchStore.target = { component: 'preferences', store: 'preferences', attribute: 'selectedEventIds' };
       this.searchStore.closeAfterAddToItinerary = true;
-      this.searchStore.isSearchOpen = true;
+      this.$addHashToUrl('#modal-search-events');
+      // this.searchStore.isSearchOpen = true;
     },
     openSearch() {
       this.searchStore.adjustSettingsForGeneralSearch();
@@ -94,10 +95,11 @@ export default {
       this.searchStore.isSearchOpen = true;
     },
     openTrails() {
-      this.searchStore.adjustSettingsForResourceListForTable('trails');
+      // this.searchStore.adjustSettingsForResourceListForTable('trails');
       this.searchStore.target = { component: 'preferences', store: 'preferences', attribute: 'selectedTrailIds' };
       this.searchStore.closeAfterAddToItinerary = true;
-      this.searchStore.isSearchOpen = true;
+      this.$addHashToUrl('#modal-search-trails');
+      // this.searchStore.isSearchOpen = true;
     },
   },
   mounted() {

@@ -25,9 +25,9 @@ class Itinerary extends CachedModel
 {
     use Preferences;
 
-    const DEFAULT_ADVENTUROUSNESS = 0.3;
-    const DEFAULT_SOLITARINESS = 0.3;
-    const DEFAULT_STRENUOUSNESS = 0.3;
+    const DEFAULT_ADVENTUROUSNESS = 0.5;
+    const DEFAULT_SOLITARINESS = 0.5;
+    const DEFAULT_STRENUOUSNESS = 0.5;
     const DEFAULT_THRIFTINESS = 0.5;
     const DEFAULT_CHECKIN_TIME = '16:00';
     const DEFAULT_CHECKOUT_TIME = '10:00';
@@ -216,13 +216,22 @@ class Itinerary extends CachedModel
         return $this->days;
     }
 
+    public function calculateMaximumTrailDistance(): float
+    {
+        // A low adventurousness and strenuousness should result in generally shorter trails. Note that this isn't the
+        // same as the maximum trail distance per day.
+        if ($this->adventurousness <= 0.3 || $this->strenuousness <= 0.3) {
+            return max(0.5, (($this->adventurousness * 0.75) + ($this->strenuousness * 1.25)) * 8);
+        }
+        return 9999.9;
+    }
+
     public function calculateMinimumTrailDistance(): float
     {
         // A high adventurousness and strenuousness should result in generally longer trails. Note that this isn't the
         // same as the minimum trail distance per day.
         if ($this->adventurousness >= 0.7 || $this->strenuousness >= 0.6) {
-            $minimumDistance = 8 * (($this->adventurousness * 0.75) + ($this->strenuousness * 1.25)) / 5;
-            return $minimumDistance;
+            return 8 * (($this->adventurousness * 0.75) + ($this->strenuousness * 1.25)) / 5;
         }
         return 0.1;
     }
@@ -232,8 +241,7 @@ class Itinerary extends CachedModel
         // A high adventurousness and strenuousness should result in generally longer trails. Note that this isn't the
         // same as the minimum trail distance per day.
         if ($this->adventurousness >= 0.6 && $this->strenuousness >= 0.6) {
-            $minimumDistance = 8 * (($this->adventurousness * 0.75) + ($this->strenuousness * 1.25)) / 2;
-            return $minimumDistance;
+            return 8 * (($this->adventurousness * 0.75) + ($this->strenuousness * 1.25)) / 2;
         }
         return 0.1;
     }

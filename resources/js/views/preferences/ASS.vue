@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 text-center text-lg">
+  <div class="px-2 py-4 text-center text-lg">
     <p class="font-semibold mb-2">What kind of adventure-seeker are you?</p>
     <p class="mb-4">Adjust the sliders, and your activities will match as close to your preferences as possible.</p>
   </div>

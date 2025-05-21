@@ -79,6 +79,9 @@ class ItineraryController extends Controller
     public function loadItinerary(Request $request, $id)
     {
         $itinerary = Itinerary::with(['days.periods.activities'])->where('id', $id)->first();
+        if (!$itinerary) {
+            return response()->json(['errors' => 'Itinerary not available'], 422);
+        }
         return $itinerary;
     }
 

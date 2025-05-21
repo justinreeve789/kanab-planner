@@ -67,14 +67,12 @@ class Trail extends Resource
         return $this->images->pluck('id')->all();
     }
 
-    public function getAverageHours()
+    public function getAverageHours(array $params = [])
     {
         if (isset($this->average_hours)) {
             return $this->average_hours;
         }
-        $this->average_hours = $this->trailService->calculateHikingTime($this->distance_miles, null, $this->difficulty);
-        $this->save();
-        return $this->average_hours;
+        return $this->getEstimatedHours($this->trailService, $params['average_hiking_speed'] ?? self::AVERAGE_HIKING_SPEED_MPH);
     }
 
     public function getPeriodsToStart(TrailService $trailService, string $activityType = ActivityType::HIKING)

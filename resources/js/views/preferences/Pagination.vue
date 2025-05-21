@@ -36,13 +36,27 @@ export default {
   },
   methods: {
     next() {
-      this.$emit('update:modelValue', this.step + 1);
+      this.$router.push(this.stepRoute(this.step + 1));
     },
     previous() {
-      this.$emit('update:modelValue', this.step - 1);
+      this.$router.push(this.stepRoute(this.step - 1));
     },
-  },
-  mounted() {
+    stepRoute(step) {
+      switch (step) {
+        case 1:
+          return 'questionnaire-dates';
+        case 2:
+          return 'questionnaire-activities';
+        case 3:
+          return 'questionnaire-about';
+        case 4:
+          return 'questionnaire-destinations';
+        case 5:
+          return 'questionnaire-complete';
+        default:
+          return 'questionnaire';
+      }
+    },
   },
 };
 </script>

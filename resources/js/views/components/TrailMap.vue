@@ -53,15 +53,15 @@ export default {
   methods: {
     async getGeoJson() {
       try {
-        const response = await axios.get(`/api/v1/trail/${this.resourceId}/geojson`);
+        const response = await this.$axiosHelper.get(`/trail/${this.resourceId}/geojson`);
         this.geoJson = response.data;
       } catch (error) {
         console.error('Error fetching geoJson data:', error);
       }
     },
     getGeoJsonMarkers() {
-      axios
-        .get('/api/v1/trail/' + this.resourceId + '/geojson/analyze')
+      this.$axiosHelper
+        .get('/trail/' + this.resourceId + '/geojson/analyze')
         .then((response) => {
           if (response.data.time_hours) {
             // this.geoJsonMarkers = response.data.time_hours;

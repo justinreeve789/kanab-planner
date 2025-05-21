@@ -28,7 +28,7 @@
   // }
 </script>
 <div id="app">
-    <app :itinerary-id="'{{ $id ?? null }}'"></app>
+    <app></app>
 </div>
 <script src="{{ mix('js/app.js') }}" defer></script>
 </body>

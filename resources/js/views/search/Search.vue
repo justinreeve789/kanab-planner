@@ -33,6 +33,7 @@
     <template v-if="showFeatured">
       <div class="featured-results" v-show="query === ''" v-for="resourceTable in getSelectedResourceTables()">
         <EventFeatured :areaIds="getSelectedAreaIds()" v-if="resourceTable === 'events'" />
+        <RestaurantFeatured :areaIds="getSelectedAreaIds()" v-if="resourceTable === 'restaurants'" />
         <TrailFeatured :areaIds="getSelectedAreaIds()" v-if="resourceTable === 'trails'" />
       </div>
     </template>
@@ -51,7 +52,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 import AccommodationResult from "./AccommodationResult.vue";
 import EventResult from "./EventResult.vue";
 import LocationResult from "./LocationResult.vue";
@@ -59,10 +59,11 @@ import RestaurantResult from "./RestaurantResult.vue";
 import TrailResult from "./TrailResult.vue";
 import AreaSelect from "./AreaSelect.vue";
 import ResourceSelect from "./ResourceSelect.vue";
-import { useSearchStore } from "../../stores/search";
-import {mapState} from "pinia";
-import TrailFeatured from "./featured/TrailFeatured.vue";
 import EventFeatured from "./featured/EventFeatured.vue";
+import RestaurantFeatured from "./featured/RestaurantFeatured.vue";
+import TrailFeatured from "./featured/TrailFeatured.vue";
+import { mapState } from "pinia";
+import { useSearchStore } from "../../stores/search";
 
 export default {
   components: {
@@ -72,6 +73,7 @@ export default {
     EventFeatured,
     EventResult,
     LocationResult,
+    RestaurantFeatured,
     RestaurantResult,
     TrailFeatured,
     TrailResult,
@@ -85,6 +87,7 @@ export default {
       'isSearchOpen',
       'title',
       'target',
+      'modal',
       'selectedAreaIds',
       'selectedResourceTables',
       'sortField',
@@ -147,8 +150,8 @@ export default {
     },
     executeQuery() {
       this.loading = true;
-      axios
-        .get('/api/v1/search', {
+      this.$axiosHelper
+        .get('/search', {
           params: {
             q: this.query,
             ar: this.getSelectedAreaIds(),

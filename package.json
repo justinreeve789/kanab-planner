@@ -42,6 +42,7 @@
         "vue": "^3.2.36",
         "vue-cookies": "^1.8.6",
         "vue-loader": "^17.2.2",
+        "vue-router": "^4.5.1",
         "vue3-datepicker": "^0.4.0",
         "vue3-touch-events": "^4.2.0"
     }

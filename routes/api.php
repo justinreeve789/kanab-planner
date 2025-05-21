@@ -19,6 +19,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('v1')->group(function() {
+    Route::prefix('auth')->group(function() {
+        Route::post('/register', 'Laravel\Fortify\Http\Controllers\RegisteredUserController@store');
+    });
+
     Route::prefix('activity_type')->group(function() {
         Route::get('/', 'App\Http\Controllers\ActivityController@getSelectableActivityTypes');
     });

@@ -14,24 +14,23 @@
       <Day :day="day" />
     </div>
   </div>
-  <div v-else class="progress w-full h-[85vh] flex justify-center items-center text-6xl relative">
-    <span class="text text-center text-6xl text-white font-bold relative">
-      Loading
-      <span class="loading loading-dots loading-lg text-white absolute ml-2 bottom-0"></span>
-    </span>
+  <div v-else>
+    <Loading />
   </div>
 </div>
 </template>
 
 <script>
-import axios from 'axios';
 import Day from './Day.vue';
+import Loading from "./components/Loading.vue";
 import { usePreferencesStore } from "../stores/preferences";
+import { useRouter } from 'vue-router';
 
 export default {
   setup() {
     const preferencesStore = usePreferencesStore();
-    return { preferencesStore };
+    const router = useRouter();
+    return { preferencesStore, router };
   },
   watch: {
     'preferencesStore.refresh'(newVal, oldVal) {
@@ -39,8 +38,17 @@ export default {
         this.preferencesStore.refresh = false;
         this.$cookies.remove('active_itinerary_id');
         this.itineraryData = null;
+        this.$router.push('/');
         this.fetchItineraryData();
       }
+    },
+    'preferencesStore.dateRange'(newDateRange) {
+      this.itineraryParams.start_date = newDateRange.start;
+      this.itineraryParams.end_date = newDateRange.end;
+      // this.itineraryData = null;
+      // this.fetchItineraryData();
+      // this.$cookies.remove('active_itinerary_id');
+      this.preferencesStore.refreshItinerary();
     },
     // 'preferencesStore.itineraryData'(newItineraryData, oldItineraryData) {
     //   if (newItineraryData === null) {
@@ -48,13 +56,6 @@ export default {
     //     this.fetchItineraryData();
     //   }
     // },
-    'preferencesStore.dateRange'(newDateRange) {
-      this.itineraryParams.start_date = newDateRange.start;
-      this.itineraryParams.end_date = newDateRange.end;
-      // this.itineraryData = null;
-      // this.fetchItineraryData();
-      this.preferencesStore.refreshItinerary();
-    },
     // 'preferencesStore.isPreferencesOpen'(newVal, oldVal) {
     //   let preferencesChange = false;
     //   if (newVal !== oldVal && newVal === false) {
@@ -83,18 +84,51 @@ export default {
     return {
       isEditing: false,
       itineraryData: null,
+      itineraryId: '',
       itineraryParams: {},
     };
   },
-  props: {
-    itineraryId: String,
-  },
   mounted() {
+    this.itineraryId = this.getActiveItineraryId();
     this.fetchItineraryData();
   },
   methods: {
-    round(num) {
-      return Math.round(num);
+    fetchItineraryData() {
+      const itineraryParams = this.getItineraryParams();
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.forEach((value, key) => {
+        itineraryParams[key] = value;
+      });
+      let url = '/itinerary';
+      if (this.itineraryId) {
+        url += '/' + this.itineraryId;
+      }
+      this.$axiosHelper.get(url, {
+        params: itineraryParams,
+      }).then((response) => {
+        this.itineraryData = response.data;
+        this.preferencesStore.setAttributesFromItineraryData(this.itineraryData);
+        this.$cookies.set('active_itinerary_id', this.itineraryData.id);
+        this.router.push('/' + this.itineraryData.id);
+      }).catch((error) => {
+        // Redirect to / if an invalid id was passed.
+        if (error.status === 422) {
+          window.location.href = '/';
+        }
+        if (error.code !== 'ERR_CANCELED') {
+          console.log('Error fetching itinerary:', error);
+        }
+      });
+    },
+    getActiveItineraryId() {
+      if (this.$route.params.itineraryId) {
+        return this.$route.params.itineraryId;
+      }
+      const activeItineraryId = this.$cookies.get('active_itinerary_id');
+      if (typeof(activeItineraryId) !== 'undefined') {
+        return activeItineraryId;
+      }
+      return null;
     },
     getItineraryParams() {
       return {
@@ -109,35 +143,18 @@ export default {
         location_ids: this.preferencesStore.locationIds,
         restaurant_ids: this.preferencesStore.restaurantIds,
         trail_ids: this.preferencesStore.trailIds,
+        preferred_activity_types: this.preferencesStore.preferredActivityTypes,
+        preferred_months: this.preferencesStore.preferredMonths,
+        duration_days: this.preferencesStore.durationDays,
       };
     },
-    fetchItineraryData() {
-      const itineraryParams = this.getItineraryParams();
-      const urlParams = new URLSearchParams(window.location.search);
-      urlParams.forEach((value, key) => {
-        itineraryParams[key] = value;
-      });
-      let url = '/api/v1/itinerary';
-      if (this.itineraryId) {
-        url += '/' + this.itineraryId;
-      }
-      axios
-        .get(url, {
-          params: itineraryParams,
-        })
-        .then((response) => {
-          this.itineraryData = response.data;
-          this.preferencesStore.setAttributesFromItineraryData(this.itineraryData);
-          this.$cookies.set('active_itinerary_id', this.preferencesStore.itineraryData.id);
-        })
-        .catch((error) => {
-          console.error('Error fetching itinerary data:', error);
-        });
+    round(num) {
+      return Math.round(num);
     },
   },
   components: {
-    // ActivityStatsModal,
     Day,
+    Loading,
   },
 };
 </script>

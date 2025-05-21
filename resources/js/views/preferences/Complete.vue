@@ -25,24 +25,13 @@ export default {
     const preferencesStore = usePreferencesStore();
     return { preferencesStore };
   },
-  components: {
-  },
-  props: {
-  },
-  data() {
-    return {
-    };
-  },
-  computed: {
-  },
   methods: {
     createItinerary() {
+      this.$cookies.remove('active_itinerary_id');
       this.preferencesStore.refreshItinerary();
       this.preferencesStore.refresh = true;
-      this.preferencesStore.isPreferencesOpen = false;
+      this.$router.push('/');
     },
-  },
-  mounted() {
   },
 };
 </script>

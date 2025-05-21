@@ -1,8 +1,8 @@
 <template>
   <div class="tooltip tooltip-primary tooltip-left hidden md:block" data-tip="Answer the questionnaire">
-    <button class="btn btn-circle btn-primary h-16 shadow-lg w-16" @click="toggleQuestionnaireModal">
+    <router-link class="btn btn-circle btn-primary h-16 shadow-lg w-16" :to="{ name: 'questionnaire' }">
       <img src="images/icons/questionnaire.png"/>
-    </button>
+    </router-link>
   </div>
 </template>
 

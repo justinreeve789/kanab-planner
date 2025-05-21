@@ -61,9 +61,5 @@ Route::get('/auth/callback', function () {
     // $user->token
 });
 
-Route::prefix('itinerary')->group(function() {
-    Route::get('/', 'App\Http\Controllers\ItineraryController@create');
-});
-
 Route::get('/image/{type}/{id}', [ImageController::class, 'getUrl']);
-Route::get('/featured-resource-image/{type}/{resourceId}', [ImageController::class, 'getFeaturedImageUrl']);
+//Route::get('/featured-resource-image/{type}/{resourceId}', [ImageController::class, 'getFeaturedImageUrl']);

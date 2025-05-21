@@ -7,6 +7,7 @@ export const useSearchStore = defineStore('search', {
     target: {},
     sortField: '',
     query: '',
+    modal: false,
     highlightSearchInMenu: false,
     closeAfterAddToItinerary: false,
     selectedAreaIds: [],
@@ -42,6 +43,7 @@ export const useSearchStore = defineStore('search', {
     adjustSettingsForPage(resourceTable) {
       this.clearSettings();
       this.title = resourceTable.charAt(0).toUpperCase() + resourceTable.slice(1);
+      this.modal = false;
       this.showCloseButtonOnMobile = true;
       this.selectedResourceTables = [resourceTable];
       this.showResourceSelect = false;
@@ -55,6 +57,7 @@ export const useSearchStore = defineStore('search', {
       this.target = {};
       this.sortField = '';
       this.query = '';
+      this.modal = false;
       this.selectedAreaIds = [];
       this.selectedResourceTables = [];
       this.showHeader = true;

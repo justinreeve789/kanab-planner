@@ -46,10 +46,10 @@ class TrailService
             ->whereNotNull('distance_miles')
             ->whereNotIn('trails.id', $existingTrails);
         if ($period === Period::EVENING) {
-            $trails->where('distance_miles', '<=', '1.5');
-        } else {
-            $trails->where('distance_miles', '>=', $itinerary->calculateMinimumTrailDistance());
+            $trails->where('distance_miles', '<=', '2.0');
         }
+        $trails->where('distance_miles', '>=', $itinerary->calculateMinimumTrailDistance());
+        $trails->where('distance_miles', '<=', $itinerary->calculateMaximumTrailDistance());
 
         $trails->with(['area', 'images']);
         $trails = $trails->get();
@@ -114,6 +114,22 @@ class TrailService
         return $distanceMiles / ($mph + $modifier);
     }
 
+    /**
+     * The listed difficulty affects the total hiking time calculation, though we use additional means to arrive at the final estimate.
+     */
+    public function getMphMultiplierForDifficulty(?string $difficulty): float
+    {
+        return match ($difficulty) {
+            'Easy' => 1.2,
+            'Easy/Intermediate' => 1.1,
+            'Intermediate' => 1,
+            'Intermediate/Difficult' => 0.9,
+            'Difficult' => 0.8,
+            'Very Difficult' => 0.7,
+            default => 1,
+        };
+    }
+
     public function calculateMphByDifficulty(?string $difficulty): float
     {
         switch ($difficulty) {
@@ -131,6 +147,9 @@ class TrailService
                 break;
             case 'Difficult':
                 $mph = 1.1;
+                break;
+            case 'Very Difficult':
+                $mph = 0.9;
                 break;
             default:
                 $mph = 1.3;

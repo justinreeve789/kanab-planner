@@ -1,13 +1,13 @@
 <template>
-  <div class="messages max-h-[540px] lg:max-h-[350px] p-4" style="overflow-y: scroll;" ref="messagesContainer">
+  <div class="messages overflow-y-scroll p-4" ref="messagesContainer">
     <div v-for="(message, index) in store.messages" :key="index">
       <div :class="['chat', message.is_assistant ? 'chat-start' : 'chat-end']">
         <div class="chat-image avatar">
           <div class="w-10 rounded-full">
             <img
               :src="message.is_assistant
-                            ? '/images/icons/virtual-assistant.png'
-                            : '/images/icons/blank-profile.svg'"
+                ? '/images/icons/virtual-assistant.png'
+                : '/images/icons/blank-profile.svg'"
             />
           </div>
         </div>

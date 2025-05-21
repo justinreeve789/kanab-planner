@@ -10,11 +10,11 @@
           </div>
           <ul class="menu menu-lg dropdown-content bg-base-100 bg-neutral text-neutral-content rounded-b-box z-1 mt-3 w-52 p-2 shadow" tabindex="0">
             <li class="hidden md:inline"><a class="justify-between" @click="openItinerary">Itinerary<span class="badge">New</span></a></li>
-            <li><a @click="openAccommodations">Accommodations</a></li>
-            <li><a @click="openEvents">Events</a></li>
-            <li><a @click="openLocations">Locations</a></li>
-            <li><a @click="openRestaurants">Restaurants</a></li>
-            <li><a @click="openTrails">Trails</a></li>
+            <li><router-link :to="{ name: 'accommodations'} ">Accommodations</router-link></li>
+            <li><router-link :to="{ name: 'events'} ">Events</router-link></li>
+            <li><router-link :to="{ name: 'locations'} ">Locations</router-link></li>
+            <li><router-link :to="{ name: 'restaurants'} ">Restaurants</router-link></li>
+            <li><router-link :to="{ name: 'trails'} ">Trails</router-link></li>
           </ul>
         </div>
         <span class="font-bold text-xl hidden sm:block">Trip Planner</span>
@@ -40,12 +40,12 @@
       </div>
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal menu-md px-1">
-          <li><a @click="openItinerary">Itinerary</a></li>
-          <li><a @click="openAccommodations">Accommodations</a></li>
-          <li><a @click="openEvents">Events</a></li>
-          <li><a @click="openLocations">Locations</a></li>
-          <li><a @click="openRestaurants">Restaurants</a></li>
-          <li><a @click="openTrails">Trails</a></li>
+          <li :class="$route.name === 'itinerary' || $router.name === 'itinerary-new' ? 'underline': ''"><a @click="openItinerary">Itinerary</a></li>
+          <li :class="$route.name === 'accommodations' ? 'underline' : ''"><router-link :to="{ name: 'accommodations'} ">Accommodations</router-link></li>
+          <li :class="$route.name === 'events' ? 'underline' : ''"><router-link :to="{ name: 'events'} ">Events</router-link></li>
+          <li :class="$route.name === 'locations' ? 'underline' : ''"><router-link :to="{ name: 'locations'} ">Locations</router-link></li>
+          <li :class="$route.name === 'restaurants' ? 'underline' : ''"><router-link :to="{ name: 'restaurants'} ">Restaurants</router-link></li>
+          <li :class="$route.name === 'trails' ? 'underline' : ''"><router-link :to="{ name: 'trails'} ">Trails</router-link></li>
         </ul>
       </div>
       <div class="navbar-end">
@@ -58,7 +58,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
         </button>
         <div>
-          <ItineraryStats class="cursor-pointer mx-2" @click="toggleAttributes" v-if="isItineraryOpen || isPreferencesOpen" />
+          <ItineraryStats class="cursor-pointer mx-2" @click="toggleAttributes" v-if="isItineraryOpen" />
         </div>
         <button class="btn btn-ghost btn-circle" v-if="getUser">
           <div class="indicator">
@@ -66,9 +66,7 @@
             <span class="badge badge-xs badge-primary indicator-item"></span>
           </div>
         </button>
-        <button class="btn btn-sm flex ml-2" v-if="!getUser" @click="openLogin">
-          Login
-        </button>
+        <router-link class="btn btn-sm flex ml-2" v-if="!getUser" :to="{ name: 'login'} ">Login</router-link>
         <div class="dropdown dropdown-end hidden md:flex" v-if="getUser">
           <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
             <div class="w-10 rounded-full">
@@ -187,7 +185,11 @@ export default {
       this.searchStore.isSearchOpen = true;
     },
     openItinerary() {
-      this.authStore.isLoginOpen = false;
+      if (this.$cookies.get('active_itinerary_id')) {
+        this.$router.push('/' + this.$cookies.get('active_itinerary_id'));
+      } else {
+        this.$router.push('/');
+      }
     },
     openLocations() {
       this.searchStore.adjustSettingsForPage('locations');
@@ -195,6 +197,7 @@ export default {
     },
     openLogin() {
       this.authStore.isLoginOpen = true;
+      this.$router.push('/login');
     },
     openRestaurants() {
       this.searchStore.adjustSettingsForPage('restaurants');
@@ -202,25 +205,30 @@ export default {
     },
     openTrails() {
       this.searchStore.adjustSettingsForPage('trails');
-      this.searchStore.isSearchOpen = true;
+      // this.searchStore.isSearchOpen = true;
+      this.$router.push('/trails');
     },
     refreshItinerary() {
-      // this.preferencesStore.refreshItinerary();
+      this.$cookies.remove('active_itinerary_id');
+      this.preferencesStore.refreshItinerary();
       this.preferencesStore.refresh = true;
+      this.$router.push('/');
     },
     selectDates() {
       this.isCalendarOpen = !this.isCalendarOpen;
     },
     toggleAttributes() {
       this.preferencesStore.currentPreferencesStep = 3;
-      this.preferencesStore.isPreferencesOpen = !this.preferencesStore.isPreferencesOpen;
+      this.$router.push('/questionnaire-about');
+      // this.preferencesStore.isPreferencesOpen = !this.preferencesStore.isPreferencesOpen;
     },
     toggleSearch() {
-      this.searchStore.adjustSettingsForGeneralSearch();
-      this.assistantStore.isAssistantOpen = false;
-      this.authStore.isLoginOpen = false;
-      this.preferencesStore.isPreferencesOpen = false;
-      this.searchStore.isSearchOpen = true;
+      this.$addHashToUrl('#modal-search');
+      // this.searchStore.adjustSettingsForGeneralSearch();
+      // this.assistantStore.isAssistantOpen = false;
+      // this.authStore.isLoginOpen = false;
+      // this.preferencesStore.isPreferencesOpen = false;
+      // this.searchStore.isSearchOpen = true;
     },
   },
   mounted() {
