@@ -1,12 +1,12 @@
 <template>
   <div class="h-[calc(100vh-128px)] -mx-8">
     <div>
-      <div class="sticky -top-6 z-10 -mt-8 bg-white h-[128px]" style="border-bottom: solid 1px #c0c0c0;">
+      <div class="sticky -top-8 z-10 -mt-8 bg-white h-[128px]" style="border-bottom: solid 1px #c0c0c0;">
         <Steps class="py-2" :step="step" v-model="preferencesStore.currentPreferencesStep" />
         <Pagination :step="step" v-model="stepRoute" />
       </div>
       <div class="h-full overflow-hidden pt-6">
-        <div class="h-full w-full flex flex-cols justify-center overflow-x-hidden overflow-y-auto" v-if="step !== 0">
+        <div class="h-full w-full flex flex-cols justify-center overflow-hidden" v-if="step !== 0">
           <div class="min-w-[500px]" v-show="step === 1">
             <Dates />
           </div>
