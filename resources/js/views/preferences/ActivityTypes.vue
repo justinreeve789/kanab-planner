@@ -22,7 +22,7 @@
     <div class="divider"></div>
     <p class="mb-4 text-lg">How many minutes does it take you to hike 1 mile on a continuous gentle incline (estimate)?</p>
     <div class="flex justify-center items-center text-2xl">
-      <input class="input px-4 text-2xl w-24" type="number" step="5" min="5" max="500" v-model="estimatedMinutesToHikeOneMile" />
+      <input class="input bg-white text-black px-4 text-2xl w-24" type="number" step="5" min="5" max="500" v-model="estimatedMinutesToHikeOneMile" />
       <span class="ml-2 text-2xl">minutes</span>
     </div>
   </div>

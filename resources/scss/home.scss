@@ -1,5 +1,12 @@
 :root {
-  color-scheme: light only;
+  color-scheme: only light;
+  --background-color: #ffffff;
+  --text-color: #000000;
+}
+
+input[type="text"] {
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
 
 html, body {
@@ -12,6 +19,8 @@ html {
 }
 
 body {
+  background-color: var(--background-color);
+  color: var(--text-color);
   background-attachment: fixed;
   //background-image: url('/images/desert-landscape.jpg');
   background-image: url('/images/2878.jpg');
