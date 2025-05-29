@@ -63,6 +63,19 @@ class Period extends CachedModel
         ];
     }
 
+    public static function getPeriodForTime(string $time)
+    {
+        if ($time < Period::AFTERNOON) {
+            return Period::MORNING;
+        } elseif ($time < Period::EVENING) {
+            return Period::AFTERNOON;
+        } elseif ($time < Period::NIGHT) {
+            return Period::EVENING;
+        } else {
+            return Period::NIGHT;
+        }
+    }
+
     public static function getStartTimeForActivities(int $period): ?string
     {
         switch ($period) {
@@ -97,7 +110,7 @@ class Period extends CachedModel
     {
         $activities = new Collection();
         foreach ($this->activities as $activity) {
-            if ($activity->activity_type->name === $activityType) {
+            if ($activity->activity_type->name ?? null === $activityType) {
                 $activities->add($activity);
             }
         }

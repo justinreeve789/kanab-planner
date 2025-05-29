@@ -23,7 +23,9 @@ use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Models\Image;
 use App\Repositories\ItineraryRepository;
+use App\ResourceEnum;
 use Carbon\Carbon;
+use DateTimeImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -42,6 +44,8 @@ class ItineraryService
     private $itinerary;
     private $repository;
     private $seasons;
+    private $priorityEventResources = [];
+    private $priorityTrailResources = [];
 
     public function __construct($itinerary = null)
     {
@@ -63,6 +67,16 @@ class ItineraryService
     public function setItinerary(?Itinerary $itinerary)
     {
         $this->itinerary = $itinerary;
+    }
+
+    public function loadPriorityResources()
+    {
+        if ($this->getItinerary()->event_priorities) {
+            $this->priorityEventResources = Event::with('images')->whereIn('id', $this->getItinerary()->event_priorities)->get()->keyBy('id');
+        }
+        if ($this->getItinerary()->trail_priorities) {
+            $this->priorityTrailResources = Trail::with('images')->whereIn('id', $this->getItinerary()->trail_priorities)->get()->keyBy('id');
+        }
     }
 
     /**
@@ -252,6 +266,8 @@ class ItineraryService
         $this->addEventForEvening($day);
         $this->addEventForNight($day);
 
+        $this->addTrailsToDay($day);
+
         // Determine whether to put a trail in the morning or the afternoon.
         $period = $this->getPeriodForTrail($day);
         if ($period === Period::MORNING) {
@@ -320,10 +336,64 @@ class ItineraryService
     }
 
     /**
-     * Add a trail to a day, accounting for how existing activities and how long the activity would take.
+     * Add trails to a day, accounting for existing activities and how long the activities will take.
      */
-    public function addTrailToDay(Day $day, Trail $trail = null)
+    public function addTrailsToDay(Day $day, Trail $trail = null)
     {
+        $dayActivities = [];
+
+        // Add any preferred trails to the day, unless they already exist in the itinerary.
+        $resources = [];
+        $activitiesInArea = $this->getItinerary()->getActivitiesInArea($day->area->id);
+        foreach ($this->getItinerary()->getTrailPriorities() as $priorityTrailId) {
+            $priorityTrail = $this->priorityTrailResources[$priorityTrailId];
+            if ($priorityTrail && $priorityTrail->area_id === $day->area->id) {
+                if (!isset($activitiesInArea[ResourceEnum::TRAILS_TYPE][$priorityTrailId])) {
+                    $resources[] = $this->priorityTrailResources[$priorityTrailId];
+                }
+            }
+        }
+
+        $baseArea = $this->getItinerary()->base_area;
+        $timePointer = new DateTimeImmutable($day->date . ' ' . $this->getItinerary()::DEFAULT_DAY_START_TIME);
+        $lat = $baseArea->latitude;
+        $lng = $baseArea->longitude;
+        $defaultDayEndTime = strtotime($day->date . ' ' . $this->getItinerary()::DEFAULT_DAY_END_TIME);
+
+        foreach ($resources as $resource) {
+            if (!$timePointer->getTimestamp() >= $defaultDayEndTime) {
+                break;
+            }
+
+            $startTime = $timePointer->format('H:i');
+
+            // Calculate travel time.
+            $hours = $this->locationService->estimateDrivingHours($lat, $lng, $resource->latitude, $resource->longitude);
+            $hoursToAdd = floor($hours);
+            $minutesToAdd = round(($hours - $hoursToAdd) * 60);
+            $timePointer = $timePointer->modify('+' . $hoursToAdd . ' hours +' . $minutesToAdd . ' minutes');
+            $endTime = $timePointer->format('H:i');
+            $this->getItinerary()->addTask('travel', 'Drive to ' . $resource->name, '', $startTime, $endTime, $day->day_num, Period::getPeriodForTime($startTime));
+
+            // Update the time and location.
+            $startTime = $endTime;
+            $lat = $resource->latitude;
+            $lng = $resource->longitude;
+
+            // Calculate time for the activity.
+            if ($resource->type === ResourceEnum::TRAILS_TYPE) {
+                // TODO: Include other activity types, i.e. bicycling, off-roading.
+                $hours = $resource->getAverageHours(['average_hiking_speed' => $this->getItinerary()->average_hiking_speed]);
+                $activityType = 'hiking';
+            }
+
+            $hoursToAdd = floor($hours);
+            $minutesToAdd = round(($hours - $hoursToAdd) * 60);
+            $timePointer = $timePointer->modify('+' . $hoursToAdd . ' hours +' . $minutesToAdd . ' minutes');
+            $endTime = $timePointer->format('H:i');
+
+            $this->getItinerary()->addActivity($resource, $activityType, $startTime, $endTime, (int)$day->day_num, Period::getPeriodForTime($startTime));
+        }
     }
 
     public function addTrailForMorning(Day $day)
@@ -839,9 +909,8 @@ class ItineraryService
 
     public function addRandomTrailToPeriod(Day $day, int $period)
     {
-        $trail = $this->trailService->getRandomTrailForPeriod(
+        $trail = $this->trailService->getRandomTrail(
             $day->area->id,
-            $period,
             $this->getItinerary(),
             $this->getItinerary()->trail_ids
         );
@@ -981,6 +1050,8 @@ class ItineraryService
         $this->getItinerary()->setActivityPriorities($request->get('activities'));
         $this->getItinerary()->setTrailPriorities($request->get('trails'));
         $this->getItinerary()->setAverageHikingSpeed($request->get('average_hiking_speed'));
+
+        $this->loadPriorityResources();
 
         $this->determineAndSetMissingDates();
 

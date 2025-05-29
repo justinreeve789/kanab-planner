@@ -3,6 +3,7 @@
 namespace App\Traits\Itinerary;
 
 use App\Models\Itinerary\Season;
+use App\Models\Trail;
 
 trait Preferences
 {

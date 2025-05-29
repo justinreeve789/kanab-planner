@@ -222,7 +222,7 @@ class Day extends CachedModel
     {
         $activities = new Collection();
         foreach ($this->getPeriods() as $period) {
-            $activities = $activities->merge($period->getActivities());
+            $activities = $activities->merge($period->activities);
         }
         return $activities;
     }

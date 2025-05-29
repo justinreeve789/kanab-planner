@@ -28887,7 +28887,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     return {
       currentPhrase: '',
       loadingPhraseIntervalId: null,
-      loadingPhrases: ["Calculating optimal angle for admiring hoodoos...", "Training squirrel guides...", "Convincing slot canyons to open wider...", "Downloading sounds of nature...", "Negotiating with the desert for cooler temperatures...", "Initializing starry skies...", "Analyzing s'mores recipes...", "Reminding red rocks to stay extra red...", "Dispatching drones to scout viewpoints...", "Wrangling tumbleweeds...", "Priming water bottles...", "Searching for hidden oases...", "Deploying carrier pigeons in case Wi-Fi is down...", "Amplifying sense of wonder...", "Increasing \"Wow\" factor...", "Setting adventure to maximum...", "Cataloging desert wildflowers...", "Cleaning mud off hiking boots...", "Reinforcing hiking poles...", "Generating epic sunset palettes...", "Calibrating scenic coefficients...", "Optimizing trail vectors...", "Compiling Instagrammability index...", "Assembling trail mix...", "Resisting urge to feed wildlife...", "Magnetizing compass array..."],
+      loadingPhrases: ["Calculating optimal angle for hoodoo admiration...", "Training squirrel guides...", "Convincing slot canyons to open wider...", "Downloading sounds of nature...", "Negotiating cooler desert temperatures...", "Initializing starry skies...", "Analyzing s'mores recipes...", "Reminding red rocks to stay extra red...", "Dispatching drones to scout viewpoints...", "Wrangling tumbleweeds...", "Priming water bottles...", "Geolocating hidden oases...", "Deploying carrier pigeons in case wifi is down...", "Amplifying sense of wonder...", "Increasing \"wow\" factor...", "Setting adventure to maximum...", "Cataloging desert wildflowers...", "Navigating travel trajectories...", "Reinforcing hiking poles...", "Generating epic sunset palettes...", "Calibrating scenic coefficients...", "Optimizing trail vectors...", "Compiling instagrammability index...", "Nutrientizing trail mix...", "Resisting urge to feed wildlife...", "Magnetizing compass matrix...", "Forming park ranger eco-mech..."],
       shuffledPhrase: []
     };
   },
@@ -28911,7 +28911,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       this.intervalId = setInterval(function () {
         _this.currentPhrase = _this.shuffledPhrases[index];
         index = (index + 1) % _this.shuffledPhrases.length;
-      }, Math.random() * 500 + 850);
+      }, Math.random() * 750 + 750);
     },
     stopCyclingPhrases: function stopCyclingPhrases() {
       clearInterval(this.intervalId);
@@ -34401,7 +34401,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, null, -1 /* HOISTED */)), _cache[6] || (_cache[6] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", {
     "class": "mb-4 text-lg"
   }, "How many minutes does it take you to hike 1 mile on a continuous gentle incline (estimate)?", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    "class": "input px-4 text-2xl w-24",
+    "class": "input bg-white text-black px-4 text-2xl w-24",
     type: "number",
     step: "5",
     min: "5",
@@ -34699,7 +34699,7 @@ var _hoisted_1 = {
   "class": "h-[calc(100vh-128px)] -mx-8"
 };
 var _hoisted_2 = {
-  "class": "sticky -top-6 z-10 -mt-8 bg-white h-[128px]",
+  "class": "sticky -top-8 z-10 -mt-8 bg-white h-[128px]",
   style: {
     "border-bottom": "solid 1px #c0c0c0"
   }
@@ -34709,7 +34709,7 @@ var _hoisted_3 = {
 };
 var _hoisted_4 = {
   key: 0,
-  "class": "h-full w-full flex flex-cols justify-center overflow-x-hidden overflow-y-auto"
+  "class": "h-full w-full flex flex-cols justify-center overflow-hidden"
 };
 var _hoisted_5 = {
   "class": "min-w-[500px]"

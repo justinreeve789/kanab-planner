@@ -22,7 +22,7 @@ class TrailService
     /**
      * TODO: This doesn't seem to work properly.
      */
-    public function getRandomTrailForPeriod($areaId, $period, $itinerary = null, $existingTrails = []): ?Trail
+    public function getRandomTrail($areaId, $itinerary = null, $existingTrails = [], $maxDistance = null): ?Trail
     {
         $totalTrailsForArea = Trail::where('area_id', $areaId)->get()->count();
         $trails = Trail::query();
@@ -45,21 +45,15 @@ class TrailService
         $trails->where('area_id', $areaId)
             ->whereNotNull('distance_miles')
             ->whereNotIn('trails.id', $existingTrails);
-        if ($period === Period::EVENING) {
-            $trails->where('distance_miles', '<=', '2.0');
-        }
         $trails->where('distance_miles', '>=', $itinerary->calculateMinimumTrailDistance());
         $trails->where('distance_miles', '<=', $itinerary->calculateMaximumTrailDistance());
 
         $trails->with(['area', 'images']);
-        $trails = $trails->get();
-        foreach ($trails as $trail) {
-            $p = $this->getBestPeriodOfDayForTrail($trail);
-            if ($p == $period) {
-                return $trail;
-            }
+        $trail = $trails->first();
+        if ($trail) {
+            $trail->best_period = $this->getBestPeriodOfDayForTrail($trail);
         }
-        return null;
+        return $trail;
     }
 
     /**

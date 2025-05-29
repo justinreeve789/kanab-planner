@@ -19,32 +19,33 @@ export default {
       currentPhrase: '',
       loadingPhraseIntervalId: null,
       loadingPhrases: [
-        "Calculating optimal angle for admiring hoodoos...",
+        "Calculating optimal angle for hoodoo admiration...",
         "Training squirrel guides...",
         "Convincing slot canyons to open wider...",
         "Downloading sounds of nature...",
-        "Negotiating with the desert for cooler temperatures...",
+        "Negotiating cooler desert temperatures...",
         "Initializing starry skies...",
         "Analyzing s'mores recipes...",
         "Reminding red rocks to stay extra red...",
         "Dispatching drones to scout viewpoints...",
         "Wrangling tumbleweeds...",
         "Priming water bottles...",
-        "Searching for hidden oases...",
-        "Deploying carrier pigeons in case Wi-Fi is down...",
+        "Geolocating hidden oases...",
+        "Deploying carrier pigeons in case wifi is down...",
         "Amplifying sense of wonder...",
-        "Increasing \"Wow\" factor...",
+        "Increasing \"wow\" factor...",
         "Setting adventure to maximum...",
         "Cataloging desert wildflowers...",
-        "Cleaning mud off hiking boots...",
+        "Navigating travel trajectories...",
         "Reinforcing hiking poles...",
         "Generating epic sunset palettes...",
         "Calibrating scenic coefficients...",
         "Optimizing trail vectors...",
-        "Compiling Instagrammability index...",
-        "Assembling trail mix...",
+        "Compiling instagrammability index...",
+        "Nutrientizing trail mix...",
         "Resisting urge to feed wildlife...",
-        "Magnetizing compass array...",
+        "Magnetizing compass matrix...",
+        "Forming park ranger eco-mech...",
       ],
       shuffledPhrase: [],
     };
@@ -67,7 +68,7 @@ export default {
       this.intervalId = setInterval(() => {
         this.currentPhrase = this.shuffledPhrases[index];
         index = (index + 1) % this.shuffledPhrases.length;
-      }, Math.random() * 500 + 850);
+      }, Math.random() * 750 + 750);
     },
     stopCyclingPhrases() {
       clearInterval(this.intervalId);

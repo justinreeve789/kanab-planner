@@ -35,8 +35,12 @@ class Itinerary extends CachedModel
     const DEFAULT_ARRIVAL_TIME = '16:00';
     const DEFAULT_AVERAGE_HIKING_SPEED = 2;
     const DEFAULT_BASE_AREA_ID = Area::KANAB;
+    const DEFAULT_DAY_END_TIME = '21:00';
+    const DEFAULT_DAY_START_TIME = '07:00';
     const DEFAULT_DEPARTURE_TIME = '10:00';
     const DEFAULT_DURATION_DAYS = 5;
+    const DEFAULT_DINNER_TIME = '17:00';
+    const DEFAULT_LUNCH_TIME = '12:00';
     const DEFAULT_PRIORITIES = ['trails', 'events', 'locations', 'restaurants'];
     const DEFAULT_SEASON = 'summer';
     const DEFAULT_TRAIL_PRIORITIES = [];
@@ -254,9 +258,37 @@ class Itinerary extends CachedModel
         return $this->days;
     }
 
-    public function getActivities(): ?array
+    public function getActivitiesInArea(int $areaId)
     {
-        return $this->activities;
+        $activitiesByArea = [];
+        foreach ($this->days as $day) {
+            if ($day->area_id === $areaId) {
+                $activities = $day->getActivities();
+                foreach ($activities as $activity) {
+                    if ($activity->resource) {
+                        $activitiesByArea[$activity->resource->type][$activity->resource->id] = (object) ['id' => $activity->resource->id];
+                    }
+                }
+            }
+        }
+        return $activitiesByArea;
+    }
+
+    public function getActivities(): array
+    {
+        $activitiesByType = [];
+        foreach ($this->days as $day) {
+            $activities = $day->getActivities();
+            foreach ($activities as $activity) {
+                if ($activity->resource) {
+                    $activitiesByType[$activity->resource->type][$activity->resource->id] = (object) [
+                        'resource_id' => $activity->resource->id,
+                        'area_id' => $activity->resource->area_id,
+                    ];
+                }
+            }
+        }
+        return $activitiesByType;
     }
 
     public function getAdventurousness(): ?float
