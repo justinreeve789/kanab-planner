@@ -34,6 +34,8 @@ use Illuminate\Support\Facades\Log;
 class ItineraryService
 {
     const DEFAULT_DRIVING_TIME_BETWEEN_AREAS = 1800;
+    const HOURS_BEFORE_TOO_LATE_TO_ADD_A_NEW_ACTIVITY = 2;
+    const HOURS_BEFORE_TOO_LATE_FOR_LUNCH = 3;
 
     public $budgetService;
     public $imageService;
@@ -266,23 +268,23 @@ class ItineraryService
         $this->addEventForEvening($day);
         $this->addEventForNight($day);
 
-        $this->addTrailsToDay($day);
+        $this->addActivitiesToDay($day);
 
         // Determine whether to put a trail in the morning or the afternoon.
-        $period = $this->getPeriodForTrail($day);
-        if ($period === Period::MORNING) {
-            $this->addTrailForMorning($day);
-        } else if ($period === Period::AFTERNOON) {
-            $this->addTrailForAfternoon($day);
-        }
+//        $period = $this->getPeriodForTrail($day);
+//        if ($period === Period::MORNING) {
+//            $this->addTrailForMorning($day);
+//        } else if ($period === Period::AFTERNOON) {
+//            $this->addTrailForAfternoon($day);
+//        }
 
         // Add a trail in the area for the evening.
-        $this->addTrailForEvening($day);
+//        $this->addTrailForEvening($day);
 
         // Add meals for the day.
-        $this->addMeal($day, Period::MORNING);
-        $this->addMeal($day, Period::AFTERNOON);
-        $this->addMeal($day, Period::EVENING);
+//        $this->addMeal($day, Period::MORNING);
+//        $this->addMeal($day, Period::AFTERNOON);
+//        $this->addMeal($day, Period::EVENING);
 
         $this->addPreamble($day);
 
@@ -335,10 +337,73 @@ class ItineraryService
         return rand(0, 1) ? Period::MORNING : Period::AFTERNOON;
     }
 
+    private function getTravelAndResourceInfoForActivity(DateTimeImmutable $timePointer, $resource, $lat, $lng)
+    {
+        $startTime = $timePointer->format('H:i');
+        $startTimestamp = $timePointer->getTimestamp();
+
+        // Calculate travel time.
+        $hours = $this->locationService->estimateDrivingHours($lat, $lng, $resource->latitude, $resource->longitude);
+        $hoursToAdd = floor($hours);
+        $minutesToAdd = round(($hours - $hoursToAdd) * 60);
+        $timePointer = $timePointer->modify('+' . $hoursToAdd . ' hours +' . $minutesToAdd . ' minutes');
+        $endTime = $timePointer->format('H:i');
+        $endTimestamp = $timePointer->getTimestamp();
+        $travelInfo = [
+            'name' => 'Drive to ' . $resource->name,
+            'description' => '',
+            'start_time' => $startTime,
+            'start_timestamp' => $startTimestamp,
+            'end_time' => $endTime,
+            'end_timestamp' => $endTimestamp,
+            'period' => Period::getPeriodForTime($startTime),
+        ];
+
+        // Update the time and location.
+        $startTime = $endTime;
+        $startTimestamp = $endTimestamp;
+        $lat = $resource->latitude;
+        $lng = $resource->longitude;
+
+        // Calculate time for the activity.
+        if ($resource->type === ResourceEnum::TRAILS_TYPE) {
+            // TODO: Include other activity types, i.e. bicycling, off-roading.
+            $hours = $resource->getAverageHours(['average_hiking_speed' => $this->getItinerary()->average_hiking_speed]);
+            $activityType = 'hiking';
+        } elseif ($resource->type === ResourceEnum::EVENTS_TYPE) {
+            // TODO: Calculate event time.
+        } elseif ($resource->type === ResourceEnum::RESTAURANTS_TYPE) {
+            $hours = $resource->getAverageHours();
+            $activityType = 'dining';
+        }
+
+        $hoursToAdd = floor($hours);
+        $minutesToAdd = round(($hours - $hoursToAdd) * 60);
+        $timePointer = $timePointer->modify('+' . $hoursToAdd . ' hours +' . $minutesToAdd . ' minutes');
+        $endTime = $timePointer->format('H:i');
+        $endTimestamp = $timePointer->getTimestamp();
+        $resourceInfo = [
+            'activity_type' => $activityType ?? null,
+            'name' => null,
+            'description' => null,
+            'start_time' => $startTime,
+            'start_timestamp' => $startTimestamp,
+            'end_time' => $endTime,
+            'end_timestamp' => $endTimestamp,
+            'period' => Period::getPeriodForTime($startTime),
+        ];
+
+        return [
+            'travel' => $travelInfo,
+            'resource' => $resourceInfo,
+            'time_pointer' => $timePointer,
+        ];
+    }
+
     /**
-     * Add trails to a day, accounting for existing activities and how long the activities will take.
+     * Add activities to a day, accounting for existing activities and how long the activities will take.
      */
-    public function addTrailsToDay(Day $day, Trail $trail = null)
+    public function addActivitiesToDay(Day $day)
     {
         $dayActivities = [];
 
@@ -354,45 +419,77 @@ class ItineraryService
             }
         }
 
-        $baseArea = $this->getItinerary()->base_area;
         $timePointer = new DateTimeImmutable($day->date . ' ' . $this->getItinerary()::DEFAULT_DAY_START_TIME);
+        $dayEndTime = strtotime($day->date . ' ' . $this->getItinerary()::DEFAULT_DAY_END_TIME);
+        $lunchTime = strtotime($day->date . ' ' . $this->getItinerary()::DEFAULT_LUNCH_TIME);
+        $dinnerTime = strtotime($day->date . ' ' . $this->getItinerary()::DEFAULT_DINNER_TIME);
+        $baseArea = $this->getItinerary()->base_area;
         $lat = $baseArea->latitude;
         $lng = $baseArea->longitude;
-        $defaultDayEndTime = strtotime($day->date . ' ' . $this->getItinerary()::DEFAULT_DAY_END_TIME);
+        $lunchAdded = false;
+        $dinnerAdded = false;
 
         foreach ($resources as $resource) {
-            if (!$timePointer->getTimestamp() >= $defaultDayEndTime) {
+            if ($timePointer->getTimestamp() >= $dayEndTime) {
                 break;
             }
 
-            $startTime = $timePointer->format('H:i');
+            $info = $this->getTravelAndResourceInfoForActivity($timePointer, $resource, $lat, $lng);
+            $travelInfo = $info['travel'];
+            $resourceInfo = $info['resource'];
 
-            // Calculate travel time.
-            $hours = $this->locationService->estimateDrivingHours($lat, $lng, $resource->latitude, $resource->longitude);
-            $hoursToAdd = floor($hours);
-            $minutesToAdd = round(($hours - $hoursToAdd) * 60);
-            $timePointer = $timePointer->modify('+' . $hoursToAdd . ' hours +' . $minutesToAdd . ' minutes');
-            $endTime = $timePointer->format('H:i');
-            $this->getItinerary()->addTask('travel', 'Drive to ' . $resource->name, '', $startTime, $endTime, $day->day_num, Period::getPeriodForTime($startTime));
+            $this->getItinerary()->addTask('travel', $travelInfo['name'], $travelInfo['description'], $travelInfo['start_time'], $travelInfo['end_time'], $day->day_num, $travelInfo['period']);
+
+            // Is this activity going to go too far past lunch (3 hours)? If so, tell them to take some snacks.
+            $notes = null;
+            if ($lunchAdded === false && $resourceInfo['end_timestamp'] > $lunchTime + (self::HOURS_BEFORE_TOO_LATE_FOR_LUNCH * 3600)) {
+                $notes = 'You may not finish the trail before it\'s time for lunch. Make sure to pack some filling snacks!';
+                $lunchAdded = true;
+            }
+
+            $this->getItinerary()->addActivity($resource, $resourceInfo['activity_type'], $resourceInfo['start_time'], $resourceInfo['end_time'], $day->day_num, $resourceInfo['period'], $notes);
 
             // Update the time and location.
-            $startTime = $endTime;
+            $timePointer = $info['time_pointer'];
             $lat = $resource->latitude;
             $lng = $resource->longitude;
 
-            // Calculate time for the activity.
-            if ($resource->type === ResourceEnum::TRAILS_TYPE) {
-                // TODO: Include other activity types, i.e. bicycling, off-roading.
-                $hours = $resource->getAverageHours(['average_hiking_speed' => $this->getItinerary()->average_hiking_speed]);
-                $activityType = 'hiking';
+            // Is it time for a meal? Add one if it is.
+            $startTime = $timePointer->format('H:i');
+            $startTimestamp = $timePointer->getTimestamp();
+            if (($lunchAdded === false && $startTimestamp >= $lunchTime && $startTimestamp < $dinnerTime) || ($dinnerAdded === false && $startTimestamp >= $dinnerTime)) {
+                $restaurant = $this->getRestaurant($day, $startTime);
+                if ($restaurant) {
+                    $info = $this->getTravelAndResourceInfoForActivity($timePointer, $restaurant, $lat, $lng);
+                    $travelInfo = $info['travel'];
+                    $resourceInfo = $info['resource'];
+
+                    $this->getItinerary()->addTask('travel', $travelInfo['name'], $travelInfo['description'], $travelInfo['start_time'], $travelInfo['end_time'], $day->day_num, $travelInfo['period']);
+                    $this->getItinerary()->addActivity($restaurant, $resourceInfo['activity_type'], $resourceInfo['start_time'], $resourceInfo['end_time'], $day->day_num, $resourceInfo['period']);
+
+                    $period = $travelInfo['period'];
+                    if ($period === Period::AFTERNOON) {
+                        $lunchAdded = true;
+                    } elseif ($period === Period::EVENING || $period === Period::NIGHT) {
+                        $dinnerAdded = true;
+                    }
+
+                    // Update the time and location.
+                    $timePointer = $info['time_pointer'];
+                    $lat = $restaurant->latitude;
+                    $lng = $restaurant->longitude;
+                }
             }
+        }
 
-            $hoursToAdd = floor($hours);
-            $minutesToAdd = round(($hours - $hoursToAdd) * 60);
-            $timePointer = $timePointer->modify('+' . $hoursToAdd . ' hours +' . $minutesToAdd . ' minutes');
-            $endTime = $timePointer->format('H:i');
-
-            $this->getItinerary()->addActivity($resource, $activityType, $startTime, $endTime, (int)$day->day_num, Period::getPeriodForTime($startTime));
+        // Have we found enough activities for the day? If not, and it's not too late (2 hours before the day's end), add some more.
+        if ($timePointer->getTimestamp() < $dayEndTime - (self::HOURS_BEFORE_TOO_LATE_TO_ADD_A_NEW_ACTIVITY * 3600)) {
+            $remainingHours = ($dayEndTime - (self::HOURS_BEFORE_TOO_LATE_TO_ADD_A_NEW_ACTIVITY * 3600) - $timePointer->getTimestamp()) / 3600;
+            $trail = $this->trailService->getRandomTrail($day->area->id, $this->getItinerary(), $remainingHours);
+            if ($trail) {
+                // TODO: Restructure so it loops until we reach the end of the day.
+                $resources[] = $trail;
+            }
         }
     }
 
@@ -512,6 +609,23 @@ class ItineraryService
 //                    $event, 'event', $event->start_date, $event->end_date, $dayNum, Period::EVENING);
 //            }
 //        }
+    }
+
+    public function getRestaurant(Day $day, string $startTime)
+    {
+        // Find a restaurant in the area.
+        // TODO: Make sure it's open during the time.
+        $restaurant = Restaurant::with('location')
+            ->whereNotIn('restaurants.id', $this->getItinerary()->restaurant_ids)
+//                ->whereIsOpen($day->date . ' ' . $mealTime['startTime'])
+            ->whereHas('location', function($query) use ($day) {
+                $query->where('area_id', $day->area->id);
+            })->inRandomOrder()->first();
+        if ($restaurant && !$this->getItinerary()->restaurantExists($restaurant)) {
+            return $restaurant;
+        }
+
+        return null;
     }
 
     // TODO: assessMeal? Split into morning/afternoon/evening functions?
@@ -911,8 +1025,7 @@ class ItineraryService
     {
         $trail = $this->trailService->getRandomTrail(
             $day->area->id,
-            $this->getItinerary(),
-            $this->getItinerary()->trail_ids
+            $this->getItinerary()
         );
 
         if ($trail && !$this->getItinerary()->trailExists($trail)) {

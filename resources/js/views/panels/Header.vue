@@ -209,10 +209,10 @@ export default {
       this.$router.push('/trails');
     },
     refreshItinerary() {
-      this.$cookies.remove('active_itinerary_id');
-      this.preferencesStore.refreshItinerary();
+      // this.$cookies.remove('active_itinerary_id');
+      // this.preferencesStore.refreshItinerary();
       this.preferencesStore.refresh = true;
-      this.$router.push('/');
+      // this.$router.push('/');
     },
     selectDates() {
       this.isCalendarOpen = !this.isCalendarOpen;

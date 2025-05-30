@@ -152,18 +152,19 @@ class Itinerary extends CachedModel
         $this->days->each()->saveAll();
     }
 
-    public function addTask($activityType, $name, $description, $startTime, $endTime, int $dayNum, $period)
+    public function addTask($activityType, $name, $description, $startTime, $endTime, int $dayNum, $period, $notes = null)
     {
-        $this->addActivity(null, $activityType, $startTime, $endTime, $dayNum, $period, $name, $description);
+        $this->addActivity(null, $activityType, $startTime, $endTime, $dayNum, $period, $name, $description, $notes);
     }
 
-    public function addActivity($resource, $activityType, $startTime, $endTime, int $dayNum, $period, $name = null, $description = null)
+    public function addActivity($resource, $activityType, $startTime, $endTime, int $dayNum, $period, $name = null, $description = null, $notes = null)
     {
         $activity = new Activity([
             'resource' => $resource,
             'activity_type_id' => ActivityType::where('name', $activityType)->pluck('id')->first(),
             'name' => $name,
             'description' => $description,
+            'notes' => $notes,
             'start_time' => $startTime,
             'end_time' => $endTime,
         ]);
@@ -230,6 +231,11 @@ class Itinerary extends CachedModel
         return 9999.9;
     }
 
+    public function calculateMaximumTotalTrailDistancePerDay(): float
+    {
+        return 9999.9;
+    }
+
     public function calculateMinimumTrailDistance(): float
     {
         // A high adventurousness and strenuousness should result in generally longer trails. Note that this isn't the
@@ -240,7 +246,7 @@ class Itinerary extends CachedModel
         return 0.1;
     }
 
-    public function calculateMinimumTrailDistancePerDay(): float
+    public function calculateMinimumTotalTrailDistancePerDay(): float
     {
         // A high adventurousness and strenuousness should result in generally longer trails. Note that this isn't the
         // same as the minimum trail distance per day.

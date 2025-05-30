@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->text('description')->nullable();
             $table->string('phrase')->nullable();
+            $table->text('notes')->nullable();
             $table->integer('activity_type_id')->unsigned();
             $table->string('resource_table')->nullable();
             $table->integer('resource_id')->unsigned()->nullable();

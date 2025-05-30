@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ActivityType;
 use App\Models\Area;
+use App\Models\Itinerary\Itinerary;
 use App\Models\Itinerary\Period;
 use App\Models\Trail;
 use Exception;
@@ -22,33 +23,37 @@ class TrailService
     /**
      * TODO: This doesn't seem to work properly.
      */
-    public function getRandomTrail($areaId, $itinerary = null, $existingTrails = [], $maxDistance = null): ?Trail
+    public function getRandomTrail(int $areaId, Itinerary $itinerary, $maxHours = null, $maxDistance = null): ?Trail
     {
         $totalTrailsForArea = Trail::where('area_id', $areaId)->get()->count();
+        $maximumTotalTrailDistancePerDay = $itinerary->calculateMaximumTotalTrailDistancePerDay();
+        $minimumTotalTrailDistancePerDay = $itinerary->calculateMinimumTotalTrailDistancePerDay();
+        $averageHikingSpeed = $itinerary->getAverageHikingspeed();
         $trails = Trail::query();
         $adventurousness = $itinerary->getAdventurousness();
         $solitariness = $itinerary->getSolitariness();
         $strenuousness = $itinerary->getStrenuousness();
-        if ($itinerary !== null) {
-            $trails = $trails->sortByDeviation([
-                'adventurousness' => $adventurousness,
-                'solitariness' => $solitariness,
-                'strenuousness' => $strenuousness
-            ], [
+        $trails = $trails->sortByDeviation([
+            'adventurousness' => $adventurousness,
+            'solitariness' => $solitariness,
+            'strenuousness' => $strenuousness
+        ], [
                 'adventurousness' => 12,
                 'solitariness' => 7,
                 'strenuousness' => 25,
             ])->take(max(20, min(10, ceil($totalTrailsForArea / 9))))->inRandomOrder();
-        } else {
-            $trails->inRandomOrder();
-        }
         $trails->where('area_id', $areaId)
             ->whereNotNull('distance_miles')
-            ->whereNotIn('trails.id', $existingTrails);
+            ->whereNotIn('trails.id', $itinerary->trail_ids);
         $trails->where('distance_miles', '>=', $itinerary->calculateMinimumTrailDistance());
         $trails->where('distance_miles', '<=', $itinerary->calculateMaximumTrailDistance());
 
+        if ($maxHours) {
+            $trails->where('distance_miles', '<=', ($maxHours / $averageHikingSpeed));
+        }
+
         $trails->with(['area', 'images']);
+
         $trail = $trails->first();
         if ($trail) {
             $trail->best_period = $this->getBestPeriodOfDayForTrail($trail);

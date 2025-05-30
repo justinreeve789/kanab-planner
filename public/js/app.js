@@ -29880,10 +29880,10 @@ __webpack_require__.r(__webpack_exports__);
       this.$router.push('/trails');
     },
     refreshItinerary: function refreshItinerary() {
-      this.$cookies.remove('active_itinerary_id');
-      this.preferencesStore.refreshItinerary();
+      // this.$cookies.remove('active_itinerary_id');
+      // this.preferencesStore.refreshItinerary();
       this.preferencesStore.refresh = true;
-      this.$router.push('/');
+      // this.$router.push('/');
     },
     selectDates: function selectDates() {
       this.isCalendarOpen = !this.isCalendarOpen;
