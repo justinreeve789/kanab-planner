@@ -1029,6 +1029,10 @@ video {
   --badge-color: var(--color-primary);
   --badge-fg: var(--color-primary-content);
 }
+.badge-secondary {
+  --badge-color: var(--color-secondary);
+  --badge-fg: var(--color-secondary-content);
+}
 .badge-neutral {
   --badge-color: var(--color-neutral);
   --badge-fg: var(--color-neutral-content);
@@ -1400,6 +1404,10 @@ video {
   color: color-mix(in oklab, var(--color-black) 30%, transparent);
   background-image: radial-gradient( circle at 35% 30%, oklch(1 0 0 / calc(var(--depth) * 0.5)), #0000 );
   box-shadow: 0 2px 3px -1px color-mix(in oklab, currentColor calc(var(--depth) * 100%), #0000);
+}
+.status-info {
+  background-color: var(--color-info);
+  color: var(--color-info);
 }
 .status-lg {
   width: calc(0.25rem * 3);
@@ -2084,6 +2092,71 @@ video {
     scale: 1.1;
     filter: brightness(1.05) contrast(1.05);
   }
+}
+.textarea {
+  border: var(--border) solid #0000;
+  min-height: calc(0.25rem * 20);
+  flex-shrink: 1;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  border-radius: var(--radius-field);
+  background-color: var(--color-base-100);
+  padding-block: calc(0.25rem * 2);
+  vertical-align: middle;
+  width: clamp(3rem, 20rem, 100%);
+  padding-inline-start: 0.75rem;
+  padding-inline-end: 0.75rem;
+  font-size: 0.875rem;
+  border-color: var(--input-color);
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000) inset, 0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset;
+  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+}
+.textarea textarea {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-color: transparent;
+  border: none;
+}
+.textarea textarea:focus, .textarea textarea:focus-within {
+  --tw-outline-style: none;
+  outline-style: none;
+}
+@media (forced-colors: active) {
+
+  .textarea textarea:focus, .textarea textarea:focus-within {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+.textarea:focus, .textarea:focus-within {
+  --input-color: var(--color-base-content);
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000);
+  outline: 2px solid var(--input-color);
+  outline-offset: 2px;
+  isolation: isolate;
+}
+.textarea:has(> textarea[disabled]), .textarea:is(:disabled, [disabled]) {
+  cursor: not-allowed;
+  border-color: var(--color-base-200);
+  background-color: var(--color-base-200);
+  color: color-mix(in oklab, var(--color-base-content) 40%, transparent);
+}
+.textarea:has(> textarea[disabled])::-moz-placeholder, .textarea:is(:disabled, [disabled])::-moz-placeholder {
+  color: color-mix(in oklab, var(--color-base-content) 20%, transparent);
+}
+.textarea:has(> textarea[disabled])::placeholder, .textarea:is(:disabled, [disabled])::placeholder {
+  color: color-mix(in oklab, var(--color-base-content) 20%, transparent);
+}
+.textarea:has(> textarea[disabled]), .textarea:is(:disabled, [disabled]) {
+  box-shadow: none;
+}
+.textarea:has(> textarea[disabled]) > textarea[disabled] {
+  cursor: not-allowed;
+}
+.textarea-info, .textarea-info:focus, .textarea-info:focus-within {
+  --input-color: var(--color-info);
 }
 .dock {
   position: fixed;
@@ -3565,6 +3638,12 @@ video {
 .h-screen {
   height: 100vh;
 }
+.h-\[32px\] {
+  height: 32px;
+}
+.h-\[28px\] {
+  height: 28px;
+}
 .max-h-6 {
   max-height: 1.5rem;
 }
@@ -3639,6 +3718,15 @@ video {
 }
 .w-full {
   width: 100%;
+}
+.w-32 {
+  width: 8rem;
+}
+.w-\[32px\] {
+  width: 32px;
+}
+.w-\[28px\] {
+  width: 28px;
 }
 .min-w-\[128px\] {
   min-width: 128px;
@@ -3914,6 +4002,10 @@ video {
 .border-transparent {
   border-color: transparent;
 }
+.border-white {
+  --tw-border-opacity: 1;
+  border-color: rgb(255 255 255 / var(--tw-border-opacity));
+}
 .bg-base-100 {
   background-color: var(--color-base-100);
 }
@@ -3972,6 +4064,9 @@ video {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+.bg-base-300 {
+  background-color: var(--color-base-300);
 }
 .bg-opacity-90 {
   --tw-bg-opacity: 0.9;

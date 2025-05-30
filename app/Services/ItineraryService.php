@@ -25,7 +25,7 @@ use App\Models\Image;
 use App\Repositories\ItineraryRepository;
 use App\ResourceEnum;
 use Carbon\Carbon;
-use DateTimeImmutable;
+use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -337,7 +337,7 @@ class ItineraryService
         return rand(0, 1) ? Period::MORNING : Period::AFTERNOON;
     }
 
-    private function getTravelAndResourceInfoForActivity(DateTimeImmutable $timePointer, $resource, $lat, $lng)
+    private function getTravelAndResourceInfoForActivity(DateTime $timePointer, $resource, $lat, $lng)
     {
         $startTime = $timePointer->format('H:i');
         $startTimestamp = $timePointer->getTimestamp();
@@ -346,7 +346,8 @@ class ItineraryService
         $hours = $this->locationService->estimateDrivingHours($lat, $lng, $resource->latitude, $resource->longitude);
         $hoursToAdd = floor($hours);
         $minutesToAdd = round(($hours - $hoursToAdd) * 60);
-        $timePointer = $timePointer->modify('+' . $hoursToAdd . ' hours +' . $minutesToAdd . ' minutes');
+        $timePointer->modify('+' . $hoursToAdd . ' hours +' . $minutesToAdd . ' minutes');
+        $timePointer = $this->ceilToNearest15Minutes($timePointer);
         $endTime = $timePointer->format('H:i');
         $endTimestamp = $timePointer->getTimestamp();
         $travelInfo = [
@@ -379,7 +380,8 @@ class ItineraryService
 
         $hoursToAdd = floor($hours);
         $minutesToAdd = round(($hours - $hoursToAdd) * 60);
-        $timePointer = $timePointer->modify('+' . $hoursToAdd . ' hours +' . $minutesToAdd . ' minutes');
+        $timePointer->modify('+' . $hoursToAdd . ' hours +' . $minutesToAdd . ' minutes');
+        $timePointer = $this->ceilToNearest15Minutes($timePointer);
         $endTime = $timePointer->format('H:i');
         $endTimestamp = $timePointer->getTimestamp();
         $resourceInfo = [
@@ -400,13 +402,21 @@ class ItineraryService
         ];
     }
 
+    private function ceilToNearest15Minutes(DateTime $dateTime): DateTime
+    {
+        $minute = (int)$dateTime->format('i');
+        $remainder = $minute % 15;
+        $minutesToAdjust = (15 - $remainder);
+        $dateTime->modify($minutesToAdjust . ' minutes');
+        $dateTime->setTime($dateTime->format('H'), $dateTime->format('i'), 0);
+        return $dateTime;
+    }
+
     /**
      * Add activities to a day, accounting for existing activities and how long the activities will take.
      */
     public function addActivitiesToDay(Day $day)
     {
-        $dayActivities = [];
-
         // Add any preferred trails to the day, unless they already exist in the itinerary.
         $resources = [];
         $activitiesInArea = $this->getItinerary()->getActivitiesInArea($day->area->id);
@@ -419,8 +429,8 @@ class ItineraryService
             }
         }
 
-        $timePointer = new DateTimeImmutable($day->date . ' ' . $this->getItinerary()::DEFAULT_DAY_START_TIME);
-        $dayEndTime = strtotime($day->date . ' ' . $this->getItinerary()::DEFAULT_DAY_END_TIME);
+        $timePointer = new DateTime($day->date . ' ' . $this->getItinerary()::DEFAULT_DAY_START_TIME);
+        $dayEndTimestamp = strtotime($day->date . ' ' . $this->getItinerary()::DEFAULT_DAY_END_TIME);
         $lunchTime = strtotime($day->date . ' ' . $this->getItinerary()::DEFAULT_LUNCH_TIME);
         $dinnerTime = strtotime($day->date . ' ' . $this->getItinerary()::DEFAULT_DINNER_TIME);
         $baseArea = $this->getItinerary()->base_area;
@@ -430,13 +440,11 @@ class ItineraryService
         $dinnerAdded = false;
 
         foreach ($resources as $resource) {
-            if ($timePointer->getTimestamp() >= $dayEndTime) {
+            if ($timePointer->getTimestamp() >= $dayEndTimestamp) {
                 break;
             }
 
-            $info = $this->getTravelAndResourceInfoForActivity($timePointer, $resource, $lat, $lng);
-            $travelInfo = $info['travel'];
-            $resourceInfo = $info['resource'];
+            ['travel' => $travelInfo, 'resource' => $resourceInfo, 'time_pointer' => $newTimePointer] = $this->getTravelAndResourceInfoForActivity($timePointer, $resource, $lat, $lng);
 
             $this->getItinerary()->addTask('travel', $travelInfo['name'], $travelInfo['description'], $travelInfo['start_time'], $travelInfo['end_time'], $day->day_num, $travelInfo['period']);
 
@@ -450,7 +458,7 @@ class ItineraryService
             $this->getItinerary()->addActivity($resource, $resourceInfo['activity_type'], $resourceInfo['start_time'], $resourceInfo['end_time'], $day->day_num, $resourceInfo['period'], $notes);
 
             // Update the time and location.
-            $timePointer = $info['time_pointer'];
+            $timePointer = $newTimePointer;
             $lat = $resource->latitude;
             $lng = $resource->longitude;
 
@@ -460,9 +468,7 @@ class ItineraryService
             if (($lunchAdded === false && $startTimestamp >= $lunchTime && $startTimestamp < $dinnerTime) || ($dinnerAdded === false && $startTimestamp >= $dinnerTime)) {
                 $restaurant = $this->getRestaurant($day, $startTime);
                 if ($restaurant) {
-                    $info = $this->getTravelAndResourceInfoForActivity($timePointer, $restaurant, $lat, $lng);
-                    $travelInfo = $info['travel'];
-                    $resourceInfo = $info['resource'];
+                    ['travel' => $travelInfo, 'resource' => $resourceInfo, 'time_pointer' => $newTimePointer] = $this->getTravelAndResourceInfoForActivity($timePointer, $restaurant, $lat, $lng);
 
                     $this->getItinerary()->addTask('travel', $travelInfo['name'], $travelInfo['description'], $travelInfo['start_time'], $travelInfo['end_time'], $day->day_num, $travelInfo['period']);
                     $this->getItinerary()->addActivity($restaurant, $resourceInfo['activity_type'], $resourceInfo['start_time'], $resourceInfo['end_time'], $day->day_num, $resourceInfo['period']);
@@ -475,7 +481,7 @@ class ItineraryService
                     }
 
                     // Update the time and location.
-                    $timePointer = $info['time_pointer'];
+                    $timePointer = $newTimePointer;
                     $lat = $restaurant->latitude;
                     $lng = $restaurant->longitude;
                 }
@@ -483,12 +489,55 @@ class ItineraryService
         }
 
         // Have we found enough activities for the day? If not, and it's not too late (2 hours before the day's end), add some more.
-        if ($timePointer->getTimestamp() < $dayEndTime - (self::HOURS_BEFORE_TOO_LATE_TO_ADD_A_NEW_ACTIVITY * 3600)) {
-            $remainingHours = ($dayEndTime - (self::HOURS_BEFORE_TOO_LATE_TO_ADD_A_NEW_ACTIVITY * 3600) - $timePointer->getTimestamp()) / 3600;
+        $i = 0;
+        while ($i++ < 10 || $timePointer->getTimestamp() < $dayEndTimestamp - (self::HOURS_BEFORE_TOO_LATE_TO_ADD_A_NEW_ACTIVITY * 3600)) {
+            $remainingHours = ($dayEndTimestamp - (self::HOURS_BEFORE_TOO_LATE_TO_ADD_A_NEW_ACTIVITY * 3600) - $timePointer->getTimestamp()) / 3600;
             $trail = $this->trailService->getRandomTrail($day->area->id, $this->getItinerary(), $remainingHours);
             if ($trail) {
-                // TODO: Restructure so it loops until we reach the end of the day.
-                $resources[] = $trail;
+                ['travel' => $travelInfo, 'resource' => $resourceInfo, 'time_pointer' => $newTimePointer] = $this->getTravelAndResourceInfoForActivity($timePointer, $trail, $lat, $lng);
+
+                $this->getItinerary()->addTask('travel', $travelInfo['name'], $travelInfo['description'], $travelInfo['start_time'], $travelInfo['end_time'], $day->day_num, $travelInfo['period']);
+
+                // Is this activity going to go too far past lunch (3 hours)? If so, tell them to take some snacks.
+                $notes = null;
+                if ($lunchAdded === false && $resourceInfo['end_timestamp'] > $lunchTime + (self::HOURS_BEFORE_TOO_LATE_FOR_LUNCH * 3600)) {
+                    $notes = 'You may not finish the trail before it\'s time for lunch. Make sure to pack some filling snacks!';
+                    $lunchAdded = true;
+                }
+
+                $this->getItinerary()->addActivity($trail, $resourceInfo['activity_type'], $resourceInfo['start_time'], $resourceInfo['end_time'], $day->day_num, $resourceInfo['period'], $notes);
+
+                // Update the time and location.
+                $timePointer = $newTimePointer;
+                $lat = $trail->latitude;
+                $lng = $trail->longitude;
+
+                // Is it time for a meal? Add one if it is.
+                $startTime = $timePointer->format('H:i');
+                $startTimestamp = $timePointer->getTimestamp();
+                if (($lunchAdded === false && $startTimestamp >= $lunchTime && $startTimestamp < $dinnerTime) || ($dinnerAdded === false && $startTimestamp >= $dinnerTime)) {
+                    $restaurant = $this->getRestaurant($day, $startTime);
+                    if ($restaurant) {
+                        ['travel' => $travelInfo, 'resource' => $resourceInfo, 'time_pointer' => $newTimePointer] = $this->getTravelAndResourceInfoForActivity($timePointer, $restaurant, $lat, $lng);
+
+                        $this->getItinerary()->addTask('travel', $travelInfo['name'], $travelInfo['description'], $travelInfo['start_time'], $travelInfo['end_time'], $day->day_num, $travelInfo['period']);
+                        $this->getItinerary()->addActivity($restaurant, $resourceInfo['activity_type'], $resourceInfo['start_time'], $resourceInfo['end_time'], $day->day_num, $resourceInfo['period']);
+
+                        $period = $travelInfo['period'];
+                        if ($period === Period::AFTERNOON) {
+                            $lunchAdded = true;
+                        } elseif ($period === Period::EVENING || $period === Period::NIGHT) {
+                            $dinnerAdded = true;
+                        }
+
+                        // Update the time and location.
+                        $timePointer = $newTimePointer;
+                        $lat = $restaurant->latitude;
+                        $lng = $restaurant->longitude;
+                    }
+                }
+            } else {
+                break;
             }
         }
     }
