@@ -229,44 +229,44 @@ class ItineraryService
             return;
         }
 
-        // Using the trail priorities for the day's area, determine when the user should best start the trail.
-        foreach ($this->getItinerary()->getTrailPriorities(true) as $trailId) {
-            $trail = Trail::where('id', $trailId)->whereNotNull('distance_miles')->first();
-            if ($trail) {
-                if ($trail->area_id == $day->area_id && !$this->getItinerary()->trailExists($trail)) {
-                    $trailPeriod = $this->trailService->getBestPeriodOfDayForTrail($trail);
-                    break;
-                }
-            }
-        }
-
-        // If we have a trail for today, and it's in the morning, and in Zion, they probably won't have time to stop
-        // to eat in the morning if they want to start on time. They should eat at home.
-        if (isset($trail) && isset($trailPeriod) && $trailPeriod === Period::MORNING && $trail->area_id == Area::ZION) {
-            $this->getItinerary()->addTask(
-                'cooking',
-                'Breakfast',
-                'Eat breakfast at home to make sure you can get to the trail at an early hour. Ideally you\'ll reach the trail by 8:00am to avoid larger crowds.',
-                '06:30',
-                '07:30',
-                $dayNum,
-                $trailPeriod
-            );
-            $this->getItinerary()->addActivity(
-                $trail,
-                'hiking',
-                '08:00',
-                $trail->calculateEndTime($day->date, '08:00'),
-                $day->day_num,
-                $trailPeriod
-            );
-        }
+//        // Using the trail priorities for the day's area, determine when the user should best start the trail.
+//        foreach ($this->getItinerary()->getTrailPriorities(true) as $trailId) {
+//            $trail = Trail::where('id', $trailId)->whereNotNull('distance_miles')->first();
+//            if ($trail) {
+//                if ($trail->area_id == $day->area_id && !$this->getItinerary()->trailExists($trail)) {
+//                    $trailPeriod = $this->trailService->getBestPeriodOfDayForTrail($trail);
+//                    break;
+//                }
+//            }
+//        }
+//
+//        // If we have a trail for today, and it's in the morning, and in Zion, they probably won't have time to stop
+//        // to eat in the morning if they want to start on time. They should eat at home.
+//        if (isset($trail) && isset($trailPeriod) && $trailPeriod === Period::MORNING && $trail->area_id == Area::ZION) {
+//            $this->getItinerary()->addTask(
+//                'cooking',
+//                'Breakfast',
+//                'Eat breakfast at home to make sure you can get to the trail at an early hour. Ideally you\'ll reach the trail by 8:00am to avoid larger crowds.',
+//                '06:30',
+//                '07:30',
+//                $dayNum,
+//                $trailPeriod
+//            );
+//            $this->getItinerary()->addActivity(
+//                $trail,
+//                'hiking',
+//                '08:00',
+//                $trail->calculateEndTime($day->date, '08:00'),
+//                $day->day_num,
+//                $trailPeriod
+//            );
+//        }
 
         // Are there possible events for the day to fill in any gaps?
-        $this->addEventForMorning($day);
-        $this->addEventForAfternoon($day);
-        $this->addEventForEvening($day);
-        $this->addEventForNight($day);
+//        $this->addEventForMorning($day);
+//        $this->addEventForAfternoon($day);
+//        $this->addEventForEvening($day);
+//        $this->addEventForNight($day);
 
         $this->addActivitiesToDay($day);
 
