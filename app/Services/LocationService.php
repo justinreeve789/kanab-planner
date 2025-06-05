@@ -7,6 +7,7 @@ use App\Models\Location;
 use App\Models\ResourceBusy;
 use App\Models\Restaurant;
 use App\Models\Trail;
+use App\Models\TravelRoute;
 use App\Services\OCRService;
 use App\Services\OpenAIService;
 use Exception;
@@ -20,6 +21,7 @@ class LocationService
 {
     const DEFAULT_MPH_FOR_ESTIMATE = 30;
     const DEFAULT_MULTIPLIER_FOR_DRIVING_DISTANCE = 1.125;
+    const KM_TO_MILES = 1.609344;
 
     private $route;
 
@@ -31,6 +33,18 @@ class LocationService
 
     private function getDrivingDistanceWithOSRM($fromLat, $fromLng, $toLat, $toLng)
     {
+        // Check if we've already saved this distance.
+        $travelRoute = TravelRoute::where([
+            'lat_origin' => $fromLat,
+            'lng_origin' => $fromLng,
+            'lat_dest' => $toLat,
+            'lng_dest' => $toLng,
+        ])->first();
+        if ($travelRoute) {
+            return $travelRoute;
+        }
+
+        // Get the route details.
         $coordinates = $fromLng . ',' . $fromLat . ';' . $toLng . ',' . $toLat;
         try {
             $response = $this->route
@@ -47,10 +61,19 @@ class LocationService
                         $totalDuration += $step['duration'];
                     }
                 }
-                return (object) [
-                    'distance_miles' => round(($totalDistance / 1000) / 1.609344, 1),
-                    'duration_hours' => $totalDuration * 10 / 60,
-                ];
+
+                $distanceMiles = round(($totalDistance / 1000) / self::KM_TO_MILES, 1);
+                $durationHours = round($totalDuration / 3600, 1);
+
+                $travelRoute = TravelRoute::create([
+                    'lat_origin' => $fromLat,
+                    'lng_origin' => $fromLng,
+                    'lat_dest' => $toLat,
+                    'lng_dest' => $toLng,
+                    'distance_miles' => $distanceMiles,
+                    'duration_hours' => $durationHours,
+                ]);
+                return $travelRoute;
             } else {
                 echo 'Route not found.';
             }

@@ -23,8 +23,8 @@ class CreateEventsTable extends Migration
             $table->string('source_id');
             $table->integer('location_id')->unsigned()->nullable();
             $table->text('description')->nullable();
-            $table->float('latitude', 10, 7)->nullable();
-            $table->float('longitude', 10, 7)->nullable();
+            $table->string('latitude', 16)->nullable();
+            $table->string('longitude', 16)->nullable();
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->string('url')->nullable();

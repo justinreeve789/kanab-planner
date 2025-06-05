@@ -19,8 +19,8 @@ class CreateAreasTable extends Migration
             $table->string('name');
             $table->string('short_name', 16);
             $table->char('abbreviation', 2);
-            $table->float('latitude', 10, 7)->nullable();
-            $table->float('longitude', 10, 7)->nullable();
+            $table->string('latitude', 16)->nullable();
+            $table->string('longitude', 16)->nullable();
             $table->timestamps();
         });
 

@@ -23,8 +23,8 @@ class CreateLocationsTable extends Migration
             $table->string('source_id')->nullable();
             $table->integer('area_id')->unsigned();
             $table->text('description')->nullable();
-            $table->float('latitude', 10, 7)->nullable();
-            $table->float('longitude', 10, 7)->nullable();
+            $table->string('latitude', 16)->nullable();
+            $table->string('longitude', 16)->nullable();
             $table->string('address')->nullable();
             $table->string('city')->nullable();
             $table->string('state')->nullable();

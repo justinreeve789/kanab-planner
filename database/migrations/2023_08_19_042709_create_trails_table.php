@@ -30,8 +30,8 @@ class CreateTrailsTable extends Migration
             $table->text('accessibility')->nullable();
             $table->string('duration')->nullable();
             $table->string('pets_allowed')->nullable();
-            $table->float('latitude', 10, 7)->nullable();
-            $table->float('longitude', 10, 7)->nullable();
+            $table->string('latitude', 16)->nullable();
+            $table->string('longitude', 16)->nullable();
             $table->string('features')->nullable();
             $table->string('url')->nullable();
             $table->string('contact_url')->nullable();

@@ -363,8 +363,6 @@ class ItineraryService
         // Update the time and location.
         $startTime = $endTime;
         $startTimestamp = $endTimestamp;
-        $lat = $resource->latitude;
-        $lng = $resource->longitude;
 
         // Calculate time for the activity.
         if ($resource->type === ResourceEnum::TRAILS_TYPE) {
@@ -490,7 +488,8 @@ class ItineraryService
 
         // Have we found enough activities for the day? If not, and it's not too late (2 hours before the day's end), add some more.
         $i = 0;
-        while (++$i < 2 || $timePointer->getTimestamp() < $dayEndTimestamp - (self::HOURS_BEFORE_TOO_LATE_TO_ADD_A_NEW_ACTIVITY * 3600)) {
+        while ($i < 2 || $timePointer->getTimestamp() < $dayEndTimestamp - (self::HOURS_BEFORE_TOO_LATE_TO_ADD_A_NEW_ACTIVITY * 3600)) {
+            $i++;
             $remainingHours = ($dayEndTimestamp - (self::HOURS_BEFORE_TOO_LATE_TO_ADD_A_NEW_ACTIVITY * 3600) - $timePointer->getTimestamp()) / 3600;
             $trail = $this->trailService->getRandomTrail($day->area->id, $this->getItinerary(), $remainingHours);
             if ($trail) {
@@ -539,6 +538,7 @@ class ItineraryService
             } else {
                 break;
             }
+            break;
         }
     }
 
