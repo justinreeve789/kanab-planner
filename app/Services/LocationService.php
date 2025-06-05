@@ -9,7 +9,11 @@ use App\Models\Restaurant;
 use App\Models\Trail;
 use App\Services\OCRService;
 use App\Services\OpenAIService;
+use Exception;
 use Illuminate\Support\Facades\Log;
+use Riverside\Osrm\Exception as OsrmException;
+use Riverside\Osrm\Service\Route;
+use Riverside\Osrm\Service\Trip;
 use Symfony\Component\Process\Process;
 
 class LocationService
@@ -17,21 +21,74 @@ class LocationService
     const DEFAULT_MPH_FOR_ESTIMATE = 30;
     const DEFAULT_MULTIPLIER_FOR_DRIVING_DISTANCE = 1.125;
 
+    private $route;
+
     public function __construct()
     {
+        $this->route = new Route();
+        $this->trip = new Trip();
     }
 
-    public function estimateDrivingDistance($fromLat, $fromLng, $toLat, $toLng): float
+    private function getDrivingDistanceWithOSRM($fromLat, $fromLng, $toLat, $toLng)
+    {
+        $coordinates = $fromLng . ',' . $fromLat . ';' . $toLng . ',' . $toLat;
+        try {
+            $response = $this->route
+                ->setSteps('true')
+                ->fetch($coordinates);
+            if ($response->isOK())
+            {
+                $totalDistance = 0;
+                $totalDuration = 0;
+                $data = $response->toArray();
+                foreach ($data['routes'][0]['legs'] as $leg) {
+                    foreach ($leg['steps'] as $step) {
+                        $totalDistance += $step['distance'];
+                        $totalDuration += $step['duration'];
+                    }
+                }
+                return (object) [
+                    'distance_miles' => round(($totalDistance / 1000) / 1.609344, 1),
+                    'duration_hours' => $totalDuration * 10 / 60,
+                ];
+            } else {
+                echo 'Route not found.';
+            }
+        } catch (OsrmException $e) {
+            echo $e->getMessage();
+        } catch (Exception $e) {
+            echo $e->getMessage();
+        }
+    }
+
+    private function getDrivingDistanceWithHaversine($fromLat, $fromLng, $toLat, $toLng): float
     {
         $distanceMiles = $this->haversineDistance($fromLat, $fromLng, $toLat, $toLng);
         $distanceMiles *= self::DEFAULT_MULTIPLIER_FOR_DRIVING_DISTANCE;
         return round($distanceMiles, 1);
     }
 
+    private function getDrivingHoursWithOSRM($fromLat, $fromLng, $toLat, $toLng): float
+    {
+        $osrm = $this->getDrivingDistanceWithOSRM($fromLat, $fromLng, $toLat, $toLng);
+        $durationHours = $osrm->duration_hours;
+        return round($durationHours, 1);
+    }
+
+    private function getDrivingHoursWithConstant($fromLat, $fromLng, $toLat, $toLng): float
+    {
+        $distanceMiles = $this->getDrivingDistanceWithHaversine($fromLat, $fromLng, $toLat, $toLng);
+        return round($distanceMiles / self::DEFAULT_MPH_FOR_ESTIMATE, 1);
+    }
+
+    public function estimateDrivingDistance($fromLat, $fromLng, $toLat, $toLng): float
+    {
+        return $this->getDrivingDistanceWithOSRM($fromLat, $fromLng, $toLat, $toLng);
+    }
+
     public function estimateDrivingHours($fromLat, $fromLng, $toLat, $toLng): float
     {
-        $distanceMiles = $this->haversineDistance($fromLat, $fromLng, $toLat, $toLng);
-        return round($distanceMiles / self::DEFAULT_MPH_FOR_ESTIMATE, 1);
+        return $this->getDrivingHoursWithOSRM($fromLat, $fromLng, $toLat, $toLng);
     }
 
     public function updateBusynessForLocation($location)

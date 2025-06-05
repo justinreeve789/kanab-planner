@@ -12,6 +12,7 @@ class Restaurant extends Resource
     use ResourceScopes;
     use SearchableResource;
 
+    protected $appends = ['latitude', 'longitude'];
     protected $casts = ['deviation_percent' => 'float'];
     protected $guarded = ['id'];
     protected $hidden = ['raw_data', 'location_id'];
@@ -49,6 +50,16 @@ class Restaurant extends Resource
     public function tags()
     {
         return $this->hasMany(LocationTag::class, 'location_id', 'location_id');
+    }
+
+    public function getLatitudeAttribute()
+    {
+        return $this->location->latitude;
+    }
+
+    public function getLongitudeAttribute()
+    {
+        return $this->location->longitude;
     }
 
     public function getAreaIdAttribute()
