@@ -488,8 +488,7 @@ class ItineraryService
 
         // Have we found enough activities for the day? If not, and it's not too late (2 hours before the day's end), add some more.
         $i = 0;
-        while ($i < 2 || $timePointer->getTimestamp() < $dayEndTimestamp - (self::HOURS_BEFORE_TOO_LATE_TO_ADD_A_NEW_ACTIVITY * 3600)) {
-            $i++;
+        while ($timePointer->getTimestamp() < $dayEndTimestamp - (self::HOURS_BEFORE_TOO_LATE_TO_ADD_A_NEW_ACTIVITY * 3600)) {
             $remainingHours = ($dayEndTimestamp - (self::HOURS_BEFORE_TOO_LATE_TO_ADD_A_NEW_ACTIVITY * 3600) - $timePointer->getTimestamp()) / 3600;
             $trail = $this->trailService->getRandomTrail($day->area->id, $this->getItinerary(), $remainingHours);
             if ($trail) {
@@ -538,7 +537,7 @@ class ItineraryService
             } else {
                 break;
             }
-            break;
+//            $timePointer->modify('+5 minutes');
         }
     }
 
@@ -1243,27 +1242,31 @@ class ItineraryService
         }
 
         if (!$startDate || !$endDate) {
-            // Let's try the month.
-            if ($this->getItinerary()->getMonth()) {
-                // Pick a random date in the month that's at least 2 weeks ahead of the current date.
-                $startDate = $this->getRandomDateInMonth($this->getItinerary()->getMonth());
-                $this->getItinerary()->setStartDate($startDate);
+            // Let's try the season.
+            if ($this->getItinerary()->getSeason()) {
+                $startDate = Season::randomDateInSeason($this->getItinerary()->getSeason());
+                $this->getItinerary()->start_date = $startDate;
 
                 if ($durationDays) {
-                    $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($startDate . ' +' . $durationDays . ' days')));
+                    $this->getItinerary()->end_date = date('Y-m-d', strtotime($startDate . ' +' . $durationDays . ' days'));
                     return;
                 }
             }
 
-            // Let's try the season.
-            if ($this->getItinerary()->getSeason()) {
-                $startDate = Season::randomDateInSeason($this->getItinerary()->getSeason());
-                $this->getItinerary()->setStartDate($startDate);
+            // Let's try the month.
+            $month = $this->getItinerary()->month;
+            if (!$month) {
+                $month = (new DateTime())->modify('+2 weeks')->format('t') - (new DateTime())->modify('+2 weeks')->format('j') <= 14 ? (new DateTime())->modify('+2 weeks +15 days')->format('n') : (new DateTime())->modify('+2 weeks')->format('n');
+                $this->getItinerary()->month = $month;
+            }
 
-                if ($durationDays) {
-                    $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($startDate . ' +' . $durationDays . ' days')));
-                    return;
-                }
+            // Pick a random date in the month that's at least 2 weeks ahead of the current date.
+            $startDate = $this->getRandomDateInMonth($month);
+            $this->getItinerary()->start_date = $startDate;
+
+            if ($durationDays) {
+                $this->getItinerary()->end_date = date('Y-m-d', strtotime($startDate . ' +' . $durationDays . ' days'));
+                return;
             }
         }
 //        throw new \Exception('Could not set dates: ' . print_r($this->getItinerary(), true));
@@ -1289,7 +1292,8 @@ class ItineraryService
         $minimumDate->add(new \DateInterval('P2W'));
 
         // Generate a random date in the specified month
-        $randomDay = mt_rand(1, cal_days_in_month(CAL_GREGORIAN, $month, $targetYear));
+        $daysInMonth = date('t', strtotime($targetYear . '-' . $month . '-01'));
+        $randomDay = mt_rand(1, $daysInMonth);
         $randomDate = new \DateTime("$targetYear-$month-$randomDay");
 
         // Check if the random date is at least 2 weeks ahead
@@ -1298,9 +1302,9 @@ class ItineraryService
         } while ($randomDate < $minimumDate);
 
         // Did we move outside the intended month? Let's try again, but this time jump forward a year.
-        if ((int)$randomDate->format('n') !== $month) {
-            $randomDate = new \DateTime($this->getRandomDateInMonth($month, $targetYear + 1));
-        }
+//        if ((int)$randomDate->format('n') !== $month) {
+//            $randomDate = new \DateTime($this->getRandomDateInMonth($month, $targetYear + 1));
+//        }
         return $randomDate->format('Y-m-d');
     }
 

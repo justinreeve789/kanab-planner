@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\GeoJsonScope;
 use App\Services\TrailService;
 use App\Traits\Proximity;
 use App\Traits\SearchableResource;
@@ -25,6 +26,10 @@ class Trail extends Resource
     {
         parent::__construct();
         $this->trailService = new TrailService();
+    }
+
+    protected static function booted(): void {
+        static::addGlobalScope(new GeoJsonScope);
     }
 
     public function toSearchableArray()

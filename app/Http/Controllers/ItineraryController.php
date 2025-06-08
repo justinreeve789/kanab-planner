@@ -72,7 +72,6 @@ class ItineraryController extends Controller
 
         $this->saveItinerary();
 
-//        return response()->json($this->itineraryService->getItinerary());
         return $this->itineraryService->getItinerary();
     }
 

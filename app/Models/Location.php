@@ -55,10 +55,10 @@ class Location extends Resource
         return $this->hasMany(OpenAIPrompt::class, 'source_id', 'id')->where('openai_prompts.source_table', $this->getTable());
     }
 
-    public function restaurant()
-    {
-        return $this->hasOne(Restaurant::class, 'location_id', 'id');
-    }
+//    public function restaurant()
+//    {
+//        return $this->hasOne(Restaurant::class, 'location_id', 'id');
+//    }
 
     public function getImageIdsAttribute()
     {

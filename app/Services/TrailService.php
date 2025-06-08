@@ -248,7 +248,11 @@ class TrailService
     public function analyzeTrail($geoJson, $averageSpeed, $activityType = ActivityType::HIKING, $roundPrecision = 1)
     {
         $data = json_decode($geoJson, true);
-        $trailPoints = $data['features'][0]['geometry']['coordinates'];
+        try {
+            $trailPoints = $data['features'][0]['geometry']['coordinates'];
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage() . ' ' . $geoJson);
+        }
         $totalTime = 0;
         $totalDist = 0;
         $cumulativeTime = 0;
