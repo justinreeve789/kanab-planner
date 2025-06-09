@@ -6,7 +6,7 @@
         <div class="icon pr-1 shrink-0">
           <img src="/images/icons/dining.svg" alt="Dining">
         </div>
-        <div class="text-lg md:text-xl">{{ activity.start_time }} {{ resource.name }}</div>
+        <div class="text-lg md:text-xl">{{ resource.name }}</div>
       </div>
       <div class="flex space-x-4 items-center mr-8 h-full">
         <RestaurantStats :restaurant="resource" :align="'right'" class="hidden lg:flex" />

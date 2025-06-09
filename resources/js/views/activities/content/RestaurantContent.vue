@@ -8,7 +8,7 @@
         <div class="lg:order-1">
           <p class="mb-4" v-if="resource.description_alt">{{ resource.description_alt }}</p>
           <p class="mb-4" v-if="resource.description">{{ resource.description }}</p>
-          <p v-if="phrase"><em>{{ phrase }}</em></p>
+<!--          <p v-if="phrase"><em>{{ phrase }}</em></p>-->
         </div>
       </div>
       <div class="w-[calc(100%+16px)] -ml-2 -mb-4 lg:w-1/3 mt-4 lg:pl-4 lg:-mt-2 lg:-mr-2" v-if="resource.images">

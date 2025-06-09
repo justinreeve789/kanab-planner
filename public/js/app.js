@@ -27408,6 +27408,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_Weather_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/Weather.vue */ "./resources/js/views/components/Weather.vue");
 /* harmony import */ var _stores_preferences__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../stores/preferences */ "./resources/js/stores/preferences.js");
 /* harmony import */ var _ahultgren_vue3_swipe_actions__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @ahultgren/vue3-swipe-actions */ "./node_modules/@ahultgren/vue3-swipe-actions/dist/index.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
@@ -27497,6 +27503,40 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     abbreviateMonth: function abbreviateMonth(month) {
       return month.substr(0, 3);
+    },
+    activityColor: function activityColor(activity) {
+      console.log(activity);
+      if (activity.activity_type && activity.activity_type.name) {
+        switch (activity.activity_type.name) {
+          case 'checking-in':
+          case 'checking-out':
+            return 'text-blue-700';
+          case 'dining':
+            return 'text-green-700';
+          case 'event':
+            return 'text-gray-700';
+          case 'hiking':
+            return 'text-orange-700';
+        }
+      }
+      return 'text-blue-700';
+    },
+    formatTime: function formatTime(time) {
+      var _time$split = time.split(':'),
+        _time$split2 = _slicedToArray(_time$split, 3),
+        hours = _time$split2[0],
+        minutes = _time$split2[1],
+        seconds = _time$split2[2];
+      var date = new Date();
+      date.setHours(parseInt(hours));
+      date.setMinutes(parseInt(minutes));
+      date.setSeconds(parseInt(seconds));
+      var formattedTime = date.toLocaleTimeString('en-us', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      return formattedTime.replace(/AM$/, 'am').replace(/PM$/, 'pm');
     },
     handleBookmark: function handleBookmark(e) {
       console.log(e);
@@ -28887,7 +28927,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     return {
       currentPhrase: '',
       loadingPhraseIntervalId: null,
-      loadingPhrases: ["Calculating optimal angle for hoodoo admiration...", "Training squirrel guides...", "Convincing slot canyons to open wider...", "Downloading sounds of nature...", "Negotiating cooler temperatures...", "Initializing starry skies...", "Compiling s'mores recipes...", "Colorizing red rocks...", "Dispatching drones to scout viewpoints...", "Wrangling tumbleweeds...", "Hydrating water bottles...", "Pressure washing hiking boots...", "Geolocating hidden oases...", "Deploying carrier pigeons in case wifi is down...", "Amplifying sense of wonder...", "Increasing \"wow\" factor...", "Maximizing adventure...", "Cataloging desert wildflowers...", "Navigating travel trajectories...", "Reinforcing hiking poles...", "Generating epic sunset palettes...", "Calibrating scenic coefficients...", "Optimizing trail vectors...", "Refactoring instagrammability index...", "Nutrientizing trail mix...", "Resisting urge to feed wildlife...", "Magnetizing compasses...", "Assembling park ranger eco-mech...", "Translating coyote howls...", "Recharging camera batteries...", "Combobulating panoramas..."],
+      loadingPhrases: ["Calculating optimal angle for hoodoo admiration...", "Training squirrel guides...", "Convincing slot canyons to open wider...", "Downloading sounds of nature...", "Negotiating cooler temperatures...", "Initializing starry skies...", "Compiling s'mores recipes...", "Colorizing red rocks...", "Dispatching drones to scout viewpoints...", "Wrangling tumbleweeds...", "Hydrating water bottles...", "Pressure washing hiking boots...", "Geolocating hidden oases...", "Deploying carrier pigeons in case wifi is down...", "Amplifying wow factor...", "Maximizing adventure...", "Cataloging desert wildflowers...", "Navigating travel trajectories...", "Reinforcing hiking poles...", "Generating epic sunset palettes...", "Calibrating scenic coefficients...", "Optimizing trail vectors...", "Refactoring instagrammability index...", "Nutrientizing trail mix...", "Resisting urge to feed wildlife...", "Magnetizing compasses...", "Assembling park ranger eco-mech...", "Translating coyote howls...", "Recharging camera batteries...", "Combobulating panoramas...", "Juicing cactuses..."],
       shuffledPhrase: []
     };
   },
@@ -29834,17 +29874,14 @@ __webpack_require__.r(__webpack_exports__);
           month: dateObj.toLocaleString('en-us', {
             month: 'short'
           }),
-          day: dateObj.toLocaleString('en-us', {
-            day: 'numeric'
-          }),
-          year: dateObj.toLocaleString('en-us', {
-            year: 'numeric'
-          })
+          day: dateObj.getUTCDate(),
+          year: dateObj.getUTCFullYear()
         };
       }
       return {
         month: '',
-        day: ''
+        day: '',
+        year: ''
       };
     },
     openAccommodations: function openAccommodations() {
@@ -30293,14 +30330,14 @@ __webpack_require__.r(__webpack_exports__);
           month: dateObj.toLocaleString('en-us', {
             month: 'short'
           }),
-          day: dateObj.toLocaleString('en-us', {
-            day: 'numeric'
-          })
+          day: dateObj.getUTCDate(),
+          year: dateObj.getUTCFullYear()
         };
       }
       return {
         month: '',
-        day: ''
+        day: '',
+        year: ''
       };
     },
     selectDates: function selectDates() {
@@ -31703,9 +31740,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       "class": "timeline"
     }, null, -1 /* HOISTED */)), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)(period.activities, function (activity, index) {
       return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
-        "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)('day-content pt-4 period-' + period.type),
+        "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)('day-content pt-4 relative period-' + period.type),
         key: index
-      }, [activity.activity_type && (activity.activity_type.name == 'checking-in' || activity.activity_type.name == 'checking-out') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_22, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Accommodation, {
+      }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+        "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["time text-sm absolute top-[-2px] right-4 opacity-50 md:text-base md:top-[-4px] md:left-4", $options.activityColor(activity)])
+      }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($options.formatTime(activity.start_time)), 3 /* TEXT, CLASS */), activity.activity_type && (activity.activity_type.name == 'checking-in' || activity.activity_type.name == 'checking-out') ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_22, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Accommodation, {
         activity: activity,
         day: $props.day,
         resource: activity.resource
@@ -32172,7 +32211,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
     src: "/images/icons/dining.svg",
     alt: "Dining"
-  })], -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.start_time) + " " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.name), 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_RestaurantStats, {
+  })], -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.name), 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_RestaurantStats, {
     restaurant: $props.resource,
     align: 'right',
     "class": "hidden lg:flex"
@@ -32232,7 +32271,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     })
   }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.expanded]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [_cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     "class": "icon pr-1"
-  }, null, -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.start_time) + " " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.name), 1 /* TEXT */)]), _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  }, null, -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.name), 1 /* TEXT */)]), _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     "class": "activity-stats flex items-center justify-end text-right flex-wrap"
   }, null, -1 /* HOISTED */))]), $data.expanded ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_TaskContent, {
     activity: $props.activity
@@ -32302,7 +32341,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
     alt: "Hiking",
     src: "/images/icons/hiking.svg"
-  })], -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.activity.start_time) + " " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
+  })], -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
     alt: $props.resource.formattedDifficulty,
     src: '/images/icons/difficulty-' + $props.resource.difficulty + '.png'
   }, null, 8 /* PROPS */, _hoisted_6)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_TrailStats, {
@@ -32362,9 +32401,6 @@ var _hoisted_7 = {
   "class": "mb-4"
 };
 var _hoisted_8 = {
-  key: 2
-};
-var _hoisted_9 = {
   key: 0,
   "class": "w-[calc(100%+16px)] -ml-2 -mb-4 lg:w-1/3 mt-4 lg:pl-4 lg:-mt-2 lg:-mr-2"
 };
@@ -32376,7 +32412,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     type: "restaurant",
     resource_table: 'restaurants',
     resource_id: $props.resource.id
-  }, null, 8 /* PROPS */, ["resource_id"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [$props.resource.description_alt ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_alt), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.resource.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.phrase), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])]), $props.resource.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Side, {
+  }, null, 8 /* PROPS */, ["resource_id"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [$props.resource.description_alt ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_alt), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $props.resource.description ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          <p v-if=\"phrase\"><em>{{ phrase }}</em></p>")])]), $props.resource.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Side, {
     resource: _ctx.restaurant,
     type: 'restaurant',
     images: $props.resource.images
@@ -32453,13 +32489,6 @@ var _hoisted_6 = {
   "class": "mb-4"
 };
 var _hoisted_7 = {
-  key: 1,
-  "class": "mb-4"
-};
-var _hoisted_8 = {
-  key: 0
-};
-var _hoisted_9 = {
   key: 0,
   "class": "w-[calc(100%+16px)] -ml-2 -mb-4 lg:w-1/3 mt-4 lg:pl-4 lg:-mt-2 lg:-mr-2"
 };
@@ -32481,7 +32510,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[0] || (_cache[0] = function ($event) {
       return $data.expanded = true;
     })
-  }, [$props.resource.description_short ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_short), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */), $props.resource.description_alt || $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_7, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("em", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)((0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_alt) + " ", 1 /* TEXT */), $props.phrase ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_8, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.phrase), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 2 /* CLASS */)]), $props.resource.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Side, {
+  }, [$props.resource.description_short ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description_short), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.resource.description), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          <p v-if=\"resource.description_alt || phrase\" class=\"mb-4\">"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("            <em>{{ resource.description_alt }} <span v-if=\"phrase\">{{ phrase }}</span></em>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          </p>")], 2 /* CLASS */)]), $props.resource.images ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_7, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Side, {
     images: $props.resource.images,
     resource: $props.resource,
     type: 'trail'

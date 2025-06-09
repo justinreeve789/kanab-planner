@@ -118,12 +118,11 @@ export default {
           month: dateObj.toLocaleString('en-us', {
             month: 'short',
           }),
-          day: dateObj.toLocaleString('en-us', {
-            day: 'numeric',
-          }),
+          day: dateObj.getUTCDate(),
+          year: dateObj.getUTCFullYear(),
         };
       }
-      return { month: '', day: ''};
+      return { month: '', day: '', year: ''};
     },
     selectDates() {
       this.isCalendarOpen = !this.isCalendarOpen;

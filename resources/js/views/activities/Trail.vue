@@ -7,7 +7,7 @@
         <div class="icon pr-1 shrink-0">
           <img alt="Hiking" src="/images/icons/hiking.svg">
         </div>
-        <div class="text-lg md:text-xl">{{ activity.start_time }} {{ resource.name }}</div>
+        <div class="text-lg md:text-xl">{{ resource.name }}</div>
         <div class="difficulty hidden">
           <img :alt="resource.formattedDifficulty" :src="'/images/icons/difficulty-' + resource.difficulty + '.png'">
         </div>

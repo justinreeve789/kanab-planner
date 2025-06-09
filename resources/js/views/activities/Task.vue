@@ -5,7 +5,7 @@
       <div class="title flex items-center space-x-2">
         <div class="icon pr-1">
         </div>
-        <div class="text-left text-lg md:text-xl">{{ activity.start_time }} {{ activity.name }}</div>
+        <div class="text-left text-lg md:text-xl">{{ activity.name }}</div>
       </div>
       <div class="activity-stats flex items-center justify-end text-right flex-wrap">
       </div>

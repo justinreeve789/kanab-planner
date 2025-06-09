@@ -22,9 +22,9 @@
           <p class="mb-4">
             {{ resource.description }}
           </p>
-          <p v-if="resource.description_alt || phrase" class="mb-4">
-            <em>{{ resource.description_alt }} <span v-if="phrase">{{ phrase }}</span></em>
-          </p>
+<!--          <p v-if="resource.description_alt || phrase" class="mb-4">-->
+<!--            <em>{{ resource.description_alt }} <span v-if="phrase">{{ phrase }}</span></em>-->
+<!--          </p>-->
         </div>
       </div>
       <div

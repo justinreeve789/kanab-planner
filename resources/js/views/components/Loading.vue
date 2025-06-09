@@ -33,8 +33,7 @@ export default {
         "Pressure washing hiking boots...",
         "Geolocating hidden oases...",
         "Deploying carrier pigeons in case wifi is down...",
-        "Amplifying sense of wonder...",
-        "Increasing \"wow\" factor...",
+        "Amplifying wow factor...",
         "Maximizing adventure...",
         "Cataloging desert wildflowers...",
         "Navigating travel trajectories...",
@@ -49,7 +48,8 @@ export default {
         "Assembling park ranger eco-mech...",
         "Translating coyote howls...",
         "Recharging camera batteries...",
-        "Combobulating panoramas..."
+        "Combobulating panoramas...",
+        "Juicing cactuses...",
       ],
       shuffledPhrase: [],
     };

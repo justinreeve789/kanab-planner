@@ -166,15 +166,11 @@ export default {
           month: dateObj.toLocaleString('en-us', {
             month: 'short',
           }),
-          day: dateObj.toLocaleString('en-us', {
-            day: 'numeric',
-          }),
-          year: dateObj.toLocaleString('en-us', {
-            year: 'numeric',
-          }),
+          day: dateObj.getUTCDate(),
+          year: dateObj.getUTCFullYear(),
         };
       }
-      return { month: '', day: ''};
+      return { month: '', day: '', year: ''};
     },
     openAccommodations() {
       this.searchStore.adjustSettingsForPage('accommodations');

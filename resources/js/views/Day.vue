@@ -39,7 +39,10 @@
             </div>
             <section v-for="(period, periodType) in day.periods" :key="periodType">
               <div class="timeline"></div>
-              <div :class="'day-content pt-4 period-' + period.type" v-for="(activity, index) in period.activities" :key="index">
+              <div :class="'day-content pt-4 relative period-' + period.type" v-for="(activity, index) in period.activities" :key="index">
+                <div class="time text-sm absolute top-[-2px] right-4 opacity-50 md:text-base md:top-[-4px] md:left-4" :class="activityColor(activity)">
+                  {{ formatTime(activity.start_time) }}
+                </div>
                 <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-if="activity.activity_type && (activity.activity_type.name == 'checking-in' || activity.activity_type.name == 'checking-out')">
                   <Accommodation :activity="activity" :day="day" :resource="activity.resource" />
                 </div>
@@ -154,6 +157,36 @@ export default {
   methods: {
     abbreviateMonth(month) {
         return month.substr(0, 3);
+    },
+    activityColor(activity) {
+      console.log(activity);
+      if (activity.activity_type && activity.activity_type.name) {
+        switch (activity.activity_type.name) {
+          case 'checking-in':
+          case 'checking-out':
+            return 'text-blue-700';
+          case 'dining':
+            return 'text-green-700';
+          case 'event':
+            return 'text-gray-700';
+          case 'hiking':
+            return 'text-orange-700';
+        }
+      }
+      return 'text-blue-700';
+    },
+    formatTime(time) {
+      const [hours, minutes, seconds] = time.split(':');
+      const date = new Date();
+      date.setHours(parseInt(hours));
+      date.setMinutes(parseInt(minutes));
+      date.setSeconds(parseInt(seconds));
+      const formattedTime = date.toLocaleTimeString('en-us', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      return formattedTime.replace(/AM$/, 'am').replace(/PM$/, 'pm');
     },
     handleBookmark(e) {
       console.log(e);
