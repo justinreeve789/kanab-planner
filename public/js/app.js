@@ -28887,7 +28887,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     return {
       currentPhrase: '',
       loadingPhraseIntervalId: null,
-      loadingPhrases: ["Calculating optimal angle for hoodoo admiration...", "Training squirrel guides...", "Convincing slot canyons to open wider...", "Downloading sounds of nature...", "Negotiating cooler desert temperatures...", "Initializing starry skies...", "Analyzing s'mores recipes...", "Reminding red rocks to stay extra red...", "Dispatching drones to scout viewpoints...", "Wrangling tumbleweeds...", "Priming water bottles...", "Geolocating hidden oases...", "Deploying carrier pigeons in case wifi is down...", "Amplifying sense of wonder...", "Increasing \"wow\" factor...", "Setting adventure to maximum...", "Cataloging desert wildflowers...", "Navigating travel trajectories...", "Reinforcing hiking poles...", "Generating epic sunset palettes...", "Calibrating scenic coefficients...", "Optimizing trail vectors...", "Compiling instagrammability index...", "Nutrientizing trail mix...", "Resisting urge to feed wildlife...", "Magnetizing compass matrix...", "Forming park ranger eco-mech..."],
+      loadingPhrases: ["Calculating optimal angle for hoodoo admiration...", "Training squirrel guides...", "Convincing slot canyons to open wider...", "Downloading sounds of nature...", "Negotiating cooler temperatures...", "Initializing starry skies...", "Compiling s'mores recipes...", "Colorizing red rocks...", "Dispatching drones to scout viewpoints...", "Wrangling tumbleweeds...", "Hydrating water bottles...", "Pressure washing hiking boots...", "Geolocating hidden oases...", "Deploying carrier pigeons in case wifi is down...", "Amplifying sense of wonder...", "Increasing \"wow\" factor...", "Maximizing adventure...", "Cataloging desert wildflowers...", "Navigating travel trajectories...", "Reinforcing hiking poles...", "Generating epic sunset palettes...", "Calibrating scenic coefficients...", "Optimizing trail vectors...", "Refactoring instagrammability index...", "Nutrientizing trail mix...", "Resisting urge to feed wildlife...", "Magnetizing compasses...", "Assembling park ranger eco-mech...", "Translating coyote howls...", "Recharging camera batteries...", "Combobulating panoramas..."],
       shuffledPhrase: []
     };
   },
@@ -28911,7 +28911,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       this.intervalId = setInterval(function () {
         _this.currentPhrase = _this.shuffledPhrases[index];
         index = (index + 1) % _this.shuffledPhrases.length;
-      }, Math.random() * 750 + 750);
+      }, Math.random() * 850 + 750);
     },
     stopCyclingPhrases: function stopCyclingPhrases() {
       clearInterval(this.intervalId);

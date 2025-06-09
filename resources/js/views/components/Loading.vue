@@ -23,29 +23,33 @@ export default {
         "Training squirrel guides...",
         "Convincing slot canyons to open wider...",
         "Downloading sounds of nature...",
-        "Negotiating cooler desert temperatures...",
+        "Negotiating cooler temperatures...",
         "Initializing starry skies...",
-        "Analyzing s'mores recipes...",
-        "Reminding red rocks to stay extra red...",
+        "Compiling s'mores recipes...",
+        "Colorizing red rocks...",
         "Dispatching drones to scout viewpoints...",
         "Wrangling tumbleweeds...",
-        "Priming water bottles...",
+        "Hydrating water bottles...",
+        "Pressure washing hiking boots...",
         "Geolocating hidden oases...",
         "Deploying carrier pigeons in case wifi is down...",
         "Amplifying sense of wonder...",
         "Increasing \"wow\" factor...",
-        "Setting adventure to maximum...",
+        "Maximizing adventure...",
         "Cataloging desert wildflowers...",
         "Navigating travel trajectories...",
         "Reinforcing hiking poles...",
         "Generating epic sunset palettes...",
         "Calibrating scenic coefficients...",
         "Optimizing trail vectors...",
-        "Compiling instagrammability index...",
+        "Refactoring instagrammability index...",
         "Nutrientizing trail mix...",
         "Resisting urge to feed wildlife...",
-        "Magnetizing compass matrix...",
-        "Forming park ranger eco-mech...",
+        "Magnetizing compasses...",
+        "Assembling park ranger eco-mech...",
+        "Translating coyote howls...",
+        "Recharging camera batteries...",
+        "Combobulating panoramas..."
       ],
       shuffledPhrase: [],
     };
@@ -68,7 +72,7 @@ export default {
       this.intervalId = setInterval(() => {
         this.currentPhrase = this.shuffledPhrases[index];
         index = (index + 1) % this.shuffledPhrases.length;
-      }, Math.random() * 750 + 750);
+      }, Math.random() * 850 + 750);
     },
     stopCyclingPhrases() {
       clearInterval(this.intervalId);
