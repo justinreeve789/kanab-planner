@@ -14,6 +14,7 @@ import axiosHelper from "./axiosHelper";
 import AssistantPage from "./views/pages/AssistantPage.vue";
 import QuestionnairePage from './views/pages/QuestionnairePage.vue';
 import ResourcePage from "./views/pages/ResourcePage.vue";
+import SettingsPage from "./views/pages/SettingsPage.vue";
 import UserPage from "./views/pages/UserPage.vue";
 
 const app = createApp({});
@@ -37,6 +38,7 @@ const routes = [
   { path: '/questionnaire-about', component: QuestionnairePage, name: 'questionnaire-about', props: { page: 'about', step: 3 } },
   { path: '/questionnaire-destinations', component: QuestionnairePage, name: 'questionnaire-destinations', props: { page: 'destinations', step: 4 } },
   { path: '/questionnaire-complete', component: QuestionnairePage, name: 'questionnaire-complete', props: { page: 'complete', step: 5 } },
+  { path: '/settings' , component: SettingsPage, name: 'settings' },
   { path: '/:itineraryId', component: Itinerary, name: 'itinerary', props: false },
 ];
 

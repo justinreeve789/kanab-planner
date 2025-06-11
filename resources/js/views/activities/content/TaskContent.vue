@@ -4,6 +4,7 @@
       <div class="w-full lg:w-2/3 lg:flex lg:flex-col">
         <div class="lg:order-1">
           <p class="mb-4" v-if="activity.description">{{ activity.description }}</p>
+          <TravelContent :activity="activity" v-if="activity.activity_type.name === 'travel'" />
         </div>
       </div>
     </div>
@@ -11,10 +12,13 @@
 </template>
 
 <script>
+import TravelContent from "./tasks/TravelContent.vue";
+
 export default {
   setup() {
   },
   components: {
+    TravelContent,
   },
   computed: {
   },

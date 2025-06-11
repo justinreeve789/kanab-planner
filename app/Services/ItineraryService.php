@@ -343,7 +343,9 @@ class ItineraryService
         $startTimestamp = $timePointer->getTimestamp();
 
         // Calculate travel time.
-        $hours = $this->locationService->estimateDrivingHours($lat, $lng, $resource->latitude, $resource->longitude);
+        $drivingDetails = $this->locationService->estimateDrivingDetails($lat, $lng, $resource->latitude, $resource->longitude);
+        $hours = $drivingDetails->hours;
+        $miles = $drivingDetails->miles;
         $hoursToAdd = floor($hours);
         $minutesToAdd = round(($hours - $hoursToAdd) * 60);
         $timePointer->modify('+' . $hoursToAdd . ' hours +' . $minutesToAdd . ' minutes');
@@ -351,8 +353,9 @@ class ItineraryService
         $endTime = $timePointer->format('H:i');
         $endTimestamp = $timePointer->getTimestamp();
         $travelInfo = [
-            'name' => 'Drive to ' . $resource->name,
+            'name' => 'Drive from Tranquility Trails',  // TODO: Retrieve the accommodation dynamically.
             'description' => '',
+            'distance_miles' => $miles,
             'start_time' => $startTime,
             'start_timestamp' => $startTimestamp,
             'end_time' => $endTime,
@@ -444,7 +447,7 @@ class ItineraryService
 
             ['travel' => $travelInfo, 'resource' => $resourceInfo, 'time_pointer' => $newTimePointer] = $this->getTravelAndResourceInfoForActivity($timePointer, $resource, $lat, $lng);
 
-            $this->getItinerary()->addTask('travel', $travelInfo['name'], $travelInfo['description'], $travelInfo['start_time'], $travelInfo['end_time'], $day->day_num, $travelInfo['period']);
+            $this->getItinerary()->addTask('travel', $travelInfo['name'], $travelInfo['description'],$travelInfo['start_time'], $travelInfo['end_time'], $day->day_num, $travelInfo['period'], $travelInfo['distance_miles']);
 
             // Is this activity going to go too far past lunch (3 hours)? If so, tell them to take some snacks.
             $notes = null;
@@ -468,7 +471,7 @@ class ItineraryService
                 if ($restaurant) {
                     ['travel' => $travelInfo, 'resource' => $resourceInfo, 'time_pointer' => $newTimePointer] = $this->getTravelAndResourceInfoForActivity($timePointer, $restaurant, $lat, $lng);
 
-                    $this->getItinerary()->addTask('travel', $travelInfo['name'], $travelInfo['description'], $travelInfo['start_time'], $travelInfo['end_time'], $day->day_num, $travelInfo['period']);
+                    $this->getItinerary()->addTask('travel', $travelInfo['name'], $travelInfo['description'], $travelInfo['start_time'], $travelInfo['end_time'], $day->day_num, $travelInfo['period'], $travelInfo['distance_miles']);
                     $this->getItinerary()->addActivity($restaurant, $resourceInfo['activity_type'], $resourceInfo['start_time'], $resourceInfo['end_time'], $day->day_num, $resourceInfo['period']);
 
                     $period = $travelInfo['period'];
@@ -494,7 +497,7 @@ class ItineraryService
             if ($trail) {
                 ['travel' => $travelInfo, 'resource' => $resourceInfo, 'time_pointer' => $newTimePointer] = $this->getTravelAndResourceInfoForActivity($timePointer, $trail, $lat, $lng);
 
-                $this->getItinerary()->addTask('travel', $travelInfo['name'], $travelInfo['description'], $travelInfo['start_time'], $travelInfo['end_time'], $day->day_num, $travelInfo['period']);
+                $this->getItinerary()->addTask('travel', $travelInfo['name'], $travelInfo['description'], $travelInfo['start_time'], $travelInfo['end_time'], $day->day_num, $travelInfo['period'], $travelInfo['distance_miles']);
 
                 // Is this activity going to go too far past lunch (3 hours)? If so, tell them to take some snacks.
                 $notes = null;

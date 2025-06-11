@@ -52,6 +52,7 @@ return new class extends Migration
             ['name' => 'games-and-entertainment', 'description' => 'Games & Entertainment', 'adventurousness' => 0.4, 'solitariness' => 0.1, 'strenuousness' => 0.1, 'is_selectable' => false],
             ['name' => 'checking-in', 'description' => 'Checking In', 'adventurousness' => 0.0, 'solitariness' => 0.0, 'strenuousness' => 0.0, 'is_selectable' => false],
             ['name' => 'checking-out', 'description' => 'Checking Out', 'adventurousness' => 0.0, 'solitariness' => 0.0, 'strenuousness' => 0.0, 'is_selectable' => false],
+            ['name' => 'travel', 'description' => 'Travel', 'adventurousness' => 0.0, 'solitariness' => 0.0, 'strenuousness' => 0.0, 'is_selectable' => false],
             ['name' => 'unknown', 'description' => 'Unknown', 'adventurousness' => 0.4, 'solitariness' => 0.3, 'strenuousness' => 0.2, 'is_selectable' => false],
         ]);
     }

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->json('activity_priorities')->nullable();
             $table->decimal('adventurousness', 3, 2)->nullable();
             $table->decimal('average_hiking_speed', 3, 1)->nullable();
+            $table->time('earliest_day_time')->nullable();
             $table->time('check_in_time')->nullable();
             $table->time('check_out_time')->nullable();
             $table->dateTime('departure_date_time')->nullable();

@@ -29,6 +29,7 @@ class Trail extends Resource
     }
 
     protected static function booted(): void {
+        parent::booted();
         static::addGlobalScope(new GeoJsonScope);
     }
 
@@ -87,6 +88,9 @@ class Trail extends Resource
     public function getEstimatedHours(TrailService $trailService, float $averageSpeed, string $activityType = ActivityType::HIKING, $roundPrecision = 1)
     {
         $stats = $trailService->analyzeTrail($this->geoJson()->where('trail_id', $this->id)->first(), $averageSpeed, $activityType, $roundPrecision);
+        if ($this->minutes_modifier !== 0) {
+            $stats['total_hours'] = round($stats['total_hours'] + ($this->minutes_modifier / 60), 1);
+        }
         return $stats['total_hours'];
     }
 

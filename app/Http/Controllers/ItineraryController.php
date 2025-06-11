@@ -77,7 +77,9 @@ class ItineraryController extends Controller
 
     public function loadItinerary(Request $request, $id)
     {
-        $itinerary = Itinerary::with(['days.periods' => function($query) {
+        $itinerary = Itinerary::with(['days' => function($query) {
+            $query->orderBy('day_num');
+        }, 'days.periods' => function($query) {
             $query->orderBy('type');
         }, 'days.periods.activities' => function($query) {
             $query->orderBy('start_time');

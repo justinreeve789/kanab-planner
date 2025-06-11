@@ -117,6 +117,7 @@ export default {
         }
         if (error.code !== 'ERR_CANCELED') {
           console.log('Error fetching itinerary:', error);
+          this.$cookies.remove('active_itinerary_id');
         }
       });
     },

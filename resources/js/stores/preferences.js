@@ -14,6 +14,7 @@ export const usePreferencesStore = defineStore('preferences', {
     preferredActivityTypes: [],
     durationDays: 7,
     preferredMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    earliestDayTime: '07:00',
     averageHikingSpeed: 2.0,
     dateRange: null,
     areaIds: null,
@@ -115,6 +116,9 @@ export const usePreferencesStore = defineStore('preferences', {
       }
       if (itineraryData.average_hiking_speed) {
         this.averageHikingSpeed = itineraryData.average_hiking_speed;
+      }
+      if (itineraryData.earliest_day_time) {
+        this.earliestDayTime = itineraryData.earliest_day_time;
       }
     },
   },

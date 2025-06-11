@@ -21,26 +21,26 @@ export default {
       loadingPhrases: [
         "Calculating optimal angle for hoodoo admiration...",
         "Training squirrel guides...",
-        "Convincing slot canyons to open wider...",
+        "Interpolating slot canyon dimensions...",
         "Downloading sounds of nature...",
         "Negotiating cooler temperatures...",
         "Initializing starry skies...",
         "Compiling s'mores recipes...",
-        "Colorizing red rocks...",
+        "Importing red rocks...",
         "Dispatching drones to scout viewpoints...",
-        "Wrangling tumbleweeds...",
+        "Untangling tumbleweeds...",
         "Hydrating water bottles...",
         "Pressure washing hiking boots...",
         "Geolocating hidden oases...",
-        "Deploying carrier pigeons in case wifi is down...",
+        "Deploying carrier wifi pigeons...",
         "Amplifying wow factor...",
-        "Maximizing adventure...",
+        "Maximizing adventure parameters...",
         "Cataloging desert wildflowers...",
         "Navigating travel trajectories...",
         "Reinforcing hiking poles...",
         "Generating epic sunset palettes...",
         "Calibrating scenic coefficients...",
-        "Optimizing trail vectors...",
+        "Optimizing park vectors...",
         "Refactoring instagrammability index...",
         "Nutrientizing trail mix...",
         "Resisting urge to feed wildlife...",
@@ -48,8 +48,14 @@ export default {
         "Assembling park ranger eco-mech...",
         "Translating coyote howls...",
         "Recharging camera batteries...",
-        "Combobulating panoramas...",
+        "Fabricating panoramic vistas...",
         "Juicing cactuses...",
+        "Lizard-proofing luggage...",
+        "Turbocharging dune buggies...",
+        "Activating porcupine defense...",
+        "Wrangling bighorn sheep...",
+        "Marking buried treasure on trail maps...",
+        "Rocket-boosting ATVs...",
       ],
       shuffledPhrase: [],
     };
@@ -72,7 +78,7 @@ export default {
       this.intervalId = setInterval(() => {
         this.currentPhrase = this.shuffledPhrases[index];
         index = (index + 1) % this.shuffledPhrases.length;
-      }, Math.random() * 850 + 750);
+      }, Math.random() * 2000 + 1000);
     },
     stopCyclingPhrases() {
       clearInterval(this.intervalId);

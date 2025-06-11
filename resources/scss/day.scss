@@ -23,3 +23,42 @@
     padding-bottom: 0 !important;
   }
 }
+
+.road {
+  background-image: url('/images/icons/road.svg');
+  background-position: center;
+  background-repeat: repeat-y;
+  background-size: 5%;
+
+  img.car {
+    margin-left: auto;
+    margin-right: auto;
+    transform: scaleX(-1) translateX(3.5rem);
+    height: 4rem;
+  }
+
+  .distance {
+    --sign-color: #45ac29;
+    position: absolute;
+    background-color: var(--sign-color);
+    color: white;
+    border-radius: 0.25em;
+    box-shadow: 0 0 0 0.1em white, 0 0 0 calc(0.1em + 1px) var(--sign-color), 0.2em 0.2em 0.1em rgba(0, 0, 0, 0.25);
+    font-family: sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    left: 50%;
+    padding: 4px 8px;
+    top: 50%;
+    transform: translateX(calc(-50% + 3.5rem)) translateY(-50%);
+    white-space: nowrap;
+    width: min-content;
+  }
+
+  .distance::after {
+    content: 'mi';
+    font-size: 0.75em;
+    vertical-align: super;
+    margin-left: 0.5em;
+  }
+}

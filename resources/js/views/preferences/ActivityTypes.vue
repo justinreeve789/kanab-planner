@@ -26,6 +26,14 @@
       <span class="ml-2 text-2xl">minutes</span>
     </div>
   </div>
+
+<!--  <div class="max-w-[640px] mb-8 p-4" v-if="isHikingSelected">-->
+<!--    <div class="divider"></div>-->
+<!--    <p class="mb-4 text-lg">What's the earliest time you want to be out the door on any given day?</p>-->
+<!--    <div class="flex justify-center items-center text-2xl">-->
+<!--      <input class="input bg-white text-black px-4 text-2xl w-[200px]" type="time" step="900" v-model="earliestDayTime" />-->
+<!--    </div>-->
+<!--  </div>-->
 </template>
 
 <script>
@@ -42,12 +50,16 @@ export default {
   data() {
     return {
       activityTypes: [],
+      earliestDayTime: '07:00',
       estimatedMinutesToHikeOneMile: 30,
       selectAll: true,
       selectedActivityTypes: [],
     };
   },
   watch: {
+    earliestDayTime(newVal) {
+      this.preferencesStore.earliestDayTime = newVal;
+    },
     estimatedMinutesToHikeOneMile(newVal) {
       if (newVal < 5) {
         newVal = 5;

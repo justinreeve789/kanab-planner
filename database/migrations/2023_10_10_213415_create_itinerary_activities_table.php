@@ -20,6 +20,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('phrase')->nullable();
             $table->text('notes')->nullable();
+            $table->float('distance_miles')->nullable();
             $table->integer('activity_type_id')->unsigned();
             $table->string('resource_table')->nullable();
             $table->integer('resource_id')->unsigned()->nullable();

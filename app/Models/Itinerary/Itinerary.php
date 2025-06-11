@@ -40,6 +40,7 @@ class Itinerary extends CachedModel
     const DEFAULT_DEPARTURE_TIME = '10:00';
     const DEFAULT_DURATION_DAYS = 5;
     const DEFAULT_DINNER_TIME = '17:00';
+    const DEFAULT_EARLIEST_DAY_TIME = '07:00';
     const DEFAULT_LUNCH_TIME = '12:00';
     const DEFAULT_PRIORITIES = ['trails', 'events', 'locations', 'restaurants'];
     const DEFAULT_SEASON = 'summer';
@@ -51,6 +52,7 @@ class Itinerary extends CachedModel
 
     protected $attributes = [
         'arrival_date_time' => '',
+        'earliest_day_time' => self::DEFAULT_EARLIEST_DAY_TIME,
     ];
     protected $casts = [
         'activity_priorities' => 'json',
@@ -152,18 +154,19 @@ class Itinerary extends CachedModel
         $this->days->each()->saveAll();
     }
 
-    public function addTask($activityType, $name, $description, $startTime, $endTime, int $dayNum, $period, $notes = null)
+    public function addTask($activityType, $name, $description, $startTime, $endTime, int $dayNum, $period, $distanceMiles = null, $notes = null)
     {
-        $this->addActivity(null, $activityType, $startTime, $endTime, $dayNum, $period, $name, $description, $notes);
+        $this->addActivity(null, $activityType, $startTime, $endTime, $dayNum, $period, $name, $description, $distanceMiles, $notes);
     }
 
-    public function addActivity($resource, $activityType, $startTime, $endTime, int $dayNum, $period, $name = null, $description = null, $notes = null)
+    public function addActivity($resource, $activityType, $startTime, $endTime, int $dayNum, $period, $name = null, $description = null, $distanceMiles = null, $notes = null)
     {
         $activity = new Activity([
             'resource' => $resource,
             'activity_type_id' => ActivityType::where('name', $activityType)->pluck('id')->first(),
             'name' => $name,
             'description' => $description,
+            'distance_miles' => $distanceMiles,
             'notes' => $notes,
             'start_time' => $startTime,
             'end_time' => $endTime,

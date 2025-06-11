@@ -50,6 +50,7 @@ class CreateTrailsTable extends Migration
             $table->decimal('max_grade_pt', 3, 2)->nullable()->comment('Maximum grade as a percentage');
             $table->boolean('reservation')->nullable();
             $table->boolean('fee')->nullable();
+            $table->integer('minutes_modifier')->default(0)->comment('How many minutes to add or subtract to the estimated activity time.');
             $table->string('gpx_url')->nullable();
             $table->text('raw_data')->nullable();
             $table->boolean('is_usable')->default(true);

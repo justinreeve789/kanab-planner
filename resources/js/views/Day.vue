@@ -20,7 +20,7 @@
                 </div>
                 <div class="flex justify-end items-center flex-grow">
                   <Weather class="text-right" :weather="day.weather" />
-                  <div class="p-4 text-sm md:text-lg text-right">
+                  <div class="p-4 text-right text-sm md:text-lg">
                     <span class="date-day-of-week hidden md:inline">{{ day.formatted_day_of_week }}</span>
                     <span class="pr-1 hidden md:inline">,</span>
                     <span class="date-month-day sm:hidden">{{ day.formatted_abbr_month_day }}</span>
@@ -33,30 +33,36 @@
             </h2>
           </div>
 
-          <div :id="'day-body-' + day.day_num" class="collapse-content bg-white w-full">
+          <div :id="'day-body-' + day.day_num" class="collapse-content bg-white w-full show-travel show-first-only">
             <div v-if="day.preamble">
               <p class="mb-8">{{ day.preamble }}</p>
             </div>
             <section v-for="(period, periodType) in day.periods" :key="periodType">
               <div class="timeline"></div>
-              <div :class="'day-content pt-4 relative period-' + period.type" v-for="(activity, index) in period.activities" :key="index">
-                <div class="time text-sm absolute top-[-2px] right-4 opacity-50 md:text-base md:top-[-4px] md:left-4" :class="activityColor(activity)">
-                  {{ formatTime(activity.start_time) }}
-                </div>
-                <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-if="activity.activity_type && (activity.activity_type.name == 'checking-in' || activity.activity_type.name == 'checking-out')">
-                  <Accommodation :activity="activity" :day="day" :resource="activity.resource" />
-                </div>
-                <div class="mb-8 border border-solid border-gray-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'event'">
-                  <Event :activity="activity" :day="day" />
-                </div>
-                <div class="mb-8 border border-solid border-green-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'dining'">
-                  <Restaurant :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
-                </div>
-                <div class="mb-8 border border-solid border-orange-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'hiking'">
-                  <Trail :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
-                </div>
-                <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-if="activity.name">
-                  <Task :activity="activity" />
+              <div :class="'day-content pt-4 relative period-' + period.type + ' activity-' + activity.activity_type.name" v-for="(activity, index) in period.activities" :key="index">
+                <div v-if="activity.activity_type.name !== 'travel' || (showTravelingTasks && activity.activity_type.name === 'travel')">
+                  <div class="time text-sm text-left absolute top-[-2px] opacity-50 w-full md:text-base md:text-left md:top-[-4px] md:left-4" :class="activityColor(activity)"
+                       v-if="showActivityTimes && activity.activity_type && activity.activity_type.name != 'checking-in' && activity.activity_type.name != 'checking-out' && activity.activity_type.name !== 'travel'">
+                    {{ formatTime(activity.start_time) }}
+                  </div>
+                  <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-if="activity.activity_type && (activity.activity_type.name == 'checking-in' || activity.activity_type.name == 'checking-out')">
+                    <Accommodation :activity="activity" :day="day" :resource="activity.resource" />
+                  </div>
+                  <div class="mb-8 border border-solid border-gray-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'event'">
+                    <Event :activity="activity" :day="day" />
+                  </div>
+                  <div class="mb-8 border border-solid border-green-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'dining'">
+                    <Restaurant :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
+                  </div>
+                  <div class="mb-8 border border-solid border-orange-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'hiking'">
+                    <Trail :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
+                  </div>
+                  <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-if="activity.name && activity.activity_type.name !== 'travel'">
+                    <Task :activity="activity" />
+                  </div>
+                  <div v-if="activity.activity_type.name === 'travel' && activity.distance_miles">
+                    <Travel :activity="activity" />
+                  </div>
                 </div>
               </div>
             </section>
@@ -76,6 +82,7 @@ import Trail from './activities/Trail.vue';
 import Weather from "./components/Weather.vue";
 import {usePreferencesStore} from "../stores/preferences";
 import { SwipeList, SwipeOut } from "@ahultgren/vue3-swipe-actions";
+import Travel from "./activities/Travel.vue";
 
 export default {
   setup() {
@@ -89,6 +96,7 @@ export default {
     Restaurant,
     Task,
     Trail,
+    Travel,
     Weather,
     SwipeOut,
     SwipeList,
@@ -112,6 +120,7 @@ export default {
           description: "some description",
         },
       ],
+      showTravelActivityId: null,
       touchDelaySecondsToTrigger: 0.75,
     };
   },
@@ -153,13 +162,18 @@ export default {
     sbClick(e) {
       console.log(e, "Second Button Click");
     },
+    showActivityTimes() {
+      return this.$cookies.get('show_activity_times') === 'true';
+    },
+    showTravelingTasks() {
+      return this.$cookies.get('show_traveling_tasks') === 'true';
+    },
   },
   methods: {
     abbreviateMonth(month) {
         return month.substr(0, 3);
     },
     activityColor(activity) {
-      console.log(activity);
       if (activity.activity_type && activity.activity_type.name) {
         switch (activity.activity_type.name) {
           case 'checking-in':
@@ -180,13 +194,28 @@ export default {
       const date = new Date();
       date.setHours(parseInt(hours));
       date.setMinutes(parseInt(minutes));
-      date.setSeconds(parseInt(seconds));
+      if (seconds) {
+        date.setSeconds(parseInt(seconds));
+      }
       const formattedTime = date.toLocaleTimeString('en-us', {
         hour: 'numeric',
         minute: '2-digit',
         hour12: true
       });
       return formattedTime.replace(/AM$/, 'am').replace(/PM$/, 'pm');
+    },
+    getShowTravelActivityId() {
+      if (this.showTravelActivityId) {
+        return this.showTravelActivityId;
+      }
+      for (let p = 0; p < this.day.periods.length; p++) {
+        for (let a = 0; a < this.day.periods[p].activities.length; a++) {
+          if (this.day.periods[p].activities[a].activity_type.name == 'travel') {
+            this.showTravelActivityId = this.day.periods[p].activities[a].id;
+            return this.showTravelActivityId;
+          }
+        }
+      }
     },
     handleBookmark(e) {
       console.log(e);

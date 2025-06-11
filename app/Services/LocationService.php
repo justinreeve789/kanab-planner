@@ -98,6 +98,16 @@ class LocationService
         return round($durationHours, 1);
     }
 
+    private function getDrivingDetailsWithOSRM($fromLat, $fromLng, $toLat, $toLng): object
+    {
+        $osrm = $this->getDrivingDistanceWithOSRM($fromLat, $fromLng, $toLat, $toLng);
+        $durationHours = $osrm->duration_hours;
+        return (object)[
+            'hours' => round($durationHours, 1),
+            'miles' => $osrm->distance_miles,
+        ];
+    }
+
     private function getDrivingHoursWithConstant($fromLat, $fromLng, $toLat, $toLng): float
     {
         $distanceMiles = $this->getDrivingDistanceWithHaversine($fromLat, $fromLng, $toLat, $toLng);
@@ -112,6 +122,11 @@ class LocationService
     public function estimateDrivingHours($fromLat, $fromLng, $toLat, $toLng): float
     {
         return $this->getDrivingHoursWithOSRM($fromLat, $fromLng, $toLat, $toLng);
+    }
+
+    public function estimateDrivingDetails($fromLat, $fromLng, $toLat, $toLng): object
+    {
+        return $this->getDrivingDetailsWithOSRM($fromLat, $fromLng, $toLat, $toLng);
     }
 
     public function updateBusynessForLocation($location)
