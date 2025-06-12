@@ -4970,6 +4970,8 @@ h1, h2 {
   background-repeat: repeat-y;
   background-size: 5%;
   height: 4rem;
+  margin-bottom: -1.5rem;
+  margin-top: -3rem;
 }
 .road img.car {
   margin-left: auto;
@@ -4988,7 +4990,8 @@ h1, h2 {
   font-size: 14px;
   font-weight: bold;
   left: 50%;
-  opacity: 0.75;
+  margin-top: -0.25rem;
+  opacity: 0.85;
   padding: 4px 8px;
   top: 50%;
   transform: translateX(-50%) translateY(-50%);

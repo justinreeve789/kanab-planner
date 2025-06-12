@@ -18,7 +18,7 @@
       </div>
     </div>
 
-    <div class="collapse-content p-0" v-if="expanded">
+    <div class="collapse-content p-0 overflow-hidden" v-if="expanded">
       <RestaurantContent :phrase="phrase" :resource="resource" />
     </div>
   </div>

@@ -32120,7 +32120,7 @@ var _hoisted_10 = {
 };
 var _hoisted_11 = {
   key: 0,
-  "class": "collapse-content min-h-[150px] items-stretch w-full bg-gray-200 p-2 bg-gradient-to-r from-white to-cyan-100"
+  "class": "collapse-content min-h-[150px] items-stretch overflow-hidden w-full bg-gray-200 p-2 bg-gradient-to-r from-white to-cyan-100"
 };
 var _hoisted_12 = {
   "class": "lg:flex lg:justify-between"
@@ -32415,7 +32415,7 @@ var _hoisted_6 = {
 };
 var _hoisted_7 = {
   key: 0,
-  "class": "collapse-content p-0"
+  "class": "collapse-content p-0 overflow-hidden"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_RestaurantStats = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("RestaurantStats");
@@ -32479,7 +32479,7 @@ var _hoisted_4 = {
 };
 var _hoisted_5 = {
   key: 0,
-  "class": "collapse-content p-0"
+  "class": "collapse-content p-0 overflow-hidden"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_TaskContent = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("TaskContent");
@@ -32545,7 +32545,7 @@ var _hoisted_10 = {
 };
 var _hoisted_11 = {
   key: 0,
-  "class": "collapse-content p-0"
+  "class": "collapse-content p-0 overflow-hidden"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_TrailStats = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("TrailStats");

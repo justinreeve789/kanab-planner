@@ -24,7 +24,7 @@
       </div>
     </div>
 
-    <div v-if="expanded" class="collapse-content min-h-[150px] items-stretch w-full bg-gray-200 p-2 bg-gradient-to-r from-white to-cyan-100">
+    <div v-if="expanded" class="collapse-content min-h-[150px] items-stretch overflow-hidden w-full bg-gray-200 p-2 bg-gradient-to-r from-white to-cyan-100">
       <div class="lg:flex lg:justify-between">
         <div class="w-full lg:w-2/3 lg:flex lg:flex-col" v-if="activity.activity_type.name == 'checking-out'">
           {{ activity.phrase }}
