@@ -10,7 +10,7 @@
       <div class="mb-6">
         <label for="preferences-show-traveling-tasks" class="label text-lg flex items-center p-2 space-x-2">
           <input id="preferences-show-traveling-tasks" class="checkbox" type="checkbox" v-model="localShowTravelingTasks" @change="updateShowTravelingTasks" />
-          Show traveling tasks
+          Show driving distances
         </label>
       </div>
     </div>

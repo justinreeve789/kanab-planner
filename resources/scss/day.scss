@@ -29,6 +29,7 @@
   background-position: center;
   background-repeat: repeat-y;
   background-size: 5%;
+  height: 4rem;
 
   img.car {
     margin-left: auto;
@@ -48,9 +49,11 @@
     font-size: 14px;
     font-weight: bold;
     left: 50%;
+    opacity: 0.75;
     padding: 4px 8px;
     top: 50%;
-    transform: translateX(calc(-50% + 3.5rem)) translateY(-50%);
+    // transform: translateX(calc(-50% + 3.5rem)) translateY(-50%);
+    transform: translateX(-50%) translateY(-50%);
     white-space: nowrap;
     width: min-content;
   }
