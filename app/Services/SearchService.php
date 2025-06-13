@@ -66,6 +66,7 @@ class SearchService
                 'showRankingScore' => true,
                 'filter' => $filter,
             ])->getHits();
+
             if ($hits) {
                 foreach ($hits as $hit) {
                     $stats = [
