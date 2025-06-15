@@ -38,7 +38,8 @@ class UpdateBusy extends Command
         $doTrails = $this->option('trails');
 
         if ($doLocations) {
-            UpdateBusyJob::dispatch();
+            $this->processLocations();
+//            UpdateBusyJob::dispatch();
         }
     }
 

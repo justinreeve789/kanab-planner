@@ -67,6 +67,7 @@ export default {
         newVal = 500;
       }
       this.preferencesStore.averageHikingSpeed = Math.max(0.1, Math.round((60 / newVal) * 10) / 10);
+      this.$cookies.set('estimated_minutes_to_hike_one_mile', newVal);
     },
     selectedActivityTypes(newVal) {
       this.preferencesStore.preferredActivityTypes = newVal;
@@ -80,6 +81,17 @@ export default {
     },
   },
   computed: {
+    estimatedMinutes() {
+      if (this.$cookies.isKey('estimated_minutes_to_hike_one_mile')) {
+        const minutes = this.$cookies.get('estimated_minutes_to_hike_one_mile')
+        if (!isNaN(minutes) && minutes >= 5 && minutes <= 500) {
+          return minutes;
+        }
+      }
+      const defaultMinutes = 30;
+      this.$cookies.set('estimated_minutes_to_hike_one_mile', defaultMinutes);
+      return defaultMinutes;
+    },
     isHikingSelected() {
       return this.selectedActivityTypes.includes('hiking');
     },

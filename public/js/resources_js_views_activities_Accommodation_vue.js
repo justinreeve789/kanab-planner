@@ -244,7 +244,7 @@ var _hoisted_10 = {
 };
 var _hoisted_11 = {
   key: 0,
-  "class": "collapse-content min-h-[150px] items-stretch w-full bg-gray-200 p-2 bg-gradient-to-r from-white to-cyan-100"
+  "class": "collapse-content min-h-[150px] items-stretch overflow-hidden w-full bg-gray-200 p-2 bg-gradient-to-r from-white to-cyan-100"
 };
 var _hoisted_12 = {
   "class": "lg:flex lg:justify-between"

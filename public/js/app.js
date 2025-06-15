@@ -27506,6 +27506,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     showActivityTimes: function showActivityTimes() {
       return this.$cookies.get('show_activity_times') === 'true';
     },
+    showWeatherForecasts: function showWeatherForecasts() {
+      return this.$cookies.get('show_weather_forecasts') === 'true';
+    },
     showTravelingTasks: function showTravelingTasks() {
       return this.$cookies.get('show_traveling_tasks') === 'true';
     }
@@ -29545,6 +29548,10 @@ __webpack_require__.r(__webpack_exports__);
                   this.searchStore.adjustSettingsForResourceListForTable('trails');
                 }
                 break;
+              case 'settings':
+                this.component = 'preferences/Settings';
+                this.title = 'Settings';
+                break;
               default:
                 this.component = '';
             }
@@ -30054,7 +30061,12 @@ __webpack_require__.r(__webpack_exports__);
       // this.preferencesStore.isPreferencesOpen = !this.preferencesStore.isPreferencesOpen;
     },
     toggleSettings: function toggleSettings() {
-      this.$router.push('/settings');
+      var mode = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'page';
+      if (mode === 'page') {
+        this.$router.push('/settings');
+      } else {
+        this.$addHashToUrl('#modal-settings');
+      }
     },
     toggleSearch: function toggleSearch() {
       this.$addHashToUrl('#modal-search');
@@ -30277,6 +30289,7 @@ __webpack_require__.r(__webpack_exports__);
         newVal = 500;
       }
       this.preferencesStore.averageHikingSpeed = Math.max(0.1, Math.round(60 / newVal * 10) / 10);
+      this.$cookies.set('estimated_minutes_to_hike_one_mile', newVal);
     },
     selectedActivityTypes: function selectedActivityTypes(newVal) {
       this.preferencesStore.preferredActivityTypes = newVal;
@@ -30290,6 +30303,17 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   computed: {
+    estimatedMinutes: function estimatedMinutes() {
+      if (this.$cookies.isKey('estimated_minutes_to_hike_one_mile')) {
+        var minutes = this.$cookies.get('estimated_minutes_to_hike_one_mile');
+        if (!isNaN(minutes) && minutes >= 5 && minutes <= 500) {
+          return minutes;
+        }
+      }
+      var defaultMinutes = 30;
+      this.$cookies.set('estimated_minutes_to_hike_one_mile', defaultMinutes);
+      return defaultMinutes;
+    },
     isHikingSelected: function isHikingSelected() {
       return this.selectedActivityTypes.includes('hiking');
     }
@@ -30813,37 +30837,70 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var _stores_preferences__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../stores/preferences */ "./resources/js/stores/preferences.js");
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  data: function data() {
+  setup: function setup() {
+    var preferencesStore = (0,_stores_preferences__WEBPACK_IMPORTED_MODULE_0__.usePreferencesStore)();
     return {
-      localShowActivityTimes: true,
-      localShowTravelingTasks: true
+      preferencesStore: preferencesStore
     };
   },
-  mounted: function mounted() {
-    this.localShowActivityTimes = this.$cookies.get('show_activity_times');
-    this.localShowTravelingTasks = this.$cookies.get('show_traveling_tasks');
-    if (!this.localShowActivityTimes) {
-      this.localShowActivityTimes = true;
-      this.$cookies.set('show_activity_times', true);
+  data: function data() {
+    return {
+      settings: {
+        estimatedMinutesToHikeOneMile: 30,
+        showActivityTimes: true,
+        showTravelingTasks: true,
+        showWeatherForecasts: true
+      },
+      cookieMap: {
+        estimatedMinutesToHikeOneMile: 'estimated_minutes_to_hike_one_mile',
+        showActivityTimes: 'show_activity_times',
+        showTravelingTasks: 'show_traveling_tasks',
+        showWeatherForecasts: 'show_weather_forecasts'
+      }
+    };
+  },
+  watch: {
+    'settings.estimatedMinutesToHikeOneMile': function settingsEstimatedMinutesToHikeOneMile(newVal) {
+      if (newVal < 5) {
+        newVal = 5;
+      } else if (newVal > 500) {
+        newVal = 500;
+      }
+      this.preferencesStore.averageHikingSpeed = Math.max(0.1, Math.round(60 / newVal * 10) / 10);
+      this.$cookies.set('estimated_minutes_to_hike_one_mile', newVal);
     }
-    if (!this.localShowTravelingTasks) {
-      this.localShowTravelingTasks = true;
-      this.$cookies.set('show_traveling_tasks', true);
+  },
+  mounted: function mounted() {
+    for (var key in this.settings) {
+      if (Object.hasOwnProperty.call(this.settings, key)) {
+        var cookieName = this.cookieMap[key];
+        var cookieValue = this.$cookies.get(cookieName);
+
+        // If the cookie isn't found or is undefined/null, set the default and store it. Otherwise, use the cookie's
+        // value (converting from string to boolean).
+        if (cookieValue === null || cookieValue === undefined) {
+          this.$cookies.set(cookieName, this.settings[key]);
+        } else {
+          this.settings[key] = cookieValue;
+        }
+      }
     }
   },
   methods: {
-    updateShowActivityTimes: function updateShowActivityTimes(e) {
+    updateSetting: function updateSetting(settingName, value) {
       var _this = this;
-      this.$nextTick(function () {
-        _this.$cookies.set('show_activity_times', e.target._modelValue);
-      });
-    },
-    updateShowTravelingTasks: function updateShowTravelingTasks(e) {
-      var _this2 = this;
-      this.$nextTick(function () {
-        _this2.$cookies.set('show_traveling_tasks', e.target._modelValue);
-      });
+      if (this.settings.hasOwnProperty(settingName) && this.cookieMap.hasOwnProperty(settingName)) {
+        this.settings[settingName] = value;
+        var cookieName = this.cookieMap[settingName];
+        this.$nextTick(function () {
+          _this.$cookies.set(cookieName, value);
+        });
+      } else {
+        console.warn("Attempted to update unknown setting: ".concat(settingName));
+      }
     }
   }
 });
@@ -31943,10 +32000,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "day-heading relative w-full"
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_9, "Day " + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.day_num + 1), 1 /* TEXT */), _cache[0] || (_cache[0] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
     "class": "separator hidden md:inline md:text-xl"
-  }, " - ", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.area.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.area.short_name), 1 /* TEXT */)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Weather, {
+  }, " - ", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.area.name), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_12, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.area.short_name), 1 /* TEXT */)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [$options.showWeatherForecasts ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_Weather, {
+    key: 0,
     "class": "text-right",
     weather: $props.day.weather
-  }, null, 8 /* PROPS */, ["weather"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.formatted_day_of_week), 1 /* TEXT */), _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  }, null, 8 /* PROPS */, ["weather"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.formatted_day_of_week), 1 /* TEXT */), _cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
     "class": "pr-1 hidden md:inline"
   }, ",", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.formatted_abbr_month_day), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_17, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.day.formatted_month_day), 1 /* TEXT */), _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
     "class": "pr-1 hidden md:inline"
@@ -34286,28 +34344,37 @@ var _hoisted_19 = {
   }
 };
 var _hoisted_20 = {
+  xmlns: "http://www.w3.org/2000/svg",
+  x: "0px",
+  y: "0px",
+  viewBox: "0,0,256,256",
+  style: {
+    "fill": "#ffffff"
+  }
+};
+var _hoisted_21 = {
   key: 1,
   "class": "btn btn-ghost btn-circle"
 };
-var _hoisted_21 = {
+var _hoisted_22 = {
   key: 3,
   "class": "dropdown dropdown-end hidden md:flex"
 };
-var _hoisted_22 = {
+var _hoisted_23 = {
   tabindex: "0",
   "class": "menu menu-lg dropdown-content bg-base-100 bg-neutral text-neutral-content rounded-b-box z-1 mt-3 w-52 p-2 shadow"
 };
-var _hoisted_23 = {
+var _hoisted_24 = {
   key: 0
 };
-var _hoisted_24 = {
+var _hoisted_25 = {
   key: 1
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_router_link = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("router-link");
   var _component_ItineraryStats = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("ItineraryStats");
   var _component_CallyCalendar = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("CallyCalendar");
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("header", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [_cache[14] || (_cache[14] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("header", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [_cache[15] || (_cache[15] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     "class": "btn btn-ghost lg:hidden",
     role: "button",
     tabindex: "0"
@@ -34327,7 +34394,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[0] || (_cache[0] = function () {
       return $options.openItinerary && $options.openItinerary.apply($options, arguments);
     })
-  }, _cache[8] || (_cache[8] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Itinerary"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  }, _cache[9] || (_cache[9] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Itinerary"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
     "class": "badge"
   }, "New", -1 /* HOISTED */)]))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
     to: {
@@ -34335,7 +34402,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return _cache[9] || (_cache[9] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Accommodations")]);
+      return _cache[10] || (_cache[10] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Accommodations")]);
     }),
     _: 1 /* STABLE */
   })]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
@@ -34344,7 +34411,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return _cache[10] || (_cache[10] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Events")]);
+      return _cache[11] || (_cache[11] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Events")]);
     }),
     _: 1 /* STABLE */
   })]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
@@ -34353,7 +34420,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return _cache[11] || (_cache[11] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Locations")]);
+      return _cache[12] || (_cache[12] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Locations")]);
     }),
     _: 1 /* STABLE */
   })]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
@@ -34362,7 +34429,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return _cache[12] || (_cache[12] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Restaurants")]);
+      return _cache[13] || (_cache[13] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Restaurants")]);
     }),
     _: 1 /* STABLE */
   })]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_router_link, {
@@ -34371,7 +34438,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return _cache[13] || (_cache[13] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Trails")]);
+      return _cache[14] || (_cache[14] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Trails")]);
     }),
     _: 1 /* STABLE */
   })])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
@@ -34385,7 +34452,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[2] || (_cache[2] = function () {
       return $options.selectDates && $options.selectDates.apply($options, arguments);
     })
-  }, _cache[15] || (_cache[15] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  }, _cache[16] || (_cache[16] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
     "class": "w-6 h-6 text-white dark:text-black",
     "aria-hidden": "true",
     xmlns: "http://www.w3.org/2000/svg",
@@ -34411,7 +34478,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return _cache[16] || (_cache[16] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Accommodations")]);
+      return _cache[17] || (_cache[17] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Accommodations")]);
     }),
     _: 1 /* STABLE */
   })], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", {
@@ -34422,7 +34489,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return _cache[17] || (_cache[17] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Events")]);
+      return _cache[18] || (_cache[18] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Events")]);
     }),
     _: 1 /* STABLE */
   })], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", {
@@ -34433,7 +34500,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return _cache[18] || (_cache[18] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Locations")]);
+      return _cache[19] || (_cache[19] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Locations")]);
     }),
     _: 1 /* STABLE */
   })], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", {
@@ -34444,7 +34511,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return _cache[19] || (_cache[19] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Restaurants")]);
+      return _cache[20] || (_cache[20] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Restaurants")]);
     }),
     _: 1 /* STABLE */
   })], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", {
@@ -34455,7 +34522,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return _cache[20] || (_cache[20] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Trails")]);
+      return _cache[21] || (_cache[21] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Trails")]);
     }),
     _: 1 /* STABLE */
   })], 2 /* CLASS */)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_18, [$options.isItineraryOpen ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
@@ -34464,7 +34531,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[4] || (_cache[4] = function () {
       return $options.refreshItinerary && $options.refreshItinerary.apply($options, arguments);
     })
-  }, _cache[21] || (_cache[21] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  }, _cache[22] || (_cache[22] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
     xmlns: "http://www.w3.org/2000/svg",
     viewBox: "0 0 16 16",
     id: "refresh"
@@ -34476,7 +34543,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[5] || (_cache[5] = function () {
       return $options.toggleSearch && $options.toggleSearch.apply($options, arguments);
     })
-  }, _cache[22] || (_cache[22] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
+  }, _cache[23] || (_cache[23] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
     xmlns: "http://www.w3.org/2000/svg",
     "class": "h-5 w-5",
     fill: "none",
@@ -34488,11 +34555,37 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "stroke-width": "2",
     d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
   })], -1 /* HOISTED */)])), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    "class": "btn btn-ghost btn-circle p-2 md:flex",
-    onClick: _cache[6] || (_cache[6] = function () {
-      return $options.toggleSettings && $options.toggleSettings.apply($options, arguments);
+    "class": "btn btn-ghost btn-circle p-2 hidden md:flex",
+    onClick: _cache[6] || (_cache[6] = function ($event) {
+      return $options.toggleSettings('modal');
     })
-  }, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("svg", _hoisted_19, _cache[23] || (_cache[23] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("g", {
+  }, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("svg", _hoisted_19, _cache[24] || (_cache[24] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("g", {
+    fill: "#ffffff",
+    "fill-rule": "nonzero",
+    stroke: "none",
+    "stroke-width": "1",
+    "stroke-linecap": "butt",
+    "stroke-linejoin": "miter",
+    "stroke-miterlimit": "10",
+    "stroke-dasharray": "",
+    "stroke-dashoffset": "0",
+    "font-family": "none",
+    "font-weight": "none",
+    "font-size": "none",
+    "text-anchor": "none",
+    style: {
+      "mix-blend-mode": "normal"
+    }
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("g", {
+    transform: "scale(5.12,5.12)"
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("path", {
+    d: "M22.20508,2c-0.48953,0.00026 -0.90693,0.35484 -0.98633,0.83789l-0.97266,5.95508c-1.16958,0.34023 -2.28485,0.7993 -3.33594,1.37109l-4.91406,-3.50977c-0.39728,-0.28369 -0.94131,-0.23911 -1.28711,0.10547l-3.89062,3.88672c-0.3432,0.34344 -0.39015,0.88376 -0.11133,1.28125l3.45703,4.94531c-0.58061,1.05722 -1.04985,2.17878 -1.39844,3.35938l-5.92969,0.98633c-0.4815,0.0811 -0.83404,0.49805 -0.83398,0.98633v5.5c-0.00088,0.48518 0.3466,0.901 0.82422,0.98633l5.93359,1.05078c0.3467,1.17855 0.81296,2.30088 1.39453,3.35937l-3.5,4.89648c-0.28369,0.39728 -0.23911,0.94131 0.10547,1.28711l3.88867,3.89063c0.34265,0.34275 0.88175,0.39048 1.2793,0.11328l4.95508,-3.46875c1.05419,0.57517 2.17218,1.03762 3.3457,1.38086l0.99023,5.96289c0.08025,0.48228 0.49742,0.83584 0.98633,0.83594h5.5c0.4858,0.00071 0.90184,-0.34778 0.98633,-0.82617l1.06055,-5.98633c1.16868,-0.3485 2.28142,-0.8178 3.33008,-1.39648l4.98828,3.5c0.39749,0.27882 0.93781,0.23187 1.28125,-0.11133l3.88867,-3.89258c0.34612,-0.34687 0.38995,-0.89343 0.10352,-1.29102l-3.55664,-4.9375c0.56867,-1.04364 1.02681,-2.14972 1.36719,-3.31055l6.01758,-1.05469c0.47839,-0.08448 0.82689,-0.50053 0.82617,-0.98633v-5.5c-0.00026,-0.48953 -0.35484,-0.90693 -0.83789,-0.98633l-6.00781,-0.98242c-0.34266,-1.15945 -0.80206,-2.26356 -1.37109,-3.30664l3.50781,-4.99805c0.27882,-0.39749 0.23187,-0.93781 -0.11133,-1.28125l-3.89062,-3.88867c-0.34687,-0.34612 -0.89343,-0.38995 -1.29102,-0.10352l-4.92383,3.54102c-1.04908,-0.57636 -2.16255,-1.04318 -3.33398,-1.38867l-1.04687,-5.98437c-0.08364,-0.47917 -0.49991,-0.82867 -0.98633,-0.82812zM23.05664,4h3.80859l0.99609,5.68555c0.06772,0.38959 0.35862,0.70269 0.74219,0.79883c1.46251,0.36446 2.83609,0.94217 4.08984,1.70117c0.34265,0.20761 0.77613,0.1907 1.10156,-0.04297l4.67969,-3.36328l2.69336,2.69336l-3.33203,4.74805c-0.22737,0.3236 -0.24268,0.75079 -0.03906,1.08984c0.75149,1.25092 1.32146,2.61583 1.68555,4.07031c0.0969,0.38717 0.41473,0.67966 0.80859,0.74414l5.70703,0.93359v3.80859l-5.71875,1.00391c-0.3899,0.06902 -0.70237,0.36157 -0.79687,0.74609c-0.35988,1.45263 -0.93019,2.8175 -1.68164,4.06836c-0.20617,0.34256 -0.18851,0.775 0.04492,1.09961l3.37891,4.68945l-2.69336,2.69531l-4.74023,-3.32617c-0.32527,-0.22783 -0.75452,-0.24163 -1.09375,-0.03516c-1.24752,0.75899 -2.62251,1.33943 -4.08008,1.70898c-0.38168,0.09622 -0.67142,0.40737 -0.74023,0.79492l-1.00977,5.6875h-3.81445l-0.94141,-5.66211c-0.06549,-0.39365 -0.35874,-0.7107 -0.74609,-0.80664c-1.46338,-0.36069 -2.84314,-0.93754 -4.10547,-1.69531c-0.33857,-0.20276 -0.76473,-0.18746 -1.08789,0.03906l-4.70312,3.29492l-2.69531,-2.69922l3.32422,-4.64648c0.23221,-0.3254 0.24834,-0.75782 0.04102,-1.09961c-0.76602,-1.26575 -1.34535,-2.6454 -1.71094,-4.11523c-0.09555,-0.38244 -0.40684,-0.67307 -0.79492,-0.74219l-5.63086,-1v-3.81445l5.62695,-0.93555c0.39312,-0.06519 0.71002,-0.35754 0.80664,-0.74414c0.36873,-1.4749 0.94778,-2.85432 1.71094,-4.11719c0.20562,-0.33876 0.19183,-0.76697 -0.03516,-1.0918l-3.28516,-4.69531l2.69727,-2.69531l4.66211,3.33203c0.32413,0.23112 0.75447,0.248 1.0957,0.04297c1.25566,-0.75415 2.63862,-1.32636 4.10352,-1.68555c0.38927,-0.09584 0.68369,-0.41486 0.74805,-0.81055zM25,17c-4.40643,0 -8,3.59357 -8,8c0,4.40643 3.59357,8 8,8c4.40643,0 8,-3.59357 8,-8c0,-4.40643 -3.59357,-8 -8,-8zM25,19c3.32555,0 6,2.67445 6,6c0,3.32555 -2.67445,6 -6,6c-3.32555,0 -6,-2.67445 -6,-6c0,-3.32555 2.67445,-6 6,-6z"
+  })])], -1 /* HOISTED */)])))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    "class": "btn btn-ghost btn-circle p-2 inline-block md:hidden",
+    onClick: _cache[7] || (_cache[7] = function ($event) {
+      return $options.toggleSettings('page');
+    })
+  }, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("svg", _hoisted_20, _cache[25] || (_cache[25] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("g", {
     fill: "#ffffff",
     "fill-rule": "nonzero",
     stroke: "none",
@@ -34517,7 +34610,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     key: 0,
     "class": "cursor-pointer mx-2",
     onClick: $options.toggleAttributes
-  }, null, 8 /* PROPS */, ["onClick"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), $options.getUser ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", _hoisted_20, _cache[24] || (_cache[24] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  }, null, 8 /* PROPS */, ["onClick"])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), $options.getUser ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", _hoisted_21, _cache[26] || (_cache[26] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     "class": "indicator"
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("svg", {
     xmlns: "http://www.w3.org/2000/svg",
@@ -34540,10 +34633,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return _cache[25] || (_cache[25] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Login")]);
+      return _cache[27] || (_cache[27] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Login")]);
     }),
     _: 1 /* STABLE */
-  })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $options.getUser ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_21, [_cache[28] || (_cache[28] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  })) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $options.getUser ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_22, [_cache[30] || (_cache[30] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     tabindex: "0",
     role: "button",
     "class": "btn btn-ghost btn-circle avatar"
@@ -34552,10 +34645,10 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("img", {
     alt: "Tailwind CSS Navbar component",
     src: "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-  })])], -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_22, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("            <li class=\"hidden md:inline\" v-if=\"!getUser\"><a @click=\"openLogin\">Login</a></li>"), $options.getUser ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", _hoisted_23, _cache[26] || (_cache[26] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", null, "Profile", -1 /* HOISTED */)]))) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $options.getUser ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", _hoisted_24, _cache[27] || (_cache[27] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", null, "Logout", -1 /* HOISTED */)]))) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])]), $options.isItineraryOpen ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_CallyCalendar, {
+  })])], -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("            <li class=\"hidden md:inline\" v-if=\"!getUser\"><a @click=\"openLogin\">Login</a></li>"), $options.getUser ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", _hoisted_24, _cache[28] || (_cache[28] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", null, "Profile", -1 /* HOISTED */)]))) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $options.getUser ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", _hoisted_25, _cache[29] || (_cache[29] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", null, "Logout", -1 /* HOISTED */)]))) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])]), $options.isItineraryOpen ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)(((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_CallyCalendar, {
     key: 0,
     modelValue: $data.dateRange,
-    "onUpdate:modelValue": _cache[7] || (_cache[7] = function ($event) {
+    "onUpdate:modelValue": _cache[8] || (_cache[8] = function ($event) {
       return $data.dateRange = $event;
     }),
     modelModifiers: {
@@ -34810,50 +34903,16 @@ var _hoisted_4 = {
   "class": "max-w-lg mx-auto absolute left-1/2 -translate-x-1/2"
 };
 var _hoisted_5 = {
-  "class": ""
-};
-var _hoisted_6 = {
-  "for": "preferences-show-activity-times",
-  "class": "label flex items-center space-x-2"
-};
-var _hoisted_7 = {
-  "class": "mb-6"
-};
-var _hoisted_8 = {
-  "for": "preferences-show-traveling-tasks",
-  "class": "label flex items-center space-x-2"
-};
-var _hoisted_9 = {
   "class": "flex justify-center items-center"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [_cache[7] || (_cache[7] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h1", {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [_cache[1] || (_cache[1] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h1", {
     "class": "font-bold mb-6 text-5xl"
-  }, "Ready for an Adventure?", -1 /* HOISTED */)), _cache[8] || (_cache[8] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", {
+  }, "Ready for an Adventure?", -1 /* HOISTED */)), _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", {
     "class": "max-w-lg mb-6"
-  }, " Now we'll create an itinerary just for you. Feel free to return here to adjust your preferences and automatically create a new itinerary if you want to change anything. You may also make manual changes on the itinerary itself. ", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    id: "preferences-show-activity-times",
-    "class": "checkbox",
-    type: "checkbox",
-    "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
-      return $data.localShowActivityTimes = $event;
-    }),
-    onChange: _cache[1] || (_cache[1] = function () {
-      return $options.updateShowActivityTimes && $options.updateShowActivityTimes.apply($options, arguments);
-    })
-  }, null, 544 /* NEED_HYDRATION, NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.localShowActivityTimes]]), _cache[5] || (_cache[5] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Show approximate activity times "))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    id: "preferences-show-traveling-tasks",
-    "class": "checkbox",
-    type: "checkbox",
-    "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
-      return $data.localShowTravelingTasks = $event;
-    }),
-    onChange: _cache[3] || (_cache[3] = function () {
-      return $options.updateShowTravelingTasks && $options.updateShowTravelingTasks.apply($options, arguments);
-    })
-  }, null, 544 /* NEED_HYDRATION, NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.localShowTravelingTasks]]), _cache[6] || (_cache[6] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Show traveling tasks "))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+  }, " Now we'll create an itinerary just for you. Feel free to return here to adjust your preferences and automatically create a new itinerary if you want to change anything. You may also make manual changes on the itinerary itself. ", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     "class": "block w-full sm:w-auto text-white bg-gradient-to-r from-green-400 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-700 font-medium rounded-lg text-md px-5 py-2.5 text-center",
-    onClick: _cache[4] || (_cache[4] = function () {
+    onClick: _cache[0] || (_cache[0] = function () {
       return $options.createItinerary && $options.createItinerary.apply($options, arguments);
     })
   }, " Create itinerary ")])])])])]);
@@ -35214,10 +35273,11 @@ var _hoisted_3 = {
   "class": "label text-lg flex items-center p-2 space-x-2"
 };
 var _hoisted_4 = {
-  "class": "mb-6"
+  "for": "preferences-show-traveling-tasks",
+  "class": "label text-lg flex items-center p-2 space-x-2"
 };
 var _hoisted_5 = {
-  "for": "preferences-show-traveling-tasks",
+  "for": "preferences-show-weather-forecasts",
   "class": "label text-lg flex items-center p-2 space-x-2"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
@@ -35226,22 +35286,32 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "checkbox",
     type: "checkbox",
     "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
-      return $data.localShowActivityTimes = $event;
+      return $data.settings.showActivityTimes = $event;
     }),
-    onChange: _cache[1] || (_cache[1] = function () {
-      return $options.updateShowActivityTimes && $options.updateShowActivityTimes.apply($options, arguments);
+    onChange: _cache[1] || (_cache[1] = function ($event) {
+      return $options.updateSetting('showActivityTimes', $event.target.checked);
     })
-  }, null, 544 /* NEED_HYDRATION, NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.localShowActivityTimes]]), _cache[4] || (_cache[4] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Show approximate activity times "))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  }, null, 544 /* NEED_HYDRATION, NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.settings.showActivityTimes]]), _cache[6] || (_cache[6] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Show approximate activity times "))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     id: "preferences-show-traveling-tasks",
     "class": "checkbox",
     type: "checkbox",
     "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
-      return $data.localShowTravelingTasks = $event;
+      return $data.settings.showTravelingTasks = $event;
     }),
-    onChange: _cache[3] || (_cache[3] = function () {
-      return $options.updateShowTravelingTasks && $options.updateShowTravelingTasks.apply($options, arguments);
+    onChange: _cache[3] || (_cache[3] = function ($event) {
+      return $options.updateSetting('showTravelingTasks', $event.target.checked);
     })
-  }, null, 544 /* NEED_HYDRATION, NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.localShowTravelingTasks]]), _cache[5] || (_cache[5] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Show driving distances "))])])])]);
+  }, null, 544 /* NEED_HYDRATION, NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.settings.showTravelingTasks]]), _cache[7] || (_cache[7] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Show driving distances "))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    id: "preferences-show-weather-forecasts",
+    "class": "checkbox",
+    type: "checkbox",
+    "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
+      return $data.settings.showWeatherForecasts = $event;
+    }),
+    onChange: _cache[5] || (_cache[5] = function ($event) {
+      return $options.updateSetting('showWeatherForecasts', $event.target.checked);
+    })
+  }, null, 544 /* NEED_HYDRATION, NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.settings.showWeatherForecasts]]), _cache[8] || (_cache[8] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Show weather forecasts "))])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("      <div class=\"p-4\">"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("        <div class=\"divider\"></div>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("        <p class=\"mb-4 text-lg\">How many minutes does it take you to hike 1 mile on a continuous gentle incline (estimate)?</p>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("        <div class=\"flex justify-center items-center text-2xl\">"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          <input class=\"input bg-white text-black px-4 text-2xl w-24\" type=\"number\" step=\"5\" min=\"5\" max=\"500\" v-model=\"settings.estimatedMinutesToHikeOneMile\" />"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("          <span class=\"ml-2 text-2xl\">minutes</span>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("        </div>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("      </div>")])]);
 }
 
 /***/ }),

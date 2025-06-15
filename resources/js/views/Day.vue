@@ -19,7 +19,7 @@
                   </span>
                 </div>
                 <div class="flex justify-end items-center flex-grow">
-                  <Weather class="text-right" :weather="day.weather" />
+                  <Weather class="text-right" :weather="day.weather" v-if="showWeatherForecasts"/>
                   <div class="p-4 text-right text-sm md:text-lg">
                     <span class="date-day-of-week hidden md:inline">{{ day.formatted_day_of_week }}</span>
                     <span class="pr-1 hidden md:inline">,</span>
@@ -164,6 +164,9 @@ export default {
     },
     showActivityTimes() {
       return this.$cookies.get('show_activity_times') === 'true';
+    },
+    showWeatherForecasts() {
+      return this.$cookies.get('show_weather_forecasts') === 'true';
     },
     showTravelingTasks() {
       return this.$cookies.get('show_traveling_tasks') === 'true';

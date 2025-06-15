@@ -54,6 +54,10 @@ export default {
                 }
                 break;
 
+              case 'settings':
+                this.component = 'preferences/Settings';
+                this.title = 'Settings';
+                break;
               default:
                 this.component = '';
             }

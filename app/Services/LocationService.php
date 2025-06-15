@@ -139,7 +139,7 @@ class LocationService
             return null;
         }
 
-        $process = new Process(["python3", 'populartimes.js', $location->source_id]);
+        $process = new Process(["/venv/bin/python3", 'populartimes.js', $location->source_id]);
         $process->run();
         if (!$process->isSuccessful()) {
             Log::error(__CLASS__ . ': ' . $process->getErrorOutput());
