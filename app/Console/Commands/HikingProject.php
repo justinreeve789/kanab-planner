@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Area;
 use App\Models\Scopes\DataScope;
+use App\Models\Scopes\UsableScope;
 use App\Models\Trail;
 use App\Models\TrailImage;
 use App\Services\ConversionService;
@@ -269,7 +270,7 @@ class HikingProject extends Command
 
         $sourceId = $this->getTrailIdFromUrl($trailUrl);
         try {
-            $trail = Trail::withoutGlobalScope(DataScope::class)->updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
+            $trail = Trail::withoutGlobalScope(UsableScope::class)->withoutGlobalScope(DataScope::class)->updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
                 'name' => $name,
                 'name_alt' => '',
                 'area_id' => $areaId ?? 0,
@@ -301,7 +302,7 @@ class HikingProject extends Command
                 'raw_data' => $areaId . ' | ' . $trailUrl,
             ]);
         } catch (\Illuminate\Database\QueryException $e) {
-            $trail = Trail::withoutGlobalScope(DataScope::class)->updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
+            $trail = Trail::withoutGlobalScope(UsableScope::class)->withoutGlobalScope(DataScope::class)->updateOrCreate(['source_type' => self::SOURCE_TYPE, 'source_id' => $sourceId], [
                 'name' => $name,
                 'name_alt' => $areaId,
                 'area_id' => 0,
