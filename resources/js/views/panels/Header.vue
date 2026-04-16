@@ -41,6 +41,7 @@
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal menu-md px-1">
           <li :class="$route.name === 'itinerary' || $router.name === 'itinerary-new' ? 'underline': ''"><a @click="openItinerary">Itinerary</a></li>
+          <li :class="$route.name === 'map' || $router.name === 'area-map' ? 'underline': ''"><a @click="openMap">Map</a></li>
           <li :class="$route.name === 'accommodations' ? 'underline' : ''"><router-link :to="{ name: 'accommodations'} ">Accommodations</router-link></li>
           <li :class="$route.name === 'events' ? 'underline' : ''"><router-link :to="{ name: 'events'} ">Events</router-link></li>
           <li :class="$route.name === 'locations' ? 'underline' : ''"><router-link :to="{ name: 'locations'} ">Locations</router-link></li>
