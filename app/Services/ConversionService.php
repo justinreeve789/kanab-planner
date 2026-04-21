@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Image;
 use App\Services\OCRService;
+use Illuminate\Support\Facades\Log;
 use Spatie\PdfToText\Pdf;
 
 class ConversionService
@@ -22,12 +23,20 @@ class ConversionService
 
     public function downloadFile($url): ?string
     {
-//        $headers = get_headers($url, 1);
-//        $contentType = $headers['Content-Type'];
         $temp = storage_path('temp/file_' . sha1(microtime()));
+        $context = stream_context_create([
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+            ],
+        ]);
         try {
-            $file = file_get_contents($url);
+            $file = file_get_contents($url, false, $context);
+            if ($file === false) {
+                return null;
+            }
         } catch (\Throwable $e) {
+            Log::error("Download failed for $url: " . $e->getMessage());
             return null;
         }
         file_put_contents($temp, $file);

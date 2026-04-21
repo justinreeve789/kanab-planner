@@ -50,7 +50,7 @@ class ImageService
     public function __construct() {
         $this->client = new Client();
         $this->conversionService = new ConversionService();
-        $this->s3 = Storage::disk('do');
+        $this->s3 = Storage::disk('s3');
     }
 
     public function getS3Client()
@@ -58,12 +58,12 @@ class ImageService
         if (!isset($this->s3Client)) {
             $this->s3Client = new S3Client([
                 'version' => 'latest',
-                'region'  => getenv('DO_DEFAULT_REGION'),
-                'endpoint' => getenv('DO_ENDPOINT'),
-                'use_path_style_endpoint' => false, // Configures to use subdomain/virtual calling format.
+                'region'  => getenv('AWS_DEFAULT_REGION'),
+                'endpoint' => getenv('AWS_ENDPOINT'),
+                'use_path_style_endpoint' => (bool) getenv('AWS_USE_PATH_STYLE_ENDPOINT'),
                 'credentials' => [
-                    'key'    => getenv('DO_ACCESS_KEY_ID'),
-                    'secret' => getenv('DO_SECRET_ACCESS_KEY'),
+                    'key'    => getenv('AWS_ACCESS_KEY_ID'),
+                    'secret' => getenv('AWS_SECRET_ACCESS_KEY'),
                 ],
             ]);
         }
@@ -97,11 +97,11 @@ class ImageService
             case 'App\\Models\\LocationImage':
             case 'App\\Models\\TrailImage':
                 $cmd = $this->getS3Client()->getCommand('GetObject', [
-                    'Bucket' => getenv('DO_BUCKET'),
+                    'Bucket' => getenv('AWS_BUCKET'),
                     'Key' => $url,
                 ]);
 
-                $request = $this->getS3Client()->createPresignedRequest($cmd, '+' . getenv('DO_EXPIRE_SIGNED_URLS') . ' minutes');
+                $request = $this->getS3Client()->createPresignedRequest($cmd, '+' . getenv('AWS_EXPIRE_SIGNED_URLS') . ' minutes');
                 return (string) $request->getUri();
             default:
         }
@@ -130,10 +130,23 @@ class ImageService
         }
 
         // Store to the cloud.
-        $filePath = getenv('DO_FOLDER') . '/' . pathinfo($newFileName, PATHINFO_BASENAME);
+        $filePath = getenv('AWS_FOLDER') . '/' . pathinfo($newFileName, PATHINFO_BASENAME);
         echo 'Uploading to ' . $filePath . '
 ';
-        if (!$this->s3->put($filePath, file_get_contents($newFileName))) {
+        try {
+            $success = $this->s3->put($filePath, file_get_contents($newFileName));
+
+            if (!$success) {
+                // This is still good for unexpected non-exception failures
+                Log::error("S3 upload returned false for: $filePath");
+                return null;
+            }
+        } catch (Throwable $e) {
+            // This will catch Permission Denied, NoSuchBucket, 403 Forbidden, etc.
+            Log::error("S3 Upload Failed: " . $e->getMessage(), [
+                'file' => $filePath,
+                'exception' => $e
+            ]);
             return null;
         }
 
@@ -144,7 +157,7 @@ class ImageService
      * Abstract storeImage() and use it instead of this function, so we're not duplicating code.
      */
     public function putImageInStorage($file, $filename) {
-        $filePath = getenv('DO_FOLDER') . '/' . $filename;
+        $filePath = getenv('AWS_FOLDER') . '/' . $filename;
         echo 'Uploading to ' . $filePath . '
 ';
         if (!$this->s3->put($filePath, file_get_contents($file))) {
