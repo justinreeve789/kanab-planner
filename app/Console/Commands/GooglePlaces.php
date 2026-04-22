@@ -270,7 +270,7 @@ class GooglePlaces extends Command
 
     protected function getDetailsForPlace($placeId)
     {
-        // Now, make a request to the Google Places Details API to get opening hours for this place.
+        // Get opening hours for this place.
         $detailsApiUrl = "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=" . getenv('GOOGLE_API_KEY');
         $detailsResponse = file_get_contents($detailsApiUrl);
 
@@ -301,31 +301,24 @@ class GooglePlaces extends Command
     {
         $location = $lat . ',' . $lng;
 
-        // Set up the Google Places API endpoint
         $api_url =
             "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$location&radius=$radiusMeters&type=$type&fields=opening_hours&key=" . getenv('GOOGLE_API_KEY');
 
-        // Send a GET request to the Google Places API
         $response = file_get_contents($api_url);
 
-        // Check if the request was successful
         if ($response === false) {
             die('Error fetching data from Google API');
         }
 
-        // Parse the JSON response
         $data = json_decode($response, true);
 
-        // Check if the JSON was parsed successfully
         if ($data === null) {
             die('Error decoding JSON');
         }
 
-        // Check if the API returned any results
         if ($data['status'] === 'OK') {
             return $data['results'];
         } else {
-            // Handle API error
             echo 'Google API returned an error: ' . $data['status'];
             echo '<pre>'; print_r($data); echo '</pre>';
         }
