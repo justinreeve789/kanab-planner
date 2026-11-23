@@ -167,10 +167,13 @@ class ItineraryEditingTest extends TestCase
         $this->assertSame('20:00:00', $note['start_time']);
 
         $restaurant = $this->fixtureRestaurantIds[$day['area']['id']][5];
+        DB::table('locations')->where('id', DB::table('restaurants')->where('id', $restaurant)->value('location_id'))
+            ->update(['url' => 'https://diner.example']);
         $meal = $this->postJson($base, ['resource_table' => 'restaurants', 'resource_id' => $restaurant, 'start_time' => '13:00'], $this->tokenHeaders())
             ->assertCreated()->json();
         $this->assertSame('dining', $meal['activity_type']['name']);
         $this->assertSame('15:00:00', $meal['end_time'], 'End defaults to the restaurant\'s usual meal length.');
+        $this->assertSame('https://diner.example', $meal['resource']['location']['url'], 'The website button reads the location.');
 
         $periodNote = $this->postJson('/api/v1/period/' . $day['periods'][0]['id'] . '/activity', ['name' => 'Sunrise'], $this->tokenHeaders())
             ->assertCreated()->json();

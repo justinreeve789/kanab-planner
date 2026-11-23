@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col sm:flex-row" v-if="type == 'checking-in' || type == 'restaurant' || type == 'trail' || type == 'place'">
     <ViewAccommodations :resource="resource" v-if="type == 'checking-in'" />
-    <ViewMenu :resource="resource" v-if="type == 'restaurant'" />
+    <ViewWebsite :resource="resource" v-if="type == 'restaurant'" />
     <ViewMap :resource="resource" v-if="type == 'trail'" />
     <AskQuestion :resource="resource" :resource_table="resource_table" :resource_id="resource?.id" v-if="type == 'trail'" />
     <AddToItinerary :resource="resource" :resource_table="resource_table" v-if="!hideAdd" />
@@ -14,7 +14,7 @@ import AskQuestion from '../buttons/AskQuestion.vue';
 import FindAccommodations from '../buttons/FindAccomodations.vue';
 import ViewAccommodations from '../buttons/ViewAccommodations.vue';
 import ViewMap from '../buttons/ViewMap.vue';
-import ViewMenu from '../buttons/ViewMenu.vue';
+import ViewWebsite from '../buttons/ViewWebsite.vue';
 import { useAssistantStore } from '../../stores/assistant.js';
 
 export default {
@@ -25,7 +25,7 @@ export default {
     FindAccommodations,
     ViewAccommodations,
     ViewMap,
-    ViewMenu,
+    ViewWebsite,
   },
   setup() {
     const store = useAssistantStore();

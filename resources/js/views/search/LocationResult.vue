@@ -16,17 +16,14 @@
       <div>
         <div class="mr-2">
         </div>
-        <button class="btn btn-primary btn-sm mr-2 z-10" @click="addToItinerary(resource.result_id)">
-          +
-          <span class="hidden md:flex">Add</span>
-        </button>
       </div>
     </div>
     <div class="collapse-content border border-solid border-red-300 border-t-0 text-sm bg-gradient-to-r from-white to-red-50" v-if="expanded">
       <div class="card-body md:w-2/3 flex flex-col justify-between p-4 md:rounded-lg">
-        <p># miles from Kanab</p>
+        <p v-if="resource.area_name" class="text-gray-500">{{ resource.area_name }}</p>
         <p class="text-gray-600 line-clamp-3">{{ resource.description }}</p>
         <div class="card-actions mt-4 space-x-2 flex-wrap text-left md:justify-end">
+          <AddToItinerary :resource="resource" resource_table="locations" />
         </div>
       </div>
     </div>
@@ -34,8 +31,11 @@
 </template>
 
 <script>
+import AddToItinerary from "../buttons/AddToItinerary.vue";
+
 export default {
   components: {
+    AddToItinerary,
   },
   setup() {
   },
@@ -54,12 +54,6 @@ export default {
       if (this.resource.images && this.resource.images[0]) {
         return 'image/location/' + this.resource.images[0].id + '?size=thumbnail';
       }
-    },
-  },
-  methods: {
-    addToItinerary(resultId) {
-    },
-    viewMap(resultId) {
     },
   },
 }

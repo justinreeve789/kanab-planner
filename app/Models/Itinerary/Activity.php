@@ -35,6 +35,11 @@ class Activity extends CachedModel
         ResourceEnum::TRAILS_TABLE => Trail::class,
     ];
 
+    /** Relations sent along with an activity's resource, e.g. a restaurant's website lives on its location. */
+    private const RESOURCE_RELATIONS = [
+        ResourceEnum::RESTAURANTS_TABLE => ['location'],
+    ];
+
     protected $appends = ['adventurousness', 'solitariness', 'strenuousness', 'resource'];
     protected $casts = ['id' => 'string', 'period_id' => 'string'];
     protected $guarded = [];
@@ -62,7 +67,10 @@ class Activity extends CachedModel
         return Attribute::make(
             get: function() {
                 $class = self::RESOURCE_CLASSES[$this->resource_table] ?? null;
-                return ($class && $this->resource_id) ? $class::find($this->resource_id) : null;
+                if (!$class || !$this->resource_id) {
+                    return null;
+                }
+                return $class::with(self::RESOURCE_RELATIONS[$this->resource_table] ?? [])->find($this->resource_id);
             },
             // Return the columns to write; assignments made inside the closure would be discarded by Eloquent.
             set: function(?Resource $resource) {

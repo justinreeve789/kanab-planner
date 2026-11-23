@@ -38,6 +38,18 @@ class AuthAndDocsTest extends TestCase
         $this->getJson('/api/v1/auth/user')->assertOk()->assertExactJson([]);
     }
 
+    public function test_google_sign_in_sends_users_back_to_this_app(): void
+    {
+        config(['services.google.client_id' => 'client-id', 'services.google.client_secret' => 'secret']);
+
+        $location = $this->get('/auth/google/redirect')->assertRedirect()->headers->get('Location');
+        $this->assertStringStartsWith('https://accounts.google.com/', $location);
+        parse_str(parse_url($location, PHP_URL_QUERY), $query);
+        $this->assertSame(rtrim(config('app.url'), '/') . '/auth/google/callback', $query['redirect_uri']);
+
+        $this->get('/auth/github/redirect')->assertNotFound();
+    }
+
     public function test_docs_are_served_from_the_built_site(): void
     {
         $root = storage_path('framework/testing/docs');

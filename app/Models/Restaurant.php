@@ -103,7 +103,8 @@ class Restaurant extends Resource
 
     public static function getFeatured(array $areaIds, int $featuredCount = 3)
     {
-        return self::whereHas('images')
+        return self::with('location')
+            ->whereHas('images')
             ->whereHas('area', function($q) use ($areaIds) {
                 $q->whereIn('areas.id', $areaIds);
             })
