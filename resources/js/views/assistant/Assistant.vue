@@ -3,10 +3,10 @@
     <h2 class="text-black text-lg">Virtual Assistant</h2>
     <div class="flex align-right">
       <button class="tooltip tooltip-bottom btn btn-sm btn-ghost hover:bg-cyan-100" data-tip="Show chat history">
-        <img src="images/icons/history.svg"/>
+        <img src="/images/icons/history.svg"/>
       </button>
       <button class="tooltip tooltip-bottom btn btn-sm btn-ghost hover:bg-cyan-100" @click="deleteHistory" data-tip="Clear chat history">
-        <img class="h-4" src="images/icons/sweep.svg"/>
+        <img class="h-4" src="/images/icons/sweep.svg"/>
       </button>
       <button class="btn btn-sm btn-ghost hover:bg-cyan-100 hidden md:flex" @click="closeAssistantModal" v-if="modal">✕</button>
     </div>
@@ -22,7 +22,7 @@
         <div class="text-sm text-black">
           {{ assistantStore.currentResource.name }}
         </div>
-        <img src="images/icons/hiking.svg" alt="Trail" class="h-6 w-6"/>
+        <img src="/images/icons/hiking.svg" alt="Trail" class="h-6 w-6"/>
       </div>
       <div class="w-full">
         <Messages />

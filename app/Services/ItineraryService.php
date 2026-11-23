@@ -1104,7 +1104,7 @@ class ItineraryService
         $minimumDate = clone $currentDate;
         $minimumDate->add(new \DateInterval('P2W'));
 
-        $randomDay = mt_rand(1, cal_days_in_month(CAL_GREGORIAN, $month, $targetYear));
+        $randomDay = mt_rand(1, (int) date('t', mktime(0, 0, 0, $month, 1, $targetYear)));
         $randomDate = new \DateTime("$targetYear-$month-$randomDay");
         while ($randomDate < $minimumDate) {
             $randomDate->add(new \DateInterval('P1D'));

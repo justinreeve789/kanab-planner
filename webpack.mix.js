@@ -11,6 +11,9 @@ const mix = require('laravel-mix');
  |
  */
 
+// Explicit, so the build doesn't depend on finding ./artisan (the Docker assets stage has no PHP files).
+mix.setPublicPath('public');
+
 mix.options({
     uglify: {
         uglifyOptions: {

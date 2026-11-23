@@ -58,3 +58,12 @@ jobs:
           cache: npm
           cache-dependency-path: docs/package-lock.json
       - run: npm run docs:build
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the image
+        run: docker build -t trip-planner:ci .
+      - name: Check the image's PHP extensions and artisan
+        run: docker run --rm --entrypoint php trip-planner:ci artisan --version

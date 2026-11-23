@@ -21,6 +21,71 @@ rm -fr chromedriver-linux64
 rm chrome-linux64.zip
 chmod a+x chrome-linux
 
+# Running with Docker
+
+The quickest way to run everything (the app, a queue worker, the scheduler, MySQL, Redis, Meilisearch, a Valhalla
+routing server and Mailpit):
+
+```sh
+docker compose up -d --build
+```
+
+Then open http://localhost:8080. Nothing needs configuring first. On its first start the `app` container:
+
+1. generates an `APP_KEY` and keeps it in the `storage` volume (set `APP_KEY` yourself to manage it);
+2. runs the migrations and, because the database is empty, loads `database/dumps` (`SEED_DATABASE=auto`);
+3. builds the search indexes (`php artisan search:reindex`);
+4. caches config and routes, then starts Apache. The `worker` (Horizon) and `scheduler` containers wait for it.
+
+The `valhalla` container downloads the Utah and Arizona OpenStreetMap extracts from Geofabrik and builds its routing
+tiles the first time (roughly 10–30 minutes and a few GB of disk). Until it's ready, drive times are estimated. Reset
+emails go to Mailpit at http://localhost:8025 until you configure real SMTP.
+
+`/up` is a health check (it also checks the database). Logs go to `docker compose logs`.
+
+## Configuring it
+
+Compose reads a `.env` file next to `docker-compose.yml`. Anything not set there uses the defaults in the compose
+file. **For anything public, set at least these:**
+
+| Variable | Why |
+| --- | --- |
+| `APP_URL` | The public address, used in emails and Google sign-in (default `http://localhost:8080`). |
+| `APP_PORT` | The host port (default 8080). Put a TLS-terminating proxy (Caddy, nginx, a load balancer) in front. |
+| `DB_PASSWORD`, `DB_ROOT_PASSWORD`, `MEILISEARCH_KEY` | Replace the `change-me-...` defaults. |
+| `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_ENCRYPTION`, `MAIL_FROM_ADDRESS` | A real SMTP server for password resets. |
+| `UDOT_API_KEY`, `AZ511_API_KEY` | Free keys from [UDOT Traffic](https://udottraffic.utah.gov/developers/doc) and [AZ511](https://az511.gov/help/endpoint/event) for closures and roadwork on drives. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google sign-in; register `APP_URL/auth/google/callback` as a redirect URI. |
+| `OPENAI_API_KEY`, `GEMINI_API_KEY`, `DO_*` | The assistant, and photos from DigitalOcean Spaces. |
+
+Other knobs: `ROUTING_DRIVER=estimate` (skip Valhalla, e.g. on a small server; you can then remove that service),
+`VALHALLA_TILE_URLS` (other OpenStreetMap extracts), `SEED_DATABASE` (`auto`, `always` or `never`).
+
+Useful commands:
+
+```sh
+docker compose exec app php artisan search:reindex        # rebuild the search indexes
+docker compose exec app php artisan update:road-events    # fetch closures now
+docker compose exec app php artisan update:data --trails --restaurants
+docker compose run --rm app php artisan tinker
+```
+
+To update: `git pull && docker compose up -d --build`. Migrations run on start.
+
+The image doesn't include the data-gathering tools (Chrome for the spiders, Tesseract and Poppler for OCR, Python
+for popular times); run those commands from a development checkout.
+
+## Drive times and road conditions
+
+Drive times come from [Valhalla](https://github.com/valhalla/valhalla), an open-source router, using
+OpenStreetMap roads (`ROUTING_DRIVER=valhalla`, `VALHALLA_URL`). Answers are cached for 30 days. If Valhalla is
+unreachable, or can't place a point on a road, that drive is estimated from straight-line distance instead.
+
+`php artisan update:road-events` (every ten minutes, from the scheduler) reads closures, roadwork and incidents from
+the UDOT and AZ511 feeds. Full closures on a route are routed around; anything else on a route adds a delay and a note.
+Without keys the command does nothing. None of the free sources offers live traffic speeds for these rural roads, so
+drive times are free-flow times plus those adjustments.
+
 # Setting up the app
 
 ```sh

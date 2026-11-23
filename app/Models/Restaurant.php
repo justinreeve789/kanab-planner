@@ -22,7 +22,7 @@ class Restaurant extends Resource
     public function toSearchableArray()
     {
         $searchableArray = parent::toSearchableArray();
-        $searchableArray['area_id'] = $this->area->id;
+        $searchableArray['area_id'] = $this->area?->id;
         return $searchableArray;
     }
 

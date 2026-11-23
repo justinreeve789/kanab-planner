@@ -1,5 +1,5 @@
 <template>
-  <div class="hero h-[calc(100vh-64px)] overflow-hidden" style="background-image: url('images/sand-caves.jfif');" v-if="$route.path === '/questionnaire'">
+  <div class="hero h-[calc(100vh-64px)] overflow-hidden" style="background-image: url('/images/sand-caves.jfif');" v-if="$route.path === '/questionnaire'">
     <Start />
   </div>
   <div class="bg-white overflow-x-hidden px-6 pt-[32px] md:mx-8 md:mb-8 md:px-16 md:pb-16" v-else>

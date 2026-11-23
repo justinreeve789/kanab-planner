@@ -15,6 +15,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Health check for load balancers and docker-compose: the app is up and can reach its database.
+Route::get('/up', function () {
+    \Illuminate\Support\Facades\DB::select('select 1');
+    return response()->json(['status' => 'ok']);
+})->name('health');
+
 Route::get('/docs/{path?}', DocsController::class)->where('path', '.*')->name('docs');
 
 Route::prefix('auth')->group(function() {
