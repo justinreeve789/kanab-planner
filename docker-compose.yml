@@ -1,0 +1,170 @@
+# Trip Planner, everything included:
+#
+#   docker compose up -d --build        # then open http://localhost:8080
+#
+# Works with no configuration. Put overrides (passwords, API keys, APP_URL) in a .env file next to this one;
+# see "Running with Docker" in README.md for the full list.
+
+x-app: &app
+  build: .
+  image: trip-planner:latest
+  restart: unless-stopped
+  volumes:
+    - storage:/var/www/html/storage
+  environment: &app-env
+    APP_NAME: ${APP_NAME:-Trip Planner}
+    APP_KEY: ${APP_KEY:-}
+    APP_URL: ${APP_URL:-http://localhost:8080}
+    APP_ENV: ${APP_ENV:-production}
+    APP_DEBUG: ${APP_DEBUG:-false}
+    LOG_CHANNEL: stderr
+    LOG_LEVEL: ${LOG_LEVEL:-info}
+
+    DB_CONNECTION: mysql
+    DB_HOST: mysql
+    DB_PORT: 3306
+    DB_DATABASE: ${DB_DATABASE:-kanab}
+    DB_USERNAME: ${DB_USERNAME:-kanab}
+    DB_PASSWORD: ${DB_PASSWORD:-change-me-database}
+    # auto: load database/dumps when the database is empty; also "always" or "never".
+    SEED_DATABASE: ${SEED_DATABASE:-auto}
+
+    REDIS_HOST: redis
+    REDIS_PORT: 6379
+    REDIS_CACHE_SCHEME: tcp
+    CACHE_DRIVER: redis
+    CACHE_STORE: redis
+    SESSION_DRIVER: redis
+    QUEUE_CONNECTION: redis
+
+    SCOUT_DRIVER: meilisearch
+    MEILISEARCH_HOST: http://meilisearch:7700
+    MEILISEARCH_KEY: ${MEILISEARCH_KEY:-change-me-meilisearch-master-key}
+
+    # Drive times from the valhalla service below; ROUTING_DRIVER=estimate turns it off.
+    ROUTING_DRIVER: ${ROUTING_DRIVER:-valhalla}
+    VALHALLA_URL: http://valhalla:8002
+    TRIP_TIMEZONE: ${TRIP_TIMEZONE:-America/Denver}
+    # Free developer keys: https://udottraffic.utah.gov/developers/doc and https://az511.gov/help/endpoint/event
+    UDOT_API_KEY: ${UDOT_API_KEY:-}
+    AZ511_API_KEY: ${AZ511_API_KEY:-}
+
+    # Password reset emails. The defaults deliver to Mailpit (http://localhost:8025); point these at a real SMTP
+    # server in production.
+    MAIL_MAILER: ${MAIL_MAILER:-smtp}
+    MAIL_HOST: ${MAIL_HOST:-mailpit}
+    MAIL_PORT: ${MAIL_PORT:-1025}
+    MAIL_USERNAME: ${MAIL_USERNAME:-}
+    MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+    MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-}
+    MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-trips@example.com}
+    MAIL_FROM_NAME: ${APP_NAME:-Trip Planner}
+
+    # Optional features.
+    GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+    GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
+    OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    DO_ACCESS_KEY_ID: ${DO_ACCESS_KEY_ID:-}
+    DO_SECRET_ACCESS_KEY: ${DO_SECRET_ACCESS_KEY:-}
+    DO_DEFAULT_REGION: ${DO_DEFAULT_REGION:-}
+    DO_BUCKET: ${DO_BUCKET:-}
+    DO_FOLDER: ${DO_FOLDER:-}
+    DO_ENDPOINT: ${DO_ENDPOINT:-}
+    DO_EXPIRE_SIGNED_URLS: ${DO_EXPIRE_SIGNED_URLS:-15}
+
+services:
+  app:
+    <<: *app
+    command: web
+    ports:
+      - "${APP_PORT:-8080}:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      meilisearch:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://localhost/up') === false ? 1 : 0);"]
+      interval: 30s
+      timeout: 5s
+      start_period: 300s
+      retries: 3
+
+  worker:
+    <<: *app
+    command: worker
+    depends_on:
+      - app
+
+  scheduler:
+    <<: *app
+    command: scheduler
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-kanab}
+      MYSQL_USER: ${DB_USERNAME:-kanab}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-change-me-database}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-change-me-database-root}
+    volumes:
+      - mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis:/data
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    restart: unless-stopped
+    environment:
+      MEILI_ENV: production
+      MEILI_MASTER_KEY: ${MEILISEARCH_KEY:-change-me-meilisearch-master-key}
+      MEILI_NO_ANALYTICS: "true"
+    volumes:
+      - meilisearch:/meili_data
+
+  # Street routing over OpenStreetMap. The first start downloads the Utah and Arizona extracts from Geofabrik and
+  # builds routing tiles (roughly 10-30 minutes and a few GB of disk); until then the app uses estimated drive times.
+  valhalla:
+    image: ghcr.io/valhalla/valhalla-scripted:latest
+    restart: unless-stopped
+    environment:
+      tile_urls: ${VALHALLA_TILE_URLS:-https://download.geofabrik.de/north-america/us/utah-latest.osm.pbf https://download.geofabrik.de/north-america/us/arizona-latest.osm.pbf}
+      server_threads: ${VALHALLA_THREADS:-2}
+      build_elevation: "False"
+      build_transit: "False"
+      build_admins: "True"
+      build_time_zones: "True"
+      use_tiles_ignore_pbf: "True"
+      serve_tiles: "True"
+    volumes:
+      - valhalla:/custom_files
+
+  # Catches outgoing email (password resets) so it can be read at http://localhost:8025. Not for production.
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${MAILPIT_PORT:-8025}:8025"
+
+volumes:
+  storage:
+  mysql:
+  redis:
+  meilisearch:
+  valhalla:

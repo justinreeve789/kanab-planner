@@ -138,19 +138,14 @@ trait Preferences
         $this->base_area_id = $baseAreaId;
     }
 
+    /** Null means "whatever the lodging says" (see ItineraryService::fillArrivalDay()). */
     public function setCheckIntime(?string $check_in_time)
     {
-        if ($check_in_time === null) {
-            $check_in_time = self::DEFAULT_CHECKIN_TIME;
-        }
         $this->check_in_time = $check_in_time;
     }
 
     public function setCheckOutTime(?string $check_out_time)
     {
-        if ($check_out_time === null) {
-            $check_out_time = self::DEFAULT_CHECKOUT_TIME;
-        }
         $this->check_out_time = $check_out_time;
     }
 

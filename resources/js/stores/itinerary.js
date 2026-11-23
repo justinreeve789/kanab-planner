@@ -41,8 +41,11 @@ export const useItineraryStore = defineStore('itinerary', {
     tokenFor: (state) => (id) => state.tokens[id] ?? null,
     days: (state) => state.itinerary?.days ?? [],
     baseArea(state) {
-      const first = state.itinerary?.days?.[0];
-      return first?.area ?? null;
+      return state.itinerary?.base_area ?? state.itinerary?.days?.[0]?.area ?? null;
+    },
+    /** "Zion Canyon Lodge" when they named it, otherwise the base area's short name. */
+    homeName(state) {
+      return state.itinerary?.lodging_name || this.baseArea?.short_name || 'base';
     },
   },
 

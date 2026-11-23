@@ -31,9 +31,13 @@ The Grand Canyon's North Rim is closed from December 1 to May 14, and trips in t
 
 You'll be out on a trail over lunchtime, or there's nowhere suitable to eat nearby, so Trip Planner reminds you to bring food and water.
 
-## Can I change where I'm staying?
+## Can I stay somewhere other than Kanab?
 
-Not yet. Every trip is based in Kanab.
+Yes. On the questionnaire's first step, under **Where are you staying?**, choose any of the seven areas. You can also tap the map where you're staying and give it a name, which makes drive times more accurate. See [Where you stay](/docs/planning/areas/#where-you-stay).
+
+## Why do drive times say "about"?
+
+"About" means the drive time is an estimate from the straight-line distance, because the route couldn't be worked out from the road map for that drive. Times without "about" are worked out along the actual roads. See [Drive times and road alerts](/docs/itinerary/drives/).
 
 ## The weather isn't showing
 
@@ -45,7 +49,7 @@ To keep things fast for everyone, you can build up to ten itineraries a minute. 
 
 ## I forgot my password
 
-Password reset isn't available in the app yet. If you used **Continue with Google**, you don't need a password: sign in with Google again.
+Choose **Forgot password?** on the sign-in page and we'll email you a link to choose a new one. See [Forgot your password?](/docs/accounts/sign-in/#forgot-your-password). If you used **Continue with Google**, you can also just sign in with Google again.
 
 ## Is the trail information official?
 

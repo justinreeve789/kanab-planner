@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Area;
 use App\Models\Itinerary\Period;
+use App\Models\Itinerary\Timeline;
 use Tests\Support\ItineraryAssertions;
 use Tests\Support\RefreshTestDatabase;
 use Tests\Support\SeedsKanabFixtures;
@@ -227,11 +228,11 @@ class ItineraryGenerationTest extends TestCase
         $this->assertSame('08:00:00', $hike['activity']['start_time']);
         $this->assertSame('12:00:00', $hike['activity']['end_time']);
 
-        // Breakfast at home finishes in time to drive to the trailhead (48 minutes in the fixtures) by 8:00.
+        // Breakfast at home finishes in time to drive to the trailhead by 8:00.
         $breakfast = array_values(array_filter($this->activitiesOfDay($hike['day']), fn($r) => $r['activity']['name'] === 'Breakfast'));
         $this->assertCount(1, $breakfast);
-        $this->assertSame(48, $hike['day']['drive_minutes']);
-        $this->assertLessThanOrEqual('07:12:00', $breakfast[0]['activity']['end_time']);
+        $this->assertGreaterThan(30, $hike['activity']['travel_minutes'], 'Kanab to Zion is a real drive.');
+        $this->assertLessThanOrEqual(Timeline::addMinutes('08:00', -$hike['activity']['travel_minutes']), $breakfast[0]['activity']['end_time']);
         $this->assertGreaterThanOrEqual('06:00:00', $breakfast[0]['activity']['start_time']);
     }
 

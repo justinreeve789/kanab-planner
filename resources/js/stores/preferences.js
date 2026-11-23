@@ -1,5 +1,8 @@
 import { defineStore } from 'pinia'
 
+/** Kanab, as in App\Models\Itinerary\Itinerary::DEFAULT_BASE_AREA_ID. */
+export const DEFAULT_BASE_AREA_ID = 3;
+
 export const usePreferencesStore = defineStore('preferences', {
   state: () => ({
     itineraryData: null,
@@ -21,8 +24,28 @@ export const usePreferencesStore = defineStore('preferences', {
     locationIds: [],
     restaurantIds: [],
     trailIds: [],
+    // Where they're staying: an area, plus an optional pin and name for the lodging itself.
+    baseAreaId: DEFAULT_BASE_AREA_ID,
+    lodgingName: '',
+    lodgingLat: null,
+    lodgingLng: null,
   }),
   actions: {
+    /** A pin belongs to the area it was dropped in, so changing area clears it. */
+    setBaseArea(areaId) {
+      this.baseAreaId = areaId;
+      this.lodgingLat = null;
+      this.lodgingLng = null;
+    },
+    baseParams() {
+      const pinned = this.lodgingLat !== null && this.lodgingLng !== null;
+      return {
+        base_area_id: this.baseAreaId,
+        lodging_name: this.lodgingName || null,
+        lat: pinned ? this.lodgingLat : null,
+        lng: pinned ? this.lodgingLng : null,
+      };
+    },
     addPreferredResource(resource) {
       if (resource.type === 'event') {
         if (!this.eventIds.includes(resource.id)) {
@@ -115,6 +138,14 @@ export const usePreferencesStore = defineStore('preferences', {
       }
       if (itineraryData.average_hiking_speed) {
         this.averageHikingSpeed = itineraryData.average_hiking_speed;
+      }
+      if (itineraryData.base_area_id) {
+        this.baseAreaId = itineraryData.base_area_id;
+        this.lodgingName = itineraryData.lodging_name ?? '';
+        const pinned = itineraryData.latitude !== null && itineraryData.latitude !== undefined
+          && itineraryData.longitude !== null && itineraryData.longitude !== undefined;
+        this.lodgingLat = pinned ? Number(itineraryData.latitude) : null;
+        this.lodgingLng = pinned ? Number(itineraryData.longitude) : null;
       }
     },
   },

@@ -106,6 +106,16 @@ class Area extends Model
         return $monthDay >= $this->closed_from || $monthDay <= $this->closed_until;
     }
 
+    /** "from December 1 to May 14", or null for areas that never close. */
+    public function closureDescription(): ?string
+    {
+        if (!$this->closed_from || !$this->closed_until) {
+            return null;
+        }
+        $format = fn(string $monthDay) => date('F j', strtotime('2001-' . $monthDay));
+        return 'from ' . $format($this->closed_from) . ' to ' . $format($this->closed_until);
+    }
+
     public function scopeOpenOn(Builder $query, string $date)
     {
         $monthDay = date('m-d', strtotime($date));

@@ -11,7 +11,10 @@
                  class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-black outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-indigo-600 sm:text-sm">
         </div>
         <div>
-          <label class="block text-sm font-medium text-white" for="login-password">Password</label>
+          <div class="flex items-center justify-between">
+            <label class="block text-sm font-medium text-white" for="login-password">Password</label>
+            <router-link :to="{ name: 'forgot-password', query: email ? { email } : {} }" class="text-sm text-white underline">Forgot password?</router-link>
+          </div>
           <input id="login-password" v-model="password" autocomplete="current-password" required type="password"
                  class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-black outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-indigo-600 sm:text-sm">
         </div>
@@ -22,6 +25,7 @@
         <a href="/auth/google/redirect" class="flex w-full justify-center rounded-md bg-white px-3 py-1.5 font-semibold text-sm text-gray-800 shadow-xs hover:bg-gray-100">
           Continue with Google
         </a>
+        <p v-if="notice" class="text-sm text-white bg-green-700/70 rounded px-3 py-2" role="status">{{ notice }}</p>
         <p v-if="error" class="text-sm text-white bg-red-600/70 rounded px-3 py-2" role="alert">{{ error }}</p>
       </form>
     </div>
@@ -47,7 +51,13 @@ export default {
     return { authStore: useAuthStore() };
   },
   data() {
-    return { email: '', password: '', error: new URLSearchParams(window.location.search).get('error'), busy: false };
+    return {
+      email: this.$route.query.email || '',
+      password: '',
+      error: new URLSearchParams(window.location.search).get('error'),
+      notice: this.$route.query.reset ? 'Your password has been changed. Sign in with your new password.' : null,
+      busy: false,
+    };
   },
   methods: {
     async login() {

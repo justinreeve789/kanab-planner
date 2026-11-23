@@ -10,6 +10,7 @@ use App\Models\Itinerary\Period;
 use App\Policies\ItineraryPolicy;
 use App\ResourceEnum;
 use App\Services\ItineraryService;
+use App\Services\TravelPlanner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -60,6 +61,11 @@ class ItineraryController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'duration_days' => 'nullable|integer|between:1,30',
             'base_area_id' => 'nullable|integer|exists:areas,id',
+            'lodging_name' => 'nullable|string|max:120',
+            'lat' => 'nullable|required_with:lng|numeric|between:-90,90',
+            'lng' => 'nullable|required_with:lat|numeric|between:-180,180',
+            'check_in' => 'nullable|date_format:H:i',
+            'check_out' => 'nullable|date_format:H:i',
             'average_hiking_speed' => 'nullable|numeric|between:0.3,6',
             'name' => 'nullable|string|max:255',
         ]);
@@ -146,7 +152,8 @@ class ItineraryController extends Controller
             $period->activities()->delete();
         }
         $day->stats = null;
-        $day->save();
+        $day->load('periods.activities');
+        app(TravelPlanner::class)->annotate($day->itinerary, $day);
         return $this->getDay($request, $day->id);
     }
 
@@ -267,11 +274,12 @@ class ItineraryController extends Controller
         }
     }
 
+    /** After an edit: the day's stats, and every drive re-timed (gaps too short to drive are flagged, not moved). */
     private function recalculateDay(Day $day): void
     {
         $day->load('periods.activities');
         $day->calculateASS(true);
-        $day->save();
+        app(TravelPlanner::class)->annotate($day->itinerary, $day);
     }
 
     private function authorizeEdit(Request $request, Itinerary $itinerary, string $ability = 'update'): void
@@ -288,6 +296,10 @@ class ItineraryController extends Controller
         $itinerary = Itinerary::withSchedule()->findOrFail($id);
         $user = $request->user('sanctum');
         $canEdit = Gate::forUser($user)->allows('update', [$itinerary, $request->header(ItineraryPolicy::TOKEN_HEADER)]);
-        return $itinerary->toArray() + ['can_edit' => $canEdit, 'owned' => $itinerary->isOwnedBy($user)];
+        return $itinerary->toArray() + [
+            'base_area' => $itinerary->getBaseArea()?->only(['id', 'name', 'short_name', 'latitude', 'longitude']),
+            'can_edit' => $canEdit,
+            'owned' => $itinerary->isOwnedBy($user),
+        ];
     }
 }

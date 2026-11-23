@@ -2,6 +2,7 @@
 
 namespace App\Models\Itinerary;
 
+use App\Models\Accommodation;
 use App\Models\ActivityType;
 use App\Models\Area;
 use App\Models\Itinerary\Activity;
@@ -256,6 +257,42 @@ class Itinerary extends CachedModel
             $this->base_area = Area::where('id', $this->base_area_id)->first();
         }
         return $this->base_area;
+    }
+
+    /** The traveller told us where they're staying: a pin, a name, or both. */
+    public function hasOwnLodging(): bool
+    {
+        return $this->hasLodgingPin() || filled($this->lodging_name);
+    }
+
+    public function hasLodgingPin(): bool
+    {
+        return $this->latitude !== null && $this->longitude !== null;
+    }
+
+    /**
+     * Where each day starts and ends: the pinned lodging, or the middle of the base area.
+     *
+     * @return array{lat: float, lng: float}
+     */
+    public function homePoint(): array
+    {
+        if ($this->hasLodgingPin()) {
+            return ['lat' => (float) $this->latitude, 'lng' => (float) $this->longitude];
+        }
+        $area = $this->getBaseArea();
+        return ['lat' => (float) $area->latitude, 'lng' => (float) $area->longitude];
+    }
+
+    /** A listed place to stay in the base area, used for check-in when the traveller didn't name their own. */
+    public function listedAccommodation(): ?Accommodation
+    {
+        if ($this->hasOwnLodging()) {
+            return null;
+        }
+        return Accommodation::whereHas('location', fn($q) => $q->where('locations.area_id', $this->base_area_id))
+            ->orderBy('id')
+            ->first();
     }
 
     public function getDay(int $dayNum = 0): Day

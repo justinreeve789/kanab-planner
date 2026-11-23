@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
+use Laravel\Fortify\Http\Controllers\NewPasswordController;
+use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
 use Laravel\Fortify\Http\Controllers\RegisteredUserController;
 
 /*
@@ -26,6 +28,8 @@ Route::prefix('v1')->group(function() {
         Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('throttle:auth');
         Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:auth');
         Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
+        Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->middleware('throttle:auth');
+        Route::post('/reset-password', [NewPasswordController::class, 'store'])->middleware('throttle:auth');
         Route::get('/user', fn(Request $request) => response()->json($request->user('sanctum')));
     });
 

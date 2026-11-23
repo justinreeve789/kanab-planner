@@ -38,6 +38,22 @@ class ActivityType extends Model
         return self::$ids[$name];
     }
 
+    /** The name for a type id: the reverse of idFor(), from the same memo. */
+    public static function nameFor(?int $id): ?string
+    {
+        if ($id === null) {
+            return null;
+        }
+        $name = array_search($id, self::$ids, true);
+        if ($name === false) {
+            $name = self::where('id', $id)->value('name');
+            if ($name !== null) {
+                self::$ids[$name] = $id;
+            }
+        }
+        return $name ?: null;
+    }
+
     public static function flushIdCache(): void
     {
         self::$ids = [];

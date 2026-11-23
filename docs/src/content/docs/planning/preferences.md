@@ -13,8 +13,8 @@ How far you'll go, and how full you like your days.
 
 - **Trail days.** At the low end, about a quarter of your full days include a hike. In the middle, about half. At the top, every full day.
 - **More than one hike a day.** At about 70% and above, a trail day can include a second hike, or a short evening walk.
-- **Distance from base.** Below 30%, day trips stay within about 60 miles of your base; below 40%, within about 75 miles. Higher settings open up Page, Lake Powell, St. George, Bryce Canyon and the North Rim.
-- **Repeat visits.** Below 80%, farther-flung areas are visited at most once. Kanab and Zion can come up on any day.
+- **Distance from base.** Below 30%, day trips stay within about 60 miles of where you're staying; below 40%, within about 75 miles. Higher settings open up the farther areas (from Kanab: Page, Lake Powell, St. George, Bryce Canyon and the North Rim).
+- **Repeat visits.** Below 80%, farther-flung areas are visited at most once. Your base and areas close to it (Kanab and Zion, if you stay in Kanab) can come up on any day.
 - **Events.** Local events are only added from 50% up.
 - **Meals out.** At 60% and above you'll sometimes have breakfast at a café instead of at home. Above 30%, dinner is usually at a restaurant.
 - **Trail length.** Low adventurousness (or low strenuousness) caps how long a trail can be. High adventurousness (or high strenuousness) sets a minimum, so you don't get a string of short strolls.

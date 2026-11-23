@@ -2,7 +2,7 @@
   <div>
     <div class="tooltip tooltip-primary tooltip-left hidden md:block" data-tip="Talk to a virtual assistant">
       <button class="btn btn-circle btn-primary h-16 shadow-lg w-16" @click="toggleAssistant">
-        <img src="images/icons/virtual-assistant.png"/>
+        <img src="/images/icons/virtual-assistant.png"/>
       </button>
     </div>
   </div>

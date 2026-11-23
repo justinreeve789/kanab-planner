@@ -15,6 +15,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Health check for load balancers and docker-compose: the app is up and can reach its database.
+Route::get('/up', function () {
+    \Illuminate\Support\Facades\DB::select('select 1');
+    return response()->json(['status' => 'ok']);
+})->name('health');
+
 Route::get('/docs/{path?}', DocsController::class)->where('path', '.*')->name('docs');
 
 Route::prefix('auth')->group(function() {
@@ -23,6 +29,9 @@ Route::prefix('auth')->group(function() {
 });
 
 Route::get('/image/{type}/{id}', [ImageController::class, 'getUrl']);
+
+// The link in password reset emails; the Vue app shows the form.
+Route::get('/reset-password/{token}', fn() => view('app'))->name('password.reset');
 
 Route::get('/', function () {
     return view('app');

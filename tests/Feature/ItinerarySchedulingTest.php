@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Area;
 use App\Models\Itinerary\Period;
 use App\Models\Itinerary\Timeline;
+use App\Services\ItineraryService;
 use Illuminate\Support\Facades\DB;
 use Tests\Support\ItineraryAssertions;
 use Tests\Support\RefreshTestDatabase;
@@ -65,21 +66,11 @@ class ItinerarySchedulingTest extends TestCase
         for ($run = 0; $run < self::RUNS; $run++) {
             $itinerary = $this->generateItinerary(['duration_days' => 8, 'adventurousness' => 0.9]);
             foreach ($this->fullDays($itinerary) as $day) {
-                $drive = $day['drive_minutes'];
-                if ($day['area']['id'] === Area::KANAB) {
-                    $this->assertSame(0, $drive);
-                    continue;
+                $goesOut = collect($this->activitiesOfDay($day))->contains(fn($r) => $r['activity']['resource_table'] !== null);
+                if ($day['area']['id'] !== Area::KANAB && $goesOut) {
+                    $this->assertGreaterThan(0, $day['drive_minutes'], "{$day['date']} is away but has no driving.");
                 }
-                $this->assertGreaterThan(0, $drive);
-                foreach ($this->activitiesOfDay($day) as $row) {
-                    $a = $row['activity'];
-                    if ($a['resource_table'] === null) {
-                        continue; // Home meals and notes.
-                    }
-                    $this->assertGreaterThanOrEqual(Timeline::addMinutes('07:00', $drive), $a['start_time'],
-                        "{$a['resource']['name']} on {$day['date']} starts before you could drive {$drive} min to {$day['area']['name']}.");
-                    $this->assertLessThanOrEqual('21:00:00', $a['end_time']);
-                }
+                $this->assertDrivesFit($day);
             }
         }
     }
@@ -95,12 +86,14 @@ class ItinerarySchedulingTest extends TestCase
                     continue;
                 }
                 $sawBryce = true;
-                $this->assertSame(156, $day['drive_minutes']);
-                foreach ($this->activitiesOfDay($day) as $row) {
-                    if ($row['activity']['resource_table'] === 'trails') {
-                        $this->assertGreaterThanOrEqual('09:36:00', $row['activity']['start_time'], 'Leave at 07:00 + 2.6h drive.');
-                    }
-                }
+                $activities = collect($this->activitiesOfDay($day))->pluck('activity');
+                $first = $activities->first(fn($a) => $a['resource_table'] !== null);
+                $this->assertNotNull($first);
+                $this->assertGreaterThanOrEqual(150, $first['travel_minutes'], 'North Rim to Bryce is a long drive.');
+                // The drive home is the return leg, or comes before dinner at home.
+                $homeDinner = $activities->last(fn($a) => $a['resource_table'] === null && $a['name'] === 'Dinner');
+                $this->assertGreaterThanOrEqual(150, $homeDinner['travel_minutes'] ?? $day['return_minutes']);
+                $this->assertDrivesFit($day);
             }
         }
         $this->assertTrue($sawBryce, 'Expected at least one Bryce day from a North Rim base.');
@@ -252,5 +245,34 @@ class ItinerarySchedulingTest extends TestCase
         $itinerary = $this->generateItinerary(['duration_days' => 8, 'adventurousness' => 0.9]);
         $awayDays = array_filter($itinerary['days'], fn($d) => $d['area']['id'] !== Area::KANAB);
         $this->assertSame($awayDays === [], $itinerary['total_travel_distance'] === 0);
+    }
+
+    /**
+     * Every stop starts after the previous one ends plus the drive between them, and the drive home ends by
+     * ItineraryService::LATEST_RETURN_HOME. Events have fixed times, so being late to one is flagged instead.
+     */
+    private function assertDrivesFit(array $day): void
+    {
+        $free = null;
+        foreach ($this->activitiesOfDay($day) as $row) {
+            $a = $row['activity'];
+            if ($a['travel_minutes'] === null) {
+                continue; // Notes and packed lunches aren't anywhere in particular.
+            }
+            if ($free !== null) {
+                $earliest = Timeline::addMinutes($free, $a['travel_minutes']);
+                if ($a['resource_table'] === 'events' && $a['start_time'] < $earliest) {
+                    $this->assertNotEmpty($a['travel_notes'], 'A late arrival at an event is flagged.');
+                } else {
+                    $this->assertGreaterThanOrEqual($earliest, $a['start_time'],
+                        ($a['resource']['name'] ?? $a['name']) . " on {$day['date']} starts before you could drive there.");
+                }
+            }
+            $free = max($free ?? '00:00:00', $a['end_time']);
+        }
+        if ($free !== null && !collect($day['return_notes'] ?? [])->contains('type', 'late')) {
+            $this->assertLessThanOrEqual(ItineraryService::LATEST_RETURN_HOME . ':00', Timeline::addMinutes($free, (int) $day['return_minutes']),
+                "{$day['date']} gets home too late without saying so.");
+        }
     }
 }

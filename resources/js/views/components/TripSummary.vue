@@ -17,7 +17,7 @@
               <button class="btn btn-sm" type="submit">Save</button>
               <button class="btn btn-sm btn-ghost text-white" type="button" @click="isRenaming = false">Cancel</button>
             </form>
-            <p class="text-sm text-orange-50 mt-1">Based in {{ baseAreaName }}</p>
+            <p class="text-sm text-orange-50 mt-1">Based in {{ baseAreaName }}<template v-if="itinerary.lodging_name"> · {{ itinerary.lodging_name }}</template></p>
           </div>
           <div class="flex flex-col sm:flex-row gap-2 shrink-0">
             <button class="btn btn-sm btn-outline border-white text-white hover:bg-white hover:text-red-700 hover:border-white" @click="share">
@@ -84,11 +84,14 @@ export default {
     user() {
       return this.authStore.user;
     },
+    baseArea() {
+      return this.itinerary.base_area ?? this.itinerary.days?.[0]?.area ?? null;
+    },
     baseAreaName() {
-      return this.itinerary.days?.[0]?.area?.name ?? 'Kanab, Utah';
+      return this.baseArea?.name ?? 'Kanab, Utah';
     },
     title() {
-      return this.itinerary.name || `${this.itinerary.duration_days} days around ${this.itinerary.days?.[0]?.area?.short_name ?? 'Kanab'}`;
+      return this.itinerary.name || `${this.itinerary.duration_days} days around ${this.baseArea?.short_name ?? 'Kanab'}`;
     },
     dateRange() {
       return formatDateRange(this.itinerary.start_date, this.itinerary.end_date);

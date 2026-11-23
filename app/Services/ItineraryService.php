@@ -26,7 +26,11 @@ use App\Models\Itinerary\Timeline;
 use App\Models\Location;
 use App\Models\Restaurant;
 use App\Models\Trail;
+use App\Services\Routing\Point;
+use App\Services\Routing\TravelTimes;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -41,6 +45,12 @@ class ItineraryService
     public const DAY_END = '22:00';
     public const BREAKFAST_AT_HOME = ['07:00', 30];
     public const LATEST_RETURN_HOME = '21:30';
+    /** Past this, TravelPlanner::settle() drops stops rather than just noting a late return. */
+    public const MUST_BE_HOME_BY = '22:00';
+    /** Areas this close to the base (straight line) aren't limited to one visit. Kanab to Zion is about 32. */
+    public const CORE_AREA_MILES = 35;
+    /** How far a lodging pin may be from the middle of the chosen base area. */
+    public const MAX_LODGING_MILES_FROM_BASE = 50;
 
     /** [earliest start, latest start] for each kind of thing, before drive time is applied. */
     public const TRAIL_WINDOWS = [
@@ -74,6 +84,8 @@ class ItineraryService
     public $locationService;
     public $phraseService;
     public $trailService;
+    private TravelTimes $travelTimes;
+    private TravelPlanner $travelPlanner;
     private ?Itinerary $itinerary;
 
     /** @var array<int, true> day_nums chosen as trail days for this trip. */
@@ -85,6 +97,8 @@ class ItineraryService
         $this->locationService = new LocationService();
         $this->phraseService = new PhraseService();
         $this->trailService = new TrailService();
+        $this->travelTimes = app(TravelTimes::class);
+        $this->travelPlanner = app(TravelPlanner::class);
     }
 
     public function getItinerary(): ?Itinerary
@@ -263,7 +277,8 @@ class ItineraryService
     /**
      * Fill a day on a timeline. Arrival and departure days get check-in/out and a meal; full days get, in order:
      * breakfast, priority events and trails, other events, trails, priority places, lunch and dinner. Everything is
-     * placed in a free slot, after the drive from base and early enough to drive back.
+     * placed in a free slot, after the drive from base and early enough to drive back. Then every drive in the day
+     * is timed, stop to stop, and the day adjusted to fit them (TravelPlanner::settle()).
      */
     public function fillDay(Day $day): void
     {
@@ -274,6 +289,8 @@ class ItineraryService
         } else {
             $this->fillFullDay($day);
         }
+        $this->travelPlanner->settle($this->getItinerary(), $day, self::LATEST_RETURN_HOME, self::MUST_BE_HOME_BY,
+            fn(Activity $a) => $this->canDrop($a));
         $this->addPreamble($day);
         $day->calculateASS(true);
     }
@@ -281,12 +298,11 @@ class ItineraryService
     private function fillArrivalDay(Day $day): void
     {
         $day->drive_minutes = 0;
-        $accommodation = Accommodation::find(1);
-        $checkIn = $accommodation?->check_in ?? Day::DEFAULT_ARRIVAL_TIME;
+        $itinerary = $this->getItinerary();
+        $accommodation = $itinerary->listedAccommodation();
+        $checkIn = $itinerary->getCheckIn() ?? $accommodation?->check_in ?? Itinerary::DEFAULT_CHECKIN_TIME;
         $timeline = Timeline::fromDay($day, self::DAY_START, self::DAY_END);
-        if ($accommodation) {
-            $this->addTimed($day, $timeline, $accommodation, ActivityType::CHECKING_IN, $checkIn, Timeline::addMinutes($checkIn, 30));
-        }
+        $this->addLodgingStop($day, $timeline, $accommodation, ActivityType::CHECKING_IN, $checkIn, 30);
         if (!$this->addRestaurantMeal($day, $timeline, 'dinner', ['17:30', '19:30'], self::DAY_END)) {
             $this->getItinerary()->addTask(ActivityType::COOKING, 'Dinner', $this->phraseService->getPhraseForArrivingLateFood(),
                 '18:00', '19:00', $day->day_num);
@@ -296,26 +312,42 @@ class ItineraryService
     private function fillDepartureDay(Day $day): void
     {
         $day->drive_minutes = 0;
-        $accommodation = Accommodation::find(1);
-        $checkOut = $accommodation?->check_out ?? Day::DEFAULT_DEPARTURE_TIME;
+        $itinerary = $this->getItinerary();
+        $accommodation = $itinerary->listedAccommodation();
+        $checkOut = $itinerary->getCheckOut() ?? $accommodation?->check_out ?? Itinerary::DEFAULT_CHECKOUT_TIME;
         $timeline = Timeline::fromDay($day, self::DAY_START, self::DAY_END);
         $breakfastStart = Timeline::addMinutes($checkOut, -90);
         $this->addHomeMeal($day, $timeline, 'breakfast', $breakfastStart);
+        $this->addLodgingStop($day, $timeline, $accommodation, ActivityType::CHECKING_OUT, $checkOut, 15);
+    }
+
+    /**
+     * Check in or out: at a listed accommodation when there is one, otherwise at the traveller's own lodging
+     * ("Check in at Zion Canyon Lodge", or "your lodging" when they only dropped a pin or chose an area).
+     */
+    private function addLodgingStop(Day $day, Timeline $timeline, ?Accommodation $accommodation, string $type, string $start, int $minutes): void
+    {
+        $end = Timeline::addMinutes($start, $minutes);
         if ($accommodation) {
-            $this->addTimed($day, $timeline, $accommodation, ActivityType::CHECKING_OUT, $checkOut, Timeline::addMinutes($checkOut, 15));
+            $this->addTimed($day, $timeline, $accommodation, $type, $start, $end);
+            return;
         }
+        $itinerary = $this->getItinerary();
+        $place = filled($itinerary->lodging_name) ? $itinerary->lodging_name : 'your lodging';
+        $name = ($type === ActivityType::CHECKING_IN ? 'Check in at ' : 'Check out of ') . $place;
+        $itinerary->addTask($type, $name, null, $start, $end, $day->day_num);
+        $timeline->reserve($start, $end);
     }
 
     private function fillFullDay(Day $day): void
     {
         $itinerary = $this->getItinerary();
-        $drive = $this->drivingMinutes($itinerary->getBaseAreaId(), $day->area_id);
-        $day->drive_minutes = $drive;
+        // A long priority trail in Zion starts at 08:00 to beat the crowds, so breakfast moves earlier.
+        $priorityTrail = $this->nextPriorityTrailFor($day);
+        $drive = $this->driveToAreaMinutes($day, $priorityTrail);
         $timeline = Timeline::fromDay($day, self::DAY_START, self::DAY_END);
         $returnBy = Timeline::addMinutes(self::LATEST_RETURN_HOME, -$drive);
 
-        // A long priority trail in Zion starts at 08:00 to beat the crowds, so breakfast moves earlier.
-        $priorityTrail = $this->nextPriorityTrailFor($day);
         $priorityPeriod = $priorityTrail ? $this->trailService->getBestPeriodOfDayForTrail($priorityTrail) : null;
         $earlyZionStart = $priorityTrail && $priorityPeriod === Period::MORNING && $priorityTrail->area_id === Area::ZION;
 
@@ -397,7 +429,9 @@ class ItineraryService
         $from = $this->later($from, $afterActivities);
 
         $eatOut = $this->isAtBase($day) || $this->getItinerary()->getAdventurousness() >= 0.3 || mt_rand(0, 1) === 1;
-        if ($eatOut && $this->addRestaurantMeal($day, $timeline, 'dinner', [$from, $to], $this->later($returnBy, '21:00'))) {
+        // Away from base, dinner has to finish in time for the drive home.
+        $latestEnd = $this->isAtBase($day) ? $this->later($returnBy, '21:00') : $returnBy;
+        if ($eatOut && $this->addRestaurantMeal($day, $timeline, 'dinner', [$from, $to], $latestEnd)) {
             return;
         }
         $homeFrom = $this->later($from, Timeline::addMinutes($afterActivities, $drive));
@@ -407,7 +441,7 @@ class ItineraryService
             return;
         }
         if (!$eatOut) {
-            $this->addRestaurantMeal($day, $timeline, 'dinner', [$from, $to], $this->later($returnBy, '21:00'));
+            $this->addRestaurantMeal($day, $timeline, 'dinner', [$from, $to], $latestEnd);
         }
     }
 
@@ -706,14 +740,22 @@ class ItineraryService
             $query->where('id', '!=', Area::ST_GEORGE);
         }
 
-        // Below 0.8, outlying areas (anything but Kanab, Zion and the base) are visited at most once.
+        // Below 0.8, outlying areas (anything but the base and its close neighbours) are visited at most once.
         if ($adventurousness < 0.8) {
+            $core = $this->coreAreaIds($baseArea);
             $counts = array_count_values($visitedAreaIds);
-            $exclude = array_filter(array_keys($counts), fn($id) => !in_array($id, [Area::KANAB, Area::ZION, $baseArea->id], true));
+            $exclude = array_filter(array_keys($counts), fn($id) => !in_array($id, $core, true));
             $query->whereNotIn('id', $exclude);
         }
 
         return $query->get();
+    }
+
+    /** Areas close enough to the base to come up any number of times (from Kanab: Kanab and Zion). */
+    private function coreAreaIds(Area $baseArea): array
+    {
+        return Area::whereProximity($baseArea->latitude, $baseArea->longitude, self::CORE_AREA_MILES)
+            ->pluck('id')->push($baseArea->id)->unique()->values()->all();
     }
 
     /**
@@ -779,14 +821,54 @@ class ItineraryService
     /**
      * Round trips from base to each away day's area, in miles.
      */
+    /** Every drive of the trip, stop to stop, in miles. */
     public function estimateTotalTravelDistance(): float
     {
-        $baseAreaId = $this->getItinerary()->getBaseAreaId();
         $total = 0.0;
         foreach ($this->getItinerary()->getDays() as $day) {
-            $total += 2 * $this->drivingMiles($baseAreaId, $day->area_id);
+            $total += (float) $day->return_miles;
+            foreach ($day->getActivities() as $activity) {
+                $total += (float) $activity->travel_miles;
+            }
         }
         return round($total);
+    }
+
+    /**
+     * The drive from where they're staying to the day's area, for planning the day before its stops are known
+     * (TravelPlanner::settle() then times the real drives). Curated area_distances rows win when there's no router
+     * and no lodging pin.
+     */
+    private function driveToAreaMinutes(Day $day, ?Trail $firstStop = null): int
+    {
+        if ($this->isAtBase($day)) {
+            return 0;
+        }
+        $itinerary = $this->getItinerary();
+        $home = $itinerary->homePoint();
+        $area = Area::find($day->area_id);
+        $to = ($firstStop ? Point::make($firstStop->latitude, $firstStop->longitude) : null)
+            ?? new Point($area->latitude, $area->longitude);
+        $minutes = $this->travelTimes->leg(new Point($home['lat'], $home['lng']), $to,
+            CarbonImmutable::parse($day->date . ' 08:00', config('routing.timezone')))->minutes;
+
+        // Without a router, a curated area-to-area time (area_distances) is the better guess when it's longer.
+        if (!$this->travelTimes->usesRouter() && !$itinerary->hasLodgingPin()) {
+            $minutes = max($minutes, $this->drivingMinutes($itinerary->getBaseAreaId(), $day->area_id));
+        }
+        return $minutes;
+    }
+
+    /** Stops TravelPlanner::settle() may drop to get home in time: anything but meals, lodging and wish-list picks. */
+    private function canDrop(Activity $activity): bool
+    {
+        $itinerary = $this->getItinerary();
+        return match ($activity->resource_table) {
+            'trails' => !in_array($activity->resource_id, $itinerary->getTrailPriorities(), false),
+            'events' => !in_array($activity->resource_id, $itinerary->getEventPriorities(), false),
+            'locations' => !in_array($activity->resource_id, $itinerary->getLocationPriorities(), false),
+            default => false,
+        };
     }
 
     private function rememberResource(?string $table, $id): void
@@ -869,8 +951,6 @@ class ItineraryService
         $itinerary->setCheckOutTime($request->get('check_out'));
         $itinerary->setDurationDays($request->get('duration_days'));
         $itinerary->setEndDate($request->get('end_date'));
-        $itinerary->setLatitude($request->get('lat'));
-        $itinerary->setLongitude($request->get('lng'));
         $itinerary->setStartDate($request->get('start_date'));
 
         // Some methods should be called after others have been set.
@@ -882,11 +962,11 @@ class ItineraryService
         $itinerary->setMonth($month);
         $itinerary->setSeason($request->get('season'));
 
-        if (!$itinerary->getLatitude() || !$itinerary->getLongitude()) {
-            $area = $itinerary->getBaseArea();
-            $itinerary->setLatitude($area?->latitude);
-            $itinerary->setLongitude($area?->longitude);
-        }
+        // Where they're staying. Without a pin, days start and end in the middle of the base area (Itinerary::homePoint()).
+        $itinerary->lodging_name = filled($request->get('lodging_name')) ? trim($request->get('lodging_name')) : null;
+        $itinerary->setLatitude($request->filled('lat') ? (float) $request->get('lat') : null);
+        $itinerary->setLongitude($request->filled('lng') ? (float) $request->get('lng') : null);
+        $this->ensureLodgingIsInBaseArea();
 
         $itinerary->setAdventurousness($request->get('adventurousness'));
         $itinerary->setSolitariness($request->get('solitariness'));
@@ -901,6 +981,57 @@ class ItineraryService
         $itinerary->setAverageHikingSpeed($request->get('average_hiking_speed'));
 
         $this->determineAndSetMissingDates();
+        $this->ensureBaseIsOpen(!$request->filled('start_date') && !$request->filled('month'), $preferredMonths);
+    }
+
+    /** A pin far from the chosen base area is almost certainly a mistake, and would make every drive wrong. */
+    private function ensureLodgingIsInBaseArea(): void
+    {
+        $itinerary = $this->getItinerary();
+        $base = $itinerary->getBaseArea();
+        if (!$base || !$itinerary->hasLodgingPin()) {
+            return;
+        }
+        $miles = $this->locationService->haversineDistance(
+            $base->latitude, $base->longitude, $itinerary->getLatitude(), $itinerary->getLongitude());
+        if ($miles > self::MAX_LODGING_MILES_FROM_BASE) {
+            throw ValidationException::withMessages(['lat' => [sprintf(
+                'That pin is %d miles from %s. Choose the area you\'re staying in, or move the pin.', round($miles), $base->name)]]);
+        }
+    }
+
+    /**
+     * The base has to be open for the whole stay (the North Rim closes for the winter). When we picked the dates
+     * ourselves, from the preferred months, we try other dates first; otherwise the traveller has to choose.
+     */
+    private function ensureBaseIsOpen(bool $datesArePicked, array $preferredMonths): void
+    {
+        $itinerary = $this->getItinerary();
+        $base = $itinerary->getBaseArea();
+        $isClosed = fn() => $itinerary->getStartDate()
+            && ($base->isClosedOn($itinerary->getStartDate()) || $base->isClosedOn($itinerary->getEndDate() ?? $itinerary->getStartDate()));
+        if (!$base || !$isClosed()) {
+            return;
+        }
+
+        if ($datesArePicked) {
+            $months = $preferredMonths ?: range(1, 12);
+            shuffle($months);
+            foreach ($months as $month) {
+                for ($attempt = 0; $attempt < 3; $attempt++) {
+                    $itinerary->setStartDate(null);
+                    $itinerary->setEndDate(null);
+                    $itinerary->setMonth($month);
+                    $this->determineAndSetMissingDates();
+                    if (!$isClosed()) {
+                        return;
+                    }
+                }
+            }
+        }
+
+        throw ValidationException::withMessages(['base_area_id' => [sprintf(
+            '%s is closed %s. Choose somewhere else to stay, or different dates.', $base->name, $base->closureDescription())]]);
     }
 
     /**
@@ -973,7 +1104,7 @@ class ItineraryService
         $minimumDate = clone $currentDate;
         $minimumDate->add(new \DateInterval('P2W'));
 
-        $randomDay = mt_rand(1, cal_days_in_month(CAL_GREGORIAN, $month, $targetYear));
+        $randomDay = mt_rand(1, (int) date('t', mktime(0, 0, 0, $month, 1, $targetYear)));
         $randomDate = new \DateTime("$targetYear-$month-$randomDay");
         while ($randomDate < $minimumDate) {
             $randomDate->add(new \DateInterval('P1D'));

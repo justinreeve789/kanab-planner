@@ -144,7 +144,8 @@ return [
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_CACHE_DB', '1'),
-            'scheme' => 'tls',
+            // Managed Redis (production) needs TLS; the Redis in docker-compose.yml is plain tcp.
+            'scheme' => env('REDIS_CACHE_SCHEME', 'tls'),
         ],
     ],
 ];

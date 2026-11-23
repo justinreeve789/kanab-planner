@@ -18,7 +18,7 @@
         </nav>
 
         <div class="space-y-4">
-          <Day v-for="day in itinerary.days" :key="day.id" :day="day" :base-area="baseArea" :can-edit="itinerary.can_edit" />
+          <Day v-for="day in itinerary.days" :key="day.id" :day="day" :home-name="homeName" :can-edit="itinerary.can_edit" />
         </div>
       </template>
 
@@ -52,8 +52,8 @@ export default {
     itinerary() {
       return this.itineraryStore.itinerary;
     },
-    baseArea() {
-      return this.itineraryStore.baseArea;
+    homeName() {
+      return this.itineraryStore.homeName;
     },
   },
   watch: {
@@ -136,6 +136,7 @@ export default {
         trail_ids: p.trailIds,
         preferred_activity_types: p.preferredActivityTypes,
         preferred_months: p.dateRange ? [] : p.preferredMonths,
+        ...p.baseParams(),
       };
       // Anything in the address bar (e.g. ?base_area_id=7) overrides the questionnaire.
       new URLSearchParams(window.location.search).forEach((value, key) => {

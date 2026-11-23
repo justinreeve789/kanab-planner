@@ -37,6 +37,14 @@ export const useAuthStore = defineStore('auth', {
       await axiosHelper.post('/auth/register', fields);
       return this.attempt_user();
     },
+    /** Always resolves with the same message whether or not the address has an account. */
+    async requestPasswordReset(email) {
+      const { data } = await axiosHelper.post('/auth/forgot-password', { email });
+      return data.message;
+    },
+    async resetPassword({ token, email, password, password_confirmation }) {
+      await axiosHelper.post('/auth/reset-password', { token, email, password, password_confirmation });
+    },
     async logout() {
       await axiosHelper.post('/auth/logout');
       this.$reset();

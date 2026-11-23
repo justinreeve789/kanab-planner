@@ -3,9 +3,11 @@ title: The trip questionnaire
 description: Each of the five steps, and how your answers shape the itinerary.
 ---
 
-The questionnaire has five steps, shown along the top of the page: **Dates**, **Activities**, **About You**, **Destinations** and **Itinerary**. Use **Previous** and **Next** to move between them. Nothing is final until you choose **Create itinerary**, and you can come back to change your answers at any time.
+The questionnaire has five steps, shown along the top of the page: **When & Where**, **Activities**, **About You**, **Destinations** and **Itinerary**. Use **Previous** and **Next** to move between them. Nothing is final until you choose **Create itinerary**, and you can come back to change your answers at any time.
 
-## Dates
+## When & Where
+
+### Your dates
 
 ![Choosing dates, or months if you're flexible](../../../assets/screenshots/questionnaire-dates.png)
 
@@ -14,8 +16,18 @@ The questionnaire has five steps, shown along the top of the page: **Dates**, **
 
 Your first day is an arrival day: you check in around 4:00 PM and go out for dinner. Your last day is a departure day: breakfast, then check-out at 10:00 AM. Everything else happens on the days in between, so a trip needs at least three days to include a full day of activities.
 
+### Where you're staying
+
+![Choosing where you'll stay, and pinning your lodging](../../../assets/screenshots/questionnaire-base.png)
+
+Under **Where are you staying?**, choose the area you'll stay in. Kanab is chosen to start with. Every day starts and ends there, so this decides how far each day's drives are.
+
+If you know exactly where you're staying, tap that spot on the map under **Know exactly where?** and type its name, for example "Cliffrose Lodge". Your check-in then reads "Check in at Cliffrose Lodge", and drives are worked out from that spot instead of the middle of the area. To start again, choose **Remove pin**. Choosing a different area also removes the pin.
+
+See [Where you stay](/docs/planning/areas/#where-you-stay) for how your choice changes the trip.
+
 :::note[Seasons]
-The Grand Canyon's North Rim is closed from December 1 to May 14. Trips in those months never send you there. See [Destinations and areas](/docs/planning/areas/).
+The Grand Canyon's North Rim is closed from December 1 to May 14. Trips in those months never send you there, and you can't stay there: if you pick dates in the closure, the North Rim can't be chosen as your base. See [Destinations and areas](/docs/planning/areas/).
 :::
 
 ## Activities

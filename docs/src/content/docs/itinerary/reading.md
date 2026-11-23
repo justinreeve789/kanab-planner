@@ -25,7 +25,7 @@ Below the summary, a row of **day buttons** shows each day's number and area. Se
 Each day is a card. The heading shows:
 
 - the **date**;
-- the **day number** and, on day trips, the **drive** each way;
+- the **day number** and the day's total **driving**, with **road alerts** if any of its drives have one;
 - the day's **area**;
 - a short summary, such as "2 hikes (6 h 18 min) · 2 meals out";
 - the **weather** forecast, once the date is close enough for a forecast (about a week ahead), on larger screens.
@@ -48,7 +48,7 @@ Each item on the timeline shows its **start time** in bold and its **end time** 
 | **Lodging** | Indigo | Checking in or out. |
 | **Note** | Grey | A reminder, such as **Pack a lunch**, or something you added yourself. |
 
-Grey **Drive** lines between items show when you're on the road, for example "Drive to Zion · about 49 min" and "Drive back to Kanab".
+Grey **Drive** lines between items show each drive: where to, how long and how far, for example "Drive to Angels Landing · 52 min · 41.2 mi", and "Drive back to Cliffrose Lodge" at the end of the day. Closures, roadwork and late returns appear as alerts under the drive. See [Drive times and road alerts](/docs/itinerary/drives/).
 
 ### More details
 

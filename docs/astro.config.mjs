@@ -38,6 +38,7 @@ export default defineConfig({
           items: [
             { label: 'Reading your itinerary', slug: 'itinerary/reading' },
             { label: 'Editing a day', slug: 'itinerary/editing' },
+            { label: 'Drive times and road alerts', slug: 'itinerary/drives' },
             { label: 'Sharing and who can edit', slug: 'itinerary/sharing' },
           ],
         },

@@ -92,7 +92,7 @@ class LocationService
         return $parsed;
     }
 
-    private function haversineDistance($lat1, $lon1, $lat2, $lon2): float
+    public function haversineDistance($lat1, $lon1, $lat2, $lon2): float
     {
         $radiusOfEarth = 3959;
         $latitudeOne = deg2rad($lat1);
