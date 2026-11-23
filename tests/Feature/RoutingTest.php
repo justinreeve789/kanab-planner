@@ -165,6 +165,9 @@ class RoutingTest extends TestCase
         $onRoute = $this->road[5];
         $this->roadEvent(['event_type' => RoadEvent::ROADWORK, 'roadway' => 'US-89', 'description' => 'Paving, one lane open',
             'latitude' => $onRoute->lat + 0.001, 'longitude' => $onRoute->lng, 'starts_at' => '2027-06-01 00:00:00', 'ends_at' => '2027-06-30 00:00:00']);
+        // The same project reported again further along: one note, one delay.
+        $this->roadEvent(['event_type' => RoadEvent::ROADWORK, 'roadway' => 'US-89', 'description' => 'Paving, one lane open',
+            'latitude' => $this->road[6]->lat, 'longitude' => $this->road[6]->lng, 'starts_at' => '2027-06-01 00:00:00', 'ends_at' => '2027-06-30 00:00:00']);
         // Off the route, and roadwork on the route that has already finished.
         $this->roadEvent(['event_type' => RoadEvent::ROADWORK, 'latitude' => 37.6, 'longitude' => -112.2, 'starts_at' => '2027-06-01 00:00:00', 'ends_at' => '2027-06-30 00:00:00']);
         $this->roadEvent(['event_type' => RoadEvent::ROADWORK, 'latitude' => $onRoute->lat, 'longitude' => $onRoute->lng, 'starts_at' => '2027-05-01 00:00:00', 'ends_at' => '2027-05-20 00:00:00']);

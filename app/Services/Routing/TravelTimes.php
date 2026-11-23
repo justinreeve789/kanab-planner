@@ -111,21 +111,28 @@ class TravelTimes
             $noWayThrough = collect($leg->notes)->contains(fn($note) => $note['closure']);
             $prefix = $noWayThrough ? '' : 'Detour around a closure. ';
         }
-        foreach ($blocking as $event) {
+        foreach ($blocking->unique(fn(RoadEvent $event) => $event->summary()) as $event) {
             $leg = $leg->withNote(['type' => RoadEvent::CLOSURES, 'closure' => true, 'text' => $prefix . $event->summary()]);
         }
         return $leg;
     }
 
-    /** Roadwork, lane closures and incidents on the route each add a delay. */
+    /**
+     * Roadwork, lane closures and incidents on the route each add a delay. Feeds often report one project at several
+     * points with the same text; that counts once.
+     */
     private function applyRoadEvents(Leg $leg, Point $from, Point $to, string $date): Leg
     {
         $events = RoadEvent::query()->where('is_full_closure', false)->activeOn($date)->around($from, $to, 5)->orderBy('id')->get();
+        $seen = array_column($leg->notes, 'text');
         foreach ($events as $event) {
-            if ($this->affects($event, $leg, $from, $to)) {
-                $delay = (int) (config('routing.road_events.delay_minutes.' . $event->event_type) ?? 10);
-                $leg = $leg->withDelay($delay, ['type' => $event->event_type, 'closure' => false, 'text' => $event->summary()]);
+            $summary = $event->summary();
+            if (in_array($summary, $seen, true) || !$this->affects($event, $leg, $from, $to)) {
+                continue;
             }
+            $seen[] = $summary;
+            $delay = (int) (config('routing.road_events.delay_minutes.' . $event->event_type) ?? 10);
+            $leg = $leg->withDelay($delay, ['type' => $event->event_type, 'closure' => false, 'text' => $summary]);
         }
         return $leg;
     }

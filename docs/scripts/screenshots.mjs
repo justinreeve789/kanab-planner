@@ -4,6 +4,9 @@
 //   npx playwright install chromium
 //   npm run screenshots          # or APP_URL=https://staging.example npm run screenshots
 //
+// drive-alerts.png needs a road event on one of the drives; without one it is skipped. For a demo, add a
+// roadwork row to road_events near a Zion restaurant, run this, then delete the row.
+//
 // Images are written to src/assets/screenshots/.
 import { chromium } from 'playwright';
 import sharp from 'sharp';
@@ -61,6 +64,15 @@ await go('/questionnaire-dates');
 await page.getByText("I don't have specific dates").click();
 await shot('questionnaire-dates');
 await page.getByText("I don't have specific dates").click();
+await page.waitForSelector('.home-base-option');
+await page.getByRole('radio', { name: /^Zion/ }).click();
+const map = page.locator('.leaflet-container');
+await map.scrollIntoViewIfNeeded();
+const mapBox = await map.boundingBox();
+await page.mouse.click(mapBox.x + mapBox.width / 2 + 40, mapBox.y + mapBox.height / 2 - 20);
+await page.fill('#lodging-name', 'Cliffrose Lodge');
+await page.waitForTimeout(1200);
+await save('questionnaire-base', await page.locator('section[aria-labelledby="home-base-heading"]').screenshot());
 await go('/questionnaire-activities');
 await shot('questionnaire-activities');
 await go('/questionnaire-about');
@@ -153,6 +165,8 @@ await shot('assistant');
 // Accounts.
 await go('/login');
 await shot('sign-in');
+await go('/forgot-password?email=jordan%40example.test');
+await shot('forgot-password');
 await context.clearCookies();
 await page.evaluate(() => localStorage.clear());
 await go('/register');
@@ -166,6 +180,27 @@ await page.waitForTimeout(1500);
 await go('/trips');
 await page.waitForTimeout(1500);
 await shot('my-trips');
+
+// A day trip whose drives have a road alert, staying in Zion.
+await clearItinerary();
+let alertDay = null;
+for (let attempt = 0; attempt < 6 && !alertDay; attempt++) {
+  await context.clearCookies();
+  await go('/?base_area_id=7&adventurousness=0.7&start_date=2027-06-01&duration_days=4');
+  await page.waitForSelector('.timeline-item', { timeout: 60000 });
+  const days = page.locator('.day-card', { has: page.locator('.drive-note') });
+  if (await days.count()) {
+    alertDay = days.first();
+  }
+}
+if (alertDay) {
+  await page.addStyleTag({ content: '.day-nav { position: static !important; }' });
+  await page.setViewportSize(tall);
+  await shotOf('drive-alerts', alertDay);
+  await page.setViewportSize(desktop);
+} else {
+  console.log('skipped drive-alerts: no road events on any drive');
+}
 
 // Phone layout.
 const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true });

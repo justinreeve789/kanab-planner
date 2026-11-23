@@ -19,6 +19,8 @@ Every change is saved straight away. There's no save button for the whole trip.
 
 The item moves to its new place on the timeline. Trip Planner doesn't stop you from overlapping other items, so check the rest of the day afterwards.
 
+After any change, the day's drives are worked out again. Trip Planner never moves your times for you, but if there isn't enough time to drive to a stop, the drive before it says how late you might be.
+
 ## Swap an item for something similar
 
 1. Select **⋯** on a hike, meal, event or place.
