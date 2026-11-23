@@ -25,6 +25,8 @@ const routes = [
   { path: '/', component: Itinerary, name: 'itinerary-new' },
   { path: '/login', component: UserPage, name: 'login' },
   { path: '/register', component: UserPage, name: 'register' },
+  { path: '/forgot-password', component: UserPage, name: 'forgot-password' },
+  { path: '/reset-password/:token', component: UserPage, name: 'reset-password' },
   { path: '/assistant', component: AssistantPage, name: 'assistant' },
   { path: '/trips', component: TripsPage, name: 'trips' },
   { path: '/search' , component: ResourcePage, name: 'search', props: { page: 'search', title: 'Search' } },

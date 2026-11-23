@@ -24,6 +24,9 @@ Route::prefix('auth')->group(function() {
 
 Route::get('/image/{type}/{id}', [ImageController::class, 'getUrl']);
 
+// The link in password reset emails; the Vue app shows the form.
+Route::get('/reset-password/{token}', fn() => view('app'))->name('password.reset');
+
 Route::get('/', function () {
     return view('app');
 })->name('application');
