@@ -15,8 +15,10 @@ class CustomQueryBuilder extends Builder
     public function betweenDates($startDateTime, $endDateTime)
     {
         return $this->whereHas('dates', function($query) use ($startDateTime, $endDateTime) {
-            $query->whereRaw("DATE_FORMAT(?, '%Y-%m-%d %h-%i-%s') >= COALESCE(event_dates.start_date, DATE_FORMAT(event_dates.start_date, '%Y-%m-%d 10:00:00'))", [$startDateTime]);
-            $query->whereRaw("DATE_FORMAT(?, '%Y-%m-%d %h-%i-%s') <= COALESCE(
+            // The bound values used to go through DATE_FORMAT(?, '%Y-%m-%d %h-%i-%s'): %h is the 12-hour clock, so a
+            // 17:00 window was compared as 05:00. Compare the datetimes directly.
+            $query->whereRaw("CAST(? AS DATETIME) >= event_dates.start_date", [$startDateTime]);
+            $query->whereRaw("CAST(? AS DATETIME) <= COALESCE(
                 event_dates.end_date,
                 CASE
                     WHEN TIME(event_dates.start_date) >= '22:00:00'

@@ -97,7 +97,7 @@ class Period extends CachedModel
     {
         $activities = new Collection();
         foreach ($this->activities as $activity) {
-            if ($activity->activity_type->name === $activityType) {
+            if ($activity->activity_type?->name === $activityType) {
                 $activities->add($activity);
             }
         }

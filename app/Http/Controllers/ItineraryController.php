@@ -51,6 +51,9 @@ class ItineraryController extends Controller
      */
     public function createItinerary(Request $request)
     {
+        // The service holds the itinerary being built, so it must not outlive the request. Laravel caches controller
+        // instances on the route, so a constructor-built service would leak state between requests (tests, Octane).
+        $this->itineraryService = new ItineraryService();
         $this->itineraryService->setupItinerary($request);
         $this->itineraryService->assignDaysForAreas($this->getItinerary()->getUseFirstDay(), $this->getItinerary()->getUseLastDay());
         $this->itineraryService->shuffleDays();
@@ -135,6 +138,51 @@ class ItineraryController extends Controller
                 }
             }
         }
+    }
+
+    public function getDay(Request $request, string $dayId)
+    {
+        return Day::with(['periods.activities'])->findOrFail($dayId);
+    }
+
+    public function getActivity(Request $request, string $activityId)
+    {
+        return Activity::findOrFail($activityId);
+    }
+
+    /*
+     * The routes below were registered without controller methods, so every call was a 500. They stay explicit
+     * 501s until itineraries have an owner to authorize against (user_itineraries exists, but nothing checks it
+     * yet); unauthenticated deletes/edits keyed only by UUID shouldn't ship.
+     */
+    public function updateDay(Request $request, string $dayId)
+    {
+        return $this->notImplemented();
+    }
+
+    public function deleteDay(Request $request, string $dayId)
+    {
+        return $this->notImplemented();
+    }
+
+    public function updateActivity(Request $request, string $activityId)
+    {
+        return $this->notImplemented();
+    }
+
+    public function deleteActivity(Request $request, string $activityId)
+    {
+        return $this->notImplemented();
+    }
+
+    public function deleteItinerary(Request $request, string $id)
+    {
+        return $this->notImplemented();
+    }
+
+    private function notImplemented()
+    {
+        return response()->json(['errors' => 'Not implemented yet'], 501);
     }
 
     /**

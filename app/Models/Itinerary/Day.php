@@ -28,6 +28,7 @@ class Day extends CachedModel
 
     protected $appends = [
         'area',
+        'preamble',
         'weather',
         'formatted_abbr_month_day',
         'formatted_date',
@@ -49,12 +50,13 @@ class Day extends CachedModel
         'formatted_day_of_week',
         'formatted_month_day',
         'formatted_year',
+        'preamble',
         'weather',
     ];
     protected $table = 'itinerary_days';
 
     public $activities;
-    public $preamble;
+    private ?string $preamble = null;
 
     /** @var Period[] $periods */
 
@@ -145,9 +147,10 @@ class Day extends CachedModel
             get: function() {
                 return Area::find($this->area_id);
             },
-            set: function(Area $area) {
-                $this->area_id = $area->id;
-            }
+            // Return the attributes to write. Assigning $this->area_id inside the closure is silently discarded:
+            // Eloquent merges the closure's return value over a copy of the attributes taken before it ran, so
+            // area_id stayed null for every day built with ['area' => $area].
+            set: fn(?Area $area) => ['area_id' => $area?->id]
         );
     }
 
@@ -169,45 +172,42 @@ class Day extends CachedModel
     /**
      * Since a trail is likely to be the focal point of the day, weight it heavier than other activities when
      * calculating the average.
+     *
+     * Each activity contributes the resource_data row for its resource (matching the activity type when there is
+     * one). Tasks without a resource (cooking, etc.) don't count. Pass $force to recompute after the day changes.
      */
-    public function calculateASS(): array
+    public function calculateASS(bool $force = false): array
     {
-        if ($this->stats) {
+        if ($this->stats && !$force) {
             return $this->stats;
         }
-        $stats = ['adventurousness' => 0, 'solitariness' => 0, 'strenuousness' => 0];
-        $activities = $this->getActivities();
-        $count = count($activities);
-        foreach ($activities as $activity) {
-            if (empty($activity->data->data)) {
-                $count--;
+        $props = ['adventurousness', 'solitariness', 'strenuousness'];
+        $weights = ['adventurousness' => 1.25, 'solitariness' => 1, 'strenuousness' => 1.5];
+        $sums = array_fill_keys($props, 0.0);
+        $totals = array_fill_keys($props, 0.0);
+
+        foreach ($this->getActivities() as $activity) {
+            $resource = $activity->resource;
+            if (!$resource || !isset($resource->data) || $resource->data->isEmpty()) {
                 continue;
             }
-            $advModifier = 1;
-            $solModifier = 1;
-            $strModifier = 1;
-            if ($activity->activityType == 'hiking') {
-                $advModifier = 1.25;
-                $strModifier = 1.5;
-            }
-            if (isset($activity->data->data[0])) {
-//                $stats['adventurousness'] += $advModifier * $activity->data->data[0]->adventurousness ??
-//                    $activity->adventurousness() ?? Activity::DEFAULT_ADVENTUROUSNESS;
-//                $stats['solitariness'] += $solModifier * isset($activity->data->data[0]) ??
-//                    $activity->data->data[0]->solitariness ??
-//                    $activity->solitariness() ?? Activity::DEFAULT_SOLITARINESS;
-//                $stats['strenuousness'] += $strModifier * isset($activity->data->data[0]) ??
-//                    $activity->data->data[0]->strenuousness ??
-//                    $activity->strenuousness() ?? Activity::DEFAULT_STRENUOUSNESS;
-                $stats['adventurousness'] += $advModifier * $activity->data->data[0]->adventurousness ?? Activity::DEFAULT_ADVENTUROUSNESS;
-                $stats['solitariness'] += $solModifier * $activity->data->data[0]->solitariness ?? Activity::DEFAULT_SOLITARINESS;
-                $stats['strenuousness'] += $strModifier * $activity->data->data[0]->strenuousness ?? Activity::DEFAULT_STRENUOUSNESS;
+            $data = $resource->data->firstWhere('activity_type_id', $activity->activity_type_id)
+                ?? $resource->data->first();
+            $isHiking = $activity->activity_type?->name === 'hiking';
+
+            foreach ($props as $prop) {
+                if ($data->{$prop} === null) {
+                    continue;
+                }
+                $weight = $isHiking ? $weights[$prop] : 1;
+                $sums[$prop] += $weight * (float) $data->{$prop};
+                $totals[$prop] += $weight;
             }
         }
-        if ($count > 0) {
-            $stats['adventurousness'] = round($stats['adventurousness'] / $count, 2);
-            $stats['solitariness'] = round($stats['solitariness'] / $count, 2);
-            $stats['strenuousness'] = round($stats['strenuousness'] / $count, 2);
+
+        $stats = [];
+        foreach ($props as $prop) {
+            $stats[$prop] = $totals[$prop] > 0 ? round(min(1, max(0, $sums[$prop] / $totals[$prop])), 2) : 0;
         }
         $this->stats = $stats;
         return $stats;
@@ -227,7 +227,12 @@ class Day extends CachedModel
         return $activities;
     }
 
-    public function getPreamble(): string
+    public function getPreamble(): ?string
+    {
+        return $this->preamble;
+    }
+
+    public function getPreambleAttribute(): ?string
     {
         return $this->preamble;
     }
@@ -238,14 +243,12 @@ class Day extends CachedModel
             ->whereDate('start', '=', Carbon::parse($this->date)->toDateString())
             ->get();
         foreach ($weather as $w) {
-            if (Carbon::parse($w->start)->toTimeString() >= '12:00:00') {
+            if (!isset($shortForecast) && Carbon::parse($w->start)->toTimeString() >= '12:00:00') {
                 $shortForecast = $w->short_forecast;
                 $detailedForecast = $w->detailed_forecast;
             }
-            if (isset($maxTemperature) && $maxTemperature < $w->temperature) {
-                $minTemperature = $maxTemperature;
-            }
-            $maxTemperature = $w->temperature;
+            $maxTemperature = isset($maxTemperature) ? max($maxTemperature, $w->temperature) : $w->temperature;
+            $minTemperature = isset($minTemperature) ? min($minTemperature, $w->temperature) : $w->temperature;
         }
 
         return (object) [
@@ -277,10 +280,11 @@ class Day extends CachedModel
     {
         foreach ($this->periods as $period) {
             foreach ($period->activities as $activity) {
-                if ($activity->activityType === $activityType) {
+                if ($activity->activity_type?->name === $activityType) {
                     return true;
                 }
-            }        }
+            }
+        }
         return false;
     }
 
@@ -293,7 +297,8 @@ class Day extends CachedModel
     {
         foreach ($this->periods as $period) {
             foreach ($period->activities as $activity) {
-                if ($activity->data && get_class($activity->data) === $resourceClass) {
+                $resource = $activity->resource;
+                if ($resource && get_class($resource) === $resourceClass) {
                     return true;
                 }
             }
@@ -329,7 +334,7 @@ class Day extends CachedModel
 
         switch ($activityType) {
             case 'cooking':
-                if ($this->periods()[$period]->hasRestaurant()) {
+                if ($this->getPeriod($period)->hasRestaurant()) {
                     return false;
                 }
                 break;

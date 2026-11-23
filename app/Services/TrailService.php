@@ -24,21 +24,19 @@ class TrailService
      */
     public function getRandomTrailForPeriod($areaId, $period, $itinerary = null, $existingTrails = []): ?Trail
     {
-        $totalTrailsForArea = Trail::where('area_id', $areaId)->get()->count();
+        $totalTrailsForArea = Trail::where('area_id', $areaId)->count();
         $trails = Trail::query();
-        $adventurousness = $itinerary->getAdventurousness();
-        $solitariness = $itinerary->getSolitariness();
-        $strenuousness = $itinerary->getStrenuousness();
         if ($itinerary !== null) {
+            // Consider the closest-matching 10–20 trails (~1/9th of the area), then pick at random among them.
             $trails = $trails->sortByDeviation([
-                'adventurousness' => $adventurousness,
-                'solitariness' => $solitariness,
-                'strenuousness' => $strenuousness
+                'adventurousness' => $itinerary->getAdventurousness(),
+                'solitariness' => $itinerary->getSolitariness(),
+                'strenuousness' => $itinerary->getStrenuousness(),
             ], [
                 'adventurousness' => 12,
                 'solitariness' => 7,
                 'strenuousness' => 25,
-            ])->take(max(20, min(10, ceil($totalTrailsForArea / 9))))->inRandomOrder();
+            ])->take((int) min(20, max(10, ceil($totalTrailsForArea / 9))))->inRandomOrder();
         } else {
             $trails->inRandomOrder();
         }
@@ -48,8 +46,10 @@ class TrailService
         if ($period === Period::EVENING) {
             $trails->where('distance_miles', '<=', '2.0');
         }
-        $trails->where('distance_miles', '>=', $itinerary->calculateMinimumTrailDistance());
-        $trails->where('distance_miles', '<=', $itinerary->calculateMaximumTrailDistance());
+        if ($itinerary !== null) {
+            $trails->where('distance_miles', '>=', $itinerary->calculateMinimumTrailDistance());
+            $trails->where('distance_miles', '<=', $itinerary->calculateMaximumTrailDistance());
+        }
 
         $trails->with(['area', 'images']);
         $trails = $trails->get();
@@ -198,6 +198,41 @@ class TrailService
     }
 
     /**
+     * All [lng, lat, elevation?] points from the GeoJSON's LineString / MultiLineString features, in order.
+     * (Previously only features[0] was read, so an empty FeatureCollection — trail 444 in the dumps — crashed.)
+     */
+    public function extractTrailPoints($geoJson): array
+    {
+        $data = is_array($geoJson) ? $geoJson : json_decode((string) $geoJson, true);
+        if (!is_array($data)) {
+            return [];
+        }
+        $features = match ($data['type'] ?? null) {
+            'FeatureCollection' => $data['features'] ?? [],
+            'Feature' => [$data],
+            default => [['geometry' => $data]],
+        };
+
+        $points = [];
+        foreach ($features as $feature) {
+            $geometry = $feature['geometry'] ?? [];
+            $lines = match ($geometry['type'] ?? null) {
+                'LineString' => [$geometry['coordinates'] ?? []],
+                'MultiLineString' => $geometry['coordinates'] ?? [],
+                default => [],
+            };
+            foreach ($lines as $line) {
+                foreach ($line as $point) {
+                    if (is_array($point) && count($point) >= 2) {
+                        $points[] = $point;
+                    }
+                }
+            }
+        }
+        return $points;
+    }
+
+    /**
      * Calculate the time between two points, considering incline, decline, and average speed
      *
      * @param $dist
@@ -248,8 +283,10 @@ class TrailService
      */
     public function analyzeTrail($geoJson, $averageSpeed, $activityType = ActivityType::HIKING, $roundPrecision = 1)
     {
-        $data = json_decode($geoJson, true);
-        $trailPoints = $data['features'][0]['geometry']['coordinates'];
+        $trailPoints = $this->extractTrailPoints($geoJson);
+        if (count($trailPoints) < 2) {
+            throw new \InvalidArgumentException('GeoJSON has no usable LineString coordinates.');
+        }
         $totalTime = 0;
         $totalDist = 0;
         $cumulativeTime = 0;

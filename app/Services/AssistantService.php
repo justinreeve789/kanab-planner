@@ -351,7 +351,7 @@ class AssistantService
     public function isMapRequested(string $query, $resource) {
         $query = preg_replace('/\s+/', ' ', $query);
         $query = trim(strtolower($query));
-        if (get_class($resource) === Trail::class) {
+        if ($resource instanceof Trail) {
             if (str_contains($query, 'map')) {
                 return true;
             }

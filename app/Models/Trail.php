@@ -21,9 +21,9 @@ class Trail extends Resource
 
     public $trailService;
 
-    public function __construct()
+    public function __construct(array $attributes = [])
     {
-        parent::__construct();
+        parent::__construct($attributes);
         $this->trailService = new TrailService();
     }
 
@@ -81,7 +81,15 @@ class Trail extends Resource
 
     public function getEstimatedHours(TrailService $trailService, float $averageSpeed, string $activityType = ActivityType::HIKING, $roundPrecision = 1)
     {
-        $stats = $trailService->analyzeTrail($this->geoJson()->where('trail_id', $this->id)->first(), $averageSpeed, $activityType, $roundPrecision);
+        $geoJson = $this->geoJson()->first();
+        if (!$geoJson) {
+            return self::DEFAULT_AVERAGE_HOURS;
+        }
+        try {
+            $stats = $trailService->analyzeTrail($geoJson->geojson, $averageSpeed, $activityType, $roundPrecision);
+        } catch (\InvalidArgumentException $e) {
+            return self::DEFAULT_AVERAGE_HOURS;
+        }
         return $stats['total_hours'];
     }
 

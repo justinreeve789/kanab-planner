@@ -19,27 +19,20 @@ class RestaurantService
         return $this->googleClient;
     }
 
+    /**
+     * Google Places price_level (0–4) to an average per-person meal price. An unknown level gets the middle price.
+     * (This was a loose switch, so a null level matched `case 0` and every unpriced restaurant looked like the
+     * cheapest kind.)
+     */
     public function calculateAveragePriceForPriceLevel(?int $priceLevel)
     {
-        switch ($priceLevel) {
-            case 0:
-                $averagePrice = 8;
-                break;
-            case 1:
-                $averagePrice = 10;
-                break;
-            case 2:
-                $averagePrice = 15;
-                break;
-            case 3:
-                $averagePrice = 30;
-                break;
-            case 4:
-                $averagePrice = 50;
-                break;
-            default:
-                $averagePrice = 15;
-        }
-        return $averagePrice;
+        return match ($priceLevel) {
+            0 => 8,
+            1 => 10,
+            2 => 15,
+            3 => 30,
+            4 => 50,
+            default => 15,
+        };
     }
 }

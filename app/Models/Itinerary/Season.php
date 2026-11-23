@@ -62,78 +62,67 @@ class Season
     public static function inDates() {
     }
 
+    public const RANGES = [
+        'spring' => ['start' => '03-20', 'end' => '06-20'],
+        'summer' => ['start' => '06-21', 'end' => '09-21'],
+        'fall' => ['start' => '09-22', 'end' => '12-20'],
+        'winter' => ['start' => '12-21', 'end' => '03-19'],
+    ];
+
+    /**
+     * Which season a date falls in. The boundaries are compared as month-day strings, so the year of the date
+     * doesn't matter (previously the boundaries were pinned to the *current* year, so any date in a later year
+     * came back as "winter", and Jan 1–Mar 19 of the current year came back as null).
+     */
     public static function get(string $date = 'today +2 weeks') {
-        // Convert the date to a timestamp.
         $time = strtotime($date);
+        if ($time === false) {
+            return null;
+        }
+        $monthDay = date('m-d', $time);
 
-        // Define the start and end dates for each season.
-        $seasons = [
-            'spring' => ['start' => '03-20', 'end' => '06-20'],
-            'summer' => ['start' => '06-21', 'end' => '09-21'],
-            'fall' => ['start' => '09-22', 'end' => '12-20'],
-            'winter' => ['start' => '12-21', 'end' => '03-19'],
-        ];
-
-        // Determine the current season.
-        foreach ($seasons as $season => $dates) {
-            $startDate = date('Y') . '-' . $dates['start'];
-            $endDate = date('Y') . '-' . $dates['end'];
-
-            if ($time >= strtotime($startDate) && $time <= strtotime($endDate)) {
-                return $season;
-            }
-
-            // Check if it's winter extending into the next year.
-            if ($season === 'winter' && $time >= strtotime($startDate)) {
-                $nextYearStartDate = (date('Y') + 1) . '-' . $dates['start'];
-                if ($time <= strtotime($nextYearStartDate)) {
+        foreach (self::RANGES as $season => $range) {
+            if ($range['start'] <= $range['end']) {
+                if ($monthDay >= $range['start'] && $monthDay <= $range['end']) {
                     return $season;
                 }
+            } elseif ($monthDay >= $range['start'] || $monthDay <= $range['end']) {
+                // Winter wraps around the new year.
+                return $season;
             }
         }
         return null;
     }
 
-    public static function randomDateInSeason(string $season): string {
-        // Define the start and end dates for each season.
-        $seasons = [
-            'spring' => ['start' => '03-20', 'end' => '06-20'],
-            'summer' => ['start' => '06-21', 'end' => '09-21'],
-            'fall' => ['start' => '09-22', 'end' => '12-20'],
-            'winter' => ['start' => '12-21', 'end' => '03-19'],
-        ];
-
-        // Get the current year.
-        $currentYear = date('Y');
-
-        // Get the start and end dates for the specified season.
-        $start = new \DateTime($currentYear . '-' . $seasons[$season]['start']);
-        $end = new \DateTime($currentYear . '-' . $seasons[$season]['end']);
-
-        if ($end < $start) {
-            $end = new \DateTime($currentYear + 1 . '-' . $seasons[$season]['end']);
+    /**
+     * A random date inside the season, at least two weeks inside its boundaries and at least two weeks from today
+     * (previously it could return a date from a season that had already passed this year).
+     */
+    public static function randomDateInSeason(string $season, ?\DateTimeInterface $today = null): string {
+        if (!isset(self::RANGES[$season])) {
+            throw new \InvalidArgumentException('Unknown season: ' . $season);
         }
 
-        // Calculate the minimum date (2 weeks from the start of the season).
-        $minDate = clone $start;
-        $minDate->add(new \DateInterval('P2W'));
+        $today = $today ? \DateTimeImmutable::createFromInterface($today) : new \DateTimeImmutable('today');
+        $earliest = $today->add(new \DateInterval('P2W'));
 
-        // Calculate the maximum date (2 weeks before the end of the season).
-        $maxDate = clone $end;
-        $maxDate->sub(new \DateInterval('P2W'));
+        for ($year = (int) $today->format('Y') - 1; $year <= (int) $today->format('Y') + 1; $year++) {
+            $start = new \DateTimeImmutable($year . '-' . self::RANGES[$season]['start']);
+            $end = new \DateTimeImmutable($year . '-' . self::RANGES[$season]['end']);
+            if ($end < $start) {
+                $end = $end->add(new \DateInterval('P1Y'));
+            }
 
-        // Check if the minimum date is after the maximum date.
-        if ($minDate > $maxDate) {
-            throw new \Exception("Invalid date range.");
+            $minDate = max($start->add(new \DateInterval('P2W')), $earliest);
+            $maxDate = $end->sub(new \DateInterval('P2W'));
+            if ($minDate > $maxDate) {
+                continue;
+            }
+
+            $days = (int) $minDate->diff($maxDate)->days;
+            return $minDate->add(new \DateInterval('P' . mt_rand(0, $days) . 'D'))->format('Y-m-d');
         }
 
-        // Generate a random timestamp within the season's date range.
-        $randomTimestamp = mt_rand($minDate->getTimestamp(), $maxDate->getTimestamp());
-
-        // Create a random DateTime object from the generated timestamp.
-        $randomDate = new \DateTime();
-        $randomDate->setTimestamp($randomTimestamp);
-
-        return $randomDate->format('Y-m-d');
+        throw new \Exception('Invalid date range.');
     }
 }

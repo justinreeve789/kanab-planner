@@ -151,16 +151,20 @@ class Area extends Model
         });
     }
 
+    public const MAX_AREA_SEARCH_MILES = 500;
+
+    /**
+     * The nearest area, widening the search 20 miles at a time. Gives up (null) past MAX_AREA_SEARCH_MILES instead
+     * of looping forever when nothing is in range (e.g. an empty areas table or bad coordinates).
+     */
     public static function getAreaForLatLng(float $latitude, float $longitude): ?Area
     {
-        $distance = 30;
-        do {
+        for ($distance = 30; $distance <= self::MAX_AREA_SEARCH_MILES; $distance += 20) {
             $area = Area::whereProximity($latitude, $longitude, $distance, true)->first();
             if ($area) {
                 return $area;
             }
-            $distance += 20;
-        } while ($area === null);
+        }
         return null;
     }
 }

@@ -12,6 +12,11 @@ class LocationController extends Controller
         return Location::with(['area', 'data', 'hours', 'text'])->get();
     }
 
+    public function getLocationsInArea(Request $request, int $areaId)
+    {
+        return Location::with(['area', 'data', 'hours', 'text'])->where('area_id', $areaId)->get();
+    }
+
     public function getLocation(Request $request, int $id)
     {
         return Location::with(['area', 'data', 'hours', 'text'])->where('id', $id)->first();

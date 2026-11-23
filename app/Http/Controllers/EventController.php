@@ -12,6 +12,13 @@ class EventController extends Controller
         return Event::with(['data', 'dates', 'links', 'location', 'text'])->get();
     }
 
+    public function getEventsInArea(Request $request, int $areaId)
+    {
+        return Event::with(['data', 'dates', 'links', 'location', 'text'])
+            ->whereHas('location', fn($q) => $q->where('area_id', $areaId))
+            ->get();
+    }
+
     public function getEvent(Request $request, int $id)
     {
         return Event::with(['data', 'dates', 'links', 'location', 'text'])->where('id', $id)->first();

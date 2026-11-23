@@ -156,12 +156,13 @@ class Itinerary extends CachedModel
     public function addActivity($resource, $activityType, $startTime, $endTime, int $dayNum, $period, $name = null, $description = null)
     {
         $activity = new Activity([
+            // Callers pass a mix of "H:i", "H:i:s" and "Y-m-d H:i:s"; the columns are TIME, so store H:i:s.
+            'start_time' => self::normalizeTime($startTime),
+            'end_time' => self::normalizeTime($endTime),
             'resource' => $resource,
             'activity_type_id' => ActivityType::where('name', $activityType)->pluck('id')->first(),
             'name' => $name,
             'description' => $description,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
         ]);
         $this->days[$dayNum]->periods[$period]->addActivity($activity);
 
@@ -202,13 +203,22 @@ class Itinerary extends CachedModel
         }
     }
 
+    public static function normalizeTime($time): ?string
+    {
+        if ($time === null || $time === '') {
+            return null;
+        }
+        $timestamp = strtotime((string) $time);
+        return $timestamp === false ? (string) $time : date('H:i:s', $timestamp);
+    }
+
     public function addDay(Day $day, $index = null): array
     {
         if ($index !== null) {
             $this->days = array_merge(
-                array_slice($this->days, 0, $index, true),
+                array_slice($this->days, 0, $index),
                 [$day],
-                array_slice($this->days, $index, count($this->days) - 1, true)
+                array_slice($this->days, $index)
             );
         } else {
             $this->days[] = $day;
@@ -259,9 +269,12 @@ class Itinerary extends CachedModel
         return $this->activities;
     }
 
+    /**
+     * 0.0 is a legitimate slider value, so only fall back to the default when the preference is missing.
+     */
     public function getAdventurousness(): ?float
     {
-        if (!$this->adventurousness) {
+        if ($this->adventurousness === null || $this->adventurousness === '') {
             $this->adventurousness = self::DEFAULT_ADVENTUROUSNESS;
         }
         return $this->adventurousness;
@@ -269,7 +282,7 @@ class Itinerary extends CachedModel
 
     public function getSolitariness(): ?float
     {
-        if (!$this->solitariness) {
+        if ($this->solitariness === null || $this->solitariness === '') {
             $this->solitariness = self::DEFAULT_SOLITARINESS;
         }
         return $this->solitariness;
@@ -277,7 +290,7 @@ class Itinerary extends CachedModel
 
     public function getStrenuousness(): ?float
     {
-        if (!$this->strenuousness) {
+        if ($this->strenuousness === null || $this->strenuousness === '') {
             $this->strenuousness = self::DEFAULT_STRENUOUSNESS;
         }
         return $this->strenuousness;

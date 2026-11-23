@@ -12,6 +12,13 @@ class RestaurantController extends Controller
         return Restaurant::with(['data', 'location', 'tags'])->get();
     }
 
+    public function getRestaurantsInArea(Request $request, int $areaId)
+    {
+        return Restaurant::with(['data', 'location', 'tags'])
+            ->whereHas('location', fn($q) => $q->where('area_id', $areaId))
+            ->get();
+    }
+
     public function getRestaurant(Request $request, int $id)
     {
         return Restaurant::with(['data', 'location', 'tags'])->where('id', $id)->first();

@@ -20,6 +20,14 @@ class AssistantController extends Controller
     const MAX_TOKENS = 2500;
     const OPENAI_RESPONSES_TYPE = 'openai_responses';
 
+    /**
+     * Routed but never written; return an explicit 501 instead of a 500 until it's needed.
+     */
+    public function getAssistants(Request $request)
+    {
+        return response()->json(['errors' => 'Not implemented yet'], 501);
+    }
+
     public function getMessages(Request $request)
     {
         $resourceTable = $request->get('resource_table');

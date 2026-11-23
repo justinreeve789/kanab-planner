@@ -66,20 +66,28 @@ class Restaurant extends Resource
         return $this->images->pluck('id')->all();
     }
 
+    public const MIN_AVERAGE_HOURS = 0.5;
+    public const MAX_AVERAGE_HOURS = 3.5;
+
     /**
-     * TODO: Test this calculation.
+     * How long a meal here takes, scaled by how busy the restaurant usually is at that hour.
+     *
+     * Popular-times data is collected per *location* (LocationService::updateBusynessForLocation writes
+     * resource_table = 'locations', resource_id = location id), with day_of_week 0–6 and a 0–100 percentage.
+     * 0% busy → half the default, 50% → the default, 100% → 1.5× the default; clamped to 0.5–3.5 hours.
      */
     public function getAverageHours(array $params = [])
     {
-        if (isset($params['date']) && isset($params['start_time'])) {
+        if (isset($params['date']) && isset($params['start_time']) && $this->location_id) {
             $resourceBusy = ResourceBusy::where([
-                'resource_table' => $this->getTable(),
-                'resource_id' => $this->id,
-                'hour' => date('H', strtotime($params['start_time'])),
-                'day' => date('w', strtotime($params['date'])),
+                'resource_table' => 'locations',
+                'resource_id' => $this->location_id,
+                'hour' => (int) date('G', strtotime($params['start_time'])),
+                'day_of_week' => (int) date('w', strtotime($params['date'])),
             ])->orderBy('collected_date', 'DESC')->first();
             if ($resourceBusy) {
-                return min(0.5, max(3.5, self::DEFAULT_AVERAGE_HOURS * ($resourceBusy->percentage * 2)));
+                $hours = self::DEFAULT_AVERAGE_HOURS * (0.5 + $resourceBusy->percentage / 100);
+                return max(self::MIN_AVERAGE_HOURS, min(self::MAX_AVERAGE_HOURS, $hours));
             }
         }
         return parent::DEFAULT_AVERAGE_HOURS;

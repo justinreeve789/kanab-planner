@@ -195,6 +195,7 @@ class ItineraryService
             $accommodation = Accommodation::where('id', 1)->first();
             $accommodation->accommodation_name = $accommodation->name;
             $this->getItinerary()->addActivity($accommodation, 'checking-in', Day::DEFAULT_ARRIVAL_TIME, '23:59:59', $dayNum, Period::EVENING);
+            $day->calculateASS(true);
             return;
         }
 
@@ -210,6 +211,7 @@ class ItineraryService
                 '23:59:59',
                 $dayNum,
                 Period::MORNING);
+            $day->calculateASS(true);
             return;
         }
 
@@ -270,7 +272,7 @@ class ItineraryService
 
         $this->addPreamble($day);
 
-        $this->calculateASSForDays();
+        $day->calculateASS(true);
     }
 
     /**
@@ -517,11 +519,12 @@ class ItineraryService
         if ($cooking === false) {
             // We still don't have a meal. Just put any restaurant in the area that's open.
             $dayPeriod = $day->getPeriods()[$period];
-            if (!$dayPeriod->hasRestaurant() && $dayPeriod->hasActivityType('cooking'))
+            if (!$dayPeriod->hasRestaurant() && !$dayPeriod->hasActivityType('cooking'))
             {
                 $restaurant = Restaurant::with(['location' => function($query) {
 //                    $query->with('images');
                 }])->whereIsOpen($day->date . ' ' . $mealTime['startTime'])
+                    ->whereNotIn('restaurants.id', $this->getItinerary()->restaurant_ids)
                     ->whereHas('location', function($query) use ($day) {
                         $query->where('area_id', $day->area_id);
                     })->inRandomOrder()->first();
@@ -542,9 +545,9 @@ class ItineraryService
     /**
      * Sort by how many subarrays each item has, in descending order.
      */
-    private function sortBySubarrayCount(&$array, $ascending = false): ?array
+    private function sortBySubarrayCount(array $array, $ascending = false): array
     {
-        usort($array, function($a, $b) use ($ascending) {
+        uasort($array, function($a, $b) use ($ascending) {
             $countA = is_array($a) ? count($a) : 0;
             $countB = is_array($b) ? count($b) : 0;
             if ($ascending) {
@@ -553,6 +556,7 @@ class ItineraryService
                 return $countB - $countA;
             }
         });
+        return $array;
     }
 
     /**
@@ -652,6 +656,7 @@ class ItineraryService
                 $day = new Day(['date' => $date, 'area_id' => $areaId, 'day_num' => $dayNum]);
                 $days[$dayNum++] = $day;
                 $date = $this->incrementDate($date);
+                $areaIds[] = $areaId;
             }
         }
 
@@ -667,7 +672,7 @@ class ItineraryService
             });
 
             // If the user's adventurousness is low (< 0.3, < 0.4), we won't pick areas that are too far from their base area.
-            switch ($adventurousness) {
+            switch (true) {
                 case $adventurousness < 0.3:
                     $maxDistance = 60;
                     break;
@@ -694,17 +699,14 @@ class ItineraryService
             // TODO: The North Rim is closed from December 1 to May 14. Don't assign this area between these dates.
 
             // If the user's adventurousness is < 0.8, only pick any area besides Kanab or Zion once, unless it's their base area.
-            // TODO: Fix this.
             if ($adventurousness < 0.8) {
                 $numPossible = 1;
                 $areaCounts = array_count_values($areaIds);
                 $filteredAreaIds = array_filter($allAreaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
-                    return (
-                        $areaId !== Area::KANAB &&
-                        $areaId !== $baseArea->id &&
-                        $areaId !== Area::ZION &&
-                        isset($areaCounts[$areaId]) ? $areaCounts[$areaId] : 9999999 <= $numPossible
-                    );
+                    return $areaId !== Area::KANAB
+                        && $areaId !== $baseArea->id
+                        && $areaId !== Area::ZION
+                        && ($areaCounts[$areaId] ?? 0) >= $numPossible;
                 });
                 $query->whereNotIn('id', $filteredAreaIds);
             }
@@ -1004,7 +1006,7 @@ class ItineraryService
                 $this->getItinerary()->setDurationDays($dateStart->diff($dateEnd)->days + 1);
                 return;
             } else if ($durationDays) {
-                $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($startDate . ' +' . $durationDays . ' days')));
+                $this->getItinerary()->setEndDate($this->calculateEndDate($startDate, $durationDays));
                 return;
             }
         }
@@ -1017,7 +1019,7 @@ class ItineraryService
                 $this->getItinerary()->setStartDate($startDate);
 
                 if ($durationDays) {
-                    $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($startDate . ' +' . $durationDays . ' days')));
+                    $this->getItinerary()->setEndDate($this->calculateEndDate($startDate, $durationDays));
                     return;
                 }
             }
@@ -1028,7 +1030,7 @@ class ItineraryService
                 $this->getItinerary()->setStartDate($startDate);
 
                 if ($durationDays) {
-                    $this->getItinerary()->setEndDate(date('Y-m-d', strtotime($startDate . ' +' . $durationDays . ' days')));
+                    $this->getItinerary()->setEndDate($this->calculateEndDate($startDate, $durationDays));
                     return;
                 }
             }
@@ -1036,9 +1038,19 @@ class ItineraryService
 //        throw new \Exception('Could not set dates: ' . print_r($this->getItinerary(), true));
     }
 
-    public function getRandomDateInMonth($month, int $year = null) {
+    /**
+     * Trip dates are inclusive: start + duration_days - 1. (determineAndSetMissingDates() already treats start/end as
+     * inclusive when deriving the duration, so the two directions now agree.)
+     */
+    public function calculateEndDate(string $startDate, int $durationDays): string
+    {
+        return date('Y-m-d', strtotime($startDate . ' +' . max(0, $durationDays - 1) . ' days'));
+    }
+
+    public function getRandomDateInMonth($month, ?int $year = null, ?\DateTime $currentDate = null) {
+        $month = (int) $month;
         // Get the current date
-        $currentDate = new \DateTime();
+        $currentDate = $currentDate ? clone $currentDate : new \DateTime();
 
         // Calculate the target year
         if ($year === null) {
@@ -1047,7 +1059,7 @@ class ItineraryService
             $targetYear = $year;
         }
 
-        if ($currentDate->format('n') > $month) {
+        if ($year === null && (int) $currentDate->format('n') > $month) {
             $targetYear++; // Move to the next year if the specified month is in the past
         }
 
@@ -1060,13 +1072,13 @@ class ItineraryService
         $randomDate = new \DateTime("$targetYear-$month-$randomDay");
 
         // Check if the random date is at least 2 weeks ahead
-        do {
+        while ($randomDate < $minimumDate) {
             $randomDate->add(new \DateInterval('P1D'));
-        } while ($randomDate < $minimumDate);
+        }
 
         // Did we move outside the intended month? Let's try again, but this time jump forward a year.
         if ((int)$randomDate->format('n') !== $month) {
-            $randomDate = new \DateTime($this->getRandomDateInMonth($month, $targetYear + 1));
+            $randomDate = new \DateTime($this->getRandomDateInMonth($month, $targetYear + 1, $currentDate));
         }
         return $randomDate->format('Y-m-d');
     }
