@@ -49,6 +49,7 @@
 </template>
 
 <script>
+import { parseDate } from '../../lib/time';
 import CallyCalendar from "../components/CallyCalendar.vue";
 import {usePreferencesStore} from "../../stores/preferences";
 
@@ -113,7 +114,7 @@ export default {
   methods: {
     getFormattedDate(date) {
       if (date) {
-        const dateObj = new Date(date);
+        const dateObj = parseDate(date);
         return {
           month: dateObj.toLocaleString('en-us', {
             month: 'short',

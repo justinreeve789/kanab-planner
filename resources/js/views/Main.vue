@@ -6,12 +6,14 @@
   <AssistantModal />
   <RouteModal />
   <TrailMapModal />
+  <SwapActivityModal />
 </template>
 
 <script>
 import AssistantModal from "./modals/AssistantModal.vue";
 import Corner from "./panels/Corner.vue";
 import RouteModal from "./modals/RouteModal.vue";
+import SwapActivityModal from "./modals/SwapActivityModal.vue";
 import TrailMapModal from "./modals/TrailMapModal.vue";
 import {useAuthStore} from "../stores/auth";
 import {useFeatureStore} from "../stores/feature";
@@ -28,6 +30,7 @@ export default {
     AssistantModal,
     Corner,
     RouteModal,
+    SwapActivityModal,
     TrailMapModal,
   },
   data() {

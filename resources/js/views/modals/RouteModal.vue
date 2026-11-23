@@ -39,7 +39,9 @@ export default {
           const parts = newVal.split('-');
           if (parts.length > 1 && parts[0] === '#modal') {
             switch (parts[1]) {
-              case 'search':
+              case 'search': {
+                // Keep whoever opened the search (e.g. the questionnaire's wish list) as the add target.
+                const target = this.searchStore.target;
                 this.component = 'search/Search';
                 this.title = 'Search';
                 this.searchStore.adjustSettingsForGeneralSearch();
@@ -52,7 +54,9 @@ export default {
                   this.title = 'Trails';
                   this.searchStore.adjustSettingsForResourceListForTable('trails');
                 }
+                this.searchStore.target = target;
                 break;
+              }
 
               default:
                 this.component = '';

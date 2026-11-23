@@ -3,6 +3,8 @@ import { defineStore } from 'pinia'
 export const useSearchStore = defineStore('search', {
   state: () => ({
     isSearchOpen: false,
+    // The swap-an-activity picker (SwapActivityModal).
+    isResourceListOpen: false,
     title: '',
     target: {},
     sortField: '',

@@ -16,10 +16,15 @@ class EventController extends Controller
         return Event::with(['data', 'dates', 'links', 'location', 'text'])->orderBy('events.id')->paginate($perPage);
     }
 
+    /**
+     * ?date=YYYY-MM-DD limits to events happening that day.
+     */
     public function getEventsInArea(Request $request, int $areaId)
     {
+        $request->validate(['date' => 'nullable|date_format:Y-m-d']);
         return Event::with(['data', 'dates', 'links', 'location', 'text'])
             ->whereHas('location', fn($q) => $q->where('area_id', $areaId))
+            ->when($request->get('date'), fn($q, $date) => $q->betweenDates($date . ' 00:00:00', $date . ' 23:59:59'))
             ->get();
     }
 

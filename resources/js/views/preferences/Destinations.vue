@@ -103,6 +103,13 @@ export default {
     },
   },
   mounted() {
+    // Featured trails and events here add to the wish list for the next itinerary.
+    this.searchStore.target = { component: 'preferences', store: 'preferences' };
+  },
+  unmounted() {
+    if (this.searchStore.target?.component === 'preferences') {
+      this.searchStore.target = {};
+    }
   },
 };
 </script>

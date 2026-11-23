@@ -281,13 +281,13 @@ class ItineraryController extends Controller
     }
 
     /**
-     * The itinerary as the app renders it, plus whether the caller may edit it.
+     * The itinerary as the app renders it, plus whether the caller may edit it and whether they own it.
      */
     private function present(Request $request, string $id): array
     {
         $itinerary = Itinerary::withSchedule()->findOrFail($id);
-        $canEdit = Gate::forUser($request->user('sanctum'))
-            ->allows('update', [$itinerary, $request->header(ItineraryPolicy::TOKEN_HEADER)]);
-        return $itinerary->toArray() + ['can_edit' => $canEdit];
+        $user = $request->user('sanctum');
+        $canEdit = Gate::forUser($user)->allows('update', [$itinerary, $request->header(ItineraryPolicy::TOKEN_HEADER)]);
+        return $itinerary->toArray() + ['can_edit' => $canEdit, 'owned' => $itinerary->isOwnedBy($user)];
     }
 }

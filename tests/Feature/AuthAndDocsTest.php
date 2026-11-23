@@ -20,7 +20,8 @@ class AuthAndDocsTest extends TestCase
             'name' => 'Ada Hiker', 'email' => 'ada@example.test', 'password' => 'correct-horse-9', 'password_confirmation' => 'correct-horse-9',
         ], self::FIRST_PARTY)->assertCreated();
         $this->assertAuthenticated();
-        $this->getJson('/api/v1/auth/user', self::FIRST_PARTY)->assertOk()->assertJsonPath('email', 'ada@example.test');
+        $this->getJson('/api/v1/auth/user', self::FIRST_PARTY)->assertOk()->assertJsonPath('email', 'ada@example.test')
+            ->assertJsonMissingPath('password')->assertJsonMissingPath('two_factor_secret')->assertJsonMissingPath('remember_token');
 
         $this->postJson('/api/v1/auth/logout', [], self::FIRST_PARTY)->assertNoContent();
         $this->assertGuest();

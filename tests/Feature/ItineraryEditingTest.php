@@ -111,7 +111,8 @@ class ItineraryEditingTest extends TestCase
 
         $this->postJson($url)->assertForbidden();
         $this->actingAs($user, 'sanctum')->postJson($url)->assertForbidden();
-        $this->actingAs($user, 'sanctum')->postJson($url, [], $this->tokenHeaders())->assertOk()->assertJsonPath('can_edit', true);
+        $this->actingAs($user, 'sanctum')->postJson($url, [], $this->tokenHeaders())->assertOk()
+            ->assertJsonPath('can_edit', true)->assertJsonPath('owned', true);
 
         $this->assertSame([$this->itinerary['id']], $user->itineraries()->pluck('itineraries.id')->all());
     }

@@ -15,6 +15,7 @@ import AssistantPage from "./views/pages/AssistantPage.vue";
 import QuestionnairePage from './views/pages/QuestionnairePage.vue';
 import ResourcePage from "./views/pages/ResourcePage.vue";
 import UserPage from "./views/pages/UserPage.vue";
+import TripsPage from "./views/pages/TripsPage.vue";
 
 const app = createApp({});
 app.component('app', App);
@@ -25,6 +26,7 @@ const routes = [
   { path: '/login', component: UserPage, name: 'login' },
   { path: '/register', component: UserPage, name: 'register' },
   { path: '/assistant', component: AssistantPage, name: 'assistant' },
+  { path: '/trips', component: TripsPage, name: 'trips' },
   { path: '/search' , component: ResourcePage, name: 'search', props: { page: 'search', title: 'Search' } },
   { path: '/accommodations', component: ResourcePage, name: 'accommodations', props: { page: 'accommodations', title: 'Accommodations' } },
   { path: '/events', component: ResourcePage, name: 'events', props: { page: 'events', title: 'Events' } },

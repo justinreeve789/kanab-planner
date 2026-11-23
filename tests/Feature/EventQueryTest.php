@@ -75,4 +75,14 @@ class EventQueryTest extends TestCase
         $this->assertSame(0, Event::betweenDates('2027-06-03 22:00:00', '2027-06-03 23:00:00')->where('events.id', $talkId)->count());
         $this->assertSame('2027-06-03 22:00:00', \App\Models\EventDate::where('event_id', $talkId)->first()->effective_end_date);
     }
+
+    public function test_area_events_can_be_filtered_by_date(): void
+    {
+        $all = $this->getJson('/api/v1/area/' . Area::KANAB . '/event')->assertOk()->json('*.id');
+        $this->assertContains($this->concertId, $all);
+
+        $this->getJson('/api/v1/area/' . Area::KANAB . '/event?date=2027-06-02')->assertOk()->assertJsonPath('0.id', $this->concertId);
+        $this->assertSame([], $this->getJson('/api/v1/area/' . Area::KANAB . '/event?date=2027-06-03')->assertOk()->json());
+        $this->getJson('/api/v1/area/' . Area::KANAB . '/event?date=June')->assertStatus(422);
+    }
 }

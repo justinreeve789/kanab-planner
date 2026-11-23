@@ -6,6 +6,7 @@
           <ActivityButtons
             :resource="resource"
             :resource_table="'trails'"
+            :hide-add="hideAdd"
             class="w-full order-2 sm:w-1/2 text-right my-4 justify-end lg:justify-start lg:w-full"
             type="trail"
           />
@@ -74,6 +75,7 @@ export default {
   props: {
     phrase: String,
     resource: Object,
+    hideAdd: { type: Boolean, default: false },
   },
 };
 </script>

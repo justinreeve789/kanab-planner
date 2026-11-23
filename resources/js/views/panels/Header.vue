@@ -60,25 +60,19 @@
         <div>
           <ItineraryStats class="cursor-pointer mx-2" @click="toggleAttributes" v-if="isItineraryOpen" />
         </div>
-        <button class="btn btn-ghost btn-circle" v-if="getUser">
-          <div class="indicator">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /> </svg>
-            <span class="badge badge-xs badge-primary indicator-item"></span>
-          </div>
-        </button>
+        <a class="btn btn-ghost btn-sm hidden md:flex" href="/docs/" title="User guide">Help</a>
         <router-link class="btn btn-sm flex ml-2" v-if="!getUser" :to="{ name: 'login'} ">Login</router-link>
-        <div class="dropdown dropdown-end hidden md:flex" v-if="getUser">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-            <div class="w-10 rounded-full">
-              <img
-                alt="Tailwind CSS Navbar component"
-                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+        <div class="dropdown dropdown-end flex" v-if="getUser">
+          <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar placeholder" :aria-label="'Account menu for ' + getUser.name">
+            <div class="w-9 rounded-full bg-orange-600 text-white flex items-center justify-center font-semibold">
+              {{ initials }}
             </div>
           </div>
-          <ul tabindex="0" class="menu menu-lg dropdown-content bg-base-100 bg-neutral text-neutral-content rounded-b-box z-1 mt-3 w-52 p-2 shadow">
-<!--            <li class="hidden md:inline" v-if="!getUser"><a @click="openLogin">Login</a></li>-->
-            <li v-if="getUser"><a>Profile</a></li>
-            <li v-if="getUser"><a>Logout</a></li>
+          <ul tabindex="0" class="menu menu-lg dropdown-content bg-neutral text-neutral-content rounded-b-box z-50 mt-12 w-52 p-2 shadow">
+            <li class="menu-title text-neutral-content/70">{{ getUser.name }}</li>
+            <li><router-link :to="{ name: 'trips' }">My trips</router-link></li>
+            <li><a href="/docs/">Help</a></li>
+            <li><a @click="logout">Sign out</a></li>
           </ul>
         </div>
       </div>
@@ -89,6 +83,7 @@
 
 <script>
 import CallyCalendar from "../components/CallyCalendar.vue";
+import { parseDate } from "../../lib/time";
 import { useAssistantStore } from "../../stores/assistant";
 import { useAuthStore } from "../../stores/auth";
 import { usePreferencesStore } from "../../stores/preferences";
@@ -146,6 +141,9 @@ export default {
     getUser() {
       return this.authStore.user;
     },
+    initials() {
+      return (this.authStore.user?.name ?? '?').split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase();
+    },
     hasDateRange() {
       return this.preferencesStore.dateRange;
     },
@@ -161,7 +159,7 @@ export default {
     },
     getFormattedDate(date) {
       if (date) {
-        const dateObj = new Date(date);
+        const dateObj = parseDate(date);
         return {
           month: dateObj.toLocaleString('en-us', {
             month: 'short',
@@ -207,6 +205,11 @@ export default {
       this.searchStore.adjustSettingsForPage('trails');
       // this.searchStore.isSearchOpen = true;
       this.$router.push('/trails');
+    },
+    async logout() {
+      document.activeElement?.blur();
+      await this.authStore.logout();
+      this.$router.push('/');
     },
     refreshItinerary() {
       this.$cookies.remove('active_itinerary_id');
