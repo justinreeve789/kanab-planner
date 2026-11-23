@@ -41,6 +41,10 @@
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_DRIVER" value="array" force="true"/>
         <env name="CACHE_STORE" value="array" force="true"/>
+        <!-- Drive times from straight-line estimates; RoutingTest fakes a Valhalla server where it needs one. -->
+        <env name="ROUTING_DRIVER" value="estimate" force="true"/>
+        <env name="UDOT_API_KEY" value="" force="true"/>
+        <env name="AZ511_API_KEY" value="" force="true"/>
         <env name="MODEL_CACHE_ENABLED" value="false" force="true"/>
         <env name="MODEL_CACHE_STORE" value="array" force="true"/>
         <!-- Override any of these from the shell, e.g. DB_HOST=mysql vendor/bin/phpunit -->

@@ -10,6 +10,7 @@ use App\Models\Itinerary\Period;
 use App\Policies\ItineraryPolicy;
 use App\ResourceEnum;
 use App\Services\ItineraryService;
+use App\Services\TravelPlanner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -151,7 +152,8 @@ class ItineraryController extends Controller
             $period->activities()->delete();
         }
         $day->stats = null;
-        $day->save();
+        $day->load('periods.activities');
+        app(TravelPlanner::class)->annotate($day->itinerary, $day);
         return $this->getDay($request, $day->id);
     }
 
@@ -272,11 +274,12 @@ class ItineraryController extends Controller
         }
     }
 
+    /** After an edit: the day's stats, and every drive re-timed (gaps too short to drive are flagged, not moved). */
     private function recalculateDay(Day $day): void
     {
         $day->load('periods.activities');
         $day->calculateASS(true);
-        $day->save();
+        app(TravelPlanner::class)->annotate($day->itinerary, $day);
     }
 
     private function authorizeEdit(Request $request, Itinerary $itinerary, string $ability = 'update'): void

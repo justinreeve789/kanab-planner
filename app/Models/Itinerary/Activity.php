@@ -41,7 +41,10 @@ class Activity extends CachedModel
     ];
 
     protected $appends = ['adventurousness', 'solitariness', 'strenuousness', 'resource'];
-    protected $casts = ['id' => 'string', 'period_id' => 'string'];
+    protected $casts = [
+        'id' => 'string', 'period_id' => 'string',
+        'travel_minutes' => 'integer', 'travel_miles' => 'float', 'travel_notes' => 'json',
+    ];
     protected $guarded = [];
     protected $table = 'itinerary_activities';
     protected $with = ['activity_type'];

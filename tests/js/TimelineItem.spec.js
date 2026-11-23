@@ -54,4 +54,20 @@ describe('TimelineItem', () => {
     const wrapper = mountItem({ item: { key: 'd', kind: 'drive', title: 'Drive to Zion', minutes: 48 } });
     expect(wrapper.text()).toContain('Drive to Zion · about 48 min');
   });
+
+  it('renders routed drives with distance and road alerts', () => {
+    const wrapper = mountItem({ item: {
+      key: 'd', kind: 'drive', title: 'Drive to Angels Landing', minutes: 52, miles: 41.2, estimated: false,
+      notes: [
+        { type: 'roadwork', closure: false, text: 'Roadwork on SR-9' },
+        { type: 'closures', closure: true, text: 'Detour around a closure. Road closed on US-89' },
+      ],
+    } });
+    expect(wrapper.text()).toContain('Drive to Angels Landing · 52 min · 41.2 mi');
+    expect(wrapper.text()).not.toContain('about');
+    const notes = wrapper.findAll('.drive-note');
+    expect(notes).toHaveLength(2);
+    expect(notes[1].attributes('role')).toBe('alert');
+    expect(notes[1].text()).toContain('Road closed on US-89');
+  });
 });

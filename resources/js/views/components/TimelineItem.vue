@@ -5,7 +5,15 @@
       <img src="/images/icons/car.svg" alt="" class="w-4 h-4 opacity-60" />
     </div>
     <div class="flex-1 border-l-2 border-dashed border-stone-300 pl-3 py-1">
-      {{ item.title }} <span class="text-stone-400">· about {{ formatDuration(item.minutes) }}</span>
+      {{ item.title }}
+      <span v-if="item.minutes > 0" class="text-stone-400">· {{ item.estimated === false ? '' : 'about ' }}{{ formatDuration(item.minutes) }}<template v-if="item.miles"> · {{ item.miles }} mi</template></span>
+      <ul v-if="item.notes?.length" class="mt-1 space-y-1">
+        <li v-for="(note, index) in item.notes" :key="index" class="drive-note flex gap-1.5 text-xs rounded-md px-2 py-1"
+            :class="note.closure ? 'bg-red-50 text-red-800' : 'bg-amber-50 text-amber-800'" :role="note.closure ? 'alert' : null">
+          <span aria-hidden="true">{{ note.closure ? '⛔' : '⚠' }}</span>
+          <span>{{ note.text }}</span>
+        </li>
+      </ul>
     </div>
   </li>
 

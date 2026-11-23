@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Accommodation;
 use App\Models\Area;
 use App\Services\ItineraryService;
+use App\Services\Routing\EstimateRouter;
+use App\Services\Routing\Point;
 use Illuminate\Support\Facades\DB;
 use Tests\Support\ItineraryAssertions;
 use Tests\Support\RefreshTestDatabase;
@@ -50,11 +52,12 @@ class HomeBaseTest extends TestCase
         $this->assertSame('16:00:00', $checkIn['start_time']);
         $this->assertSame('Check out of Zion Canyon Lodge', $this->onlyActivityOfType($last, 'checking-out')['name']);
 
-        foreach ($itinerary['days'] as $day) {
-            if ($day['area']['id'] === Area::ZION) {
-                $this->assertSame(0, (int) $day['drive_minutes'], 'Days at the base need no drive.');
-            }
-        }
+        // Drives start from the pin: dinner on the first night is at a Zion restaurant (fixtures put them in the
+        // middle of the area), which is a short drive from the lodging rather than from the middle of Zion.
+        $dinner = collect($this->activitiesOfDay($first))->pluck('activity')->firstWhere('resource_table', 'restaurants');
+        $expected = (new EstimateRouter())->route(new Point(37.2, -112.99), new Point(Area::find(Area::ZION)->latitude, Area::find(Area::ZION)->longitude));
+        $this->assertSame($expected->minutes, $dinner['travel_minutes']);
+        $this->assertSame($expected->minutes, $first['return_minutes']);
     }
 
     public function test_without_a_name_or_pin_a_listed_accommodation_in_the_base_area_is_used(): void

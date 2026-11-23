@@ -61,41 +61,76 @@ export function dayActivities(day) {
   return activities.sort((a, b) => (toMinutes(a.start_time) ?? 0) - (toMinutes(b.start_time) ?? 0));
 }
 
+/** Activities carry their own drives (travel_minutes) on itineraries built since street routing. */
+function hasTimedDrives(activities) {
+  return activities.some((activity) => activity.travel_minutes !== null && activity.travel_minutes !== undefined);
+}
+
+function driveItem(key, title, minutes, miles, notes, source) {
+  return { key, kind: 'drive', title, minutes, miles: miles ?? null, notes: notes ?? [], estimated: source !== 'router' };
+}
+
 /**
- * The day as a list of timeline items: its activities in time order, with "drive to" and "drive back" legs
- * around everything that happens in the day's area when the day is away from base.
+ * The day as a list of timeline items: its activities in time order, with a drive before every stop that needs
+ * one and the drive home at the end. Older itineraries only know the drive to the day's area, so they get a drive
+ * there and back around everything that happens in the area.
  */
-export function buildDaySchedule(day, baseAreaName = 'base') {
+export function buildDaySchedule(day, homeName = 'base') {
   const activities = dayActivities(day);
-  const items = activities.map((activity) => ({
+  const toItem = (activity) => ({
     key: activity.id,
     kind: activityKind(activity),
     activity,
     start: activity.start_time,
     end: activity.end_time,
-  }));
+  });
 
+  if (!hasTimedDrives(activities)) {
+    return legacySchedule(day, homeName, activities.map(toItem));
+  }
+
+  const items = [];
+  let lastStop = -1;
+  for (const activity of activities) {
+    const item = toItem(activity);
+    if (activity.travel_minutes > 0) {
+      const title = item.kind === 'stay' || item.kind === 'meal' ? `Drive back to ${homeName}` : `Drive to ${activityTitle(activity)}`;
+      items.push(driveItem(`${activity.id}-drive`, title, activity.travel_minutes, activity.travel_miles, activity.travel_notes, activity.travel_source));
+    }
+    items.push(item);
+    if (activity.travel_minutes !== null && activity.travel_minutes !== undefined) {
+      lastStop = items.length - 1;
+    }
+  }
+  if (day?.return_minutes > 0 || day?.return_notes?.length) {
+    const back = driveItem(`${day.id}-drive-back`, `Drive back to ${homeName}`, day.return_minutes ?? 0, day.return_miles, day.return_notes,
+      activities.some((a) => a.travel_source === 'router') ? 'router' : 'estimate');
+    items.splice(lastStop + 1, 0, back);
+  }
+  return items;
+}
+
+function legacySchedule(day, homeName, items) {
   const drive = day?.drive_minutes ?? 0;
   if (drive > 0) {
     const inArea = items.filter((item) => item.activity.resource_table);
     if (inArea.length) {
       const first = items.indexOf(inArea[0]);
-      items.splice(first, 0, {
-        key: `${day.id}-drive-out`,
-        kind: 'drive',
-        title: `Drive to ${day.area?.short_name ?? day.area?.name ?? 'the area'}`,
-        minutes: drive,
-      });
+      items.splice(first, 0, driveItem(`${day.id}-drive-out`, `Drive to ${day.area?.short_name ?? day.area?.name ?? 'the area'}`, drive));
       const last = items.indexOf(inArea[inArea.length - 1]);
-      items.splice(last + 1, 0, {
-        key: `${day.id}-drive-back`,
-        kind: 'drive',
-        title: `Drive back to ${baseAreaName}`,
-        minutes: drive,
-      });
+      items.splice(last + 1, 0, driveItem(`${day.id}-drive-back`, `Drive back to ${homeName}`, drive));
     }
   }
   return items;
+}
+
+/** Minutes of driving in a day: every leg on newer itineraries, there-and-back on older ones. */
+export function dayDriveMinutes(day) {
+  const activities = dayActivities(day);
+  if (hasTimedDrives(activities)) {
+    return day?.drive_minutes ?? 0;
+  }
+  return 2 * (day?.drive_minutes ?? 0);
 }
 
 /** Hours spent on trails and the number of meals out, for a day's summary line. */

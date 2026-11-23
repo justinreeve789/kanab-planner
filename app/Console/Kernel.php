@@ -18,6 +18,8 @@ class Kernel extends ConsoleKernel
                 return date('W') % 2;
             })->at("06:00");
         $schedule->command('update:weather')->hourly();
+        // Closures and roadwork for drive times; a no-op until UDOT_API_KEY / AZ511_API_KEY are set.
+        $schedule->command('update:road-events')->everyTenMinutes()->withoutOverlapping();
     }
 
     /**

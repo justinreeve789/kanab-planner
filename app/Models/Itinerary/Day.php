@@ -35,8 +35,11 @@ class Day extends CachedModel
         'formatted_month_day',
         'formatted_year',
     ];
-    protected $attributes = ['preamble' => null, 'drive_minutes' => null];
-    protected $casts = ['id' => 'string', 'itinerary_id' => 'string', 'stats' => 'json', 'drive_minutes' => 'integer'];
+    protected $attributes = ['preamble' => null, 'drive_minutes' => null, 'return_minutes' => null, 'return_miles' => null, 'return_notes' => null];
+    protected $casts = [
+        'id' => 'string', 'itinerary_id' => 'string', 'stats' => 'json',
+        'drive_minutes' => 'integer', 'return_minutes' => 'integer', 'return_miles' => 'float', 'return_notes' => 'json',
+    ];
     protected $guarded = [
         'formatted_abbr_month_day',
         'formatted_date',
@@ -182,6 +185,23 @@ class Day extends CachedModel
      *
      * @return Collection
      */
+    /** Take an activity out of the day (in memory; for days that haven't been saved yet). */
+    public function removeActivity(Activity $activity): void
+    {
+        foreach ($this->getPeriods() as $period) {
+            $period->setRelation('activities', $period->activities->reject(fn(Activity $a) => $a === $activity)->values());
+        }
+    }
+
+    /** Re-time an activity, moving it to the period its new start falls in (in memory). */
+    public function moveActivity(Activity $activity, string $start, string $end): void
+    {
+        $this->removeActivity($activity);
+        $activity->start_time = Timeline::toTime(Timeline::toMinutes($start));
+        $activity->end_time = Timeline::toTime(Timeline::toMinutes($end));
+        $this->getPeriod(Period::forTime($activity->start_time))->addActivity($activity);
+    }
+
     public function getActivities(): Collection
     {
         $activities = new Collection();

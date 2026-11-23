@@ -9,7 +9,8 @@
       <div class="flex-1 min-w-0">
         <p class="text-xs font-semibold uppercase tracking-wider text-stone-500">
           Day {{ day.day_num + 1 }}
-          <span v-if="day.drive_minutes" class="font-normal normal-case tracking-normal">· {{ formatDuration(day.drive_minutes) }} drive each way</span>
+          <span v-if="driveMinutes" class="font-normal normal-case tracking-normal">· {{ formatDuration(driveMinutes) }} of driving</span>
+          <span v-if="hasRoadAlerts" class="ml-1 normal-case tracking-normal text-amber-700" title="Road alerts on this day's drives">· road alerts</span>
         </p>
         <h2 class="text-lg sm:text-xl font-semibold text-stone-900 truncate">{{ day.area.name }}</h2>
         <p class="text-xs sm:text-sm text-stone-500 truncate">{{ summaryLine }}</p>
@@ -83,7 +84,7 @@
 import DayStats from './components/DayStats.vue';
 import TimelineItem from './components/TimelineItem.vue';
 import Weather from './components/Weather.vue';
-import { buildDaySchedule, summarizeDay } from '../lib/schedule';
+import { buildDaySchedule, dayDriveMinutes, summarizeDay } from '../lib/schedule';
 import { formatDuration, parseDate } from '../lib/time';
 import { useItineraryStore } from '../stores/itinerary';
 import { useSearchStore } from '../stores/search';
@@ -124,6 +125,12 @@ export default {
     },
     schedule() {
       return buildDaySchedule(this.day, this.homeName);
+    },
+    driveMinutes() {
+      return dayDriveMinutes(this.day);
+    },
+    hasRoadAlerts() {
+      return this.schedule.some((item) => item.kind === 'drive' && item.notes?.some((note) => note.type !== 'late'));
     },
     summaryLine() {
       const s = summarizeDay(this.day);
