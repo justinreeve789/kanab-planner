@@ -1,11 +1,11 @@
 <template>
-  <div class="progress w-full h-screen -mt-[68px] flex justify-center items-center text-6xl relative">
-    <span class="text text-center text-6xl text-white font-bold relative">
-      Loading
-      <span class="loading loading-dots loading-lg text-white absolute ml-2 bottom-0"></span>
+  <div class="progress w-full h-[calc(100vh-64px)] flex justify-center items-center text-6xl relative" role="status" aria-live="polite">
+    <span class="text text-center text-4xl sm:text-6xl text-stone-700 font-bold relative">
+      Building your itinerary
+      <span class="loading loading-dots loading-lg text-orange-600 absolute ml-2 bottom-0"></span>
     </span>
     <div class="opacity-75 text-center absolute w-full top-1/2 -translate-1/2">
-      <div class="px-8 py-16 italic text-base text-center text-white">
+      <div class="px-8 py-16 italic text-base text-center text-stone-600">
         {{ currentPhrase }}
       </div>
     </div>

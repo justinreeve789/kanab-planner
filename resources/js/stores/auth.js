@@ -1,37 +1,46 @@
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
+import axiosHelper from '../axiosHelper';
 
+/**
+ * The signed-in user. Auth is the Laravel session (Sanctum's first-party SPA mode), so there's no token to keep:
+ * the browser's cookies carry it, and axios sends the CSRF header automatically.
+ */
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     isLoginOpen: false,
     user: null,
+    checked: false,
   }),
-  actions: {
-    set_user(user) {
-      this.user = user
-    },
-    async attempt_user() {
-      return axios.get('/api/v1/me')
-        .then((response) => {
-          this.user = response.data.data
-          return response
-        })
-        .catch((error) => {
-          this.user = null
-          throw error
-        })
-    },
-    async logout() {
-      return axios.post('/logout')
-        .then((response) => {
-          this.$reset()
-        })
-        .catch((error) => {
-          console.error(error)
-          throw error
-        })
-    },
-  },
   getters: {
     currentUser: (state) => state.user,
   },
-})
+  actions: {
+    set_user(user) {
+      this.user = user;
+    },
+    async attempt_user() {
+      try {
+        const { data } = await axiosHelper.get('/auth/user', { persistent: true });
+        this.user = data && data.id ? data : null;
+      } catch (error) {
+        this.user = null;
+      } finally {
+        this.checked = true;
+      }
+      return this.user;
+    },
+    async login(email, password, remember = true) {
+      await axiosHelper.post('/auth/login', { email, password, remember });
+      return this.attempt_user();
+    },
+    async register(fields) {
+      await axiosHelper.post('/auth/register', fields);
+      return this.attempt_user();
+    },
+    async logout() {
+      await axiosHelper.post('/auth/logout');
+      this.$reset();
+      this.checked = true;
+    },
+  },
+});

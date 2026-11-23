@@ -1,182 +1,192 @@
 <template>
-    <div class="rounded-lg p-[2px] bg-gradient-to-r from-orange-100 to-red-100">
-      <div class="rounded-lg p-[1px] bg-gradient-to-r from-orange-200 to-red-200">
-        <div class="collapse collapse-arrow bg-white">
-          <input type="checkbox" v-touch="toggleEditing" />
-          <div class="collapse-title font-medium py-0 md:py-3">
-            <h2 :id="'day-heading-' + day.day_num" class="day-heading relative w-full">
-              <div class="flex bg-white items-center justify-between w-full font-medium text-left text-gray-500">
-                <div class="day-title md:p-4">
-                  <span class="day font-large text-xl md:inline md:text-3xl">Day {{ day.day_num + 1 }}</span>
-                  <span class="separator hidden md:inline md:text-xl"> - </span>
-                  <span class="area font-large md:inline md:text-3xl md:inline-block block">
-                    <span class="hidden xl:inline">
-                      {{ day.area.name }}
-                    </span>
-                    <span class="xl:hidden">
-                      {{ day.area.short_name }}
-                    </span>
-                  </span>
-                </div>
-                <div class="flex justify-end items-center flex-grow">
-                  <Weather class="text-right" :weather="day.weather" />
-                  <div class="p-4 text-sm md:text-lg text-right">
-                    <span class="date-day-of-week hidden md:inline">{{ day.formatted_day_of_week }}</span>
-                    <span class="pr-1 hidden md:inline">,</span>
-                    <span class="date-month-day sm:hidden">{{ day.formatted_abbr_month_day }}</span>
-                    <span class="date-month-day hidden sm:inline">{{ day.formatted_month_day }}</span>
-                    <span class="pr-1 hidden md:inline">,</span>
-                    <span class="date-year block md:inline">{{ day.formatted_year }}</span>
-                  </div>
-                </div>
-              </div>
-            </h2>
-          </div>
-
-          <div :id="'day-body-' + day.day_num" class="collapse-content bg-white w-full">
-            <div v-if="day.preamble">
-              <p class="mb-8">{{ day.preamble }}</p>
-            </div>
-            <section v-for="(period, periodType) in day.periods" :key="periodType">
-              <div class="timeline"></div>
-              <div :class="'day-content pt-4 period-' + period.type" v-for="(activity, index) in period.activities" :key="index">
-                <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-if="activity.activity_type && (activity.activity_type.name == 'checking-in' || activity.activity_type.name == 'checking-out')">
-                  <Accommodation :activity="activity" :day="day" :resource="activity.resource" />
-                </div>
-                <div class="mb-8 border border-solid border-gray-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'event'">
-                  <Event :activity="activity" :day="day" />
-                </div>
-                <div class="mb-8 border border-solid border-green-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'dining'">
-                  <Restaurant :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
-                </div>
-                <div class="mb-8 border border-solid border-orange-300 rounded-lg" v-else-if="activity.activity_type && activity.activity_type.name == 'hiking'">
-                  <Trail :phrase="activity.phrase" :activity="activity" :resource="activity.resource" />
-                </div>
-                <div class="mb-8 border border-solid border-blue-300 rounded-lg" v-if="activity.name">
-                  <Task :activity="activity" />
-                </div>
-              </div>
-            </section>
-          </div>
-        </div>
+  <article :id="'day-' + day.day_num" class="day-card scroll-mt-32 rounded-2xl bg-white shadow-sm border border-stone-200 overflow-hidden">
+    <header class="flex items-center gap-3 p-3 sm:p-4 cursor-pointer select-none" @click="open = !open">
+      <div class="date-badge w-14 shrink-0 text-center rounded-xl bg-stone-900 text-white py-1.5 leading-none">
+        <div class="text-[10px] uppercase tracking-wider text-stone-300">{{ weekday }}</div>
+        <div class="text-2xl font-bold my-0.5">{{ dayOfMonth }}</div>
+        <div class="text-[10px] uppercase tracking-wider text-stone-300">{{ month }}</div>
       </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-semibold uppercase tracking-wider text-stone-500">
+          Day {{ day.day_num + 1 }}
+          <span v-if="day.drive_minutes" class="font-normal normal-case tracking-normal">· {{ formatDuration(day.drive_minutes) }} drive each way</span>
+        </p>
+        <h2 class="text-lg sm:text-xl font-semibold text-stone-900 truncate">{{ day.area.name }}</h2>
+        <p class="text-xs sm:text-sm text-stone-500 truncate">{{ summaryLine }}</p>
+      </div>
+      <Weather class="hidden sm:flex text-stone-600" :weather="day.weather" />
+      <svg class="w-5 h-5 text-stone-400 transition-transform shrink-0" :class="{ 'rotate-180': open }" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M5.2 7.2a.75.75 0 0 1 1.06.02L10 11.1l3.74-3.88a.75.75 0 1 1 1.08 1.04l-4.28 4.44a.75.75 0 0 1-1.08 0L5.18 8.26a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd"/>
+      </svg>
+    </header>
+
+    <div v-show="open" class="border-t border-stone-100">
+      <div v-if="day.preamble || editingNote || canEdit" class="px-4 pt-3">
+        <form v-if="editingNote" class="flex flex-col gap-2" @submit.prevent="saveNote">
+          <textarea v-model="note" class="textarea textarea-sm w-full" rows="2" maxlength="2000" placeholder="A note for this day"></textarea>
+          <div class="flex gap-2">
+            <button class="btn btn-sm btn-primary" type="submit">Save note</button>
+            <button class="btn btn-sm btn-ghost" type="button" @click="editingNote = false">Cancel</button>
+          </div>
+        </form>
+        <p v-else-if="day.preamble" class="text-stone-600 italic">
+          {{ day.preamble }}
+          <button v-if="canEdit" class="link link-hover text-xs not-italic ml-1" @click="startNote">Edit</button>
+        </p>
+        <button v-else class="link link-hover text-xs text-stone-500" @click="startNote">+ Add a note</button>
+      </div>
+
+      <ol v-if="schedule.length" class="py-2">
+        <TimelineItem
+          v-for="item in schedule"
+          :key="item.key"
+          :item="item"
+          :can-edit="canEdit"
+          @swap="swap"
+          @remove="remove"
+          @update-time="updateTime"
+        />
+      </ol>
+      <p v-else class="px-4 py-6 text-center text-stone-500">Nothing planned. Enjoy a free day.</p>
+
+      <form v-if="addingItem" class="flex flex-wrap items-end gap-2 px-4 pb-3" @submit.prevent="addItem">
+        <label class="text-xs text-stone-600 flex-1 min-w-[12rem]">What
+          <input v-model="newItem.name" required maxlength="255" class="input input-sm block w-full" placeholder="Ice cream in town" />
+        </label>
+        <label class="text-xs text-stone-600">Start
+          <input v-model="newItem.start_time" type="time" required class="input input-sm block" />
+        </label>
+        <label class="text-xs text-stone-600">End
+          <input v-model="newItem.end_time" type="time" class="input input-sm block" />
+        </label>
+        <button class="btn btn-sm btn-primary" type="submit">Add</button>
+        <button class="btn btn-sm btn-ghost" type="button" @click="addingItem = false">Cancel</button>
+      </form>
+
+      <footer class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-stone-50 border-t border-stone-100">
+        <div v-if="canEdit" class="flex flex-wrap gap-2">
+          <button class="btn btn-sm" :disabled="busy" @click="startAddItem">Add item</button>
+          <button class="btn btn-sm" :disabled="busy" @click="regenerate">
+            <span v-if="busy" class="loading loading-spinner loading-xs"></span>
+            Shuffle this day
+          </button>
+          <button v-if="schedule.length" class="btn btn-sm btn-ghost" :disabled="busy" @click="clear">Clear day</button>
+        </div>
+        <div v-else></div>
+        <DayStats :stats="day.stats" />
+      </footer>
     </div>
+  </article>
 </template>
 
 <script>
-import Accommodation from "./activities/Accommodation.vue";
-import Event from './activities/Event.vue';
-import Location from './activities/Location.vue';
-import Restaurant from './activities/Restaurant.vue';
-import Task from './activities/Task.vue';
-import Trail from './activities/Trail.vue';
-import Weather from "./components/Weather.vue";
-import {usePreferencesStore} from "../stores/preferences";
-import { SwipeList, SwipeOut } from "@ahultgren/vue3-swipe-actions";
+import DayStats from './components/DayStats.vue';
+import TimelineItem from './components/TimelineItem.vue';
+import Weather from './components/Weather.vue';
+import { buildDaySchedule, summarizeDay } from '../lib/schedule';
+import { formatDuration, parseDate } from '../lib/time';
+import { useItineraryStore } from '../stores/itinerary';
+import { useSearchStore } from '../stores/search';
 
 export default {
-  setup() {
-    const preferencesStore = usePreferencesStore();
-    return { preferencesStore };
+  components: { DayStats, TimelineItem, Weather },
+  props: {
+    day: { type: Object, required: true },
+    baseArea: { type: Object, default: null },
+    canEdit: { type: Boolean, default: false },
   },
-  components: {
-    Accommodation,
-    Event,
-    Location,
-    Restaurant,
-    Task,
-    Trail,
-    Weather,
-    SwipeOut,
-    SwipeList,
+  setup() {
+    return { itineraryStore: useItineraryStore(), searchStore: useSearchStore() };
   },
   data() {
     return {
-      mockSwipeList: [
-        {
-          id: 0,
-          title: "Some title",
-          description: "some description",
-        },
-        {
-          id: 1,
-          title: "Some title",
-          description: "some description",
-        },
-        {
-          id: 2,
-          title: "Some title",
-          description: "some description",
-        },
-      ],
-      touchDelaySecondsToTrigger: 0.75,
+      open: true,
+      busy: false,
+      editingNote: false,
+      note: '',
+      addingItem: false,
+      newItem: { name: '', start_time: '', end_time: '' },
     };
   },
   computed: {
-    adventurousness() {
-      return Math.max(0.01, Math.min(100, Math.round(this.day.stats.adventurousness * 100)));
+    date() {
+      return parseDate(this.day.date);
     },
-    solitariness() {
-      return Math.max(0.01, Math.min(100, Math.round(this.day.stats.solitariness * 100)));
+    weekday() {
+      return this.date?.toLocaleDateString('en-US', { weekday: 'short' });
     },
-    strenuousness() {
-      return Math.max(0.01, Math.min(100, Math.round(this.day.stats.strenuousness * 100)));
+    dayOfMonth() {
+      return this.date?.getDate();
     },
-    isEditing() {
-      return this.preferencesStore.isEditing;
+    month() {
+      return this.date?.toLocaleDateString('en-US', { month: 'short' });
     },
-    revealFirstRight() {
-      this.$refs.list.revealRight(0);
+    schedule() {
+      return buildDaySchedule(this.day, this.baseArea?.short_name ?? 'base');
     },
-    revealFirstLeft() {
-      this.$refs.list.revealLeft(0);
-    },
-    closeFirst() {
-      this.$refs.list.closeActions(0);
-    },
-    closeAll() {
-      this.$refs.list.closeActions();
-    },
-    remove(item) {
-      this.mockSwipeList = this.mockSwipeList.filter((i) => i !== item);
-      // console.log(e, 'remove');
-    },
-    itemClick(e) {
-      console.log(e, "item click");
-    },
-    fbClick(e) {
-      console.log(e, "First Button Click");
-    },
-    sbClick(e) {
-      console.log(e, "Second Button Click");
+    summaryLine() {
+      const s = summarizeDay(this.day);
+      const parts = [];
+      if (s.hikes) {
+        parts.push(`${s.hikes} ${s.hikes === 1 ? 'hike' : 'hikes'} (${formatDuration(s.hikeMinutes)})`);
+      }
+      if (s.events) {
+        parts.push(`${s.events} ${s.events === 1 ? 'event' : 'events'}`);
+      }
+      if (s.mealsOut) {
+        parts.push(`${s.mealsOut} ${s.mealsOut === 1 ? 'meal' : 'meals'} out`);
+      }
+      return parts.length ? parts.join(' · ') : 'A relaxed day';
     },
   },
   methods: {
-    abbreviateMonth(month) {
-        return month.substr(0, 3);
+    formatDuration,
+    async run(action) {
+      this.busy = true;
+      try {
+        await action();
+      } catch (e) {
+        // The store shows the error.
+      } finally {
+        this.busy = false;
+      }
     },
-    handleBookmark(e) {
-      console.log(e);
+    startNote() {
+      this.note = this.day.preamble ?? '';
+      this.editingNote = true;
     },
-    handleDelete(e) {
-      console.log(e);
+    async saveNote() {
+      await this.run(() => this.itineraryStore.updateDayNote(this.day, this.note.trim() || null));
+      this.editingNote = false;
     },
-    nextDay(item, i) {
-        return function(direction, mouseEvent) {
-            console.log("Swiped item ", i, ": ", item, " in direction ", direction);
-        };
+    startAddItem() {
+      this.newItem = { name: '', start_time: '', end_time: '' };
+      this.addingItem = true;
     },
-    previousDay(item, i) {
-        return function(direction, mouseEvent) {
-            console.log("Swiped item ", i, ": ", item, " in direction ", direction);
-        };
+    async addItem() {
+      const payload = { ...this.newItem, end_time: this.newItem.end_time || this.newItem.start_time };
+      await this.run(() => this.itineraryStore.addActivity(this.day, payload));
+      this.addingItem = false;
     },
-    toggleEditing(e) {
-      this.preferencesStore.isEditing = !this.preferencesStore.isEditing;
+    regenerate() {
+      return this.run(() => this.itineraryStore.regenerateDay(this.day));
     },
-  },
-  props: {
-    day: Object,
+    clear() {
+      if (window.confirm(`Remove everything from Day ${this.day.day_num + 1}?`)) {
+        return this.run(() => this.itineraryStore.clearDay(this.day));
+      }
+    },
+    remove(activity) {
+      return this.run(() => this.itineraryStore.removeActivity(activity));
+    },
+    updateTime(activity, times) {
+      return this.run(() => this.itineraryStore.updateActivity(activity, times));
+    },
+    swap(activity) {
+      this.searchStore.title = `Swap ${activity.resource?.name ?? 'activity'}`;
+      this.searchStore.target = { component: 'swap', activity, areaId: this.day.area.id, date: this.day.date };
+      this.searchStore.isResourceListOpen = true;
+    },
   },
 };
 </script>

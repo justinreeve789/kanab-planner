@@ -35,14 +35,8 @@ class Day extends CachedModel
         'formatted_month_day',
         'formatted_year',
     ];
-    protected $attributes = [
-        'formatted_abbr_month_day' => '',
-        'formatted_date' => '',
-        'formatted_day_of_week' => '',
-        'formatted_month_day' => '',
-        'formatted_year' => '',
-    ];
-    protected $casts = ['id' => 'string', 'itinerary_id' => 'string', 'stats' => 'json'];
+    protected $attributes = ['preamble' => null, 'drive_minutes' => null];
+    protected $casts = ['id' => 'string', 'itinerary_id' => 'string', 'stats' => 'json', 'drive_minutes' => 'integer'];
     protected $guarded = [
         'formatted_abbr_month_day',
         'formatted_date',
@@ -53,30 +47,20 @@ class Day extends CachedModel
     ];
     protected $table = 'itinerary_days';
 
-    public $activities;
-    public $preamble;
-
-    /** @var Period[] $periods */
-
+    /**
+     * A new day (constructed with attributes) gets its four empty periods in memory. Rows hydrated from the database
+     * are constructed without attributes and get their periods from the relation, so this never queries.
+     */
     public function __construct(array $attributes = [])
     {
-        $this->id = Str::uuid();
-
-        foreach ($attributes as $key => $attr) {
-            $this->setAttribute($key, $attr);
-        }
-
-        // Activities could potentially occur outside the day's area, such as eating dinner close to the home area after
-        // spending time in other areas, if the location is still in a reasonable proximity, but generally all activities
-        // should occur in the same area.
-
-        $this->start_time = '07:00';
-        $this->end_time = '22:00';
-
-        $this->activities = [];
-        $this->createPeriodsIfNotExist();
-
         parent::__construct($attributes);
+
+        if (!empty($attributes)) {
+            $this->id = $this->id ?? Str::uuid();
+            $this->start_time = $this->start_time ?? '07:00:00';
+            $this->end_time = $this->end_time ?? '22:00:00';
+            $this->createPeriods();
+        }
     }
 
     public function getFormattedAbbrMonthDayAttribute()
@@ -104,29 +88,13 @@ class Day extends CachedModel
         return Carbon::parse($this->date)->format('Y');
     }
 
-    protected function createPeriodsIfNotExist()
+    protected function createPeriods(): void
     {
-        $periods = [
-            Period::MORNING,
-            Period::AFTERNOON,
-            Period::EVENING,
-            Period::NIGHT
-        ];
-
-        foreach ($periods as $period) {
-            $this->periods->put($period, new Period(['day_id' => $this->id, 'type' => $period]));
+        $periods = new Collection();
+        foreach (Period::getPeriodTypes() as $type) {
+            $periods->put($type, new Period(['day_id' => $this->id, 'type' => $type]));
         }
-
-//        foreach ($periods as $periodType) {
-//            // Check if the period already exists for this day, if not, create it.
-//            $existingPeriod = $this->periods()->where('type', $periodType)->first();
-//            if (!$existingPeriod) {
-//                $this->periods()->create([
-//                    'day_id' => $this->id,
-//                    'type' => $periodType,
-//                ]);
-//            }
-//        }
+        $this->setRelation('periods', $periods);
     }
 
     public function itinerary()
@@ -145,69 +113,65 @@ class Day extends CachedModel
             get: function() {
                 return Area::find($this->area_id);
             },
-            set: function(Area $area) {
-                $this->area_id = $area->id;
-            }
+            // Return the attributes to write. Assigning $this->area_id inside the closure is silently discarded:
+            // Eloquent merges the closure's return value over a copy of the attributes taken before it ran, so
+            // area_id stayed null for every day built with ['area' => $area].
+            set: fn(?Area $area) => ['area_id' => $area?->id]
         );
     }
 
-    public function saveAll()
+    public function getPeriod(int $type): Period
     {
-        $this->periods->each()->save();
+        return $this->periods->first(fn(Period $period) => $period->type === $type);
     }
 
-    public function getPeriod($index): Period
-    {
-        return $this->periods[$index];
-    }
-
+    /**
+     * Periods in morning → night order.
+     */
     public function getPeriods(): Collection
     {
-        return $this->periods;
+        return $this->periods->sortBy('type')->values();
     }
 
     /**
      * Since a trail is likely to be the focal point of the day, weight it heavier than other activities when
      * calculating the average.
+     *
+     * Each activity contributes the resource_data row for its resource (matching the activity type when there is
+     * one). Tasks without a resource (cooking, etc.) don't count. Pass $force to recompute after the day changes.
      */
-    public function calculateASS(): array
+    public function calculateASS(bool $force = false): array
     {
-        if ($this->stats) {
+        if ($this->stats && !$force) {
             return $this->stats;
         }
-        $stats = ['adventurousness' => 0, 'solitariness' => 0, 'strenuousness' => 0];
-        $activities = $this->getActivities();
-        $count = count($activities);
-        foreach ($activities as $activity) {
-            if (empty($activity->data->data)) {
-                $count--;
+        $props = ['adventurousness', 'solitariness', 'strenuousness'];
+        $weights = ['adventurousness' => 1.25, 'solitariness' => 1, 'strenuousness' => 1.5];
+        $sums = array_fill_keys($props, 0.0);
+        $totals = array_fill_keys($props, 0.0);
+
+        foreach ($this->getActivities() as $activity) {
+            $resource = $activity->resource;
+            if (!$resource || !isset($resource->data) || $resource->data->isEmpty()) {
                 continue;
             }
-            $advModifier = 1;
-            $solModifier = 1;
-            $strModifier = 1;
-            if ($activity->activityType == 'hiking') {
-                $advModifier = 1.25;
-                $strModifier = 1.5;
-            }
-            if (isset($activity->data->data[0])) {
-//                $stats['adventurousness'] += $advModifier * $activity->data->data[0]->adventurousness ??
-//                    $activity->adventurousness() ?? Activity::DEFAULT_ADVENTUROUSNESS;
-//                $stats['solitariness'] += $solModifier * isset($activity->data->data[0]) ??
-//                    $activity->data->data[0]->solitariness ??
-//                    $activity->solitariness() ?? Activity::DEFAULT_SOLITARINESS;
-//                $stats['strenuousness'] += $strModifier * isset($activity->data->data[0]) ??
-//                    $activity->data->data[0]->strenuousness ??
-//                    $activity->strenuousness() ?? Activity::DEFAULT_STRENUOUSNESS;
-                $stats['adventurousness'] += $advModifier * $activity->data->data[0]->adventurousness ?? Activity::DEFAULT_ADVENTUROUSNESS;
-                $stats['solitariness'] += $solModifier * $activity->data->data[0]->solitariness ?? Activity::DEFAULT_SOLITARINESS;
-                $stats['strenuousness'] += $strModifier * $activity->data->data[0]->strenuousness ?? Activity::DEFAULT_STRENUOUSNESS;
+            $data = $resource->data->firstWhere('activity_type_id', $activity->activity_type_id)
+                ?? $resource->data->first();
+            $isHiking = $activity->activity_type?->name === 'hiking';
+
+            foreach ($props as $prop) {
+                if ($data->{$prop} === null) {
+                    continue;
+                }
+                $weight = $isHiking ? $weights[$prop] : 1;
+                $sums[$prop] += $weight * (float) $data->{$prop};
+                $totals[$prop] += $weight;
             }
         }
-        if ($count > 0) {
-            $stats['adventurousness'] = round($stats['adventurousness'] / $count, 2);
-            $stats['solitariness'] = round($stats['solitariness'] / $count, 2);
-            $stats['strenuousness'] = round($stats['strenuousness'] / $count, 2);
+
+        $stats = [];
+        foreach ($props as $prop) {
+            $stats[$prop] = $totals[$prop] > 0 ? round(min(1, max(0, $sums[$prop] / $totals[$prop])), 2) : 0;
         }
         $this->stats = $stats;
         return $stats;
@@ -224,12 +188,12 @@ class Day extends CachedModel
         foreach ($this->getPeriods() as $period) {
             $activities = $activities->merge($period->getActivities());
         }
-        return $activities;
+        return $activities->sortBy('start_time')->values();
     }
 
-    public function getPreamble(): string
+    public function getPreamble(): ?string
     {
-        return $this->preamble;
+        return $this->attributes['preamble'] ?? null;
     }
 
     public function getWeatherAttribute()
@@ -238,14 +202,12 @@ class Day extends CachedModel
             ->whereDate('start', '=', Carbon::parse($this->date)->toDateString())
             ->get();
         foreach ($weather as $w) {
-            if (Carbon::parse($w->start)->toTimeString() >= '12:00:00') {
+            if (!isset($shortForecast) && Carbon::parse($w->start)->toTimeString() >= '12:00:00') {
                 $shortForecast = $w->short_forecast;
                 $detailedForecast = $w->detailed_forecast;
             }
-            if (isset($maxTemperature) && $maxTemperature < $w->temperature) {
-                $minTemperature = $maxTemperature;
-            }
-            $maxTemperature = $w->temperature;
+            $maxTemperature = isset($maxTemperature) ? max($maxTemperature, $w->temperature) : $w->temperature;
+            $minTemperature = isset($minTemperature) ? min($minTemperature, $w->temperature) : $w->temperature;
         }
 
         return (object) [
@@ -277,23 +239,25 @@ class Day extends CachedModel
     {
         foreach ($this->periods as $period) {
             foreach ($period->activities as $activity) {
-                if ($activity->activityType === $activityType) {
+                if ($activity->activity_type?->name === $activityType) {
                     return true;
                 }
-            }        }
+            }
+        }
         return false;
     }
 
     public function hasActivityTypeInPeriod(string $activityType, int $period): bool
     {
-        return $this->getPeriods()[$period]->hasActivityType($activityType);
+        return $this->getPeriod($period)->hasActivityType($activityType);
     }
 
     public function hasResourceClass($resourceClass): bool
     {
         foreach ($this->periods as $period) {
             foreach ($period->activities as $activity) {
-                if ($activity->data && get_class($activity->data) === $resourceClass) {
+                $resource = $activity->resource;
+                if ($resource && get_class($resource) === $resourceClass) {
                     return true;
                 }
             }
@@ -321,49 +285,8 @@ class Day extends CachedModel
         return $this->hasResourceClass(ResourceEnum::TRAILS_CLASS);
     }
 
-    public function shouldAddActivityTypeForPeriod(string $activityType, int $period): bool
+    public function setPreamble(?string $preamble): void
     {
-        if ($this->hasActivityTypeInPeriod($activityType, $period)) {
-            return false;
-        }
-
-        switch ($activityType) {
-            case 'cooking':
-                if ($this->periods()[$period]->hasRestaurant()) {
-                    return false;
-                }
-                break;
-            default:
-        }
-
-        return true;
-    }
-
-    public function shouldAddCookingForPeriod(int $period): bool
-    {
-        return $this->shouldAddActivityTypeForPeriod('cooking', $period);
-    }
-
-    public function shouldAddTrail(): bool
-    {
-    }
-
-    public function setPreamble(string $preamble): void
-    {
-        $this->preamble = $preamble;
-    }
-
-    /**
-     * After activities are added to periods, we can calculate specific times. Activities may be moved into different periods.
-     */
-    public function chronotizeActivities()
-    {
-        foreach ($this->periods as $period) {
-            foreach ($period->activities as $activity) {
-                if ($period->type === Period::MORNING) {
-                    // Breakfast should always come first.
-                }
-            }
-        }
+        $this->attributes['preamble'] = $preamble;
     }
 }

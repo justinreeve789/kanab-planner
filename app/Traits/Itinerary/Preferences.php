@@ -46,26 +46,20 @@ trait Preferences
         return $this->end_date;
     }
 
-    public function getEventPriorities($random = false): ?array
+    public function getEventPriorities($random = false): array
     {
-        if ($random === true) {
-            return $this->shuffleArray($this->event_priorities);
-        } else {
-            return $this->event_priorities;
-        }
+        $ids = $this->event_priorities ?? [];
+        return $random === true ? $this->shuffleArray($ids) : $ids;
     }
     public function getLatitude(): ?float
     {
         return $this->latitude;
     }
 
-    public function getLocationPriorities($random = false): ?array
+    public function getLocationPriorities($random = false): array
     {
-        if ($random === true) {
-            return $this->shuffleArray($this->location_priorities);
-        } else {
-            return $this->location_priorities;
-        }
+        $ids = $this->location_priorities ?? [];
+        return $random === true ? $this->shuffleArray($ids) : $ids;
     }
 
     public function getLongitude(): ?float
@@ -83,13 +77,10 @@ trait Preferences
         return $this->priorities;
     }
 
-    public function getRestaurantPriorities($random = false): ?array
+    public function getRestaurantPriorities($random = false): array
     {
-        if ($random === true) {
-            return $this->shuffleArray($this->restaurant_priorities);
-        } else {
-            return $this->restaurant_priorities;
-        }
+        $ids = $this->restaurant_priorities ?? [];
+        return $random === true ? $this->shuffleArray($ids) : $ids;
     }
 
     public function getSeason(): ?string
@@ -112,13 +103,10 @@ trait Preferences
         return $this->strenuousness;
     }
 
-    public function getTrailPriorities($random = false): ?array
+    public function getTrailPriorities($random = false): array
     {
-        if ($random === true) {
-            return $this->shuffleArray($this->trail_priorities);
-        } else {
-            return $this->trail_priorities;
-        }
+        $ids = $this->trail_priorities ?? [];
+        return $random === true ? $this->shuffleArray($ids) : $ids;
     }
 
     public function setActivityPriorities($priorities = null) {
@@ -241,17 +229,52 @@ trait Preferences
         $this->strenuousness = $strenuousness;
     }
 
-    public function setTrailPriorities($priorities = null) {
-        if ($priorities === null) {
-            $priorities = self::DEFAULT_TRAIL_PRIORITIES;
-        }
-        if (!is_array($priorities)) {
-            $priorities = explode(',', $priorities);
-        }
-        $this->trail_priorities = $priorities;
+    public function setTrailPriorities($ids = null)
+    {
+        $this->trail_priorities = $this->normalizeIds($ids);
     }
 
-    protected function shuffleArray($array) {
+    public function setEventPriorities($ids = null)
+    {
+        $this->event_priorities = $this->normalizeIds($ids);
+    }
+
+    public function setLocationPriorities($ids = null)
+    {
+        $this->location_priorities = $this->normalizeIds($ids);
+    }
+
+    public function setRestaurantPriorities($ids = null)
+    {
+        $this->restaurant_priorities = $this->normalizeIds($ids);
+    }
+
+    public function setAreaPriorities($ids = null)
+    {
+        $this->area_priorities = $this->normalizeIds($ids);
+    }
+
+    public function getAreaPriorities(): array
+    {
+        return $this->area_priorities ?? [];
+    }
+
+    /**
+     * Accepts an array or a comma-separated string; returns unique positive integer ids.
+     */
+    protected function normalizeIds($ids): array
+    {
+        if ($ids === null || $ids === '') {
+            return [];
+        }
+        if (!is_array($ids)) {
+            $ids = explode(',', (string) $ids);
+        }
+        $ids = array_filter(array_map('intval', $ids), fn($id) => $id > 0);
+        return array_values(array_unique($ids));
+    }
+
+    protected function shuffleArray(array $array) {
         $keys = array_keys($array);
         shuffle($keys);
         $shuffledArray = [];

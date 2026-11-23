@@ -19,8 +19,7 @@ class ImageController extends Controller
 
     public function getImageByQuery(Request $request) {
         $query = $request->get('q');
-        $response = $this->imageService->search($query);
-        echo '<pre>'; print_r($response); echo '</pre>';
+        return response()->json($this->imageService->search($query));
     }
 
     public function getUrl(Request $request, string $type, string $id, bool $thumbnail = false) {

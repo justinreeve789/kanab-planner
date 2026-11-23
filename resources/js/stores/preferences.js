@@ -53,7 +53,7 @@ export const usePreferencesStore = defineStore('preferences', {
     },
     getRandomPreferredMonth() {
       if (this.preferredMonths.length > 0) {
-        const index = Math.floor(Math.random() * this.preferredMonths);
+        const index = Math.floor(Math.random() * this.preferredMonths.length);
         return this.preferredMonths[index];
       }
     },
@@ -64,7 +64,7 @@ export const usePreferencesStore = defineStore('preferences', {
         return this.locationIds.includes(resourceId);
       } else if (resourceType === 'restaurant') {
         return this.restaurantIds.includes(resourceId);
-      } else if (resourceType === 'location') {
+      } else if (resourceType === 'trail') {
         return this.trailIds.includes(resourceId);
       }
       return false;

@@ -58,7 +58,6 @@
 import axios from "axios";
 import AddToItinerary from "../../buttons/AddToItinerary.vue";
 import AskQuestion from "../../buttons/AskQuestion.vue";
-import ViewMenu from "../../buttons/ViewMenu.vue";
 import {usePreferencesStore} from "../../../stores/preferences";
 
 export default {
@@ -69,7 +68,6 @@ export default {
   components: {
     AddToItinerary,
     AskQuestion,
-    ViewMenu,
   },
   data() {
     return {

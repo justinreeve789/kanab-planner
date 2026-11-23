@@ -22,6 +22,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'provider',
+        'provider_id',
+        'email_verified_at',
     ];
 
     /**
@@ -32,6 +35,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'provider_id',
     ];
 
     /**
@@ -43,12 +49,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function itineraries() {
-        return $this->hasManyThrough(Itinerary::class, UserItinerary::class, 'itinerary_id', 'id', 'id', 'user_id');
-    }
-
-    public function isAdmin() {
-        return true;
+    public function itineraries()
+    {
+        return $this->belongsToMany(Itinerary::class, 'user_itineraries', 'user_id', 'itinerary_id')->withTimestamps();
     }
 }
 

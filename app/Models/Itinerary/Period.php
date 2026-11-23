@@ -12,10 +12,6 @@ use Illuminate\Support\Str;
 
 class Period extends CachedModel
 {
-//    public const MORNING = 'morning';
-//    public const AFTERNOON = 'afternoon';
-//    public const EVENING = 'evening';
-//    public const NIGHT = 'night';
     public const MORNING = 0;
     public const AFTERNOON = 1;
     public const EVENING = 2;
@@ -25,12 +21,28 @@ class Period extends CachedModel
     protected $guarded = [];
     protected $table = 'itinerary_periods';
 
-//    public $activities;
-
+    /**
+     * New periods start with an empty in-memory activity list; hydrated rows load theirs from the relation.
+     */
     public function __construct(array $attributes = []) {
-        $this->id = Str::uuid();
-//        $this->activities = new Collection();
         parent::__construct($attributes);
+        if (!empty($attributes)) {
+            $this->id = $this->id ?? Str::uuid();
+            $this->setRelation('activities', new Collection());
+        }
+    }
+
+    /**
+     * The column is ENUM('0','1','2','3'); MySQL treats a bare integer as an enum *index*, so always write the string.
+     */
+    public function setTypeAttribute($type): void
+    {
+        $this->attributes['type'] = (string) (int) $type;
+    }
+
+    public function getTypeAttribute($type): ?int
+    {
+        return $type === null ? null : (int) $type;
     }
 
     public function activities(): HasMany
@@ -40,7 +52,7 @@ class Period extends CachedModel
 
     public function getActivities(): Collection
     {
-        return $this->activities;
+        return $this->activities->sortBy('start_time')->values();
     }
 
     public function addActivity(Activity $activity): void
@@ -48,9 +60,18 @@ class Period extends CachedModel
         $this->activities->add($activity);
     }
 
-    public function getAreaId(): int
+    /**
+     * Which period a start time falls in: morning until 11:30, afternoon until 16:00, evening until 22:00.
+     */
+    public static function forTime(?string $time): int
     {
-        return $this->area_id;
+        $time = $time ? substr(Itinerary::normalizeTime($time), 0, 5) : '12:00';
+        return match (true) {
+            $time < '11:30' => self::MORNING,
+            $time < '16:00' => self::AFTERNOON,
+            $time < '22:00' => self::EVENING,
+            default => self::NIGHT,
+        };
     }
 
     public static function getPeriodTypes()
@@ -97,7 +118,7 @@ class Period extends CachedModel
     {
         $activities = new Collection();
         foreach ($this->activities as $activity) {
-            if ($activity->activity_type->name === $activityType) {
+            if ($activity->activity_type?->name === $activityType) {
                 $activities->add($activity);
             }
         }

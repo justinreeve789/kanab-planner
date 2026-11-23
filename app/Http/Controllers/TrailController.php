@@ -10,9 +10,13 @@ use Illuminate\Http\Request;
 
 class TrailController extends Controller
 {
+    /**
+     * Paginated: ?page=2&per_page=50 (max 100).
+     */
     public function index(Request $request)
     {
-        return Trail::with(['area', 'data'])->get();
+        $perPage = max(1, min(100, (int) $request->get('per_page', 50)));
+        return Trail::with(['area', 'data'])->orderBy('trails.id')->paginate($perPage);
     }
 
     public function getTrail(Request $request, int $id)
@@ -31,9 +35,13 @@ class TrailController extends Controller
     public function downloadGeoJson(Request $request, int $id)
     {
         $json = $this->getGeoJsonData($request, $id);
-        if ($json) {
-            return response()->download($json, $id . '.geojson');
+        if (!$json) {
+            abort(404);
         }
+        // download() expects a file path; this is the file *contents*.
+        return response()->streamDownload(function() use ($json) {
+            echo $json;
+        }, $id . '.geojson', ['Content-Type' => 'application/geo+json']);
     }
 
     public function getGpxData(Request $request, int $id)
@@ -57,11 +65,18 @@ class TrailController extends Controller
 
     public function analyzeGeoJson(Request $request, int $id)
     {
-        $averageSpeed = $request->get('average_speed') ?? Trail::AVERAGE_HIKING_SPEED_MPH;
+        $averageSpeed = (float) ($request->get('average_speed') ?? Trail::AVERAGE_HIKING_SPEED_MPH);
+        if ($averageSpeed <= 0 || $averageSpeed > 30) {
+            return response()->json(['errors' => ['average_speed' => ['Must be between 0 and 30 mph.']]], 422);
+        }
         $json = $this->getGeoJsonData($request, $id);
         if ($json) {
             $trailService = new TrailService();
-            return $trailService->analyzeTrail($json, $averageSpeed);
+            try {
+                return $trailService->analyzeTrail($json, $averageSpeed);
+            } catch (\InvalidArgumentException $e) {
+                return response()->json(['errors' => ['geojson' => [$e->getMessage()]]], 422);
+            }
         }
     }
 }

@@ -4,11 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
 
+/**
+ * "Sign in with Google": redirect out, then log the returning user into the session and send them back to the app.
+ * New emails get an account; an existing account with the same email is linked to the provider.
+ */
 class AuthController extends Controller
 {
+    /** Providers configured in config/services.php. */
+    public const PROVIDERS = ['google'];
+
     public function redirectToProvider(string $provider)
     {
         return Socialite::driver($provider)->redirect();
@@ -19,30 +25,27 @@ class AuthController extends Controller
         try {
             $socialUser = Socialite::driver($provider)->user();
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to authenticate with ' . ucfirst($provider)], 401);
+            return redirect('/login?error=' . urlencode('Could not sign in with ' . ucfirst($provider) . '.'));
         }
 
-        $user = User::where('provider_id', $socialUser->id)
-            ->where('provider', $provider)
-            ->first();
+        $user = User::where('provider', $provider)->where('provider_id', $socialUser->getId())->first()
+            ?? User::where('email', $socialUser->getEmail())->first();
 
         if ($user) {
-            Auth::login($user);
-            $token = $user->createToken('social-login')->plainTextToken;
-            return response()->json(['token' => $token]);
+            $user->forceFill(['provider' => $provider, 'provider_id' => $socialUser->getId()])->save();
         } else {
-            $newUser = User::create([
-                'name' => $socialUser->name,
-                'email' => $socialUser->email,
-                'provider_id' => $socialUser->id,
+            $user = User::create([
+                'name' => $socialUser->getName() ?: $socialUser->getEmail(),
+                'email' => $socialUser->getEmail(),
                 'provider' => $provider,
-                'password' => Hash::make(uniqid()), // TODO: Generate a random password
+                'provider_id' => $socialUser->getId(),
                 'email_verified_at' => now(),
             ]);
-
-            Auth::login($newUser);
-            $token = $newUser->createToken('social-login')->plainTextToken;
-            return response()->json(['token' => $token]);
         }
+
+        Auth::login($user, true);
+        request()->session()->regenerate();
+
+        return redirect('/');
     }
 }

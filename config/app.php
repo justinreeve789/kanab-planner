@@ -19,6 +19,11 @@ return [
     'name' => env('APP_NAME', 'Laravel'),
 
     /*
+    | Where the built Starlight user guide lives (npm run docs:build writes it here). Served at /docs.
+    */
+    'docs_path' => env('DOCS_PATH', public_path('docs')),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
@@ -167,6 +172,7 @@ return [
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
+        App\Providers\FortifyServiceProvider::class,
         App\Providers\HorizonServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         PulkitJalan\Google\GoogleServiceProvider::class,

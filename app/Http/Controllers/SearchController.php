@@ -29,9 +29,13 @@ class SearchController extends Controller
     }
 
     public function featured(Request $request, string $resourceTable) {
-        $areaIds = $request->get('area_ids');
-        /** @var Resource $model */
-        $model = Resource::getModelForResourceTable($resourceTable);
-        return $model::getFeatured($areaIds, self::FEATURED_RESULT_COUNT);
+        $areaIds = array_map('intval', (array) ($request->get('area_ids') ?? \App\Models\Area::pluck('id')->all()));
+        try {
+            /** @var Resource $model */
+            $model = Resource::getModelForResourceTable($resourceTable);
+        } catch (\Exception $e) {
+            abort(404);
+        }
+        return $model::getFeatured($areaIds, self::FEATURED_RESULT_COUNT) ?? [];
     }
 }

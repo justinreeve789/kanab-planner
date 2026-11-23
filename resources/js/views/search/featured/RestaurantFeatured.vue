@@ -9,9 +9,9 @@
             <div class="p-6 pt-3">
               <p class="text-gray-600 text-sm mb-4 line-clamp-4">{{ resource.description }}</p>
               <div class="flex flex-wrap gap-2">
-                <button class="flex-grow h-10">
-                  <ViewMenu :resource="resource" />
-                </button>
+                <div class="flex-grow h-10 empty:hidden">
+                  <ViewWebsite :resource="resource" />
+                </div>
                 <button class="flex-grow h-10">
                   <AskQuestion :resource="resource" :resource-table="'restaurants'" />
                 </button>
@@ -27,9 +27,9 @@
             <div class="p-6 pt-3">
               <p class="text-gray-600 text-sm mb-4 line-clamp-4">{{ resource.description }}</p>
               <div class="flex flex-wrap gap-2">
-                <button class="flex-grow h-10">
-                  <ViewMenu :resource="resource" />
-                </button>
+                <div class="flex-grow h-10 empty:hidden">
+                  <ViewWebsite :resource="resource" />
+                </div>
                 <button class="flex-grow h-10">
                   <AskQuestion :resource="resource" :resource-table="'restaurants'" />
                 </button>
@@ -45,9 +45,9 @@
             <div class="p-6 pt-3">
               <p class="text-gray-600 text-sm mb-4 line-clamp-4">{{ resource.description }}</p>
               <div class="flex flex-wrap gap-2">
-                <button class="flex-grow h-10">
-                  <ViewMenu :resource="resource" />
-                </button>
+                <div class="flex-grow h-10 empty:hidden">
+                  <ViewWebsite :resource="resource" />
+                </div>
                 <button class="flex-grow h-10">
                   <AskQuestion :resource="resource" :resource-table="'restaurants'" />
                 </button>
@@ -67,7 +67,7 @@
 import axios from "axios";
 import AddToItinerary from "../../buttons/AddToItinerary.vue";
 import AskQuestion from "../../buttons/AskQuestion.vue";
-import ViewMenu from "../../buttons/ViewMenu.vue";
+import ViewWebsite from "../../buttons/ViewWebsite.vue";
 import {usePreferencesStore} from "../../../stores/preferences";
 
 export default {
@@ -78,7 +78,7 @@ export default {
   components: {
     AddToItinerary,
     AskQuestion,
-    ViewMenu,
+    ViewWebsite,
   },
   data() {
     return {

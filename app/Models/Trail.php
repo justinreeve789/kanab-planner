@@ -21,9 +21,9 @@ class Trail extends Resource
 
     public $trailService;
 
-    public function __construct()
+    public function __construct(array $attributes = [])
     {
-        parent::__construct();
+        parent::__construct($attributes);
         $this->trailService = new TrailService();
     }
 
@@ -52,9 +52,14 @@ class Trail extends Resource
         return $this->hasMany(TrailImage::class, 'trail_id', 'id');
     }
 
+    /**
+     * Trails that were combined into this one (resource_merges.merged_from → merged_to).
+     */
     public function merged_trails(): HasManyThrough
     {
-        return $this->hasManyThrough(Trail::class, TrailMerge::class, 'merged_from', 'id', 'id', 'merged_to');
+        return $this->hasManyThrough(Trail::class, ResourceMerge::class, 'merged_to', 'id', 'id', 'merged_from')
+            ->withoutGlobalScopes()
+            ->where('resource_merges.resource_table', $this->getTable());
     }
 
     public function openai_prompts()
@@ -81,7 +86,15 @@ class Trail extends Resource
 
     public function getEstimatedHours(TrailService $trailService, float $averageSpeed, string $activityType = ActivityType::HIKING, $roundPrecision = 1)
     {
-        $stats = $trailService->analyzeTrail($this->geoJson()->where('trail_id', $this->id)->first(), $averageSpeed, $activityType, $roundPrecision);
+        $geoJson = $this->geoJson()->first();
+        if (!$geoJson) {
+            return self::DEFAULT_AVERAGE_HOURS;
+        }
+        try {
+            $stats = $trailService->analyzeTrail($geoJson->geojson, $averageSpeed, $activityType, $roundPrecision);
+        } catch (\InvalidArgumentException $e) {
+            return self::DEFAULT_AVERAGE_HOURS;
+        }
         return $stats['total_hours'];
     }
 

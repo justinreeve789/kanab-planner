@@ -1,31 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
+         bootstrap="tests/bootstrap.php"
          colors="true"
+         cacheDirectory=".phpunit.cache"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnSkippedTests="true"
 >
     <testsuites>
+        <!-- Pure logic. No database, no network. -->
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
         </testsuite>
+        <!-- HTTP + database. Uses RefreshDatabase against an isolated test schema with small, deterministic fixtures. -->
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
+        <!-- Sanity checks against the real dataset in database/dumps. Skipped unless TEST_DATA_DB_DATABASE is loaded. -->
+        <testsuite name="Data">
+            <directory>tests/Data</directory>
+        </testsuite>
     </testsuites>
+    <groups>
+        <!-- Executable specs for bugs/design issues that are documented but not yet fixed.
+             Run them explicitly with: vendor/bin/phpunit (double-dash)group known-issues -->
+        <exclude>
+            <group>known-issues</group>
+        </exclude>
+    </groups>
     <source>
         <include>
             <directory>app</directory>
         </include>
     </source>
     <php>
-        <env name="APP_ENV" value="testing"/>
+        <env name="APP_ENV" value="testing" force="true"/>
+        <env name="APP_KEY" value="base64:3xK4dQ8bH6m2vY1nW9sT0pL5cR7aE3fG2hJ4kM6nP8q=" force="true"/>
+        <env name="APP_DEBUG" value="true"/>
+        <env name="APP_URL" value="http://localhost"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
-        <env name="CACHE_DRIVER" value="array"/>
-        <!-- <env name="DB_CONNECTION" value="sqlite"/> -->
-        <!-- <env name="DB_DATABASE" value=":memory:"/> -->
-        <env name="MAIL_MAILER" value="array"/>
-        <env name="QUEUE_CONNECTION" value="sync"/>
-        <env name="SESSION_DRIVER" value="array"/>
+        <env name="CACHE_DRIVER" value="array" force="true"/>
+        <env name="CACHE_STORE" value="array" force="true"/>
+        <env name="MODEL_CACHE_ENABLED" value="false" force="true"/>
+        <env name="MODEL_CACHE_STORE" value="array" force="true"/>
+        <!-- Override any of these from the shell, e.g. DB_HOST=mysql vendor/bin/phpunit -->
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_HOST" value="127.0.0.1"/>
+        <env name="DB_PORT" value="3306"/>
+        <env name="DB_DATABASE" value="kanab_test"/>
+        <env name="DB_USERNAME" value="kanab"/>
+        <env name="DB_PASSWORD" value="kanab"/>
+        <env name="TEST_DATA_DB_DATABASE" value="kanab_data"/>
+        <env name="MAIL_MAILER" value="array" force="true"/>
+        <env name="QUEUE_CONNECTION" value="sync" force="true"/>
+        <env name="SESSION_DRIVER" value="array" force="true"/>
+        <env name="BROADCAST_DRIVER" value="log" force="true"/>
+        <env name="SCOUT_DRIVER" value="null" force="true"/>
+        <env name="FILESYSTEM_DRIVER" value="local" force="true"/>
+        <!-- ImageService builds the DigitalOcean Spaces disk in its constructor; give it inert credentials. -->
+        <env name="DO_ACCESS_KEY_ID" value="test" force="true"/>
+        <env name="DO_SECRET_ACCESS_KEY" value="test" force="true"/>
+        <env name="DO_DEFAULT_REGION" value="us-east-1" force="true"/>
+        <env name="DO_BUCKET" value="test-bucket" force="true"/>
+        <env name="DO_ENDPOINT" value="http://127.0.0.1:9" force="true"/>
+        <env name="MEILISEARCH_HOST" value="http://127.0.0.1:9" force="true"/>
+        <env name="OPENAI_API_KEY" value="test" force="true"/>
+        <env name="GEMINI_API_KEY" value="test" force="true"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="PULSE_ENABLED" value="false"/>
     </php>
 </phpunit>

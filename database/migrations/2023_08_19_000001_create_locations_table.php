@@ -1,14 +1,11 @@
 <?php
 
-use App\Traits\ImportTable;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 class CreateLocationsTable extends Migration
 {
-    use ImportTable;
-
     /**
      * Run the migrations.
      *
@@ -38,8 +35,6 @@ class CreateLocationsTable extends Migration
             $table->timestamps();
             $table->foreign('area_id')->references('id')->on('areas')->onDelete('cascade');
         });
-
-        self::importTable('locations');
     }
 
     /**

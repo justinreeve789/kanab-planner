@@ -2,13 +2,12 @@
 
 namespace App\Models\Assistant;
 
-use App\Models\Location;
-use App\Models\Trail;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class Message extends Model
 {
@@ -29,43 +28,54 @@ class Message extends Model
         return $contentHtml;
     }
 
+    public const LINK_TARGETS_CACHE_KEY = 'assistant-message-link-targets';
+    public const LINK_TARGETS_CACHE_SECONDS = 3600;
+
     /**
-     * TODO: Cache the data.
+     * Escape the message, then link every known place or trail name in it (case-insensitive, whole words), longest
+     * names first, each spot of text at most once.
+     *
+     * The message is rendered with v-html, so escaping comes first: it used to be inserted raw, along with the names
+     * and URLs, and overlapping names ("Zion" inside "Zion National Park") produced nested anchors.
      */
     public static function transformLinks(string $message): string {
-        $locations = Location::whereNotNull('url')->get();
-        $trails = Trail::whereNotNull('url')->get();
-        foreach ($locations as $resource) {
-            $modifiedResourceName = str_ireplace(['the ', ' national park', ' restaurant'], '', strtolower($resource->name));
-            $modifiedResourceName = trim(strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $modifiedResourceName)));
-            $modifiedMessage = str_ireplace(['the ', ' national park', ' restaurant'], '', strtolower($message));
-            $modifiedMessage = trim(strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $modifiedMessage)));
-            if (stripos($modifiedMessage, $modifiedResourceName) !== false) {
-                $message = str_ireplace($resource->name, '<a href="' . $resource->url . '" target="_blank"><span>' . $resource->name . '</span></a>', $message);
-            }
+        $escaped = e($message);
+        $targets = self::linkTargets();
+        if (empty($targets)) {
+            return $escaped;
         }
-        foreach ($trails as $resource) {
-            $modifiedResourceName = str_ireplace(['the ', ' hike', ' loop', ' trail'], '', strtolower($resource->name));
-            $modifiedResourceName = trim(strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $modifiedResourceName)));
-            $modifiedMessage = str_ireplace(['the ', ' hike', ' loop', ' trail'], '', strtolower($message));
-            $modifiedMessage = trim(strtolower(preg_replace("/[^a-zA-Z0-9 ]/", "", $modifiedMessage)));
-            if (stripos($modifiedMessage, $modifiedResourceName) !== false) {
-                $message = str_ireplace($resource->name, '<a href="' . $resource->url . '" target="_blank"><span>' . $resource->name . '</span></a>', $message);
+
+        $alternation = implode('|', array_map(fn($name) => preg_quote(e($name), '/'), array_keys($targets)));
+        $lookup = array_change_key_case($targets, CASE_LOWER);
+
+        return preg_replace_callback('/(?<![\w&])(' . $alternation . ')(?!\w)/iu', function($match) use ($lookup) {
+            $url = $lookup[mb_strtolower(html_entity_decode($match[1]))] ?? null;
+            if ($url === null) {
+                return $match[0];
             }
-        }
-        return $message;
-//        $analysis = $this->phraseService->analyzePhraseWithSpacy($message);
-//        if (isset($analysis['PROPN'])) {
-//            foreach ($analysis['PROPN'] as $word) {
-//                Log::info($word);
-//                $location = Location::search($word)->where('name', $word)->options(['rankingScoreThreshold' => 0.9])->first();
-//                if ($location && $location->url !== null) {
-//                    Log::info($location->url);
-//                    $message = str_replace($word, '<a href="' . $location->url . '" target="_blank">' . $word . '</a>', $message);
-//                }
-//            }
-//        }
-//        return $message;
+            return '<a href="' . e($url) . '" target="_blank" rel="noopener noreferrer"><span>' . $match[1] . '</span></a>';
+        }, $escaped);
+    }
+
+    /**
+     * [name => url] for usable locations and trails with an http(s) URL, longest names first. Cached, since every
+     * serialized message needs it.
+     */
+    public static function linkTargets(): array
+    {
+        return Cache::remember(self::LINK_TARGETS_CACHE_KEY, self::LINK_TARGETS_CACHE_SECONDS, function() {
+            $rows = DB::table('locations')->where('is_usable', 1)->whereNotNull('url')->get(['name', 'url'])
+                ->concat(DB::table('trails')->where('is_usable', 1)->whereNotNull('url')->get(['name', 'url']));
+            $targets = [];
+            foreach ($rows as $row) {
+                $name = trim((string) $row->name);
+                if (mb_strlen($name) >= 3 && preg_match('#^https?://#i', $row->url) && !isset($targets[$name])) {
+                    $targets[$name] = $row->url;
+                }
+            }
+            uksort($targets, fn($a, $b) => mb_strlen($b) <=> mb_strlen($a));
+            return $targets;
+        });
     }
 
     /**

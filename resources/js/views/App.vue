@@ -35,6 +35,8 @@ export default {
   methods: {
   },
   mounted() {
+    this.authStore.attempt_user();
+    this.featureStore.fetchFeatures();
   },
 };
 </script>

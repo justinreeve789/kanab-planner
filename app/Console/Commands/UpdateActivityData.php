@@ -4,128 +4,98 @@ namespace App\Console\Commands;
 
 use App\Models\ActivityType;
 use App\Models\Event;
-use App\Models\Location;
 use App\Models\ResourceData;
 use App\Models\Restaurant;
 use App\Models\Trail;
-use App\Services\EventService;
+use App\Services\DataService;
 use App\Services\OpenAIService;
-use App\Services\RestaurantService;
 use Illuminate\Console\Command;
 
+/**
+ * Recompute the adventurousness / solitariness / strenuousness rows in resource_data.
+ *
+ *   php artisan update:data --trails --restaurants   # deterministic, from DataService
+ *   php artisan update:data --events                 # classifies untyped events with OpenAI first
+ */
 class UpdateActivityData extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'update:data {--events} {--restaurants} {--trails}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Updates activity data information';
+    protected $description = 'Recompute resource_data scores for trails, restaurants and/or events';
 
-    private $openAIService;
+    private DataService $dataService;
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
-        $this->openAIService = new OpenAIService();
+        $this->dataService = new DataService();
 
-        $doEvents = $this->option('events');
-        $doRestaurants = $this->option('restaurants');
-        $doTrails = $this->options('trails');
-
-        if ($doEvents) {
-            $this->eventService = new EventService();
+        if ($this->option('trails')) {
+            $this->processResources('trails', Trail::query(), ActivityType::HIKING);
+        }
+        if ($this->option('restaurants')) {
+            $this->processResources('restaurants', Restaurant::query(), ActivityType::DINING);
+        }
+        if ($this->option('events')) {
             $this->processEvents();
         }
-
-        if ($doRestaurants) {
-//            $this->processRestaurants();
+        if (!$this->option('trails') && !$this->option('restaurants') && !$this->option('events')) {
+            $this->warn('Nothing to do: pass --trails, --restaurants and/or --events.');
         }
+    }
 
-        if ($doTrails) {
-            $this->processTrails();
-        }
+    private function processResources(string $table, $query, string $activityTypeName): void
+    {
+        $activityTypeId = ActivityType::idFor($activityTypeName);
+        $count = 0;
+        $query->chunkById(200, function($resources) use ($table, $activityTypeId, &$count) {
+            foreach ($resources as $resource) {
+                $this->store($table, $resource, $activityTypeId);
+                $count++;
+            }
+        });
+        $this->info("Updated {$count} {$table}.");
     }
 
     /**
-     * TODO: Figure out how we're going to handle it when we rename the activity type of an event. By default, they're
-     * just "event" but they could be later updated to "endurance-race" or "festivals-and-celebrations." Is it possible
-     * an event could have more than one activity type? Probably not, but for now we'll just solve this problem by
-     * assuming the first activity type in an event's data is the only activity type.
+     * Classify events that have no activity type with OpenAI, then score every typed event from its type.
+     *
+     * TODO: An event could be renamed from the default "event" type to something more specific later; for now the
+     * first resource_data row's type is treated as the event's only type.
      */
-    protected function processEvents()
+    private function processEvents(): void
     {
-        if (1 === 1) {
-            $events = Event::whereHas('data', function ($query) {
-                $query->whereNull('activity_id');
-            })->orWhereDoesntHave('data')->with('data')->get();
-            foreach ($events as $item) {
-                // Use AI to determine the type of event.
-                $guessType =
-                    $this->openAIService->identifyActivityTypeWithOpenAI($item->name . ' ' . $item->description);
-                $activityType = ActivityType::where('name', $guessType)->first();
-                if ($activityType) {
-                    $resourceData = ResourceData::updateOrCreate(
-                        ['resource_table' => 'events', 'resource_id' => $item->id],
-                        ['activity_type_id' => $activityType->id]
-                    );
-                    $this->info('Assigned ' . $guessType . ' to ' . $item->name);
-                } else {
-                    $this->info('Cannot assign ' . $guessType . ' to ' . $item->name);
-                }
+        $openAIService = new OpenAIService();
+        $untyped = Event::whereDoesntHave('data', fn($q) => $q->whereNotNull('activity_type_id'))->get();
+        foreach ($untyped as $event) {
+            $guess = $openAIService->identifyActivityTypeWithOpenAI($event->name . ' ' . $event->description);
+            $activityTypeId = ActivityType::idFor($guess);
+            if ($activityTypeId) {
+                $this->store('events', $event, $activityTypeId);
+                $this->info("Assigned {$guess} to {$event->name}");
+            } else {
+                $this->warn("Cannot assign {$guess} to {$event->name}");
             }
         }
 
-        $resourceData = ResourceData::with('activity_type')
-            ->where('resource_table', 'events')
-            ->whereNotNull('activity_id')
-            ->whereNull(['adventurousness', 'solitariness', 'strenuousness'])
-            ->get();
-        foreach ($resourceData as $item) {
-            $item->adventurousness = $item->activity_type->adventurousness;
-            $item->solitariness = $item->activity_type->solitariness;
-            $item->strenuousness = $item->activity_type->strenuousness;
-            $item->save();
-        }
+        ResourceData::with('activity_type')->where('resource_table', 'events')->whereNotNull('activity_type_id')
+            ->whereNull('strenuousness')->each(function(ResourceData $row) {
+                $row->update([
+                    'adventurousness' => $row->activity_type->adventurousness,
+                    'solitariness' => $row->activity_type->solitariness,
+                    'strenuousness' => $row->activity_type->strenuousness,
+                ]);
+            });
     }
 
-    protected function processRestaurants()
+    private function store(string $table, $resource, int $activityTypeId): void
     {
-//        $restaurants = Restaurant::with('data')->get();
-        $restaurants = Restaurant::get();
-        foreach ($restaurants as $item) {
-            $item->activity_type_id = ActivityType::where('name', 'dining')->pluck('id')->first();
-            $this->update('restaurants', $item);
-        }
-    }
-
-    protected function processTrails()
-    {
-//        $trails = Trail::with('data')->get();
-        $trails = Trail::get();
-        foreach ($trails as $item) {
-            foreach (['hiking'] as $activityTypeName) {
-                $item->activity_type_id = ActivityType::where('name', $activityTypeName)->pluck('id')->first();
-                $this->update('trails', $item);
-            }
-        }
-    }
-
-    protected function update($resourceTable, $item)
-    {
-        ResourceData::updateOrCreate(['resource_table' => $resourceTable, 'resource_id' => $item->id, 'activity_type_id' => $item->activity_type_id], [
-            'adventurousness' => $item->adventurousness($item->activity_type->name),
-            'solitariness' => $item->solitariness($item->activity_type->name),
-            'strenuousness' => $item->strenuousness($item->activity_type->name),
-        ]);
+        ResourceData::updateOrCreate(
+            ['resource_table' => $table, 'resource_id' => $resource->id, 'activity_type_id' => $activityTypeId],
+            [
+                'adventurousness' => $this->dataService->calculateAdventurousness($resource, $activityTypeId),
+                'solitariness' => $this->dataService->calculateSolitariness($resource, $activityTypeId),
+                'strenuousness' => round($this->dataService->calculateStrenuousness($resource, $activityTypeId), 2),
+            ]
+        );
     }
 }

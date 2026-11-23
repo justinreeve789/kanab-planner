@@ -122,40 +122,45 @@ abstract class Resource extends Model
     }
 
     /**
+     * Order by how far each resource's adventurousness/solitariness/strenuousness are from the user's, as
+     * sum(weight ^ |difference|), rounded to the nearest 0.25 with random tie-breaking.
+     *
      * We want to get as close to all the properties as we can. For example, if adventurousness is 0.1 and strenuousness
      * is 0.9, we should weigh adv 0.2/str 0.8 higher than adv 0.5/str 0.5. We should evaluate the total deviation
      * rather than an average of the properties.
-     * TODO: We may want to make this logarithmic, so preferences with higher values weigh heavier than lower values.
-     * If a user has set a high adventurousness, it would make sense they'd want to see more events like this, even
-     * if the deviation of the other properties skews the total out of place.
      *
-     * @param array $userPropValues This contains adventurousness/solitariness/strenuousness as the key, followed by the user's settings for that property, e.g. ['adventurousness' => 0.5, 'solitariness' => 0.3, 'strenuousness' => 0.7]
-     * @param array $weightValues This contains adventurousness/solitariness/strenuousness as the key, followed by a relative numerical weight for that property, e.g. ['adventurousness' => 12, 'solitariness' => 7, 'strenuousness' => 25]
-     * @param int $activityTypeId Right now this corresponds to App\Models\Activity, but this will be renamed to App\Models\ActivityType in the future.
+     * resource_data is LEFT JOINed (one row per resource, for $activityTypeId when given), and a resource without a
+     * row is scored with its activity type's defaults instead of being dropped. The INNER JOIN used here before hid
+     * about a quarter of usable trails from itineraries.
+     *
+     * @param array $userPropValues e.g. ['adventurousness' => 0.5, 'solitariness' => 0.3, 'strenuousness' => 0.7]
+     * @param array $weights e.g. ['adventurousness' => 12, 'solitariness' => 7, 'strenuousness' => 25]
      */
-    public function scopeSortByDeviation(CustomQueryBuilder $builder, array $userPropValues, array $weights, int $activityTypeId = null) {
+    public function scopeSortByDeviation(CustomQueryBuilder $builder, array $userPropValues, array $weights, ?int $activityTypeId = null) {
         $table = $this->getModel()->getTable();
+        $defaults = $activityTypeId ? ActivityType::find($activityTypeId) : null;
 
-        $order = '';
-        $index = 0;
+        $terms = [];
+        $bindings = [];
         foreach ($userPropValues as $prop => $value) {
-            $order .= 'POW(' . $weights[$prop] . ', ABS(COALESCE(resource_data.' . $prop . ', 0) - ' . $value . '))';
-            if ($index < count($userPropValues) - 1) {
-                $order .= ' + ';
+            if (!in_array($prop, ResourceData::getRankingProps(), true) || $value === null) {
+                continue;
             }
-            $index++;
+            $terms[] = "POW(?, ABS(COALESCE(rd.{$prop}, ?) - ?))";
+            array_push($bindings, (float) ($weights[$prop] ?? 10), (float) ($defaults?->{$prop} ?? 0.5), (float) $value);
         }
 
-        // Round to the nearest 0.25.
-        $order = '(ROUND(4 * ' . $order . ') / 4), RAND()';
+        $query = $builder->select($table . '.*')->leftJoinSub(
+            ResourceData::query()
+                ->selectRaw('resource_id, AVG(adventurousness) AS adventurousness, AVG(solitariness) AS solitariness, AVG(strenuousness) AS strenuousness')
+                ->where('resource_table', $table)
+                ->when($activityTypeId, fn($q) => $q->where('activity_type_id', $activityTypeId))
+                ->groupBy('resource_id'),
+            'rd', 'rd.resource_id', '=', $table . '.id'
+        );
 
-        $query = $this->select($table . '.*')
-            ->join('resource_data', function($join) use ($table) {
-                $join->on('resource_data.resource_table', '=', DB::raw("'" . $table . "'"))->on($table . '.id', '=', 'resource_data.resource_id');
-            });
-
-        if ($order != '') {
-            $query->orderByRaw($order);
+        if ($terms) {
+            $query->orderByRaw('ROUND(4 * (' . implode(' + ', $terms) . ')) / 4', $bindings)->inRandomOrder();
         }
 
         return $query;
@@ -163,8 +168,8 @@ abstract class Resource extends Model
 
     public function calculateEndTime(string $date, string $startTime, array $params = [])
     {
-        // TODO: Use busyness and popularity rankings.
-        return date('H:i:s', strtotime($date . ' ' . $startTime) + $this->getAverageHours($params) * 60 * 60);
+        $hours = $this->getAverageHours($params + ['date' => $date, 'start_time' => $startTime]);
+        return date('H:i:s', (int) (strtotime($date . ' ' . $startTime) + $hours * 60 * 60));
     }
 
     public function getAverageHours(array $params = [])

@@ -1,0 +1,44 @@
+---
+title: Trip Planner Guide
+description: Plan a hiking and sightseeing trip around Kanab, Utah, with Zion, Bryce Canyon and the Grand Canyon's North Rim close by.
+template: splash
+hero:
+  tagline: Tell us how you like to travel. Get a day-by-day plan of hikes, meals, events and drives around Kanab, Zion, Bryce and the North Rim, then make it your own.
+  image:
+    file: ../../assets/screenshots/phone-hero.png
+    alt: A seven-day itinerary on a phone
+  actions:
+    - text: Quick start
+      link: /docs/guide/quick-start/
+      icon: right-arrow
+    - text: Open Trip Planner
+      link: /
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+  <Card title="Answer a few questions" icon="pencil">
+    Pick your dates, the activities you enjoy, how hard you like to hike and anything you already know you want to see.
+  </Card>
+  <Card title="Get a full itinerary" icon="list-format">
+    Every day is laid out on a timeline: breakfast, hikes timed to your pace, lunch, events, dinner and the drives in between.
+  </Card>
+  <Card title="Change anything" icon="setting">
+    Move a hike to the afternoon, swap a restaurant, add your own plans or reshuffle a whole day. Your changes are saved as you go.
+  </Card>
+  <Card title="Share it" icon="rocket">
+    Send the link to your travel companions. They can see the plan; only you can change it.
+  </Card>
+</CardGrid>
+
+## Where to next
+
+<CardGrid>
+  <LinkCard title="Planning a trip" href="/docs/planning/questionnaire/" description="Every step of the questionnaire, and what each answer changes." />
+  <LinkCard title="Reading your itinerary" href="/docs/itinerary/reading/" description="Times, drive legs, meals, notes and the stats on each day." />
+  <LinkCard title="Editing a day" href="/docs/itinerary/editing/" description="Change times, swap activities, add your own plans and more." />
+  <LinkCard title="FAQ" href="/docs/faq/" description="Quick answers to common questions." />
+</CardGrid>

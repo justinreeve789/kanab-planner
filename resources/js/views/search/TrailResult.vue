@@ -20,10 +20,6 @@
         <div class="mr-2 text-xs">
           <TrailStats :trail="resource" :showDistance="true" :showElevation="false" :showGrade="false" v-if="resource.distance_miles"/>
         </div>
-<!--        <button class="btn btn-sm mr-2 bg-gradient-to-r from-indigo-400 to-indigo-500 hover:bg-gradient-to-br text-white" @click="addToItinerary(resource)">-->
-<!--          +-->
-<!--          <span class="hidden md:flex">Add</span>-->
-<!--        </button>-->
       </div>
     </div>
     <div class="collapse-content p-0 border border-solid border-orange-300 border-t-0" v-if="expanded">
@@ -71,11 +67,6 @@ export default {
       if (this.resource.images && this.resource.images[0]) {
         return 'image/trail/' + this.resource.images[0].id + '?size=thumbnail';
       }
-    },
-  },
-  methods: {
-    addToItinerary(resource) {
-      this.preferencesStore.addToItinerary(resource);
     },
   },
 }

@@ -16,10 +16,6 @@
       <div class="flex items-center">
         <div class="mr-2 text-xs">
         </div>
-        <button class="btn btn-primary btn-sm mr-2" @click="addToItinerary(resource.result_id)">
-          +
-          <span class="hidden md:flex">Add</span>
-        </button>
       </div>
     </div>
     <div class="collapse-content p-0 border border-solid border-green-300 border-t-0" v-if="expanded">
@@ -52,10 +48,6 @@ export default {
       if (this.resource.images && this.resource.images[0]) {
         return 'image/restaurant/' + this.resource.images[0].id + '?size=thumbnail';
       }
-    },
-  },
-  methods: {
-    addToItinerary(resultId) {
     },
   },
 }

@@ -7,55 +7,64 @@ use App\Models\Area;
 use App\Models\Itinerary\Period;
 use App\Models\Trail;
 use Exception;
-use Illuminate\Support\Facades\Log;
 
 class TrailService
 {
-    const DISTANCE_FATIGUE_ADJUSTER = 7;
-    const INCLINE_FATIGUE_ADJUSTER = 500;
     const MAX_DECLINE_BICYCLING_SPEED = 15; // Maximum bicycling speed on a decline (miles per hour)
     const MAX_DECLINE_HIKING_SPEED = 3.7; // Maximum hiking speed on a decline (miles per hour)
     const MIN_INCLINE_BICYCLING_SPEED = 1; // Minimum bicycling speed on an incline (miles per hour)
     const MIN_INCLINE_HIKING_SPEED = 0.2; // Minimum hiking speed on an incline (miles per hour)
-    const TIME_MULTIPLIER = 1;
+
+    /** Track points are merged into pieces at least this long before grades are taken, so GPS jitter averages out. */
+    const RESAMPLE_MILES = 0.1;
+    /** Each mile already covered slows you down by this fraction. */
+    const FATIGUE_PER_MILE = 0.02;
+    /**
+     * How strongly grade slows hiking: Tobler's function uses 3.5; half that matches the published durations in
+     * database/dumps far better (97% of trails vs 94%), as does TIME_MULTIPLIER for breaks and photo stops.
+     * See tests/Data/TrailEstimatesTest.
+     */
+    const GRADE_FACTOR = 2.0;
+    const TIME_MULTIPLIER = 1.25;
+    const FEET_PER_METER = 3.28084;
 
     /**
-     * TODO: This doesn't seem to work properly.
+     * A random trail in the area whose best time of day is $period, drawn from the ~20 trails closest to the user's
+     * adventurousness/solitariness/strenuousness and within their distance range.
      */
     public function getRandomTrailForPeriod($areaId, $period, $itinerary = null, $existingTrails = []): ?Trail
     {
-        $totalTrailsForArea = Trail::where('area_id', $areaId)->get()->count();
-        $trails = Trail::query();
-        $adventurousness = $itinerary->getAdventurousness();
-        $solitariness = $itinerary->getSolitariness();
-        $strenuousness = $itinerary->getStrenuousness();
-        if ($itinerary !== null) {
-            $trails = $trails->sortByDeviation([
-                'adventurousness' => $adventurousness,
-                'solitariness' => $solitariness,
-                'strenuousness' => $strenuousness
-            ], [
-                'adventurousness' => 12,
-                'solitariness' => 7,
-                'strenuousness' => 25,
-            ])->take(max(20, min(10, ceil($totalTrailsForArea / 9))))->inRandomOrder();
-        } else {
-            $trails->inRandomOrder();
-        }
-        $trails->where('area_id', $areaId)
-            ->whereNotNull('distance_miles')
+        $trails = Trail::query()
+            ->where('trails.area_id', $areaId)
+            ->whereNotNull('trails.distance_miles')
             ->whereNotIn('trails.id', $existingTrails);
-        if ($period === Period::EVENING) {
-            $trails->where('distance_miles', '<=', '2.0');
-        }
-        $trails->where('distance_miles', '>=', $itinerary->calculateMinimumTrailDistance());
-        $trails->where('distance_miles', '<=', $itinerary->calculateMaximumTrailDistance());
 
-        $trails->with(['area', 'images']);
-        $trails = $trails->get();
-        foreach ($trails as $trail) {
-            $p = $this->getBestPeriodOfDayForTrail($trail);
-            if ($p == $period) {
+        if ($period === Period::EVENING) {
+            $trails->where('trails.distance_miles', '<=', 2.0);
+        }
+        if ($itinerary !== null) {
+            // The minimum distance is about main hikes; an evening walk is meant to be short.
+            if ($period !== Period::EVENING) {
+                $trails->where('trails.distance_miles', '>=', $itinerary->calculateMinimumTrailDistance());
+            }
+            $trails->where('trails.distance_miles', '<=', $itinerary->calculateMaximumTrailDistance())
+                ->sortByDeviation([
+                    'adventurousness' => $itinerary->getAdventurousness(),
+                    'solitariness' => $itinerary->getSolitariness(),
+                    'strenuousness' => $itinerary->getStrenuousness(),
+                ], [
+                    'adventurousness' => 12,
+                    'solitariness' => 7,
+                    'strenuousness' => 25,
+                ], ActivityType::idFor(ActivityType::HIKING))
+                ->limit(20);
+        } else {
+            $trails->inRandomOrder()->limit(20);
+        }
+
+        $candidates = $trails->get()->shuffle();
+        foreach ($candidates as $trail) {
+            if ($this->getBestPeriodOfDayForTrail($trail) === $period) {
                 return $trail;
             }
         }
@@ -63,42 +72,32 @@ class TrailService
     }
 
     /**
-     * TODO: Add more log into this, using busyness tracking. For now, we'll just say to do it in the morning if it's
-     * at Zion, due to the crowds. If it's a longer trail (6+ hours), we'll also say to do it in the morning. If it's
-     * easy and short (less than 1 mile), evening. Otherwise, afternoon.
+     * When to start a trail:
+     * - 6+ hours, or 2.5+ hours in Zion (crowds): morning.
+     * - 3+ hours: morning or afternoon.
+     * - Up to 1.5 hours and not difficult: evening (a sunset walk).
+     * - Short but difficult: morning or afternoon.
+     * - Anything else: morning.
+     *
+     * TODO: Use busyness tracking and forecast heat.
      */
     public function getBestPeriodOfDayForTrail($trail, float $modifier = 0)
     {
-        $periods = [];
-
         if (is_integer($trail)) {
             $trail = Trail::where('id', $trail)->first();
         }
+        $hours = (float) $trail->average_hours;
 
-        if ($trail->average_hours >= 6) {
+        if ($hours >= 6 || ($trail->area_id === Area::ZION && $hours >= 2.5)) {
             return Period::MORNING;
         }
-
-        if ($trail->area_id === Area::ZION && $trail->average_hours >= 2.5) {
-            return Period::MORNING;
+        if ($hours >= 3) {
+            return [Period::MORNING, Period::AFTERNOON][array_rand([0, 1])];
         }
-
-        if ($trail->average_hours <= 1.5) {
-            if ($trail->difficulty != 'Difficult') {
-            } else {
-                $periods = array_merge($periods, [Period::MORNING, Period::AFTERNOON]);
-            }
+        if ($hours > 0 && $hours <= 1.5) {
+            return $trail->isDifficult() ? [Period::MORNING, Period::AFTERNOON][array_rand([0, 1])] : Period::EVENING;
         }
-
-        if ($trail->average_hours >= 3) {
-            $periods = array_merge($periods, [Period::MORNING, Period::AFTERNOON]);
-        }
-
-        if (empty($periods)) {
-            return Period::MORNING;
-        }
-
-        return $periods[array_rand($periods)];
+        return Period::MORNING;
     }
 
     /**
@@ -157,25 +156,6 @@ class TrailService
         return $mph;
     }
 
-    public function calculateTrailDifficulty($trail): string
-    {
-        return 'Intermediate';
-    }
-
-    /**
-     * Using the user's hiking speed and the formula from the NPS, reference the geoJSON data to determine when users
-     * will reach locations along the trail, in hour increments. If it's a short trail, use half-hour increments.
-     * Account for weariness toward the end of the trail after an incline.
-     *
-     * TODO: Users should be able to report their own times after a hike so we can adjust our formula.
-     *
-     * @param $geoJson
-     * @return array
-     */
-    public function estimateTimesAlongTrailPath(float $hikingSpeed, $geoJson): array
-    {
-    }
-
     public function haversine($lat1, $lon1, $lat2, $lon2)
     {
         $earthRadius = 3960; // Earth radius in miles (for miles calculation)
@@ -198,127 +178,119 @@ class TrailService
     }
 
     /**
-     * Calculate the time between two points, considering incline, decline, and average speed
-     *
-     * @param $dist
-     * @param $elevationChange
-     * @param $isIncline
-     * @param $averageSpeed
-     * @param $maxDeclineSpeed
-     * @param $minInclineSpeed
-     * @return float|int
+     * All [lng, lat, elevation?] points from the GeoJSON's LineString / MultiLineString features, in order.
+     * (Previously only features[0] was read, so an empty FeatureCollection — trail 444 in the dumps — crashed.)
      */
-    public function calculateTime($dist, $elevationChange, $isIncline, $averageSpeed, $maxDeclineSpeed, $minInclineSpeed)
+    public function extractTrailPoints($geoJson): array
     {
-        // Adjust speed based on incline (decrease for incline)
-        if ($elevationChange > 0) {
-            $averageSpeed -= 0.0003 * $elevationChange; // A simple penalty for each foot of incline
-            $averageSpeed = max($averageSpeed, $minInclineSpeed); // Cap speed on steep inclines
-            $isIncline = true;
+        $data = is_array($geoJson) ? $geoJson : json_decode((string) $geoJson, true);
+        if (!is_array($data)) {
+            return [];
         }
+        $features = match ($data['type'] ?? null) {
+            'FeatureCollection' => $data['features'] ?? [],
+            'Feature' => [$data],
+            default => [['geometry' => $data]],
+        };
 
-        // Adjust speed based on decline (increase but cap at max decline speed)
-        elseif ($elevationChange < 0) {
-            $averageSpeed += 0.0002 * abs($elevationChange); // A small boost for decline, but capped
-            $averageSpeed = min($averageSpeed, $maxDeclineSpeed); // Cap speed on steep declines
-        }
-
-        // Account for fatigue (higher fatigue if there's significant elevation gain)
-        if ($isIncline) {
-            $fatiguePenalty = 1 + ($elevationChange / self::INCLINE_FATIGUE_ADJUSTER);
-            $averageSpeed = $averageSpeed / $fatiguePenalty;
-        }
-
-        // Account for fatigue due to overall distance.
-        $averageSpeed = $averageSpeed + (log(0.01 + $dist) / self::DISTANCE_FATIGUE_ADJUSTER);
-
-        // Time = Distance / Speed (convert miles to hours)
-        $time = $dist / $averageSpeed;
-
-        return $time * self::TIME_MULTIPLIER;
-    }
-
-    /**
-     * Parse the GeoJSON and estimate total time.
-     *
-     * @param $geoJson
-     * @param float $averageSpeed Average speed (miles per hour)
-     * @param $activityType
-     * @return array
-     */
-    public function analyzeTrail($geoJson, $averageSpeed, $activityType = ActivityType::HIKING, $roundPrecision = 1)
-    {
-        $data = json_decode($geoJson, true);
-        $trailPoints = $data['features'][0]['geometry']['coordinates'];
-        $totalTime = 0;
-        $totalDist = 0;
-        $cumulativeTime = 0;
-        $hourlyCoordinates = [];
-        $currentHour = 0;
-
-        for ($i = 1; $i < count($trailPoints); $i++) {
-            $point1 = $trailPoints[$i - 1];
-            $point2 = $trailPoints[$i];
-
-            $lat1 = $point1[1];
-            $lon1 = $point1[0];
-            $elev1 = isset($point1[2]) ? $point1[2] : 0;
-
-            $lat2 = $point2[1];
-            $lon2 = $point2[0];
-            $elev2 = isset($point2[2]) ? $point2[2] : 0;
-
-            // Calculate the distance between the two points in miles
-            $dist = $this->haversine($lat1, $lon1, $lat2, $lon2);
-            $totalDist += $dist;
-
-            // Calculate the elevation change in feet
-            $elevationChange = $elev2 - $elev1;
-
-            // Calculate the time between the two points
-            if ($activityType === ActivityType::BICYCLING) {
-                $maxDeclineSpeed = self::MAX_DECLINE_BICYCLING_SPEED;
-                $minInclineSpeed = self::MIN_INCLINE_BICYCLING_SPEED;
-            } elseif ($activityType === ActivityType::HIKING) {
-                $maxDeclineSpeed = self::MAX_DECLINE_HIKING_SPEED;
-                $minInclineSpeed = self::MIN_INCLINE_HIKING_SPEED;
-            } else {
-                throw new Exception('Valid activity type not specified.');
-            }
-
-            $time = $this->calculateTime($dist, $elevationChange, $elevationChange > 0, $averageSpeed, $maxDeclineSpeed, $minInclineSpeed);
-
-            // Add time for this segment
-            $cumulativeTime += $time;
-            $totalTime += $time;
-
-            // Check if it's time to add coordinates for the current hour
-            $newHour = floor($cumulativeTime);
-            if ($newHour > $currentHour) {
-                $hourlyCoordinates[$newHour] = [
-                    [$lat2, $lon2]
-                ];
-                $currentHour = $newHour;
-            } else {
-                // Append coordinates if it's the same hour
-                if (isset($hourlyCoordinates[$newHour])) {
-                    $hourlyCoordinates[$newHour][] = [$lat2, $lon2];
-                } else {
-                    $hourlyCoordinates[$newHour] = [
-                        [$lat2, $lon2]
-                    ];
+        $points = [];
+        foreach ($features as $feature) {
+            $geometry = $feature['geometry'] ?? [];
+            $lines = match ($geometry['type'] ?? null) {
+                'LineString' => [$geometry['coordinates'] ?? []],
+                'MultiLineString' => $geometry['coordinates'] ?? [],
+                default => [],
+            };
+            foreach ($lines as $line) {
+                foreach ($line as $point) {
+                    if (is_array($point) && count($point) >= 2) {
+                        $points[] = $point;
+                    }
                 }
             }
         }
+        return $points;
+    }
 
-        $hourLatLng = [];
-        foreach ($hourlyCoordinates as $hour => $coordinates) {
-            $hourLatLng[$hour] = $coordinates[0];
+    /**
+     * Speed over one stretch of trail, in mph.
+     *
+     * Hiking follows the shape of Tobler's hiking function relative to flat ground: fastest on a slight descent
+     * (−5%), slower in both directions from there. Bicycling slows ~10% per 1% of climb and gains a little on descents. Both are
+     * capped by the MIN/MAX constants, then slowed by fatigue for the miles already covered.
+     *
+     * $grade is rise over run (0.1 = 10%).
+     */
+    public function segmentSpeed(float $averageSpeed, float $grade, float $milesSoFar, string $activityType = ActivityType::HIKING): float
+    {
+        if ($activityType === ActivityType::BICYCLING) {
+            $speed = $grade >= 0 ? $averageSpeed / (1 + 10 * $grade) : $averageSpeed * min(1.5, 1 + 5 * abs($grade));
+            $speed = max(self::MIN_INCLINE_BICYCLING_SPEED, min(self::MAX_DECLINE_BICYCLING_SPEED, $speed));
+        } elseif ($activityType === ActivityType::HIKING) {
+            $speed = $averageSpeed * exp(-self::GRADE_FACTOR * (abs($grade + 0.05) - 0.05));
+            $speed = max(self::MIN_INCLINE_HIKING_SPEED, min(self::MAX_DECLINE_HIKING_SPEED, $speed));
+        } else {
+            throw new Exception('Valid activity type not specified.');
         }
+        return $speed / (1 + self::FATIGUE_PER_MILE * $milesSoFar);
+    }
+
+    /**
+     * Estimate how long a GPS track takes, and where you'll be at each hour.
+     *
+     * The track is resampled into pieces of at least RESAMPLE_MILES before grades are computed, so the estimate
+     * depends on the terrain rather than on how densely the track was recorded. Elevations are meters (GPX).
+     *
+     * @return array{total_hours: float, time_hours: array<int, array{0: float, 1: float}>, total_dist: float, elevation_gain_ft: int}
+     */
+    public function analyzeTrail($geoJson, $averageSpeed, $activityType = ActivityType::HIKING, $roundPrecision = 1)
+    {
+        if (!in_array($activityType, [ActivityType::HIKING, ActivityType::BICYCLING], true)) {
+            throw new Exception('Valid activity type not specified.');
+        }
+        $points = $this->extractTrailPoints($geoJson);
+        if (count($points) < 2) {
+            throw new \InvalidArgumentException('GeoJSON has no usable LineString coordinates.');
+        }
+
+        $averageSpeed = (float) $averageSpeed;
+        $totalHours = 0.0;
+        $totalMiles = 0.0;
+        $gainMeters = 0.0;
+        $hourly = [0 => [$points[0][1], $points[0][0]]];
+
+        $anchor = $points[0];
+        $pieceMiles = 0.0;
+        $count = count($points);
+        for ($i = 1; $i < $count; $i++) {
+            $pieceMiles += $this->haversine($points[$i - 1][1], $points[$i - 1][0], $points[$i][1], $points[$i][0]);
+            if ($pieceMiles < self::RESAMPLE_MILES && $i < $count - 1) {
+                continue;
+            }
+
+            $rise = (($points[$i][2] ?? 0) - ($anchor[2] ?? 0));
+            $grade = $pieceMiles > 0 ? $rise / ($pieceMiles * 1609.344) : 0.0;
+            $gainMeters += max(0, $rise);
+
+            $speed = $this->segmentSpeed($averageSpeed, $grade, $totalMiles, $activityType);
+            $hours = $pieceMiles / $speed * self::TIME_MULTIPLIER;
+
+            $before = (int) floor($totalHours);
+            $totalHours += $hours;
+            $totalMiles += $pieceMiles;
+            for ($h = $before + 1; $h <= (int) floor($totalHours); $h++) {
+                $hourly[$h] = [$points[$i][1], $points[$i][0]];
+            }
+
+            $anchor = $points[$i];
+            $pieceMiles = 0.0;
+        }
+
         return [
-            'total_hours' => round($totalTime, $roundPrecision),
-            'time_hours' => $hourLatLng,
-            'total_dist' => $totalDist,
+            'total_hours' => round($totalHours, $roundPrecision),
+            'time_hours' => $hourly,
+            'total_dist' => $totalMiles,
+            'elevation_gain_ft' => (int) round($gainMeters * self::FEET_PER_METER),
         ];
     }
 }

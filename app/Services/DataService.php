@@ -3,89 +3,13 @@
 namespace App\Services;
 
 use App\Models\ActivityType;
-use App\Models\Blog\Post;
-use App\Models\Event;
-use App\Models\Image;
-use App\Models\Itinerary\Activity;
-use App\Models\Location;
-use App\Models\OpenAIPrompt;
-use App\Models\Resource;
-use App\Models\ResourceData;
-use App\Models\ResourceMerge;
-use App\Models\ResourceText;
-use App\Models\Restaurant;
-use App\Models\Scopes\DataScope;
-use App\Models\Trail;
-use App\Models\TrailGeoJson;
-use App\Models\TrailImage;
-use App\Models\TrailMerge;
-use App\Repositories\ResourceRepository;
 use App\ResourceEnum;
-use App\Services\OpenAIService;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Throwable;
 
 class DataService
 {
     const DEFAULT_ADVENTUROUSNESS = 0.3;
     const DEFAULT_SOLITARINESS = 0.3;
     const DEFAULT_STRENUOUSNESS = 0.3;
-
-    /**
-     * The busier the event, restaurant, or trail, the lower the solitariness.
-     * (x - 0.5) / y
-     */
-//    public function solitariness($activityType = null)
-//    {
-//        $busynessAdj = $this->getBusyness();
-//        switch (static::class) {
-//            // We don't care so much about solitariness at a restaurant.
-//            case ResourceEnum::RESTAURANTS_CLASS:
-//                $busynessAdj = $busynessAdj / 3;
-//                $this->setActivityType('dining');
-//                break;
-//            case ResourceEnum::TRAILS_CLASS:
-//                $busynessAdj = $busynessAdj / 1.5;
-//                if (!$this->getActivityType()) {
-//                    $this->setActivityType('hiking');
-//                }
-//                break;
-//            case ResourceEnum::EVENTS_CLASS:
-//                if (isset($this->data[0])) {
-//                    $busynessAdj = -($this->data[0]->solitariness);
-//                }
-//                $this->setActivityType('event');
-//                break;
-//            case ResourceEnum::LOCATIONS_CLASS:
-//            default:
-//                $busynessAdj = $busynessAdj / 1.5;
-//        }
-//        $solitariness = ($this->getActivityTypeByName($activityType)->solitariness ?? 0.5) - $busynessAdj;
-//        return round($solitariness, 2);
-//    }
-//
-//    public function strenuousness($activityType = null): float
-//    {
-//        switch (static::class) {
-//            case ResourceEnum::TRAILS_CLASS:
-//                if (!$this->getActivityType()) {
-//                    $this->setActivityType('hiking');
-//                }
-//                $strenuousness = $this->calculateStrenuousnessForTrail();
-//                break;
-//            case ResourceEnum::RESTAURANTS_CLASS:
-//                $strenuousness = 0;
-//                break;
-//            case ResourceEnum::EVENTS_CLASS:
-//                $strenuousness = reset($this->data)->strenuousness;
-//            case ResourceEnum::LOCATIONS_CLASS:
-//            default:
-//                $strenuousness = $this->data->strenuousness;
-//        }
-//        return round($strenuousness, 2);
-//    }
 
     /**
      * TODO: Cache the results.
@@ -105,6 +29,7 @@ class DataService
                 break;
             case ResourceEnum::TRAILS_CLASS:
                 $adventurousness = $this->calculateAdventurousnessForTrail($resource, $activityTypeId);
+                break;
             default:
         }
         return round($adventurousness, 2);
@@ -128,6 +53,7 @@ class DataService
                 break;
             case ResourceEnum::TRAILS_CLASS:
                 $solitariness = $this->calculateSolitarinessForTrail($resource, $activityTypeId);
+                break;
             default:
         }
         return round($solitariness, 2);
@@ -151,6 +77,7 @@ class DataService
                 break;
             case ResourceEnum::TRAILS_CLASS:
                 $strenuousness = $this->calculateStrenuousnessForTrail($resource, $activityTypeId);
+                break;
             default:
         }
         return round($strenuousness, 2);
@@ -241,79 +168,42 @@ class DataService
         return ActivityType::find($activityTypeId)->strenuousness;
     }
 
+    public const DIFFICULTY_STRENUOUSNESS = [
+        'Easy' => -0.10,
+        'Easy/Intermediate' => -0.05,
+        'Intermediate' => 0.0,
+        'Intermediate/Difficult' => 0.05,
+        'Difficult' => 0.10,
+        'Very Difficult' => 0.15,
+    ];
+
     /**
-     * The incline/decline, distance, and grade are used for calculating the strenuousness of the trail (-0.2/+0.9).
-     * Account for differences between hiking and off-roading by calling setActivityType() before this function.
-     * Strenuousness = ActivityAdventurousness + K1 * K2 * K3
-
-    Where:
-    - ActivityAdventurousness is a constant representing the adventurousness of the trail based on the activity type.
-    - K1 = 0.5 (a constant)
-    - K2 = 1.0 - 1.0 / (1.0 + exp(-K * (incline - decline)))
-    - K is the incline/decline sensitivity (0.75 in the code).
-    - incline and decline are the incline and decline values of the trail.
-    - K3 = 1.0 - 1.0 / (1.0 + exp(D * (distance - A)))
-    - D is the distance sensitivity (1 in the code).
-    - A is the distance threshold (3.0 in the code).
-
-    - exp(x) is the exponential function: e^x, where e is the base of the natural logarithm.
-
-    The result of K2 and K3 is constrained to the range [0, 1] using the sigmoid function (1.0 / (1.0 + exp(-x))). This ensures that these terms are between 0 and 1.
-
-    Additionally, there are adjustments based on the difficulty and average hours of the trail:
-
-    - If the trail is marked as easy, subtract 0.2 from the final score.
-    - If the trail is marked as difficult, add 0.2 to the final score.
-    - If there is an average hours value, adjust the final score based on it.
-
-    This equation allows you to calculate the strenuousness score for a trail based on its characteristics and activity type. Simply plug in the values for incline, decline, distance, and other parameters to compute the score.
+     * Strenuousness of a trail, 0–1, from how far, how much climbing, how steep and how long:
+     *
+     *   0.35 · (1 − e^(−miles/6)) + 0.35 · (1 − e^(−climb_ft/1500)) + 0.10 · min(1, avg_grade/15%)
+     *   + 0.20 · (1 − e^(−hours/4)) + difficulty adjustment (−0.10 … +0.15)
+     *
+     * Every term grows with its input and saturates gently, so a longer or steeper trail always scores at least as
+     * high. (The previous formula fed raw feet into steep sigmoids; any trail that climbed more than it descended
+     * scored 0 on that term.) Trails with none of these fields get their activity type's default.
      */
     public function calculateStrenuousnessForTrail($resource, $activityTypeId): float
     {
-        // Calculate the individual terms.
-        $K = 0.75; // Incline/decline sensitivity
-        $D = 3; // Distance sensitivity
-        $G = 1.25; // Grade sensitivity
-        $A = 3.0;  // Distance threshold
+        $miles = (float) $resource->distance_miles;
+        $climb = (float) $resource->incline_ft;
+        $grade = (float) $resource->average_grade_pt;
+        $hours = (float) $resource->average_hours;
 
-        $incline = (int)$resource->incline_ft;
-        $decline = (int)$resource->decline_ft;
-        $distance = (float)$resource->distance_miles;
-        $avgGrade = (float)$resource->average_grade_pt;
-        $maxGrade = (float)$resource->max_grade_pt;
-
-        // Use a logarithmic value based on distance, so extremely long distances don't skew the results too much. This
-        // will have a wider curve for smaller numbers, and cap out at 7.5.
-        $distance = 7.5 / (1 + exp(-$distance * 7.5));
-
-        $inclineDeclineTerm = 1.0 / (1.0 + exp(-$K * ($incline - $decline)));
-        $distanceTerm = 1.0 / (1.0 + exp($D * ($distance - $A)));
-        $gradeTerm = 1.0 / (1.0 + exp(-$G * ($avgGrade - $maxGrade)));
-
-        // Calculate the overall strenuousness score.
-        $strenuousness = 0.5 * (1.0 - $inclineDeclineTerm) * (1.0 - $distanceTerm) * (1.0 - $gradeTerm);
-
-        // Ensure the result is between 0 and 0.5.
-        $strenuousness = max(0, min(0.5, $strenuousness));
-
-        // Take into account what the difficulty field specifies (-0.2/+0.2).
-        if ($resource->isEasy()) {
-            $strenuousness -= 0.2;
-        }
-        if ($resource->isDifficult()) {
-            $strenuousness += 0.2;
+        if ($miles <= 0 && $climb <= 0 && $hours <= 0) {
+            return (float) (ActivityType::find($activityTypeId)?->strenuousness ?? 0.5);
         }
 
-        // Take into account the average hours of the trail (-0.1/+0.2).
-        if ($resource->average_hours) {
-            $strenuousness += (0.4 * (1 - exp(-0.2 * $resource->average_hours)) - 0.2) / 2;
-        }
+        $score = 0.35 * (1 - exp(-$miles / 6))
+            + 0.35 * (1 - exp(-max(0, $climb) / 1500))
+            + 0.10 * min(1, max(0, $grade) / 0.15)
+            + 0.20 * (1 - exp(-$hours / 4))
+            + (self::DIFFICULTY_STRENUOUSNESS[$resource->difficulty] ?? 0.0);
 
-        try {
-            return ActivityType::find($activityTypeId)->strenuousness + $strenuousness;
-        } catch (\Throwable $e) {
-            Log::error('Could not calculate strenuousness for ' . $activityTypeId . ' ' . $resource->id . ' ' . $resource->name);
-            return 0;
-        }
+        return max(0.0, min(1.0, $score));
     }
 }

@@ -13,7 +13,16 @@ class AxiosHelper {
     };
   }
 
+  /**
+   * GET that is cancelled when the route changes. Pass { persistent: true } for requests that must survive
+   * navigation (e.g. who is signed in).
+   */
   get(url, config = {}) {
+    const { persistent, ...rest } = config;
+    if (persistent) {
+      return this.instance.get(url, rest);
+    }
+    config = rest;
     const controller = new AbortController();
     const signal = controller.signal;
     this.activeGetRequests.set(url, controller);

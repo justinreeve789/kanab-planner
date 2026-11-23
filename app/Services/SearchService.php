@@ -17,7 +17,6 @@ use App\Models\Scopes\DataScope;
 use App\Models\Trail;
 use App\Models\TrailGeoJson;
 use App\Models\TrailImage;
-use App\Models\TrailMerge;
 use App\Repositories\ResourceRepository;
 use App\ResourceEnum;
 use App\Services\OpenAIService;
