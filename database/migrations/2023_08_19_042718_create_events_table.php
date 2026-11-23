@@ -1,14 +1,11 @@
 <?php
 
-use App\Traits\ImportTable;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 class CreateEventsTable extends Migration
 {
-    use ImportTable;
-
     /**
      * Run the migrations.
      *
@@ -39,8 +36,6 @@ class CreateEventsTable extends Migration
             $table->unique(['source_type', 'source_id']);
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });
-
-        self::importTable('events');
     }
 
     /**

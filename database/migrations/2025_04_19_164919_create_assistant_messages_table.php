@@ -1,14 +1,11 @@
 <?php
 
-use App\Traits\ImportTable;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    use ImportTable;
-
     /**
      * Run the migrations.
      */
@@ -26,8 +23,6 @@ return new class extends Migration
             $table->softDeletes();
             $table->foreign('assistant_thread_id')->references('id')->on('assistant_threads')->onDelete('cascade');
         });
-
-        self::importTable('assistant_messages');
     }
 
     /**

@@ -1,6 +1,5 @@
 <?php
 
-use App\Traits\ImportTable;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -8,8 +7,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    use ImportTable;
-
     /**
      * Run the migrations.
      */
@@ -44,8 +41,6 @@ return new class extends Migration
         }
 
         DB::table('accommodation_images')->insert($data);
-
-        // self::importTable('accommodation_images');
     }
 
     /**
