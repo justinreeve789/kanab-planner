@@ -92,7 +92,8 @@ export default {
   components: { DayStats, TimelineItem, Weather },
   props: {
     day: { type: Object, required: true },
-    baseArea: { type: Object, default: null },
+    /** Where the day's drive ends: their lodging's name or the base area. */
+    homeName: { type: String, default: 'base' },
     canEdit: { type: Boolean, default: false },
   },
   setup() {
@@ -122,7 +123,7 @@ export default {
       return this.date?.toLocaleDateString('en-US', { month: 'short' });
     },
     schedule() {
-      return buildDaySchedule(this.day, this.baseArea?.short_name ?? 'base');
+      return buildDaySchedule(this.day, this.homeName);
     },
     summaryLine() {
       const s = summarizeDay(this.day);

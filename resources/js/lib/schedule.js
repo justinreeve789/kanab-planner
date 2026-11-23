@@ -33,6 +33,10 @@ export function activityKind(activity) {
   if (type === 'cooking') {
     return durationBetween(activity.start_time, activity.end_time) > 0 ? 'meal' : 'note';
   }
+  // Checking in or out of the traveller's own lodging has no listed accommodation behind it.
+  if (type === 'checking-in' || type === 'checking-out') {
+    return 'stay';
+  }
   return 'note';
 }
 
@@ -41,7 +45,7 @@ export function activityTitle(activity) {
   const kind = activityKind(activity);
   if (kind === 'stay') {
     const verb = activity.activity_type?.name === 'checking-out' ? 'Check out of' : 'Check in at';
-    return `${verb} ${activity.resource?.name ?? 'your lodging'}`;
+    return activity.resource ? `${verb} ${activity.resource.name}` : (activity.name ?? `${verb} your lodging`);
   }
   return activity.resource?.name ?? activity.name ?? 'Untitled';
 }

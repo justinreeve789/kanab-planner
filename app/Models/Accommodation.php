@@ -36,9 +36,14 @@ class Accommodation extends Resource
         return $this->hasMany(AccommodationImage::class, 'accommodation_id', 'id');
     }
 
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
+    }
+
     public function getAreaIdAttribute()
     {
-        return Area::KANAB;
+        return $this->area?->id;
     }
 
     public function getImageIdsAttribute()

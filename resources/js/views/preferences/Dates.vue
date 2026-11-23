@@ -44,13 +44,15 @@
     </div>
   </fieldset>
   <div>
-    <CallyCalendar class="absolute left-1/2 -translate-x-1/2 bg-white text-black" v-show="isCalendarOpen" v-model.lazy="dateRange" />
+    <CallyCalendar class="absolute left-1/2 -translate-x-1/2 bg-white text-black z-[1000]" v-show="isCalendarOpen" v-model.lazy="dateRange" />
   </div>
+  <HomeBase />
 </template>
 
 <script>
 import { parseDate } from '../../lib/time';
 import CallyCalendar from "../components/CallyCalendar.vue";
+import HomeBase from "./HomeBase.vue";
 import {usePreferencesStore} from "../../stores/preferences";
 
 export default {
@@ -60,6 +62,7 @@ export default {
   },
   components: {
     CallyCalendar,
+    HomeBase,
   },
   watch: {
     dateRange(newDates, oldDates) {

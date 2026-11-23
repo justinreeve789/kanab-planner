@@ -37,6 +37,12 @@ describe('schedule', () => {
     const resource = { name: 'Tranquility Trails' };
     expect(activityTitle({ resource_table: 'accommodations', resource, activity_type: { name: 'checking-in' } })).toBe('Check in at Tranquility Trails');
     expect(activityTitle({ resource_table: 'accommodations', resource, activity_type: { name: 'checking-out' } })).toBe('Check out of Tranquility Trails');
+
+    // Their own lodging: a task named by the API.
+    const own = { name: 'Check in at Cliffrose Lodge', activity_type: { name: 'checking-in' } };
+    expect(activityKind(own)).toBe('stay');
+    expect(activityTitle(own)).toBe('Check in at Cliffrose Lodge');
+    expect(activityTitle({ activity_type: { name: 'checking-out' } })).toBe('Check out of your lodging');
     expect(activityTitle({ name: 'Pack a lunch' })).toBe('Pack a lunch');
   });
 

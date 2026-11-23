@@ -1,6 +1,6 @@
 <template>
   <ul class="steps w-full text-sm md:text-md">
-    <li class="step cursor-pointer" :class="{'step-primary': this.step >= 1}" @click="$router.push('questionnaire-dates')">Dates</li>
+    <li class="step cursor-pointer" :class="{'step-primary': this.step >= 1}" @click="$router.push('questionnaire-dates')">When &amp; Where</li>
     <li class="step cursor-pointer" :class="{'step-primary': this.step >= 2}" @click="$router.push('questionnaire-activities')">Activities</li>
     <li class="step cursor-pointer" :class="{'step-primary': this.step >= 3}" @click="$router.push('questionnaire-about')">About You</li>
     <li class="step cursor-pointer" :class="{'step-primary': this.step >= 4}" @click="$router.push('questionnaire-destinations')">Destinations</li>
