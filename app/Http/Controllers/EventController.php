@@ -7,9 +7,13 @@ use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
+    /**
+     * Paginated: ?page=2&per_page=50 (max 100).
+     */
     public function index(Request $request)
     {
-        return Event::with(['data', 'dates', 'links', 'location', 'text'])->get();
+        $perPage = max(1, min(100, (int) $request->get('per_page', 50)));
+        return Event::with(['data', 'dates', 'links', 'location', 'text'])->orderBy('events.id')->paginate($perPage);
     }
 
     public function getEventsInArea(Request $request, int $areaId)

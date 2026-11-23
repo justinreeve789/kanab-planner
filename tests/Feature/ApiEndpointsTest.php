@@ -128,14 +128,4 @@ class ApiEndpointsTest extends TestCase
         $this->getJson('/api/v1/day/00000000-0000-0000-0000-000000000000')->assertNotFound();
         $this->getJson('/api/v1/activity/00000000-0000-0000-0000-000000000000')->assertNotFound();
     }
-
-    public function test_unbuilt_mutations_say_so_instead_of_crashing(): void
-    {
-        $uuid = '00000000-0000-0000-0000-000000000000';
-        $this->deleteJson("/api/v1/itinerary/{$uuid}")->assertStatus(501);
-        $this->putJson("/api/v1/day/{$uuid}")->assertStatus(501);
-        $this->deleteJson("/api/v1/day/{$uuid}")->assertStatus(501);
-        $this->putJson("/api/v1/activity/{$uuid}")->assertStatus(501);
-        $this->deleteJson("/api/v1/activity/{$uuid}")->assertStatus(501);
-    }
 }

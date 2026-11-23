@@ -12,8 +12,8 @@ trait ItineraryAssertions
     protected function generateItinerary(array $params = []): array
     {
         $params += ['start_date' => '2027-06-01', 'duration_days' => 5];
-        $response = $this->getJson('/api/v1/itinerary?' . http_build_query($params));
-        $response->assertSuccessful();
+        $response = $this->postJson('/api/v1/itinerary', $params);
+        $response->assertCreated();
         return $response->json();
     }
 

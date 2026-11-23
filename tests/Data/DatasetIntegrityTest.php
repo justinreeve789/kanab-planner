@@ -41,9 +41,8 @@ class DatasetIntegrityTest extends DataTestCase
     }
 
     /**
-     * Trail 444's stored GeoJSON is an empty FeatureCollection.
+     * Trail 444's stored GeoJSON was an empty FeatureCollection; update:geojson now refuses to store one.
      */
-    #[Group('known-issues')]
     public function test_every_stored_trail_path_has_coordinates(): void
     {
         $service = new TrailService();
@@ -57,10 +56,9 @@ class DatasetIntegrityTest extends DataTestCase
     }
 
     /**
-     * Resource::scopeSortByDeviation() INNER JOINs resource_data, so a usable trail without a row there can never
-     * be picked by TrailService::getRandomTrailForPeriod(). About a quarter of usable trails have none.
+     * Every usable trail is scored (php artisan update:data --trails). Unscored trails would still be pickable
+     * (sortByDeviation LEFT JOINs with defaults), but would rank on defaults instead of their own numbers.
      */
-    #[Group('known-issues')]
     public function test_every_hikeable_trail_has_resource_data(): void
     {
         $missing = DB::table('trails')
@@ -74,7 +72,8 @@ class DatasetIntegrityTest extends DataTestCase
 
     /**
      * LocationService::updateBusynessForLocation() skipped Sunday (array_search() returned 0, which failed a
-     * truthiness check). Fixed in code; the stored data still needs a re-scrape.
+     * truthiness check). Fixed in code; the stored data needs a re-scrape with a Google API key
+     * (php artisan update:busy), so this stays a known issue until database/dumps/resource_busy.sql is refreshed.
      */
     #[Group('known-issues')]
     public function test_busyness_was_collected_for_sundays(): void

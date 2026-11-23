@@ -46,4 +46,33 @@ class EventQueryTest extends TestCase
         $this->assertSame(0, Event::betweenDates('2027-06-02 06:00:00', '2027-06-02 11:00:00')->count());
         $this->assertSame(0, Event::betweenDates('2027-06-03 18:00:00', '2027-06-03 20:00:00')->count());
     }
+
+    public function test_events_overlapping_a_window_are_found(): void
+    {
+        $locationId = DB::table('locations')->insertGetId(['name' => 'Kanab Park', 'area_id' => Area::KANAB]);
+        $marketId = DB::table('events')->insertGetId([
+            'name' => 'Farmers Market', 'source_type' => 'fixture', 'source_id' => 'market', 'location_id' => $locationId,
+            'start_date' => '2027-06-02 09:00:00', 'end_date' => '2027-06-02 12:00:00',
+        ]);
+        DB::table('event_dates')->insert(['event_id' => $marketId, 'start_date' => '2027-06-02 09:00:00', 'end_date' => '2027-06-02 12:00:00']);
+
+        $morning = Event::betweenDates('2027-06-02 06:00:00', '2027-06-02 11:00:00')->pluck('events.id')->all();
+        $this->assertSame([$marketId], $morning, 'Starts inside the window.');
+        $this->assertSame([$marketId], Event::betweenDates('2027-06-02 11:30:00', '2027-06-02 16:00:00')->pluck('events.id')->all(), 'Still running.');
+        $this->assertSame(0, Event::betweenDates('2027-06-02 12:00:00', '2027-06-02 13:00:00')->where('events.id', $marketId)->count(), 'Ended.');
+    }
+
+    public function test_open_ended_occurrences_last_four_hours_or_until_ten(): void
+    {
+        $locationId = DB::table('locations')->insertGetId(['name' => 'Kanab Library', 'area_id' => Area::KANAB]);
+        $talkId = DB::table('events')->insertGetId([
+            'name' => 'Ranger Talk', 'source_type' => 'fixture', 'source_id' => 'talk', 'location_id' => $locationId,
+            'start_date' => '2027-06-03 19:00:00',
+        ]);
+        DB::table('event_dates')->insert(['event_id' => $talkId, 'start_date' => '2027-06-03 19:00:00']);
+
+        $this->assertSame(1, Event::betweenDates('2027-06-03 21:30:00', '2027-06-03 23:00:00')->where('events.id', $talkId)->count());
+        $this->assertSame(0, Event::betweenDates('2027-06-03 22:00:00', '2027-06-03 23:00:00')->where('events.id', $talkId)->count());
+        $this->assertSame('2027-06-03 22:00:00', \App\Models\EventDate::where('event_id', $talkId)->first()->effective_end_date);
+    }
 }

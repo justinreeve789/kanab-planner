@@ -144,4 +144,46 @@ class TrailServiceTest extends TestCase
         $this->assertFalse((new Trail(['difficulty' => 'Intermediate']))->isDifficult());
         $this->assertTrue((new Trail(['difficulty' => 'Very Difficult']))->isDifficult());
     }
+
+    public function test_hiking_estimate_does_not_depend_on_gps_point_density(): void
+    {
+        // The same 3.5-mile climb, sampled every ~0.35 mi vs every ~18 ft.
+        $sparse = $this->service->analyzeTrail(GeoJson::line(37.0, -112.5, 37.05, -112.5, 10, 1500, 1800), 2.0, ActivityType::HIKING, 2);
+        $dense = $this->service->analyzeTrail(GeoJson::line(37.0, -112.5, 37.05, -112.5, 1000, 1500, 1800), 2.0, ActivityType::HIKING, 2);
+
+        $this->assertEqualsWithDelta($sparse['total_hours'], $dense['total_hours'], 0.05 * $sparse['total_hours']);
+        $this->assertEqualsWithDelta(984, $sparse['elevation_gain_ft'], 2, '300 m of climbing.');
+    }
+
+    public function test_gps_jitter_does_not_inflate_the_estimate(): void
+    {
+        $smooth = json_decode(GeoJson::line(37.0, -112.5, 37.05, -112.5, 1000, 1500, 1500), true);
+        $noisy = $smooth;
+        foreach ($noisy['features'][0]['geometry']['coordinates'] as $i => &$point) {
+            $point[2] += ($i % 2 ? 3 : -3); // ±3 m of elevation noise on every point
+        }
+        $smoothHours = $this->service->analyzeTrail(json_encode($smooth), 2.0, ActivityType::HIKING, 2)['total_hours'];
+        $noisyHours = $this->service->analyzeTrail(json_encode($noisy), 2.0, ActivityType::HIKING, 2)['total_hours'];
+        $this->assertEqualsWithDelta($smoothHours, $noisyHours, 0.05 * $smoothHours);
+    }
+
+    public function test_multilinestring_tracks_are_read(): void
+    {
+        $line = json_decode(GeoJson::line(37.0, -112.5, 37.02, -112.5, 10, 1500, 1500), true)['features'][0]['geometry']['coordinates'];
+        $multi = ['type' => 'Feature', 'geometry' => ['type' => 'MultiLineString', 'coordinates' => [$line, $line]]];
+        $this->assertCount(22, $this->service->extractTrailPoints($multi));
+        $this->expectException(\InvalidArgumentException::class);
+        $this->service->analyzeTrail(['type' => 'FeatureCollection', 'features' => []], 2.0);
+    }
+
+    public function test_short_easy_trails_are_evening_hikes(): void
+    {
+        $easy = new Trail(['area_id' => Area::KANAB, 'average_hours' => 0.5, 'difficulty' => 'Easy']);
+        $this->assertSame(Period::EVENING, $this->service->getBestPeriodOfDayForTrail($easy));
+
+        $steep = new Trail(['area_id' => Area::KANAB, 'average_hours' => 1.0, 'difficulty' => 'Difficult']);
+        for ($i = 0; $i < 10; $i++) {
+            $this->assertContains($this->service->getBestPeriodOfDayForTrail($steep), [Period::MORNING, Period::AFTERNOON]);
+        }
+    }
 }

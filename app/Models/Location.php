@@ -44,12 +44,6 @@ class Location extends Resource
         return $this->hasMany(LocationImage::class, 'location_id', 'id');
     }
 
-    public function isOpen($dateTime)
-    {
-        $dayOfWeek = date('w', strtotime($dateTime));
-        $time = date('H:i:s', strtotime($dateTime));
-    }
-
     public function openai_prompts()
     {
         return $this->hasMany(OpenAIPrompt::class, 'source_id', 'id')->where('openai_prompts.source_table', $this->getTable());

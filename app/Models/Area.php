@@ -33,17 +33,18 @@ class Area extends Model
     }
 
     /**
-     * A lower delta will make the relative distance between each area less, which decreases the randomness.
+     * Relative popularity of each area for day-trip selection (see pickWeighted()).
      */
-    public static function getAreaWeights($delta = 1) {
+    public static function getAreaWeights(): array
+    {
         return [
-            Area::BRYCE => 100 * $delta,
-            Area::NORTH_RIM => 50 * $delta,
-            Area::KANAB => 75 * $delta,
-            Area::LAKE_POWELL => 50 * $delta,
-            Area::PAGE_AZ => 50 * $delta,
-            Area::ST_GEORGE => 10 * $delta,
-            Area::ZION => 150 * $delta,
+            Area::BRYCE => 100,
+            Area::NORTH_RIM => 50,
+            Area::KANAB => 75,
+            Area::LAKE_POWELL => 50,
+            Area::PAGE_AZ => 50,
+            Area::ST_GEORGE => 10,
+            Area::ZION => 150,
         ];
     }
 
@@ -61,21 +62,61 @@ class Area extends Model
         return $this->hasMany(AreaWeather::class, 'area_id', 'id');
     }
 
-    public function scopeInWeightedRandomOrder(Builder $query, $delta = 1)
+    /**
+     * Pick one area from $areas at random, favoring the popular ones (getAreaWeights()).
+     *
+     * Adventurousness flattens the weights: at 0 the big draws (Zion, Bryce) dominate, at 1 every eligible area is
+     * close to equally likely. Sampling happens over the areas that already passed every filter, so a rejected pick
+     * can't silently fall back to the base area (the old scope picked one id first and filtered afterwards).
+     *
+     * @param \Illuminate\Support\Collection<int, Area> $areas
+     */
+    public static function pickWeighted($areas, float $adventurousness = 0.5): ?Area
     {
-        // Calculate the total weight.
-        $totalWeight = array_sum($this->getAreaWeights());
+        if ($areas->isEmpty()) {
+            return null;
+        }
+        $exponent = 1.5 - max(0.0, min(1.0, $adventurousness));
+        $weights = self::getAreaWeights();
+        $scored = $areas->map(fn(Area $area) => [$area, pow($weights[$area->id] ?? 50, $exponent)]);
 
-        // Generate a random number within the total weight.
-        $rand = mt_rand(1, $totalWeight);
-
-        // Iterate through the weights to find the selected weight.
-        foreach ($this->getAreaWeights() as $areaId => $weight) {
-            $rand -= $weight;
-            if ($rand <= 0) {
-               return $query->where('id', $areaId);
+        $total = $scored->sum(fn($pair) => $pair[1]);
+        $roll = mt_rand() / mt_getrandmax() * $total;
+        foreach ($scored as [$area, $weight]) {
+            $roll -= $weight;
+            if ($roll <= 0) {
+                return $area;
             }
         }
+        return $scored->last()[0];
+    }
+
+    /**
+     * Whether the area is inside its seasonal closure (closed_from..closed_until, MM-DD, may wrap the new year).
+     */
+    public function isClosedOn(string $date): bool
+    {
+        if (!$this->closed_from || !$this->closed_until) {
+            return false;
+        }
+        $monthDay = date('m-d', strtotime($date));
+        if ($this->closed_from <= $this->closed_until) {
+            return $monthDay >= $this->closed_from && $monthDay <= $this->closed_until;
+        }
+        return $monthDay >= $this->closed_from || $monthDay <= $this->closed_until;
+    }
+
+    public function scopeOpenOn(Builder $query, string $date)
+    {
+        $monthDay = date('m-d', strtotime($date));
+        return $query->where(function($q) use ($monthDay) {
+            $q->whereNull('closed_from')
+                ->orWhereNull('closed_until')
+                ->orWhere(fn($q) => $q->whereColumn('closed_from', '<=', 'closed_until')
+                    ->where(fn($q) => $q->where('closed_from', '>', $monthDay)->orWhere('closed_until', '<', $monthDay)))
+                ->orWhere(fn($q) => $q->whereColumn('closed_from', '>', 'closed_until')
+                    ->where('closed_from', '>', $monthDay)->where('closed_until', '<', $monthDay));
+        });
     }
 
     public function isTooCold($day, $period, $activityType) {

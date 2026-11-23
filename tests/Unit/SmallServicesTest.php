@@ -69,4 +69,16 @@ class SmallServicesTest extends TestCase
         $html = "<div>\n<img class=\"a\" src=\"https://cdn.test/one.jpg\" alt=\"\">\n<img src='/two.png'>\n</div>";
         $this->assertSame(['https://cdn.test/one.jpg', '/two.png'], $service->extractImagesFromHtml($html));
     }
+
+    public function test_extracts_every_image_on_a_line_including_backgrounds(): void
+    {
+        $html = '<img src="/a.jpg"><img alt="b" src=\'/b.jpg\'><div style="background-image: url(/c.png)"></div><div style="background-image:url(\'/d.webp\')"></div>';
+        $this->assertSame(['/a.jpg', '/b.jpg', '/c.png', '/d.webp'], (new ConversionService())->extractImagesFromHtml($html));
+    }
+
+    public function test_extracts_pdf_links(): void
+    {
+        $html = '<a href="/maps/zion.pdf">Map</a> <a href=\'https://x.test/guide.PDF?v=2\'>Guide</a> <a href="/page.html">Page</a>';
+        $this->assertSame(['/maps/zion.pdf', 'https://x.test/guide.PDF?v=2'], (new ConversionService())->extractPDFsFromHtml($html));
+    }
 }

@@ -389,6 +389,42 @@ class AssistantService
         return false;
     }
 
+    public const PREFERENCE_NUDGES = [
+        'strenuousness' => [
+            [-0.2, ['easier', 'easy', 'shorter', 'less strenuous', 'not as hard', 'gentle', 'relax']],
+            [0.2, ['harder', 'challenging', 'longer hikes', 'more strenuous', 'tougher', 'difficult']],
+        ],
+        'adventurousness' => [
+            [-0.2, ['less driving', 'stay close', 'closer', 'less adventurous', 'popular']],
+            [0.2, ['more adventurous', 'off the beaten', 'unique', 'explore more', 'more hikes', 'more activities']],
+        ],
+        'solitariness' => [
+            [-0.2, ['social', 'lively', 'busy places']],
+            [0.2, ['quiet', 'fewer crowds', 'less crowded', 'solitude', 'avoid crowds', 'secluded']],
+        ],
+    ];
+
+    /**
+     * Nudge adventurousness / solitariness / strenuousness by ±0.2 for phrases like "easier hikes" or "fewer
+     * crowds", starting from $params (defaults 0.5), clamped to 0–1.
+     */
+    public function adjustPreferencesForQuery(string $query, array $params = []): array
+    {
+        $query = strtolower($query);
+        foreach (self::PREFERENCE_NUDGES as $preference => $nudges) {
+            foreach ($nudges as [$delta, $phrases]) {
+                foreach ($phrases as $phrase) {
+                    if (str_contains($query, $phrase)) {
+                        $current = (float) ($params[$preference] ?? 0.5);
+                        $params[$preference] = round(max(0, min(1, $current + $delta)), 1);
+                        break;
+                    }
+                }
+            }
+        }
+        return $params;
+    }
+
     /**
      * A user may type something like "I want different activities," in which case we'll want to refresh the itinerary,
      * but keep the dates and areas.

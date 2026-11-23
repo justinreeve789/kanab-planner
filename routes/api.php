@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
+use Laravel\Fortify\Http\Controllers\RegisteredUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,8 +21,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('v1')->group(function() {
+    // Session-based auth for the SPA (the api group is stateful for first-party requests; see Kernel).
     Route::prefix('auth')->group(function() {
-        Route::post('/register', 'Laravel\Fortify\Http\Controllers\RegisteredUserController@store');
+        Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('throttle:auth');
+        Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:auth');
+        Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
+        Route::get('/user', fn(Request $request) => response()->json($request->user('sanctum')));
     });
 
     Route::prefix('activity_type')->group(function() {
@@ -44,7 +50,7 @@ Route::prefix('v1')->group(function() {
 
     Route::prefix('assistant')->group(function() {
         Route::get('/', 'App\Http\Controllers\AssistantController@getAssistants');
-        Route::post('/itinerary', 'App\Http\Controllers\AssistantController@createItinerary');
+        Route::post('/itinerary', 'App\Http\Controllers\AssistantController@createItinerary')->middleware('throttle:itineraries');
         Route::put('/itinerary/{itineraryId}', 'App\Http\Controllers\AssistantController@updateItinerary');
         Route::prefix('message')->group(function() {
             Route::post('/', 'App\Http\Controllers\AssistantController@sendMessage');
@@ -58,6 +64,7 @@ Route::prefix('v1')->group(function() {
     Route::prefix('day')->group(function() {
         Route::get('/{dayId}', 'App\Http\Controllers\ItineraryController@getDay');
         Route::post('/{dayId}/activity', 'App\Http\Controllers\ItineraryController@createActivity');
+        Route::post('/{dayId}/regenerate', 'App\Http\Controllers\ItineraryController@regenerateDay')->middleware('throttle:itineraries');
         Route::put('/{dayId}', 'App\Http\Controllers\ItineraryController@updateDay');
         Route::delete('/{dayId}', 'App\Http\Controllers\ItineraryController@deleteDay');
     });
@@ -76,16 +83,16 @@ Route::prefix('v1')->group(function() {
     });
 
     Route::prefix('itinerary')->group(function() {
-        // TODO: Make this a POST to create the itinerary. A GET should return a list of itineraries.
-        Route::get('/', 'App\Http\Controllers\ItineraryController@createItinerary');
+        Route::get('/', 'App\Http\Controllers\ItineraryController@index');
+        Route::post('/', 'App\Http\Controllers\ItineraryController@createItinerary')->middleware('throttle:itineraries');
         Route::get('/{id}', 'App\Http\Controllers\ItineraryController@loadItinerary');
+        Route::post('/{id}/claim', 'App\Http\Controllers\ItineraryController@claimItinerary');
         Route::put('/{id}', 'App\Http\Controllers\ItineraryController@updateItinerary');
         Route::delete('/{id}', 'App\Http\Controllers\ItineraryController@deleteItinerary');
     });
 
     Route::prefix('image')->group(function() {
         Route::get('/', 'App\Http\Controllers\ImageController@getImageByQuery');
-        Route::get('/map/{mapType}', 'App\Http\Controllers\ImageController@getMapTile');
         Route::get('/map/{mapType}/{z}/{x}/{y}.{ext}', 'App\Http\Controllers\ImageController@getMapTile');
     });
 

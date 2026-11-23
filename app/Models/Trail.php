@@ -52,9 +52,14 @@ class Trail extends Resource
         return $this->hasMany(TrailImage::class, 'trail_id', 'id');
     }
 
+    /**
+     * Trails that were combined into this one (resource_merges.merged_from → merged_to).
+     */
     public function merged_trails(): HasManyThrough
     {
-        return $this->hasManyThrough(Trail::class, TrailMerge::class, 'merged_from', 'id', 'id', 'merged_to');
+        return $this->hasManyThrough(Trail::class, ResourceMerge::class, 'merged_to', 'id', 'id', 'merged_from')
+            ->withoutGlobalScopes()
+            ->where('resource_merges.resource_table', $this->getTable());
     }
 
     public function openai_prompts()

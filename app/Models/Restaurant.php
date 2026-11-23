@@ -74,10 +74,13 @@ class Restaurant extends Resource
      *
      * Popular-times data is collected per *location* (LocationService::updateBusynessForLocation writes
      * resource_table = 'locations', resource_id = location id), with day_of_week 0–6 and a 0–100 percentage.
-     * 0% busy → half the default, 50% → the default, 100% → 1.5× the default; clamped to 0.5–3.5 hours.
+     * 0% busy → half the base time, 50% → the base time, 100% → 1.5×; clamped to 0.5–3.5 hours.
+     *
+     * $params: date, start_time, and optionally base_hours (defaults to DEFAULT_AVERAGE_HOURS).
      */
     public function getAverageHours(array $params = [])
     {
+        $base = (float) ($params['base_hours'] ?? self::DEFAULT_AVERAGE_HOURS);
         if (isset($params['date']) && isset($params['start_time']) && $this->location_id) {
             $resourceBusy = ResourceBusy::where([
                 'resource_table' => 'locations',
@@ -86,25 +89,16 @@ class Restaurant extends Resource
                 'day_of_week' => (int) date('w', strtotime($params['date'])),
             ])->orderBy('collected_date', 'DESC')->first();
             if ($resourceBusy) {
-                $hours = self::DEFAULT_AVERAGE_HOURS * (0.5 + $resourceBusy->percentage / 100);
+                $hours = $base * (0.5 + $resourceBusy->percentage / 100);
                 return max(self::MIN_AVERAGE_HOURS, min(self::MAX_AVERAGE_HOURS, $hours));
             }
         }
-        return parent::DEFAULT_AVERAGE_HOURS;
+        return $base;
     }
 
     public function getAveragePrice()
     {
         return $this->average_price;
-    }
-
-    public function hasBreakfast(string $date)
-    {
-        $dayOfWeek = date('N', strtotime($date));
-        if (!isset($this->hours[$date][$dayOfWeek])) {
-            $this->hours[$date][$dayOfWeek] = $this->hours()->where(['location_id' => $this->location_id, 'day_of_week'])->first();
-        }
-        $hours = $this->hours[$date][$dayOfWeek];
     }
 
     public static function getFeatured(array $areaIds, int $featuredCount = 3)

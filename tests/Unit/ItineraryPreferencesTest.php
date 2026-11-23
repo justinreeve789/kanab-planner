@@ -90,7 +90,7 @@ class ItineraryPreferencesTest extends TestCase
     {
         $itinerary = new Itinerary();
         $itinerary->setTrailPriorities('12,34');
-        $this->assertSame(['12', '34'], $itinerary->getTrailPriorities());
+        $this->assertSame([12, 34], $itinerary->getTrailPriorities());
 
         $itinerary->setTrailPriorities([5]);
         $this->assertSame([5], $itinerary->getTrailPriorities());

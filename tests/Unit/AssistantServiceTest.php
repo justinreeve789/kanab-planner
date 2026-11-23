@@ -60,4 +60,15 @@ class AssistantServiceTest extends TestCase
         $this->assertFalse($this->service->isMapRequested('show me the map', new Restaurant()));
         $this->assertFalse($this->service->isMapRequested('show me the map', null), 'No resource in context must not crash.');
     }
+
+    public function test_requests_nudge_preferences(): void
+    {
+        $nudged = $this->service->adjustPreferencesForQuery('Something easier with fewer crowds please', ['strenuousness' => 0.6]);
+        $this->assertEquals(0.4, $nudged['strenuousness']);
+        $this->assertEquals(0.7, $nudged['solitariness']);
+        $this->assertArrayNotHasKey('adventurousness', $nudged);
+
+        $this->assertEquals(1.0, $this->service->adjustPreferencesForQuery('much harder hikes', ['strenuousness' => 0.9])['strenuousness']);
+        $this->assertSame([], $this->service->adjustPreferencesForQuery('what time is it'));
+    }
 }

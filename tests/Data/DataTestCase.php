@@ -35,6 +35,8 @@ abstract class DataTestCase extends TestCase
         }
 
         DB::beginTransaction();
+        // The smoke tests generate dozens of itineraries in one go.
+        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
     }
 
     protected function tearDown(): void

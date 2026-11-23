@@ -28,7 +28,6 @@ class Day extends CachedModel
 
     protected $appends = [
         'area',
-        'preamble',
         'weather',
         'formatted_abbr_month_day',
         'formatted_date',
@@ -36,49 +35,32 @@ class Day extends CachedModel
         'formatted_month_day',
         'formatted_year',
     ];
-    protected $attributes = [
-        'formatted_abbr_month_day' => '',
-        'formatted_date' => '',
-        'formatted_day_of_week' => '',
-        'formatted_month_day' => '',
-        'formatted_year' => '',
-    ];
-    protected $casts = ['id' => 'string', 'itinerary_id' => 'string', 'stats' => 'json'];
+    protected $attributes = ['preamble' => null, 'drive_minutes' => null];
+    protected $casts = ['id' => 'string', 'itinerary_id' => 'string', 'stats' => 'json', 'drive_minutes' => 'integer'];
     protected $guarded = [
         'formatted_abbr_month_day',
         'formatted_date',
         'formatted_day_of_week',
         'formatted_month_day',
         'formatted_year',
-        'preamble',
         'weather',
     ];
     protected $table = 'itinerary_days';
 
-    public $activities;
-    private ?string $preamble = null;
-
-    /** @var Period[] $periods */
-
+    /**
+     * A new day (constructed with attributes) gets its four empty periods in memory. Rows hydrated from the database
+     * are constructed without attributes and get their periods from the relation, so this never queries.
+     */
     public function __construct(array $attributes = [])
     {
-        $this->id = Str::uuid();
-
-        foreach ($attributes as $key => $attr) {
-            $this->setAttribute($key, $attr);
-        }
-
-        // Activities could potentially occur outside the day's area, such as eating dinner close to the home area after
-        // spending time in other areas, if the location is still in a reasonable proximity, but generally all activities
-        // should occur in the same area.
-
-        $this->start_time = '07:00';
-        $this->end_time = '22:00';
-
-        $this->activities = [];
-        $this->createPeriodsIfNotExist();
-
         parent::__construct($attributes);
+
+        if (!empty($attributes)) {
+            $this->id = $this->id ?? Str::uuid();
+            $this->start_time = $this->start_time ?? '07:00:00';
+            $this->end_time = $this->end_time ?? '22:00:00';
+            $this->createPeriods();
+        }
     }
 
     public function getFormattedAbbrMonthDayAttribute()
@@ -106,29 +88,13 @@ class Day extends CachedModel
         return Carbon::parse($this->date)->format('Y');
     }
 
-    protected function createPeriodsIfNotExist()
+    protected function createPeriods(): void
     {
-        $periods = [
-            Period::MORNING,
-            Period::AFTERNOON,
-            Period::EVENING,
-            Period::NIGHT
-        ];
-
-        foreach ($periods as $period) {
-            $this->periods->put($period, new Period(['day_id' => $this->id, 'type' => $period]));
+        $periods = new Collection();
+        foreach (Period::getPeriodTypes() as $type) {
+            $periods->put($type, new Period(['day_id' => $this->id, 'type' => $type]));
         }
-
-//        foreach ($periods as $periodType) {
-//            // Check if the period already exists for this day, if not, create it.
-//            $existingPeriod = $this->periods()->where('type', $periodType)->first();
-//            if (!$existingPeriod) {
-//                $this->periods()->create([
-//                    'day_id' => $this->id,
-//                    'type' => $periodType,
-//                ]);
-//            }
-//        }
+        $this->setRelation('periods', $periods);
     }
 
     public function itinerary()
@@ -154,19 +120,17 @@ class Day extends CachedModel
         );
     }
 
-    public function saveAll()
+    public function getPeriod(int $type): Period
     {
-        $this->periods->each()->save();
+        return $this->periods->first(fn(Period $period) => $period->type === $type);
     }
 
-    public function getPeriod($index): Period
-    {
-        return $this->periods[$index];
-    }
-
+    /**
+     * Periods in morning → night order.
+     */
     public function getPeriods(): Collection
     {
-        return $this->periods;
+        return $this->periods->sortBy('type')->values();
     }
 
     /**
@@ -224,17 +188,12 @@ class Day extends CachedModel
         foreach ($this->getPeriods() as $period) {
             $activities = $activities->merge($period->getActivities());
         }
-        return $activities;
+        return $activities->sortBy('start_time')->values();
     }
 
     public function getPreamble(): ?string
     {
-        return $this->preamble;
-    }
-
-    public function getPreambleAttribute(): ?string
-    {
-        return $this->preamble;
+        return $this->attributes['preamble'] ?? null;
     }
 
     public function getWeatherAttribute()
@@ -290,7 +249,7 @@ class Day extends CachedModel
 
     public function hasActivityTypeInPeriod(string $activityType, int $period): bool
     {
-        return $this->getPeriods()[$period]->hasActivityType($activityType);
+        return $this->getPeriod($period)->hasActivityType($activityType);
     }
 
     public function hasResourceClass($resourceClass): bool
@@ -326,49 +285,8 @@ class Day extends CachedModel
         return $this->hasResourceClass(ResourceEnum::TRAILS_CLASS);
     }
 
-    public function shouldAddActivityTypeForPeriod(string $activityType, int $period): bool
+    public function setPreamble(?string $preamble): void
     {
-        if ($this->hasActivityTypeInPeriod($activityType, $period)) {
-            return false;
-        }
-
-        switch ($activityType) {
-            case 'cooking':
-                if ($this->getPeriod($period)->hasRestaurant()) {
-                    return false;
-                }
-                break;
-            default:
-        }
-
-        return true;
-    }
-
-    public function shouldAddCookingForPeriod(int $period): bool
-    {
-        return $this->shouldAddActivityTypeForPeriod('cooking', $period);
-    }
-
-    public function shouldAddTrail(): bool
-    {
-    }
-
-    public function setPreamble(string $preamble): void
-    {
-        $this->preamble = $preamble;
-    }
-
-    /**
-     * After activities are added to periods, we can calculate specific times. Activities may be moved into different periods.
-     */
-    public function chronotizeActivities()
-    {
-        foreach ($this->periods as $period) {
-            foreach ($period->activities as $activity) {
-                if ($period->type === Period::MORNING) {
-                    // Breakfast should always come first.
-                }
-            }
-        }
+        $this->attributes['preamble'] = $preamble;
     }
 }

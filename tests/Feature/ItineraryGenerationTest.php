@@ -57,8 +57,16 @@ class ItineraryGenerationTest extends TestCase
 
         $this->assertSame(Area::KANAB, $first['area']['id']);
         $this->assertSame(Area::KANAB, $last['area']['id']);
-        $this->assertSame(['checking-in'], array_map(fn($r) => $this->typeOf($r['activity']), $this->activitiesOfDay($first)));
-        $this->assertSame(['checking-out'], array_map(fn($r) => $this->typeOf($r['activity']), $this->activitiesOfDay($last)));
+
+        // Arrive in the afternoon, check in, then dinner; on the way out, breakfast then check out.
+        $arrival = array_map(fn($r) => [$this->typeOf($r['activity']), $r['activity']['start_time']], $this->activitiesOfDay($first));
+        $this->assertSame(['checking-in', '16:00:00'], $arrival[0]);
+        $this->assertContains($arrival[1][0], ['dining', 'cooking']);
+        $this->assertGreaterThanOrEqual('17:00:00', $arrival[1][1]);
+
+        $departure = array_map(fn($r) => [$this->typeOf($r['activity']), $r['activity']['start_time']], $this->activitiesOfDay($last));
+        $this->assertSame('cooking', $departure[0][0]);
+        $this->assertSame(['checking-out', '10:00:00'], end($departure));
     }
 
     public function test_arriving_early_and_leaving_late_uses_the_first_and_last_days(): void
@@ -158,7 +166,7 @@ class ItineraryGenerationTest extends TestCase
         foreach ([0.3, 0.6, 0.9] as $adventurousness) {
             $itinerary = $this->generateItinerary(['duration_days' => 8, 'adventurousness' => $adventurousness]);
             foreach ($this->activitiesOf($itinerary) as $row) {
-                if ($row['period'] === Period::AFTERNOON && $this->typeOf($row['activity']) === 'cooking') {
+                if ($row['period'] === Period::AFTERNOON && $row['activity']['name'] === 'Lunch') {
                     $this->assertSame(Area::KANAB, $row['day']['area']['id'], "Lunch at home while in {$row['day']['area']['name']}.");
                 }
             }
@@ -219,9 +227,12 @@ class ItineraryGenerationTest extends TestCase
         $this->assertSame('08:00:00', $hike['activity']['start_time']);
         $this->assertSame('12:00:00', $hike['activity']['end_time']);
 
-        $breakfast = array_filter($this->activitiesOfDay($hike['day']), fn($r) => $r['activity']['name'] === 'Breakfast');
+        // Breakfast at home finishes in time to drive to the trailhead (48 minutes in the fixtures) by 8:00.
+        $breakfast = array_values(array_filter($this->activitiesOfDay($hike['day']), fn($r) => $r['activity']['name'] === 'Breakfast'));
         $this->assertCount(1, $breakfast);
-        $this->assertSame('06:30:00', array_values($breakfast)[0]['activity']['start_time']);
+        $this->assertSame(48, $hike['day']['drive_minutes']);
+        $this->assertLessThanOrEqual('07:12:00', $breakfast[0]['activity']['end_time']);
+        $this->assertGreaterThanOrEqual('06:00:00', $breakfast[0]['activity']['start_time']);
     }
 
     public function test_season_is_derived_from_the_start_date(): void

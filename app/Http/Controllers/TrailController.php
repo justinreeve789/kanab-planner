@@ -10,9 +10,13 @@ use Illuminate\Http\Request;
 
 class TrailController extends Controller
 {
+    /**
+     * Paginated: ?page=2&per_page=50 (max 100).
+     */
     public function index(Request $request)
     {
-        return Trail::with(['area', 'data'])->get();
+        $perPage = max(1, min(100, (int) $request->get('per_page', 50)));
+        return Trail::with(['area', 'data'])->orderBy('trails.id')->paginate($perPage);
     }
 
     public function getTrail(Request $request, int $id)

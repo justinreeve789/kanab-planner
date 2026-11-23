@@ -3,146 +3,163 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityType;
-use App\Models\Area;
-use App\Models\Event;
 use App\Models\Itinerary\Activity;
 use App\Models\Itinerary\Day;
 use App\Models\Itinerary\Itinerary;
 use App\Models\Itinerary\Period;
-use App\Models\Itinerary\Season;
-use App\Models\Location;
-use App\Models\Resource;
-use App\Models\Restaurant;
-use App\Models\Trail;
-use App\Traits\ActivityData;
-use App\Services\ConversionService;
+use App\Policies\ItineraryPolicy;
+use App\ResourceEnum;
 use App\Services\ItineraryService;
-use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 
+/**
+ * Itineraries, their days and activities.
+ *
+ * Reading is open to anyone with the id. Every change is authorized by ItineraryPolicy: the X-Itinerary-Token header
+ * returned when the itinerary was created, or a signed-in owner.
+ */
 class ItineraryController extends Controller
 {
-    const DEFAULT_AREA = Area::KANAB;
-    const DEFAULT_DAYS = 5;
-    const DEFAULT_SEASON = 'summer';
-    const DEFAULT_DISTANCE = 30;
-    const MINIMUM_TRAIL_DAYS_RATIO_TO_TOTAL_POSSIBLE = 0.8;
+    /** Activity type for a resource added by hand. */
+    public const ACTIVITY_TYPE_FOR_TABLE = [
+        ResourceEnum::TRAILS_TABLE => ActivityType::HIKING,
+        ResourceEnum::RESTAURANTS_TABLE => ActivityType::DINING,
+        ResourceEnum::EVENTS_TABLE => ActivityType::EVENT,
+        ResourceEnum::LOCATIONS_TABLE => ActivityType::SIGHTSEEING,
+        ResourceEnum::ACCOMMODATIONS_TABLE => ActivityType::CHECKING_IN,
+    ];
 
-    private $conversionService;
-    private $itinerary;
-    private $itineraryService;
-    private $locationService;
-
-    public function __construct()
-    {
-        $this->conversionService = new ConversionService();
-        $this->itineraryService = new ItineraryService();
-    }
-
+    /**
+     * The signed-in user's saved itineraries, newest first.
+     */
     public function index(Request $request)
     {
+        $user = $request->user('sanctum');
+        if (!$user) {
+            return response()->json(['errors' => 'Sign in to see your saved itineraries.'], 401);
+        }
+        return $user->itineraries()
+            ->select('itineraries.id', 'itineraries.name', 'start_date', 'end_date', 'duration_days', 'base_area_id', 'itineraries.created_at')
+            ->orderByDesc('user_itineraries.created_at')
+            ->get();
     }
 
     /**
-     * Activity weight: 0.25
-     * Event weight: 0.5 (they're not something anyone can do any day)
-     * Trail weight: 0.25
+     * Generate a new itinerary from the request's preferences. The response carries a one-time edit_token; keep it
+     * to make changes later. A signed-in user also becomes the owner.
      */
     public function createItinerary(Request $request)
     {
-        // The service holds the itinerary being built, so it must not outlive the request. Laravel caches controller
-        // instances on the route, so a constructor-built service would leak state between requests (tests, Octane).
-        $this->itineraryService = new ItineraryService();
-        $this->itineraryService->setupItinerary($request);
-        $this->itineraryService->assignDaysForAreas($this->getItinerary()->getUseFirstDay(), $this->getItinerary()->getUseLastDay());
-        $this->itineraryService->shuffleDays();
-        $this->itineraryService->getItinerary()->setTotalPossibleTrailDays($this->itineraryService->calculateTotalPossibleTrailDays());
-        $this->itineraryService->getItinerary()->minimum_trail_days = max(1, floor(self::MINIMUM_TRAIL_DAYS_RATIO_TO_TOTAL_POSSIBLE * $this->itineraryService->getItinerary()->getTotalPossibleTrailDays()));
-        foreach ($this->itineraryService->getItinerary()->getDays() as $dayNum => $day) {
-            $this->itineraryService->fillDay($day);
+        $request->validate([
+            'adventurousness' => 'nullable|numeric|between:0,1',
+            'solitariness' => 'nullable|numeric|between:0,1',
+            'strenuousness' => 'nullable|numeric|between:0,1',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'duration_days' => 'nullable|integer|between:1,30',
+            'base_area_id' => 'nullable|integer|exists:areas,id',
+            'average_hiking_speed' => 'nullable|numeric|between:0.3,6',
+            'name' => 'nullable|string|max:255',
+        ]);
+
+        $service = new ItineraryService();
+        $token = $service->getItinerary()->issueEditToken();
+        $itinerary = $service->generate($request);
+
+        if ($user = $request->user('sanctum')) {
+            $itinerary->users()->syncWithoutDetaching([$user->id]);
         }
 
-        // TODO: If the user is visiting two or more national parks or monuments, or spending two or more days at the
-        // same national park or monument, advise they purchase a national park pass.
-
-        // TODO: If we have a situation where the last days aren't as well-filled as earlier days, let's shuffle them
-        // around. Take into account days and hours that trails and locations are open.
-
-//        $this->itineraryService->adjustDays();
-
-//        $this->getItinerary()->setTotalTravelDistance($this->itineraryService->estimateTotalTravelDistance());
-
-        $this->saveItinerary();
-
-//        return response()->json($this->itineraryService->getItinerary());
-        return $this->itineraryService->getItinerary();
+        return response()->json(['can_edit' => true, 'edit_token' => $token] + $this->present($request, $itinerary->id), 201);
     }
 
     public function loadItinerary(Request $request, $id)
     {
-        $itinerary = Itinerary::with(['days.periods.activities'])->where('id', $id)->first();
-        if (!$itinerary) {
+        if (!Itinerary::whereKey($id)->exists()) {
             return response()->json(['errors' => 'Itinerary not available'], 422);
         }
-        return $itinerary;
+        return $this->present($request, $id);
     }
 
+    /**
+     * Rename the trip.
+     */
     public function updateItinerary(Request $request, $id)
     {
-        $dayNum = $request->get('day_num');
-        $newResourceTable = $request->get('new_resource_table');
-        $newResourceId = $request->get('new_resource_id');
-        $oldResourceTable = $request->get('old_resource_table');
-        $oldResourceId = $request->get('old_resource_id');
-        $data = $request->get('data');
-        $newResource = null;
-        $oldResource = null;
+        $itinerary = Itinerary::findOrFail($id);
+        $this->authorizeEdit($request, $itinerary);
+        $data = $request->validate(['name' => 'nullable|string|max:255']);
+        $itinerary->name = $data['name'] ?? null;
+        $itinerary->save();
+        return $this->present($request, $itinerary->id);
+    }
 
-        $itinerary = Itinerary::with(['days.periods.activities'])->where('id', $id)->first();
-        if (!$itinerary) {
-            return false;
-        }
+    public function deleteItinerary(Request $request, string $id)
+    {
+        $itinerary = Itinerary::findOrFail($id);
+        $this->authorizeEdit($request, $itinerary, 'delete');
+        $itinerary->delete();
+        return response()->noContent();
+    }
 
-        $newResourceModel = Resource::getModelForResourceTable($newResourceTable);
-        $newResource = $newResourceModel::find($newResourceId);
-        if (!$newResource) {
-            throw new Exception('Invalid new resource: ' . $newResourceTable . '_' . $newResourceId);
-        }
-        if ($oldResourceTable && $oldResourceId) {
-            $oldResourceModel = Resource::getModelForResourceTable($oldResourceTable);
-            $oldResource = $newResourceModel::find($oldResourceId);
-            if (!$oldResource) {
-                throw new Exception('Invalid old resource: ' . $oldResourceTable . '_' . $oldResourceId);
-            }
-        }
-
-        foreach ($itinerary->days as &$day) {
-            if ($day->day_num === $dayNum) {
-                // If the old resource isn't found in the day, throw an error.
-                foreach ($day->periods as &$period) {
-                    foreach ($period->activities as &$activity) {
-                        if (isset($activity->resource)) {
-                            if ($oldResource && $activity->resource->table === $oldResource->table && $activity->resource->id === $oldResource->id) {
-                                // Old resource found. We'll replace it with the new one.
-                                $itinerary->addActivity();
-                                $activity = new Activity([
-                                    'resource' => $newResource,
-                                    'activity_type_id' => ActivityType::where('name', $activityType)->pluck('id')->first(),
-                                    'start_time' => $startTime,
-                                    'end_time' => $endTime,
-                                ]);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    /**
+     * Save an itinerary you can edit (you hold its token) to your account, so it follows you across devices.
+     */
+    public function claimItinerary(Request $request, string $id)
+    {
+        $itinerary = Itinerary::findOrFail($id);
+        $user = $request->user('sanctum');
+        Gate::forUser($user)->authorize('claim', [$itinerary, $request->header(ItineraryPolicy::TOKEN_HEADER)]);
+        $itinerary->users()->syncWithoutDetaching([$user->id]);
+        return $this->present($request, $itinerary->id);
     }
 
     public function getDay(Request $request, string $dayId)
     {
-        return Day::with(['periods.activities'])->findOrFail($dayId);
+        return Day::with(['periods' => fn($q) => $q->orderBy('type'), 'periods.activities' => fn($q) => $q->orderBy('start_time')])
+            ->findOrFail($dayId);
+    }
+
+    /**
+     * Edit the day's note (shown above its schedule).
+     */
+    public function updateDay(Request $request, string $dayId)
+    {
+        $day = Day::findOrFail($dayId);
+        $this->authorizeEdit($request, $day->itinerary);
+        $data = $request->validate(['preamble' => 'nullable|string|max:2000']);
+        $day->setPreamble($data['preamble'] ?? null);
+        $day->save();
+        return $this->getDay($request, $day->id);
+    }
+
+    /**
+     * Clear everything off the day, leaving a free day.
+     */
+    public function deleteDay(Request $request, string $dayId)
+    {
+        $day = Day::with('periods.activities')->findOrFail($dayId);
+        $this->authorizeEdit($request, $day->itinerary);
+        foreach ($day->periods as $period) {
+            $period->activities()->delete();
+        }
+        $day->stats = null;
+        $day->save();
+        return $this->getDay($request, $day->id);
+    }
+
+    /**
+     * Throw away the day's plan and build a new one in the same area.
+     */
+    public function regenerateDay(Request $request, string $dayId)
+    {
+        $day = Day::findOrFail($dayId);
+        $itinerary = $day->itinerary;
+        $this->authorizeEdit($request, $itinerary);
+        (new ItineraryService())->regenerateDay($itinerary, $day);
+        return $this->getDay($request, $day->id);
     }
 
     public function getActivity(Request $request, string $activityId)
@@ -150,69 +167,127 @@ class ItineraryController extends Controller
         return Activity::findOrFail($activityId);
     }
 
-    /*
-     * The routes below were registered without controller methods, so every call was a 500. They stay explicit
-     * 501s until itineraries have an owner to authorize against (user_itineraries exists, but nothing checks it
-     * yet); unauthenticated deletes/edits keyed only by UUID shouldn't ship.
+    /**
+     * Add to a day (POST /day/{id}/activity) or a specific period (POST /period/{id}/activity): either a resource
+     * (resource_table + resource_id) or a custom item (name, description). The period is chosen from start_time.
      */
-    public function updateDay(Request $request, string $dayId)
+    public function createActivity(Request $request, ?string $dayId = null)
     {
-        return $this->notImplemented();
+        if ($request->route('periodId')) {
+            $period = Period::findOrFail($request->route('periodId'));
+            $day = Day::findOrFail($period->day_id);
+        } else {
+            $day = Day::findOrFail($dayId);
+            $period = null;
+        }
+        $this->authorizeEdit($request, $day->itinerary);
+        $data = $this->validateActivity($request, true);
+
+        $start = Itinerary::normalizeTime($data['start_time'] ?? null)
+            ?? Period::getStartTimeForActivities($period?->type ?? Period::MORNING);
+        $period = $period ?? $day->periods()->where('type', (string) Period::forTime($start))->firstOrFail();
+
+        $activity = new Activity(['period_id' => $period->id, 'start_time' => $start]);
+        $this->fillActivity($activity, $data, $day);
+        $activity->save();
+        $this->recalculateDay($day);
+
+        return response()->json($activity->fresh(), 201);
     }
 
-    public function deleteDay(Request $request, string $dayId)
-    {
-        return $this->notImplemented();
-    }
-
+    /**
+     * Change an activity's times or text, or swap it for another resource.
+     */
     public function updateActivity(Request $request, string $activityId)
     {
-        return $this->notImplemented();
+        $activity = Activity::findOrFail($activityId);
+        $day = Day::findOrFail($activity->period->day_id);
+        $this->authorizeEdit($request, $day->itinerary);
+        $data = $this->validateActivity($request, false);
+
+        if (array_key_exists('start_time', $data)) {
+            $activity->start_time = Itinerary::normalizeTime($data['start_time']);
+            $newPeriod = $day->periods()->where('type', (string) Period::forTime($activity->start_time))->first();
+            $activity->period_id = $newPeriod?->id ?? $activity->period_id;
+        }
+        $this->fillActivity($activity, $data, $day);
+        $activity->save();
+        $this->recalculateDay($day);
+
+        return $activity->fresh();
     }
 
     public function deleteActivity(Request $request, string $activityId)
     {
-        return $this->notImplemented();
+        $activity = Activity::findOrFail($activityId);
+        $day = Day::findOrFail($activity->period->day_id);
+        $this->authorizeEdit($request, $day->itinerary);
+        $activity->delete();
+        $this->recalculateDay($day);
+        return response()->noContent();
     }
 
-    public function deleteItinerary(Request $request, string $id)
+    private function validateActivity(Request $request, bool $creating): array
     {
-        return $this->notImplemented();
+        return $request->validate([
+            'resource_table' => ['nullable', Rule::in(array_keys(self::ACTIVITY_TYPE_FOR_TABLE)), 'required_with:resource_id'],
+            'resource_id' => 'nullable|integer|required_with:resource_table',
+            'name' => ($creating ? 'required_without:resource_table|' : '') . 'nullable|string|max:255',
+            'description' => 'nullable|string|max:2000',
+            'start_time' => 'nullable|date_format:H:i,H:i:s',
+            'end_time' => 'nullable|date_format:H:i,H:i:s',
+        ]);
     }
 
-    private function notImplemented()
+    private function fillActivity(Activity $activity, array $data, Day $day): void
     {
-        return response()->json(['errors' => 'Not implemented yet'], 501);
+        if (!empty($data['resource_table'])) {
+            $model = Activity::RESOURCE_CLASSES[$data['resource_table']];
+            $resource = $model::findOrFail($data['resource_id']);
+            $activity->resource = $resource;
+            $activity->activity_type_id = ActivityType::idFor(self::ACTIVITY_TYPE_FOR_TABLE[$data['resource_table']]);
+            $activity->name = null;
+            if (!array_key_exists('end_time', $data)) {
+                $activity->end_time = $resource->calculateEndTime($day->date, $activity->start_time);
+            }
+        } elseif (!$activity->exists) {
+            $activity->activity_type_id = ActivityType::idFor('unknown');
+        }
+        foreach (['name', 'description'] as $field) {
+            if (array_key_exists($field, $data) && $activity->isTask()) {
+                $activity->{$field} = $data[$field];
+            }
+        }
+        if (array_key_exists('end_time', $data)) {
+            $activity->end_time = Itinerary::normalizeTime($data['end_time']);
+        }
+        $activity->end_time = $activity->end_time ?? $activity->start_time;
+        if ($activity->end_time < $activity->start_time) {
+            abort(response()->json(['errors' => ['end_time' => ['The end time must be after the start time.']]], 422));
+        }
+    }
+
+    private function recalculateDay(Day $day): void
+    {
+        $day->load('periods.activities');
+        $day->calculateASS(true);
+        $day->save();
+    }
+
+    private function authorizeEdit(Request $request, Itinerary $itinerary, string $ability = 'update'): void
+    {
+        Gate::forUser($request->user('sanctum'))
+            ->authorize($ability, [$itinerary, $request->header(ItineraryPolicy::TOKEN_HEADER)]);
     }
 
     /**
-     * @return Itinerary
+     * The itinerary as the app renders it, plus whether the caller may edit it.
      */
-    private function getItinerary()
+    private function present(Request $request, string $id): array
     {
-        return $this->itineraryService->getItinerary();
-    }
-
-    private function saveItinerary()
-    {
-        $this->itineraryService->saveItinerary();
-    }
-
-    public function createActivity(Request $request, string $dayId = null, string $periodId = null)
-    {
-        if ($dayId) {
-            /** @var Day $day */
-            $day = Day::find($dayId);
-            if (!$day) {
-                throw new Exception('Invalid day id: ' . $dayId);
-            }
-        } elseif ($periodId) {
-            /** @var Period $period */
-            $period = Period::find($periodId);
-            if (!$period) {
-                throw new Exception('Invalid period id: ' . $periodId);
-            }
-        }
-        $period->addActivity();
+        $itinerary = Itinerary::withSchedule()->findOrFail($id);
+        $canEdit = Gate::forUser($request->user('sanctum'))
+            ->allows('update', [$itinerary, $request->header(ItineraryPolicy::TOKEN_HEADER)]);
+        return $itinerary->toArray() + ['can_edit' => $canEdit];
     }
 }

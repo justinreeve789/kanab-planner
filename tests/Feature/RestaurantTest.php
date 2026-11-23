@@ -49,8 +49,8 @@ class RestaurantTest extends TestCase
 
     public function test_without_busyness_data_meals_take_the_default_time(): void
     {
-        $this->assertSame(Restaurant::DEFAULT_AVERAGE_HOURS, $this->restaurant->getAverageHours());
-        $this->assertSame(Restaurant::DEFAULT_AVERAGE_HOURS, $this->restaurant->getAverageHours(['date' => '2027-06-07', 'start_time' => '12:00:00']));
+        $this->assertEquals(Restaurant::DEFAULT_AVERAGE_HOURS, $this->restaurant->getAverageHours());
+        $this->assertEquals(Restaurant::DEFAULT_AVERAGE_HOURS, $this->restaurant->getAverageHours(['date' => '2027-06-07', 'start_time' => '12:00:00']));
         $this->assertSame('14:00:00', $this->restaurant->calculateEndTime('2027-06-07', '12:00:00'));
     }
 

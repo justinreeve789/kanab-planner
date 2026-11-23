@@ -44,7 +44,7 @@ class LocationService
             return null;
         }
 
-        $process = new Process(["python3", 'populartimes.js', $location->source_id]);
+        $process = new Process(['python3', base_path('populartimes.py'), $location->source_id]);
         $process->run();
         if (!$process->isSuccessful()) {
             Log::error(__CLASS__ . ': ' . $process->getErrorOutput());
@@ -70,7 +70,7 @@ class LocationService
     }
 
     /**
-     * Parse populartimes.js output ("Day: Monday, Popular Times: [0, 0, 5, ...]") into
+     * Parse populartimes.py output ("Day: Monday, Popular Times: [0, 0, 5, ...]") into
      * [day_of_week (0 = Sunday) => [day name, [hour => percentage]]].
      *
      * (Sunday used to be dropped: array_search() returns 0 for it, which the old truthiness check rejected. The real

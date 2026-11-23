@@ -39,7 +39,6 @@ class Itinerary extends CachedModel
     const DEFAULT_DURATION_DAYS = 5;
     const DEFAULT_PRIORITIES = ['trails', 'events', 'locations', 'restaurants'];
     const DEFAULT_SEASON = 'summer';
-    const DEFAULT_TRAIL_PRIORITIES = [];
     const FALL = 'fall';
     const SPRING = 'spring';
     const SUMMER = 'summer';
@@ -48,6 +47,7 @@ class Itinerary extends CachedModel
     protected $attributes = [
         'arrival_date_time' => '',
     ];
+    protected $hidden = ['edit_token_hash'];
     protected $casts = [
         'activity_priorities' => 'json',
         'area_priorities' => 'json',
@@ -66,14 +66,12 @@ class Itinerary extends CachedModel
         'trip_preference' => 'json',
     ];
 
-    public $activities;
     public $base_area;
+
+    /** Resources already scheduled while generating, so nothing is used twice. Not persisted. */
     public $event_ids;
-    public $event_priorities;
     public $location_ids;
-    public $location_priorities;
     public $restaurant_ids;
-    public $restaurant_priorities;
     public $trail_ids;
 
     public function __construct(array $attributes = [])
@@ -81,7 +79,6 @@ class Itinerary extends CachedModel
         parent::__construct($attributes);
 
         $this->id = Str::uuid();
-        $this->activities = [];
         $this->adventurousness = $this->adventurousness ?? self::DEFAULT_ADVENTUROUSNESS;
         $this->average_hiking_speed = $this->average_hiking_speed ?? self::DEFAULT_AVERAGE_HIKING_SPEED;
         $this->base_area_id = $this->base_area_id ?? self::DEFAULT_BASE_AREA_ID;
@@ -96,16 +93,6 @@ class Itinerary extends CachedModel
         $this->total_possible_trail_days = 0;
         $this->total_travel_distance = 0;
         $this->trail_ids = [];
-    }
-
-    /**
-     * We're using this as a singleton, so we can reference it from both ItineraryController and ItineraryService.
-     */
-    public static function getInstance() {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
     }
 
     public function getArrivalDateTimeAttribute()
@@ -127,44 +114,68 @@ class Itinerary extends CachedModel
         return $this->hasMany(Day::class, 'itinerary_id', 'id');
     }
 
-    public function user()
+    /**
+     * Days, periods and activities in display order.
+     */
+    public function scopeWithSchedule($query)
     {
-        return $this->hasOneThrough(User::class, UserItinerary::class, 'user_id', 'id', 'id', 'itinerary_id');
+        return $query->with([
+            'days' => fn($q) => $q->orderBy('day_num'),
+            'days.periods' => fn($q) => $q->orderBy('type'),
+            'days.periods.activities' => fn($q) => $q->orderBy('start_time'),
+        ]);
     }
 
-//    public function save(array $options = [])
-//    {
-//        return \DB::transaction(function () use ($options) {
-//            $this->load('days');
-//            parent::save($options);
-//            if ($this->relationLoaded('days')) {
-//                $this->days()->saveMany($this->getRelation('days'));
-//            }
-//        });
-//    }
-//
-    public function saveAll()
+    public function users()
     {
-        $this->days->each()->saveAll();
+        return $this->belongsToMany(User::class, 'user_itineraries', 'itinerary_id', 'user_id')->withTimestamps();
     }
 
-    public function addTask($activityType, $name, $description, $startTime, $endTime, int $dayNum, $period)
+    /**
+     * Issue a new edit token. Only its hash is stored, so the plain token can be returned exactly once.
+     */
+    public function issueEditToken(): string
     {
-        $this->addActivity(null, $activityType, $startTime, $endTime, $dayNum, $period, $name, $description);
+        $token = Str::random(40);
+        $this->edit_token_hash = hash('sha256', $token);
+        return $token;
     }
 
-    public function addActivity($resource, $activityType, $startTime, $endTime, int $dayNum, $period, $name = null, $description = null)
+    public function hasEditToken(?string $token): bool
     {
+        return $token !== null && $token !== '' && $this->edit_token_hash !== null
+            && hash_equals($this->edit_token_hash, hash('sha256', $token));
+    }
+
+    public function isOwnedBy(?User $user): bool
+    {
+        return $user !== null && $this->users()->whereKey($user->id)->exists();
+    }
+
+    public function addTask($activityType, $name, $description, $startTime, $endTime, int $dayNum, $period = null): Activity
+    {
+        return $this->addActivity(null, $activityType, $startTime, $endTime, $dayNum, $period, $name, $description);
+    }
+
+    /**
+     * Schedule something on day $dayNum. The period is derived from the start time (see Period::forTime()) unless
+     * $period is given, so morning/afternoon/evening always agree with the clock.
+     */
+    public function addActivity($resource, $activityType, $startTime, $endTime, int $dayNum, $period = null, $name = null, $description = null, $phrase = null): Activity
+    {
+        $startTime = self::normalizeTime($startTime);
         $activity = new Activity([
             // Callers pass a mix of "H:i", "H:i:s" and "Y-m-d H:i:s"; the columns are TIME, so store H:i:s.
-            'start_time' => self::normalizeTime($startTime),
+            'start_time' => $startTime,
             'end_time' => self::normalizeTime($endTime),
             'resource' => $resource,
-            'activity_type_id' => ActivityType::where('name', $activityType)->pluck('id')->first(),
+            'activity_type_id' => ActivityType::idFor($activityType),
             'name' => $name,
             'description' => $description,
+            'phrase' => $phrase,
         ]);
-        $this->days[$dayNum]->periods[$period]->addActivity($activity);
+        $period = $period ?? Period::forTime($startTime);
+        $this->getDay($dayNum)->getPeriod($period)->addActivity($activity);
 
         if ($resource) {
             if ($resource->isEvent()) {
@@ -177,30 +188,7 @@ class Itinerary extends CachedModel
                 $this->trail_ids[] = $resource->id;
             }
         }
-    }
-
-    public function removeActivity($resource, $activityType, int $dayNum, $period = null)
-    {
-        foreach ($this->days as &$day) {
-            if ($day->day_num === $dayNum) {
-                foreach ($day->periods as &$period) {
-                    foreach ($period->activities as &$activity) {
-                        if (isset($activity->resource)) {
-                            if ($oldResource && $activity->resource->table === $oldResource->table && $activity->resource->id === $oldResource->id) {
-                                // Old resource found. We'll replace it with the new one.
-                                $itinerary->addActivity();
-                                $activity = new Activity([
-                                    'resource' => $newResource,
-                                    'activity_type_id' => ActivityType::where('name', $activityType)->pluck('id')->first(),
-                                    'start_time' => $startTime,
-                                    'end_time' => $endTime,
-                                ]);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        return $activity;
     }
 
     public static function normalizeTime($time): ?string
@@ -210,20 +198,6 @@ class Itinerary extends CachedModel
         }
         $timestamp = strtotime((string) $time);
         return $timestamp === false ? (string) $time : date('H:i:s', $timestamp);
-    }
-
-    public function addDay(Day $day, $index = null): array
-    {
-        if ($index !== null) {
-            $this->days = array_merge(
-                array_slice($this->days, 0, $index),
-                [$day],
-                array_slice($this->days, $index)
-            );
-        } else {
-            $this->days[] = $day;
-        }
-        return $this->days;
     }
 
     public function calculateMaximumTrailDistance(): float
@@ -244,29 +218,6 @@ class Itinerary extends CachedModel
             return 8 * (($this->adventurousness * 0.75) + ($this->strenuousness * 1.25)) / 5;
         }
         return 0.1;
-    }
-
-    public function calculateMinimumTrailDistancePerDay(): float
-    {
-        // A high adventurousness and strenuousness should result in generally longer trails. Note that this isn't the
-        // same as the minimum trail distance per day.
-        if ($this->adventurousness >= 0.6 && $this->strenuousness >= 0.6) {
-            return 8 * (($this->adventurousness * 0.75) + ($this->strenuousness * 1.25)) / 2;
-        }
-        return 0.1;
-    }
-
-    public function deleteDay($index): array
-    {
-        if (isset($this->days[$index])) {
-            unset($this->days[$index]);
-        }
-        return $this->days;
-    }
-
-    public function getActivities(): ?array
-    {
-        return $this->activities;
     }
 
     /**
@@ -304,17 +255,22 @@ class Itinerary extends CachedModel
         return $this->base_area;
     }
 
-    public function getDay(int $index = 0): Day
+    public function getDay(int $dayNum = 0): Day
     {
-        return $this->days[$index];
+        return $this->getDays()[$dayNum];
     }
 
     /**
+     * Days keyed by day_num.
+     *
      * @return Day[]
      */
     public function getDays(): array
     {
-        return $this->days;
+        if (!$this->relationLoaded('days')) {
+            return [];
+        }
+        return $this->days->keyBy('day_num')->sortKeys()->all();
     }
 
     public function getArrivalDateTime()
@@ -339,60 +295,6 @@ class Itinerary extends CachedModel
     public function getTotalTravelDistance(): ?int
     {
         return $this->total_travel_distance;
-    }
-
-    public function hasMeal($date, $period): bool
-    {
-        switch ($period) {
-            case Period::MORNING:
-                $startTime = '07:00:00';
-                $endTime = '11:29:59';
-                break;
-            case Period::AFTERNOON:
-                $startTime = '11:30:00';
-                $endTime = '15:59:59';
-                break;
-            case Period::EVENING:
-                $startTime = '16:00:00';
-                $endTime = '23:59:59';
-                break;
-            default:
-                return false;
-        }
-
-        foreach ($this->getActivities() as $activity) {
-        }
-
-        return false;
-    }
-
-    public function hasBreakfast(): bool
-    {
-        return $this->hasMeal(Period::MORNING);
-    }
-
-    public function hasDinner(): bool
-    {
-        return $this->hasMeal(Period::EVENING);
-    }
-
-    public function hasLunch(): bool
-    {
-        return $this->hasMeal(Period::AFTERNOON);
-    }
-
-    public function resourceExists($resource): bool
-    {
-        if ($this->getActivities()) {
-            foreach ($this->getActivities() as $activity) {
-                if (get_class($activity->data) === get_class($resource)) {
-                    if ($activity->id === $resource->id) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     public function eventExists($event): bool
@@ -434,9 +336,14 @@ class Itinerary extends CachedModel
         $this->base_area = $area;
     }
 
+    /**
+     * Held as the days relation (not an attribute), so save() never tries to write a "days" column and toArray()
+     * still includes them.
+     */
     public function setDays(array $days)
     {
-        $this->days = $days;
+        ksort($days);
+        $this->setRelation('days', new \Illuminate\Database\Eloquent\Collection($days));
     }
 
     public function setTotalPossibleTrailDays(int $totalPossibleTrailDays)

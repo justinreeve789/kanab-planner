@@ -1,5 +1,10 @@
 <?php
 /**
+ * Builds itineraries.
+ *
+ * generate() runs the whole pipeline: read preferences → pick an area for each day → order the days → fill each day
+ * on a Timeline (so nothing overlaps and drive time is respected) → save. regenerateDay() refills one saved day.
+ *
  * If there's a low adventurousness (<= 0.5), stick with the trails that everyone comes to do, such as Angels Landing,
  * the Narrows, Scout Overlook, etc.
  */
@@ -10,49 +15,76 @@ use App\Models\Accommodation;
 use App\Models\ActivityType;
 use App\Models\Area;
 use App\Models\AreaDistance;
-use App\Models\AreaWeather;
-use App\Models\Builder\CustomQueryBuilder;
 use App\Models\Event;
+use App\Models\EventDate;
 use App\Models\Itinerary\Activity;
 use App\Models\Itinerary\Day;
 use App\Models\Itinerary\Itinerary;
 use App\Models\Itinerary\Period;
 use App\Models\Itinerary\Season;
+use App\Models\Itinerary\Timeline;
 use App\Models\Location;
 use App\Models\Restaurant;
 use App\Models\Trail;
-use App\Models\Image;
-use App\Repositories\ItineraryRepository;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class ItineraryService
 {
-    const DEFAULT_DRIVING_TIME_BETWEEN_AREAS = 1800;
+    public const MINIMUM_TRAIL_DAYS_RATIO_TO_TOTAL_POSSIBLE = 0.8;
 
-    public $budgetService;
-    public $imageService;
+    /** Used when there's no area_distances row for a pair of areas. */
+    public const DEFAULT_DRIVING_MPH = 45;
+
+    public const DAY_START = '06:00';
+    public const DAY_END = '22:00';
+    public const BREAKFAST_AT_HOME = ['07:00', 30];
+    public const LATEST_RETURN_HOME = '21:30';
+
+    /** [earliest start, latest start] for each kind of thing, before drive time is applied. */
+    public const TRAIL_WINDOWS = [
+        Period::MORNING => ['08:00', '10:30'],
+        Period::AFTERNOON => ['13:00', '15:00'],
+        Period::EVENING => ['16:30', '19:00'],
+    ];
+    public const LUNCH_WINDOW = ['11:30', '13:30'];
+    public const DINNER_WINDOW = ['17:00', '20:00'];
+    public const EVENT_WINDOWS = [
+        Period::MORNING => ['06:00', '11:30'],
+        Period::AFTERNOON => ['11:30', '16:00'],
+        Period::EVENING => ['16:00', '22:00'],
+    ];
+
+    /** Minutes for meals cooked at home, and the base hours for restaurant meals (scaled by busyness). */
+    public const HOME_MEAL_MINUTES = ['breakfast' => 30, 'lunch' => 45, 'dinner' => 60];
+    public const RESTAURANT_MEAL_HOURS = ['breakfast' => 0.75, 'lunch' => 1.0, 'dinner' => 1.5];
+
+    public const EVENING_TRAIL_MAX_HOURS = 2.0;
+    public const MAX_EVENT_MINUTES = 180;
+    public const SIGHTSEEING_MINUTES = 90;
+
+    /** Preferred activity types that mean "schedule trails" / "schedule events". */
+    public const TRAIL_ACTIVITY_TYPES = ['hiking', 'bicycling', 'offroading', 'rock-climbing'];
+    public const EVENT_ACTIVITY_TYPES = [
+        'concert', 'educational-fun', 'festivals-and-celebrations', 'museum', 'night-life', 'rodeo', 'stargazing',
+        'tour', 'games-and-entertainment', 'endurance-race',
+    ];
+
     public $locationService;
     public $phraseService;
-    public $restaurantService;
     public $trailService;
-    private $itinerary;
-    private $repository;
-    private $seasons;
+    private ?Itinerary $itinerary;
 
-    public function __construct($itinerary = null)
+    /** @var array<int, true> day_nums chosen as trail days for this trip. */
+    private array $trailDays = [];
+
+    public function __construct(?Itinerary $itinerary = null)
     {
-        $this->setItinerary(new Itinerary());
-        $this->budgetService = new BudgetService();
-        $this->imageService = new ImageService();
+        $this->setItinerary($itinerary ?? new Itinerary());
         $this->locationService = new LocationService();
         $this->phraseService = new PhraseService();
-        $this->restaurantService = new RestaurantService();
         $this->trailService = new TrailService();
-//        $this->seasons = Season::all();
     }
 
     public function getItinerary(): ?Itinerary
@@ -66,78 +98,107 @@ class ItineraryService
     }
 
     /**
-     * TODO: Fix the model definitions so we're not doing any of this offsetUnset() and setRelation() stuff.
+     * Build and save a complete itinerary from a request's preferences.
      */
-    public function saveItinerary()
+    public function generate(Request $request): Itinerary
+    {
+        ActivityType::flushIdCache();
+        $this->setupItinerary($request);
+        $itinerary = $this->getItinerary();
+
+        $this->assignDaysForAreas($itinerary->getUseFirstDay(), $itinerary->getUseLastDay());
+        $this->shuffleDays();
+        $this->placePriorityEventDays();
+
+        $itinerary->setTotalPossibleTrailDays($this->calculateTotalPossibleTrailDays());
+        $itinerary->minimum_trail_days = max(1, (int) floor(self::MINIMUM_TRAIL_DAYS_RATIO_TO_TOTAL_POSSIBLE * $itinerary->getTotalPossibleTrailDays()));
+        $this->chooseTrailDays();
+
+        foreach ($itinerary->getDays() as $day) {
+            $this->fillDay($day);
+        }
+        $itinerary->setTotalTravelDistance($this->estimateTotalTravelDistance());
+
+        $this->saveItinerary();
+        return $itinerary;
+    }
+
+    /**
+     * Throw away a saved day's activities and fill it again, avoiding everything scheduled on the other days.
+     */
+    public function regenerateDay(Itinerary $itinerary, Day $target): Day
+    {
+        ActivityType::flushIdCache();
+        $itinerary->load(['days.periods.activities']);
+        $this->setItinerary($itinerary);
+        $days = $itinerary->getDays();
+        $itinerary->setDays($days);
+
+        foreach ($days as $day) {
+            if ($day->id === $target->id) {
+                continue;
+            }
+            foreach ($day->getActivities() as $activity) {
+                $this->rememberResource($activity->resource_table, $activity->resource_id);
+            }
+        }
+
+        $day = $days[$target->day_num];
+        DB::transaction(function() use ($day) {
+            foreach ($day->getPeriods() as $period) {
+                $period->activities()->delete();
+                $period->setRelation('activities', new \Illuminate\Database\Eloquent\Collection());
+            }
+            $day->stats = null;
+            $day->setPreamble(null);
+
+            // Same odds of a hike as the rest of the trip.
+            $fullDays = max(1, $this->getItinerary()->getDurationDays() - 2);
+            $odds = $this->calculateTotalPossibleTrailDays() / $fullDays;
+            $this->trailDays = ($this->wantsTrails() && mt_rand() / mt_getrandmax() < $odds) ? [$day->day_num => true] : [];
+            $this->fillDay($day);
+            $this->saveDay($day);
+        });
+
+        return $day->fresh(['periods.activities']);
+    }
+
+    /**
+     * Persist the itinerary, its days, periods and activities.
+     */
+    public function saveItinerary(): void
     {
         DB::transaction(function() {
-            $itinerary = clone $this->getItinerary();
-            $days = $itinerary->getDays();
-            $itinerary->offsetUnset('days');
-//            $itinerary->setRelation('days', collect($days));
+            $itinerary = $this->getItinerary();
             $itinerary->save();
-            $itinerary->days = $days;
-
-            foreach ($days as $day) {
-                $day = clone $day;
+            foreach ($itinerary->getDays() as $day) {
                 $day->itinerary_id = $itinerary->id;
-                $day->area_id = $day->area->id;
-                $area = $day->area;
-                $day->offsetUnset('area');
-                $day->offsetUnset('formatted_abbr_month_day');
-                $day->offsetUnset('formatted_date');
-                $day->offsetUnset('formatted_day_of_week');
-                $day->offsetUnset('formatted_month_day');
-                $day->offsetUnset('formatted_year');
-                $day->setRelation('area', $area);
-                $day->save();
-
-                foreach ($day->periods as $period) {
-                    $period->day_id = $day->id;
-                    $period->type = (string) $period->type;
-                    $period->save();
-                    $period->type = (int) $period->type;
-                    $activities = clone $period->activities;
-
-                    foreach ($activities as $activity) {
-                        $activity->period_id = $period->id;
-                        $resource = $activity->resource;
-                        $activity->offsetUnset('resource');
-                        $activity->setRelation('resource', $resource);
-                        $activity->resource_table = isset($resource) ? $resource->getTable() : null;
-                        $activity->resource_id = isset($resource) ? $resource->id : null;
-                        $activityType = $activity->activity_type;
-                        $activity->offsetUnset('activity_type');
-                        $activity->activity_type_id = $activity->activity_type_id ?? 0;
-                        $activity->save();
-                        $activity->activity_type = $activityType;
-                    }
-                }
+                $this->saveDay($day);
             }
         });
     }
 
-    public function getRepository()
+    private function saveDay(Day $day): void
     {
-        if (!isset($this->repository)) {
-            $this->repository = new ItineraryRepository();
+        $day->save();
+        foreach ($day->getPeriods() as $period) {
+            $period->day_id = $day->id;
+            $period->save();
+            foreach ($period->getActivities() as $activity) {
+                $activity->period_id = $period->id;
+                $activity->activity_type_id = $activity->activity_type_id ?? ActivityType::idFor('unknown');
+                $activity->save();
+            }
         }
-        return $this->repository;
     }
 
     public function getDeviations(): array
     {
-        $deviations = [];
-        if ($this->getItinerary()->getAdventurousness()) {
-            $deviations['adventurousness'] = $this->getItinerary()->getAdventurousness();
-        }
-        if ($this->getItinerary()->getSolitariness()) {
-            $deviations['solitariness'] = $this->getItinerary()->getSolitariness();
-        }
-        if ($this->getItinerary()->getStrenuousness()) {
-            $deviations['strenuousness'] = $this->getItinerary()->getStrenuousness();
-        }
-        return $deviations;
+        return [
+            'adventurousness' => $this->getItinerary()->getAdventurousness(),
+            'solitariness' => $this->getItinerary()->getSolitariness(),
+            'strenuousness' => $this->getItinerary()->getStrenuousness(),
+        ];
     }
 
     /**
@@ -173,133 +234,323 @@ class ItineraryService
     }
 
     /**
-     * Let's go hour by hour and figure out where activities fit. Breakfast ~8:00am, lunch ~12:00pm, dinner ~5:00pm.
-     * Make sure there's at least 3 hours between breakfast and lunch, and 4 hours between lunch and dinner.
-     *
-     * TODO: A combined less adventurous and more solitary setting will avoid taking them too far, such as St. George or Page.
-     * TODO: If lunch won't be possible, set a "bringSnacks" flag in the overlapping activity to true.
+     * Pick which full days get a hike: every day with a priority trail, then random days until
+     * total_possible_trail_days is reached. Nothing is picked if the user's activities exclude trails entirely.
      */
-    public function fillDay(Day $day, $pass = false): void
+    public function chooseTrailDays(): void
     {
-        // TODO: getEventPriorities()
+        $itinerary = $this->getItinerary();
+        $fullDays = array_filter($itinerary->getDays(), fn(Day $day) => !$this->isArrivalDay($day) && !$this->isDepartureDay($day));
+        $this->trailDays = [];
 
-//        $curTime = $day->startTime;
-        $date = $day->date;
-        $dayNum = $day->day_num;
-        $durationDays = $this->getItinerary()->getDurationDays();
-
-        // If this is the first day and they're arriving at a normal late time, let's not plan any activities. Just
-        // grocery shopping, maybe fast food.
-        if ($dayNum === 0 && !$this->getItinerary()->getUseFirstDay()) {
-//            $accommodation = Accommodation::with('images')->where('id', 1)->first();
-            $accommodation = Accommodation::where('id', 1)->first();
-            $accommodation->accommodation_name = $accommodation->name;
-            $this->getItinerary()->addActivity($accommodation, 'checking-in', Day::DEFAULT_ARRIVAL_TIME, '23:59:59', $dayNum, Period::EVENING);
-            $day->calculateASS(true);
-            return;
-        }
-
-        // If this is the last day and they're departing at a normal early time, let's not plan any activities. We'll
-        // also want to use the same accommodation they checked in with on their first day.
-        if ($dayNum === ($durationDays - 1) && !$this->getItinerary()->getUseLastDay()) {
-            $accommodation = Accommodation::where('id', 1)->first();
-            $accommodation->accommodation_name = $accommodation->name;
-            $this->getItinerary()->addActivity(
-                $accommodation,
-                'checking-out',
-                Day::DEFAULT_DEPARTURE_TIME,
-                '23:59:59',
-                $dayNum,
-                Period::MORNING);
-            $day->calculateASS(true);
-            return;
-        }
-
-        // Using the trail priorities for the day's area, determine when the user should best start the trail.
-        foreach ($this->getItinerary()->getTrailPriorities(true) as $trailId) {
-            $trail = Trail::where('id', $trailId)->whereNotNull('distance_miles')->first();
-            if ($trail) {
-                if ($trail->area_id == $day->area_id && !$this->getItinerary()->trailExists($trail)) {
-                    $trailPeriod = $this->trailService->getBestPeriodOfDayForTrail($trail);
-                    break;
-                }
+        $priorityAreas = Trail::whereIn('id', $itinerary->getTrailPriorities())->pluck('area_id')->all();
+        foreach ($fullDays as $day) {
+            if (in_array($day->area_id, $priorityAreas, true)) {
+                $this->trailDays[$day->day_num] = true;
             }
         }
 
-        // If we have a trail for today, and it's in the morning, and in Zion, they probably won't have time to stop
-        // to eat in the morning if they want to start on time. They should eat at home.
-        if (isset($trail) && isset($trailPeriod) && $trailPeriod === Period::MORNING && $trail->area_id == Area::ZION) {
-            $this->getItinerary()->addTask(
-                'cooking',
-                'Breakfast',
-                'Eat breakfast at home to make sure you can get to the trail at an early hour. Ideally you\'ll reach the trail by 8:00am to avoid larger crowds.',
-                '06:30',
-                '07:30',
-                $dayNum,
-                $trailPeriod
-            );
-            $this->getItinerary()->addActivity(
-                $trail,
-                'hiking',
-                '08:00',
-                $trail->calculateEndTime($day->date, '08:00'),
-                $day->day_num,
-                $trailPeriod
-            );
+        if (!$this->wantsTrails()) {
+            return;
         }
-
-        // Are there possible events for the day to fill in any gaps?
-        $this->addEventForMorning($day);
-        $this->addEventForAfternoon($day);
-        $this->addEventForEvening($day);
-        $this->addEventForNight($day);
-
-        // Determine whether to put a trail in the morning or the afternoon.
-        $period = $this->getPeriodForTrail($day);
-        if ($period === Period::MORNING) {
-            $this->addTrailForMorning($day);
-        } else if ($period === Period::AFTERNOON) {
-            $this->addTrailForAfternoon($day);
+        $remaining = array_keys(array_diff_key($fullDays, $this->trailDays));
+        shuffle($remaining);
+        while (count($this->trailDays) < $itinerary->getTotalPossibleTrailDays() && $remaining) {
+            $this->trailDays[array_pop($remaining)] = true;
         }
-
-        // Add a trail in the area for the evening.
-        $this->addTrailForEvening($day);
-
-        // Add meals for the day.
-        $this->addMeal($day, Period::MORNING);
-        $this->addMeal($day, Period::AFTERNOON);
-        $this->addMeal($day, Period::EVENING);
-
-        $this->addPreamble($day);
-
-        $day->calculateASS(true);
     }
 
     /**
-     * Do a second pass through the itinerary, and make sure everything makes sense.
+     * Fill a day on a timeline. Arrival and departure days get check-in/out and a meal; full days get, in order:
+     * breakfast, priority events and trails, other events, trails, priority places, lunch and dinner. Everything is
+     * placed in a free slot, after the drive from base and early enough to drive back.
      */
-    public function adjustDays()
+    public function fillDay(Day $day): void
     {
-        $baseArea = $this->getItinerary()->getBaseArea();
-        $days = $this->getItinerary()->getDays();
-        $durationDays = $this->getItinerary()->getDurationDays();
-        foreach ($days as $index => $day) {
-            $date = $day->date;
-            $dayNum = $day->day_num;
-            if ($dayNum === 0 || $dayNum === $durationDays - 1) {
-                continue;
-            }
+        if ($this->isArrivalDay($day)) {
+            $this->fillArrivalDay($day);
+        } elseif ($this->isDepartureDay($day)) {
+            $this->fillDepartureDay($day);
+        } else {
+            $this->fillFullDay($day);
+        }
+        $this->addPreamble($day);
+        $day->calculateASS(true);
+    }
 
-            // If someone is visiting another area and there's no events/locations/trails, change to the base area.
-            // TODO: People may be foodies and want to try restaurants in different areas. Accommodate this.
-            if ($day->area_id !== $baseArea->id && !$day->hasEvent() && !$day->hasLocation() && !$day->hasTrail()) {
-                unset($days[$index]);
-                $day = new Day(['date' => $date, 'area' => $baseArea, 'day_num' => $dayNum]);
-                $day = $this->fillDay($day, true);
-                $days[$index] = $day;
+    private function fillArrivalDay(Day $day): void
+    {
+        $day->drive_minutes = 0;
+        $accommodation = Accommodation::find(1);
+        $checkIn = $accommodation?->check_in ?? Day::DEFAULT_ARRIVAL_TIME;
+        $timeline = Timeline::fromDay($day, self::DAY_START, self::DAY_END);
+        if ($accommodation) {
+            $this->addTimed($day, $timeline, $accommodation, ActivityType::CHECKING_IN, $checkIn, Timeline::addMinutes($checkIn, 30));
+        }
+        if (!$this->addRestaurantMeal($day, $timeline, 'dinner', ['17:30', '19:30'], self::DAY_END)) {
+            $this->getItinerary()->addTask(ActivityType::COOKING, 'Dinner', $this->phraseService->getPhraseForArrivingLateFood(),
+                '18:00', '19:00', $day->day_num);
+        }
+    }
+
+    private function fillDepartureDay(Day $day): void
+    {
+        $day->drive_minutes = 0;
+        $accommodation = Accommodation::find(1);
+        $checkOut = $accommodation?->check_out ?? Day::DEFAULT_DEPARTURE_TIME;
+        $timeline = Timeline::fromDay($day, self::DAY_START, self::DAY_END);
+        $breakfastStart = Timeline::addMinutes($checkOut, -90);
+        $this->addHomeMeal($day, $timeline, 'breakfast', $breakfastStart);
+        if ($accommodation) {
+            $this->addTimed($day, $timeline, $accommodation, ActivityType::CHECKING_OUT, $checkOut, Timeline::addMinutes($checkOut, 15));
+        }
+    }
+
+    private function fillFullDay(Day $day): void
+    {
+        $itinerary = $this->getItinerary();
+        $drive = $this->drivingMinutes($itinerary->getBaseAreaId(), $day->area_id);
+        $day->drive_minutes = $drive;
+        $timeline = Timeline::fromDay($day, self::DAY_START, self::DAY_END);
+        $returnBy = Timeline::addMinutes(self::LATEST_RETURN_HOME, -$drive);
+
+        // A long priority trail in Zion starts at 08:00 to beat the crowds, so breakfast moves earlier.
+        $priorityTrail = $this->nextPriorityTrailFor($day);
+        $priorityPeriod = $priorityTrail ? $this->trailService->getBestPeriodOfDayForTrail($priorityTrail) : null;
+        $earlyZionStart = $priorityTrail && $priorityPeriod === Period::MORNING && $priorityTrail->area_id === Area::ZION;
+
+        $breakfastStart = $earlyZionStart
+            ? Timeline::floorToQuarter(Timeline::addMinutes('08:00', -$drive - self::HOME_MEAL_MINUTES['breakfast']))
+            : self::BREAKFAST_AT_HOME[0];
+        $arrival = $this->addBreakfast($day, $timeline, $breakfastStart, $drive, $earlyZionStart);
+
+        $this->addPriorityEvents($day, $timeline, $returnBy);
+
+        if ($priorityTrail) {
+            $earliest = $earlyZionStart ? '08:00' : $this->later(self::TRAIL_WINDOWS[$priorityPeriod][0], $arrival);
+            $this->placeTrail($day, $timeline, $priorityTrail, $earliest, self::TRAIL_WINDOWS[$priorityPeriod][1], $returnBy,
+                $earlyZionStart ? 'Ideally you\'ll reach the trail by 8:00am to avoid larger crowds.' : null);
+        }
+
+        if ($this->wantsEvents()) {
+            foreach (self::EVENT_WINDOWS as $window) {
+                $this->addEventInWindow($day, $timeline, $this->later($window[0], $arrival), $window[1], $returnBy);
             }
         }
-        $this->getItinerary()->setDays($days);
+
+        if (isset($this->trailDays[$day->day_num])) {
+            $this->addTrails($day, $timeline, $arrival, $returnBy);
+        }
+
+        $this->addPriorityLocation($day, $timeline, $arrival, $returnBy);
+        $this->addLunch($day, $timeline, $arrival, $returnBy);
+        $this->addDinner($day, $timeline, $drive, $returnBy);
+    }
+
+    /**
+     * Breakfast at home before leaving, or (adventurousness ≥ 0.6, coin flip) at a restaurant in the day's area.
+     * Returns the earliest time other activities can start in the day's area.
+     */
+    private function addBreakfast(Day $day, Timeline $timeline, string $homeStart, int $drive, bool $mustBeHome): string
+    {
+        $eatOut = !$mustBeHome && $this->getItinerary()->getAdventurousness() >= 0.6 && mt_rand(0, 1) === 1;
+        if ($eatOut) {
+            $arrival = Timeline::addMinutes(self::BREAKFAST_AT_HOME[0], $drive);
+            $meal = $this->addRestaurantMeal($day, $timeline, 'breakfast', [$arrival, Timeline::addMinutes($arrival, 60)], '10:30');
+            if ($meal) {
+                return $meal->end_time;
+            }
+        }
+        $meal = $this->addHomeMeal($day, $timeline, 'breakfast', $homeStart);
+        return Timeline::addMinutes($meal->end_time, $drive);
+    }
+
+    private function addLunch(Day $day, Timeline $timeline, string $arrival, string $returnBy): void
+    {
+        [$from, $to] = self::LUNCH_WINDOW;
+        $from = $this->later($from, $arrival);
+        if ($this->addRestaurantMeal($day, $timeline, 'lunch', [$from, $to], $returnBy)) {
+            return;
+        }
+        if ($this->isAtBase($day)) {
+            $start = $timeline->findSlot(self::HOME_MEAL_MINUTES['lunch'], $from, $to);
+            if ($start) {
+                $this->addHomeMeal($day, $timeline, 'lunch', $start);
+                return;
+            }
+        }
+        // Out on a trail through lunch, or nowhere to eat: bring it along.
+        $during = $this->activityAt($day, '12:00');
+        $this->getItinerary()->addTask(ActivityType::COOKING, 'Pack a lunch',
+            $during ? 'You\'ll be out at ' . $during->resource?->name . ' over lunch, so bring a packed lunch and plenty of water.'
+                : 'Bring a packed lunch and snacks for the day.',
+            '12:00', '12:00', $day->day_num);
+    }
+
+    /**
+     * Dinner after the day's last activity: at a restaurant in the area, or at home if there's time to drive back.
+     */
+    private function addDinner(Day $day, Timeline $timeline, int $drive, string $returnBy): void
+    {
+        [$from, $to] = self::DINNER_WINDOW;
+        $afterActivities = $timeline->lastEnd() ?? $from;
+        $from = $this->later($from, $afterActivities);
+
+        $eatOut = $this->isAtBase($day) || $this->getItinerary()->getAdventurousness() >= 0.3 || mt_rand(0, 1) === 1;
+        if ($eatOut && $this->addRestaurantMeal($day, $timeline, 'dinner', [$from, $to], $this->later($returnBy, '21:00'))) {
+            return;
+        }
+        $homeFrom = $this->later($from, Timeline::addMinutes($afterActivities, $drive));
+        $start = $timeline->findSlot(self::HOME_MEAL_MINUTES['dinner'], $homeFrom, '20:30');
+        if ($start) {
+            $this->addHomeMeal($day, $timeline, 'dinner', $start);
+            return;
+        }
+        if (!$eatOut) {
+            $this->addRestaurantMeal($day, $timeline, 'dinner', [$from, $to], $this->later($returnBy, '21:00'));
+        }
+    }
+
+    private function addHomeMeal(Day $day, Timeline $timeline, string $meal, string $start): Activity
+    {
+        $end = Timeline::addMinutes($start, self::HOME_MEAL_MINUTES[$meal]);
+        $phrase = match ($meal) {
+            'breakfast' => $this->phraseService->getPhraseForBreakfast(),
+            'lunch' => $this->phraseService->getPhraseForLunch(),
+            default => $this->phraseService->getPhraseForLightMeal(),
+        };
+        $timeline->reserve($start, $end);
+        return $this->getItinerary()->addTask(ActivityType::COOKING, ucfirst($meal), $phrase, $start, $end, $day->day_num);
+    }
+
+    /**
+     * An unused restaurant in the day's area that's open when the meal starts, priority restaurants first.
+     */
+    private function addRestaurantMeal(Day $day, Timeline $timeline, string $meal, array $window, string $latestEnd): ?Activity
+    {
+        [$from, $to] = $window;
+        $baseHours = self::RESTAURANT_MEAL_HOURS[$meal];
+        $minutes = (int) round($baseHours * 60);
+        $start = $timeline->findSlot($minutes, $from, $this->earlier($to, Timeline::addMinutes($latestEnd, -$minutes)));
+        if (!$start) {
+            return null;
+        }
+
+        $query = fn() => Restaurant::whereIsOpen($day->date . ' ' . $start)
+            ->whereNotIn('restaurants.id', $this->getItinerary()->restaurant_ids)
+            ->whereHas('location', fn($q) => $q->where('area_id', $day->area_id));
+        $restaurant = $query()->whereIn('restaurants.id', $this->getItinerary()->getRestaurantPriorities())->first()
+            ?? $query()->inRandomOrder()->first();
+        if (!$restaurant) {
+            return null;
+        }
+
+        $end = $restaurant->calculateEndTime($day->date, $start, ['base_hours' => $baseHours]);
+        if (!$timeline->isFree($start, $end)) {
+            $end = Timeline::addMinutes($start, $minutes);
+        }
+        return $this->addTimed($day, $timeline, $restaurant, ActivityType::DINING, $start, $end,
+            $this->phraseService->getPhraseForDining($restaurant));
+    }
+
+    /**
+     * Morning or afternoon (coin flip) first; a second hike only for adventurousness ≥ 0.7; a short evening hike
+     * when the day still has room.
+     */
+    private function addTrails(Day $day, Timeline $timeline, string $arrival, string $returnBy): void
+    {
+        $periods = mt_rand(0, 1) ? [Period::MORNING, Period::AFTERNOON] : [Period::AFTERNOON, Period::MORNING];
+        foreach ([...$periods, Period::EVENING] as $period) {
+            if ($day->hasTrail() && $this->getItinerary()->getAdventurousness() < 0.7) {
+                return;
+            }
+            $trail = $this->trailService->getRandomTrailForPeriod(
+                $day->area_id, $period, $this->getItinerary(), $this->getItinerary()->trail_ids
+            );
+            if ($trail) {
+                [$from, $to] = self::TRAIL_WINDOWS[$period];
+                $this->placeTrail($day, $timeline, $trail, $this->later($from, $arrival), $to, $returnBy);
+            }
+        }
+    }
+
+    private function placeTrail(Day $day, Timeline $timeline, Trail $trail, string $earliest, string $latestStart, string $returnBy, ?string $note = null): ?Activity
+    {
+        $minutes = (int) round(60 * (float) $trail->getAverageHours(['average_hiking_speed' => $this->getItinerary()->getAverageHikingSpeed()]));
+        $start = $timeline->findSlot($minutes, $earliest, $this->earlier($latestStart, Timeline::addMinutes($returnBy, -$minutes)));
+        if (!$start) {
+            return null;
+        }
+        $phrase = trim($this->phraseService->getPhraseForHiking($trail) . ' ' . ($note ?? ''));
+        return $this->addTimed($day, $timeline, $trail, ActivityType::HIKING, $start, Timeline::addMinutes($start, $minutes), $phrase);
+    }
+
+    /**
+     * An event in the day's area with an occurrence overlapping the window, at that occurrence's time (capped at
+     * three hours), if the slot is free.
+     */
+    private function addEventInWindow(Day $day, Timeline $timeline, string $from, string $to, string $returnBy, ?array $onlyIds = null): ?Activity
+    {
+        if ($from >= $to) {
+            return null;
+        }
+        $windowStart = $day->date . ' ' . $from;
+        $windowEnd = $day->date . ' ' . $to;
+        $query = Event::betweenDates($windowStart, $windowEnd)
+            ->whereNotIn('events.id', $this->getItinerary()->event_ids)
+            ->whereHas('location', fn($q) => $q->where('area_id', $day->area_id));
+        if ($onlyIds !== null) {
+            $query->whereIn('events.id', $onlyIds);
+        }
+
+        foreach ($query->inRandomOrder()->limit(5)->get() as $event) {
+            $occurrence = EventDate::where('event_id', $event->id)->overlapping($windowStart, $windowEnd)->orderBy('start_date')->first();
+            if (!$occurrence) {
+                continue;
+            }
+            $start = $this->later(date('H:i', strtotime($occurrence->start_date)), $from);
+            $occurrenceEnd = date('Y-m-d', strtotime($occurrence->effective_end_date)) > $day->date
+                ? '23:59' : date('H:i', strtotime($occurrence->effective_end_date));
+            $end = $this->earlier($this->earlier($occurrenceEnd, Timeline::addMinutes($start, self::MAX_EVENT_MINUTES)), $returnBy);
+            if ($end > $start && $timeline->isFree($start, $end)) {
+                return $this->addTimed($day, $timeline, $event, ActivityType::EVENT, $start, $end);
+            }
+        }
+        return null;
+    }
+
+    private function addPriorityEvents(Day $day, Timeline $timeline, string $returnBy): void
+    {
+        $ids = $this->getItinerary()->getEventPriorities();
+        if ($ids) {
+            $this->addEventInWindow($day, $timeline, '06:00', '23:59', $returnBy, $ids);
+        }
+    }
+
+    /**
+     * A priority location (museum, viewpoint, visitor center...) in the day's area, as 90 minutes of sightseeing.
+     */
+    private function addPriorityLocation(Day $day, Timeline $timeline, string $arrival, string $returnBy): void
+    {
+        $ids = array_diff($this->getItinerary()->getLocationPriorities(), $this->getItinerary()->location_ids);
+        if (!$ids) {
+            return;
+        }
+        $location = Location::whereIn('id', $ids)->where('area_id', $day->area_id)->first();
+        if (!$location) {
+            return;
+        }
+        $start = $timeline->findSlot(self::SIGHTSEEING_MINUTES, $this->later('09:00', $arrival),
+            $this->earlier('17:00', Timeline::addMinutes($returnBy, -self::SIGHTSEEING_MINUTES)));
+        if ($start) {
+            $this->addTimed($day, $timeline, $location, ActivityType::SIGHTSEEING, $start, Timeline::addMinutes($start, self::SIGHTSEEING_MINUTES));
+        }
+    }
+
+    private function addTimed(Day $day, Timeline $timeline, $resource, string $type, string $start, string $end, ?string $phrase = null): Activity
+    {
+        $timeline->reserve($start, $end);
+        return $this->getItinerary()->addActivity($resource, $type, $start, $end, $day->day_num, null, null, null, $phrase);
     }
 
     /**
@@ -307,633 +558,292 @@ class ItineraryService
      */
     public function addPreamble(Day $day)
     {
-        $baseArea = $this->getItinerary()->getBaseArea();
-        if ($day->area_id === $baseArea->id && !$day->hasEvent() && !$day->hasLocation() && !$day->hasTrail()) {
+        if ($this->isArrivalDay($day) || $this->isDepartureDay($day)) {
+            return;
+        }
+        if ($this->isAtBase($day) && !$day->hasEvent() && !$day->hasLocation() && !$day->hasTrail()) {
             $day->setPreamble($this->phraseService->getPhraseForRelaxing());
         }
     }
 
-    /**
-     * TODO: Look at weather forecasts to help determine if it'll be too hot to hike in the afternoon.
-     */
-    public function getPeriodForTrail(Day $day)
+    private function nextPriorityTrailFor(Day $day): ?Trail
     {
-        return rand(0, 1) ? Period::MORNING : Period::AFTERNOON;
-    }
-
-    /**
-     * Add a trail to a day, accounting for how existing activities and how long the activity would take.
-     */
-    public function addTrailToDay(Day $day, Trail $trail = null)
-    {
-    }
-
-    public function addTrailForMorning(Day $day)
-    {
-        if ($this->shouldAddTrail($day, Period::MORNING)) {
-            $this->addRandomTrailToPeriod($day, Period::MORNING);
-        }
-    }
-
-    public function addTrailForAfternoon(Day $day)
-    {
-        if ($this->shouldAddTrail($day, Period::AFTERNOON)) {
-            $this->addRandomTrailToPeriod($day, Period::AFTERNOON);
-        }
-    }
-
-    public function addTrailForEvening(Day $day)
-    {
-        if ($this->shouldAddTrail($day, Period::EVENING)) {
-            $this->addRandomTrailToPeriod($day, Period::EVENING);
-        }
-    }
-
-    private function addEventForPeriod(Day $day, int $period, $startTime, $endTime)
-    {
-        if ($this->getItinerary()->getAdventurousness() < 0.5) {
-            return;
-        }
-        $dayNum = $day->day_num;
-        if (empty($day->periods->get($period)->getActivities())) {
-            $event = Event::betweenDates($day->date . ' ' . $startTime, $day->date . ' ' . $endTime)
-                ->with('location')
-                ->whereHas('location', function($query) use ($day) {
-                    $query->where('area_id', $day->area_id);
-                })->inRandomOrder()
-                ->first();
-            if ($event) {
-                $this->getItinerary()->addActivity(
-                    $event,
-                    'event',
-                    date('H:i:s', strtotime($event->start_date)),
-                    date('H:i:s', strtotime($event->end_date)),
-                    $dayNum,
-                    $period
-                );
+        foreach ($this->getItinerary()->getTrailPriorities(true) as $trailId) {
+            if (in_array($trailId, $this->getItinerary()->trail_ids, true)) {
+                continue;
+            }
+            $trail = Trail::where('id', $trailId)->where('area_id', $day->area_id)->whereNotNull('distance_miles')->first();
+            if ($trail) {
+                return $trail;
             }
         }
+        return null;
     }
 
-    public function addEventForMorning(Day $day)
+    private function activityAt(Day $day, string $time): ?Activity
     {
-        $this->addEventForPeriod($day, Period::MORNING, '06:00:00', '11:00:00');
-    }
-
-    public function addEventForAfternoon(Day $day): void
-    {
-        if ($this->getItinerary()->getAdventurousness() < 0.5) {
-            return;
-        }
-        $this->addEventForPeriod($day, Period::AFTERNOON, '12:00:00', '16:00:00');
-    }
-
-    public function addEventForEvening(Day $day): void
-    {
-        if ($this->getItinerary()->getAdventurousness() < 0.5) {
-            return;
-        }
-        $this->addEventForPeriod($day, Period::EVENING, '16:15:00', '22:00:00');
-        return;
-        $dayNum = $day->day_num;
-        if (empty($day->periods[Period::EVENING]->getActivities())) {
-//            $event = Event::betweenDates($day->date . ' 17:00:00', $day->date . ' 22:00:00')
-//                ->with('location')
-//                ->whereHas('location', function($query) use ($day) {
-//                    $query->where('area_id', $day->area_id);
-//                })->sortByDeviation($this->getDeviations())
-//                ->limit(2)
-//                ->inRandomOrder()
-//                ->first();
-            $event = Event::betweenDates($day->date . ' 17:00:00', $day->date . ' 22:00:00')
-                ->with('location')
-                ->whereHas('location', function($query) use ($day) {
-                    $query->where('area_id', $day->area_id);
-                })->inRandomOrder()
-                ->first();
-            if ($event) {
-                $this->getItinerary()->addActivity(
-                    $event,
-                    'event',
-                    date('H:i:s', strtotime($event->start_date)),
-                    date('H:i:s', strtotime($event->end_date)),
-                    $dayNum,
-                    Period::EVENING
-                );
+        foreach ($day->getActivities() as $activity) {
+            if ($activity->start_time <= Itinerary::normalizeTime($time) && $activity->end_time > Itinerary::normalizeTime($time)) {
+                return $activity;
             }
         }
-    }
-
-    public function addEventForNight(Day $day): void
-    {
-        if ($this->getItinerary()->getAdventurousness() < 0.5) {
-            return;
-        }
-        $this->addEventForPeriod($day, Period::NIGHT, '22:00:00', '23:59:59');
-        return;
-//        $dayNum = $day->day_num;
-//        if (empty($day->periods[Period::EVENING]->getActivities())) {
-//            $event = Event::betweenDates($day->date . ' 22:00:00', $day->date . ' 23:59:59')
-//                ->with('location')
-//                ->whereHas('location', function($query) use ($day) {
-//                    $query->where('area_id', $day->area_id);
-//                })->inRandomOrder()
-//                ->first();
-//            if ($event) {
-//                $this->getItinerary()->addActivity(
-//                    $event, 'event', $event->start_date, $event->end_date, $dayNum, Period::EVENING);
-//            }
-//        }
-    }
-
-    // TODO: assessMeal? Split into morning/afternoon/evening functions?
-    public function addMeal(Day $day, int $period)
-    {
-        $date = $day->date;
-        $dayNum = $day->day_num;
-        $mealTime = Period::getTimesForMeals($period);
-        $startTime = $mealTime['startTime'];
-
-        // Add a restaurant in the area for the period.
-        if ($this->shouldAddDining($day, $period)) {
-            $restaurant = Restaurant::with(['location' => function($query) {
-//                $query->with('images');
-            }])->whereNotIn('restaurants.id', $this->getItinerary()->restaurant_ids)
-//                ->whereIsOpen($date . ' ' . $mealTime['startTime'])
-                ->whereHas('location', function($query) use ($day) {
-                    $query->where('area_id', $day->area->id);
-                })->inRandomOrder()->first();
-            if ($restaurant && !$this->getItinerary()->restaurantExists($restaurant)) {
-                $this->getItinerary()->addActivity(
-                    $restaurant,
-                    ActivityType::DINING,
-                    $startTime,
-                    $restaurant->calculateEndTime($day->date, $startTime),
-                    $dayNum,
-                    $period
-                );
-            }
-        }
-
-        // Tell the user to cook if necessary. If their adventurousness is at least 0.6, we'll randomly choose either
-        // cooking or a restaurant.
-        if ($this->getItinerary()->getAdventurousness() >= 0.6) {
-            $cooking = (bool) rand(0, 1);
-        } else {
-            $cooking = true;
-        }
-
-        if ($this->shouldAddCooking($day, $period)) {
-            if ($cooking === true) {
-                switch ($period) {
-                    case Period::MORNING:
-                        $name = 'Breakfast';
-                        $phrase = $this->phraseService->getPhraseForBreakfast();
-                        break;
-                    case Period::AFTERNOON:
-                        $name = 'Lunch';
-                        $phrase = $this->phraseService->getPhraseForLunch();
-                        break;
-                    case Period::EVENING:
-                        $name = 'Dinner';
-//                        $phrase = $this->phraseService->getPhraseForDinner();
-                        $phrase = $this->phraseService->getPhraseForLightMeal();
-                        break;
-                    default:
-                        $name = 'Meal time!';
-                        $phrase = $this->phraseService->getPhraseForLightMeal();
-                }
-
-                $this->getItinerary()->addTask(
-                    'cooking',
-                    $name,
-                    $phrase,
-                    ($date . ' ' . $startTime),
-                    ($date . ' ' . $startTime),
-                    $dayNum,
-                    $period
-                );
-            }
-        }
-
-        if ($cooking === false) {
-            // We still don't have a meal. Just put any restaurant in the area that's open.
-            $dayPeriod = $day->getPeriods()[$period];
-            if (!$dayPeriod->hasRestaurant() && !$dayPeriod->hasActivityType('cooking'))
-            {
-                $restaurant = Restaurant::with(['location' => function($query) {
-//                    $query->with('images');
-                }])->whereIsOpen($day->date . ' ' . $mealTime['startTime'])
-                    ->whereNotIn('restaurants.id', $this->getItinerary()->restaurant_ids)
-                    ->whereHas('location', function($query) use ($day) {
-                        $query->where('area_id', $day->area_id);
-                    })->inRandomOrder()->first();
-                if ($restaurant && !$this->getItinerary()->restaurantExists($restaurant)) {
-                    $this->getItinerary()->addActivity(
-                        $restaurant,
-                        'dining',
-                        $startTime,
-                        $restaurant->calculateEndTime($day->date, $startTime),
-                        $dayNum,
-                        $period
-                    );
-                }
-            }
-        }
+        return null;
     }
 
     /**
-     * Sort by how many subarrays each item has, in descending order.
-     */
-    private function sortBySubarrayCount(array $array, $ascending = false): array
-    {
-        uasort($array, function($a, $b) use ($ascending) {
-            $countA = is_array($a) ? count($a) : 0;
-            $countB = is_array($b) ? count($b) : 0;
-            if ($ascending) {
-                return $countA - $countB;
-            } else {
-                return $countB - $countA;
-            }
-        });
-        return $array;
-    }
-
-    /**
-     * We'll need to examine the priorities and make sure we include those areas.
-     */
-    public function calculateAreaPriorities(): array
-    {
-        $eventPriorities = $this->getItinerary()->getEventPriorities();
-        $locationPriorities = $this->getItinerary()->getLocationPriorities();
-        $restaurantPriorities = $this->getItinerary()->getRestaurantPriorities();
-        $trailPriorities = $this->getItinerary()->getTrailPriorities();
-        $areaPriorities = [];
-
-        foreach ($eventPriorities as $resourceId) {
-            $resource = Event::find($resourceId);
-            if ($resource) {
-                $areaPriorities[$resource->area_id][] = $resource;
-            }
-        }
-
-        foreach ($locationPriorities as $resourceId) {
-            $resource = Location::find($resourceId);
-            if ($resource) {
-                $areaPriorities[$resource->area_id][] = $resource;
-            }
-        }
-
-        foreach ($restaurantPriorities as $resourceId) {
-            $resource = Restaurant::find($resourceId);
-            if ($resource) {
-                $areaPriorities[$resource->area_id][] = $resource;
-            }
-        }
-
-        foreach ($trailPriorities as $resourceId) {
-            $resource = Trail::find($resourceId);
-            if ($resource) {
-                $areaPriorities[$resource->area_id][] = $resource;
-            }
-        }
-
-        return $this->sortBySubarrayCount($areaPriorities);
-    }
-
-    /**
-     * We'll need to examine the priorities and make sure we include those areas.
+     * Pick an area for every day of the trip.
+     *
+     * Arrival and departure days are at the base area. Then every area the user asked for (through priority trails,
+     * events, places, restaurants or areas) gets a day. The rest are sampled from the areas that pass the filters:
+     * open for the season, have trails in the user's distance range, close enough for low adventurousness, and (below
+     * 0.8) outlying areas at most once.
      */
     public function assignDaysForAreas(bool $useFirstDay = false, bool $useLastDay = false): array
     {
-        $adventurousness = $this->getItinerary()->getAdventurousness();
-        $baseArea = $this->getItinerary()->getBaseArea();
-        $durationDays = $this->getItinerary()->getDurationDays();
-        $dayNum = 0;
+        $itinerary = $this->getItinerary();
+        $adventurousness = $itinerary->getAdventurousness();
+        $baseArea = $itinerary->getBaseArea();
+        $durationDays = $itinerary->getDurationDays();
+        $date = $itinerary->getStartDate();
+        $days = [];
         $areaIds = [];
-        $allAreaIds = Area::all()->pluck('id')->toArray();
-        $allAreaIds = array_combine($allAreaIds, $allAreaIds);
+        $dayNum = 0;
 
-        // Default to the user's accommodation area for the first day, if $useFirstDay is false.
-        $date = $this->getItinerary()->getStartDate();
-        if ($useFirstDay === false) {
-            $day = new Day(['date' => $date, 'area' => $baseArea, 'day_num' => $dayNum]);
-            $day->start_time = Day::DEFAULT_ARRIVAL_TIME;
-            $days[$dayNum++] = $day;
+        if (!$useFirstDay) {
+            $days[$dayNum] = new Day(['date' => $date, 'area' => $baseArea, 'day_num' => $dayNum, 'start_time' => Day::DEFAULT_ARRIVAL_TIME]);
+            $dayNum++;
             $date = $this->incrementDate($date);
             $areaIds[] = $baseArea->id;
-        } else {
-            $days = [];
         }
-
-        // Do the same for the last day.
-        if ($useLastDay === false) {
-            $day = new Day(['date' => $date, 'area' => $baseArea, 'day_num' => $durationDays - 1]);
-            $day->end_time = Day::DEFAULT_DEPARTURE_TIME;
-            $days[$durationDays - 1] = $day;
+        if (!$useLastDay && $durationDays > 1) {
+            $days[$durationDays - 1] = new Day([
+                'date' => $this->calculateEndDate($itinerary->getStartDate(), $durationDays),
+                'area' => $baseArea, 'day_num' => $durationDays - 1, 'end_time' => Day::DEFAULT_DEPARTURE_TIME,
+            ]);
             $areaIds[] = $baseArea->id;
         }
 
-        $activityPriorities = $this->getItinerary()->getActivityPriorities();
-        $trailPriorities = $this->getItinerary()->getTrailPriorities();
-
-        $this->getItinerary()->setDays($days);
-
-        // Get the areas for the trails. Weight the areas that appear the most so they are first in the array.
-        // TODO: Make sure the trails are actually open on the date.
-        $trailAreaIds = Trail::select('area_id', DB::raw('COUNT(area_id) AS occurrences'))
-            ->whereNotNull('distance_miles')
-            ->whereIn('id', $trailPriorities)
-            ->groupBy('area_id')
-            ->orderByRaw('COUNT(area_id) DESC')
-            ->get()
-            ->keyBy('area_id');
-
-        // Add areas as long as we have days remaining in the duration of the trip.
-        $modifier = $useLastDay ? 0 : -1;
-        foreach ($trailAreaIds as $areaId => $tai) {
-            if (count($days) < $durationDays + $modifier) {
-                $day = new Day(['date' => $date, 'area_id' => $areaId, 'day_num' => $dayNum]);
-                $days[$dayNum++] = $day;
-                $date = $this->incrementDate($date);
-                $areaIds[] = $areaId;
+        foreach ($this->requestedAreaIds() as $areaId) {
+            if (count($days) >= $durationDays) {
+                break;
             }
+            $days[$dayNum] = new Day(['date' => $date, 'area' => Area::find($areaId), 'day_num' => $dayNum]);
+            $dayNum++;
+            $date = $this->incrementDate($date);
+            $areaIds[] = $areaId;
         }
 
-        // Fill in any remaining days.
-        do {
-            // TODO: Don't be so random about the area. Get an area with other events they'd be interested in. Also take
-            // into account other preferences like maximum distance they want to travel.
-            /** @var CustomQueryBuilder $query */
-            $itinerary = $this->getItinerary();
-            $query = Area::inWeightedRandomOrder($adventurousness)->whereHas('trails', function($q) use ($itinerary) {
-                $q->where('trails.distance_miles', '>=', $itinerary->calculateMinimumTrailDistance());
-                $q->where('trails.distance_miles', '<=', $itinerary->calculateMaximumTrailDistance());
-            });
-
-            // If the user's adventurousness is low (< 0.3, < 0.4), we won't pick areas that are too far from their base area.
-            switch (true) {
-                case $adventurousness < 0.3:
-                    $maxDistance = 60;
-                    break;
-                case $adventurousness < 0.4:
-                    $maxDistance = 75;
-                    break;
-                default:
-                    $maxDistance = null;
-            }
-
-            if ($maxDistance) {
-                $query->whereProximity($baseArea->latitude, $baseArea->longitude, $maxDistance);
-            }
-
-            // If there aren't trails with their minimum distance in the area, don't use the area.
-
-            // If the user's adventurousness < 0.5, let's focus on Kanab, and not St. George.
-            if ($adventurousness < 0.5) {
-                if ($baseArea->id === Area::ZION) {
-                    $query->whereNot('id', Area::ST_GEORGE);
-                }
-            }
-
-            // TODO: The North Rim is closed from December 1 to May 14. Don't assign this area between these dates.
-
-            // If the user's adventurousness is < 0.8, only pick any area besides Kanab or Zion once, unless it's their base area.
-            if ($adventurousness < 0.8) {
-                $numPossible = 1;
-                $areaCounts = array_count_values($areaIds);
-                $filteredAreaIds = array_filter($allAreaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
-                    return $areaId !== Area::KANAB
-                        && $areaId !== $baseArea->id
-                        && $areaId !== Area::ZION
-                        && ($areaCounts[$areaId] ?? 0) >= $numPossible;
-                });
-                $query->whereNotIn('id', $filteredAreaIds);
-            }
-
-            // If the user's adventurousness is < 0.9, only pick the remaining non-base area(s) once per 10 days of the trip.
-            // TODO: Fix this.
-//            if ($adventurousness < 0.9) {
-//                $numPossible = ceil($this->getItinerary()->durationDays / 10);
-//                $areaCounts = array_count_values($areaIds);
-//                $filteredAreaIds = array_filter($allAreaIds, function($areaId) use ($areaCounts, $numPossible, $baseArea) {
-//                    return (
-//                        $areaId !== $baseArea->id &&
-//                        isset($areaCounts[$areaId]) &&
-//                        $areaCounts[$areaId] >= $numPossible
-//                    );
-//                });
-//                $query->whereNotIn('id', $filteredAreaIds);
-//            }
-
-            $area = $query->first();
-            if (!$area) {
-                // TODO: If nothing was found, retry it with relaxed settings, particularly on minimum distance for trails.
-                $area = $baseArea;
-            }
-
-            $day = new Day(['date' => $date, 'area' => $area, 'day_num' => $dayNum]);
-            $days[$dayNum++] = $day;
+        while (count($days) < $durationDays) {
+            $area = Area::pickWeighted($this->eligibleAreas($areaIds), $adventurousness) ?? $baseArea;
+            $days[$dayNum] = new Day(['date' => $date, 'area' => $area, 'day_num' => $dayNum]);
+            $dayNum++;
             $date = $this->incrementDate($date);
             $areaIds[] = $area->id;
-        } while (count($days) < $durationDays);
-        ksort($days);
-
-        $this->getItinerary()->setDays($days);
-
-        return $days;
-    }
-
-    public function isTooCold($day, $period, $activityType) {
-        return $day->area->isTooCold($day, $period, $activityType);
-    }
-
-    public function isTooHot($day, $period, $activityType) {
-        return false;
-        return $day->area->isTooHot($day, $period, $activityType);
-    }
-
-    /**
-     * Should we add a trail for the period to fill in the gaps? Don't exceed the maximum trail distance.
-     */
-    public function shouldAddTrail(Day $day, int $period, Trail $trail = null): bool {
-        switch ($period) {
-            case Period::NIGHT:
-                break;
-            case Period::MORNING:
-            case Period::AFTERNOON:
-            case Period::EVENING:
-            default:
-                if (!$this->isTooHot($day, $period, 'hiking')) {
-                    $dayHasTrail = $day->hasTrail();
-                    if ($this->getItinerary()->getAdventurousness() >= 0.7 || !$dayHasTrail) {
-                        if (count($day->periods[$period]->getActivities()) === 0) {
-                            return true;
-                        }
-                    }
-                }
-                break;
         }
-        return false;
+
+        $itinerary->setDays($days);
+        return $itinerary->getDays();
     }
 
     /**
-     * If it's morning (and the day is not in the base location?), just say false.
-     * Generally, restaurants should only be added for dinner. For lunch, check for a suitable restaurant in the area.
+     * Areas the trip must include, most-requested first, skipping any closed for the season.
      */
-    public function shouldAddDining(Day $day, int $period): bool
+    private function requestedAreaIds(): array
     {
-        if ($period === Period::MORNING) {
-            return false;
+        $itinerary = $this->getItinerary();
+        $counts = [];
+        $add = function($ids) use (&$counts) {
+            foreach ($ids as $id) {
+                $counts[$id] = ($counts[$id] ?? 0) + 1;
+            }
+        };
+        $add(Trail::whereIn('id', $itinerary->getTrailPriorities())->whereNotNull('distance_miles')->pluck('area_id'));
+        $add(Location::whereIn('id', $itinerary->getLocationPriorities())->pluck('area_id'));
+        $add(Restaurant::with('location')->whereIn('id', $itinerary->getRestaurantPriorities())->get()->pluck('location.area_id')->filter());
+        $add(Event::with('location')->whereIn('id', $itinerary->getEventPriorities())
+            ->betweenDates($itinerary->getStartDate() . ' 00:00:00', $itinerary->getEndDate() . ' 23:59:59')
+            ->get()->pluck('location.area_id')->filter());
+        $add($itinerary->getAreaPriorities());
+        arsort($counts);
+
+        $open = $this->openAreas()->pluck('id')->all();
+        return array_values(array_filter(array_keys($counts), fn($id) => in_array($id, $open, true)
+            && $id !== $itinerary->getBaseAreaId()));
+    }
+
+    private function openAreas()
+    {
+        $itinerary = $this->getItinerary();
+        return Area::openOn($itinerary->getStartDate())->openOn($itinerary->getEndDate())->get();
+    }
+
+    private function eligibleAreas(array $visitedAreaIds): Collection
+    {
+        $itinerary = $this->getItinerary();
+        $adventurousness = $itinerary->getAdventurousness();
+        $baseArea = $itinerary->getBaseArea();
+
+        $query = Area::openOn($itinerary->getStartDate())->openOn($itinerary->getEndDate());
+        if ($this->wantsTrails()) {
+            $query->whereHas('trails', function($q) use ($itinerary) {
+                $q->where('trails.distance_miles', '>=', $itinerary->calculateMinimumTrailDistance())
+                    ->where('trails.distance_miles', '<=', $itinerary->calculateMaximumTrailDistance());
+            });
         }
-        if ($day->periods[$period]->hasRestaurant() || $day->hasActivityTypeInPeriod('cooking', $period)) {
-            return false;
+
+        // Low adventurousness keeps day trips close to base.
+        $maxDistance = match (true) {
+            $adventurousness < 0.3 => 60,
+            $adventurousness < 0.4 => 75,
+            default => null,
+        };
+        if ($maxDistance) {
+            $query->whereProximity($baseArea->latitude, $baseArea->longitude, $maxDistance);
         }
-        return true;
+
+        // If the user's adventurousness < 0.5 and they're staying in Zion, focus on Kanab, not St. George.
+        if ($adventurousness < 0.5 && $baseArea->id === Area::ZION) {
+            $query->where('id', '!=', Area::ST_GEORGE);
+        }
+
+        // Below 0.8, outlying areas (anything but Kanab, Zion and the base) are visited at most once.
+        if ($adventurousness < 0.8) {
+            $counts = array_count_values($visitedAreaIds);
+            $exclude = array_filter(array_keys($counts), fn($id) => !in_array($id, [Area::KANAB, Area::ZION, $baseArea->id], true));
+            $query->whereNotIn('id', $exclude);
+        }
+
+        return $query->get();
     }
 
     /**
-     * Should we add a home-meal option for the period?
-     * If they're away from their base area:
-     * a. Morning is okay, especially if they're hiking a Zion trail that morning.
-     * b. Lunch is out of the question.
-     * c. Dinner is okay if their afternoon activity will end and they can travel back by 5pm.
-     * back. If they've already done a trail today, only add another
-     * trail if their adventurousness is >= 0.7.
+     * Move each priority event's area onto the date it happens (shuffleDays() reorders dates, so this runs after).
      */
-    public function shouldAddCooking(Day $day, int $period): bool {
-        // Make sure there isn't already a restaurant or cooking activity during the period.
-        $dayPeriod = $day->getPeriod($period);
-        if ($dayPeriod->hasRestaurant() || $dayPeriod->hasActivityType('cooking')) {
-            return false;
+    public function placePriorityEventDays(): void
+    {
+        $itinerary = $this->getItinerary();
+        $ids = $itinerary->getEventPriorities();
+        if (!$ids) {
+            return;
         }
+        $days = $itinerary->getDays();
+        $occurrences = EventDate::whereIn('event_id', $ids)
+            ->overlapping($itinerary->getStartDate() . ' 00:00:00', $itinerary->getEndDate() . ' 23:59:59')
+            ->with('event.location')->orderBy('start_date')->get();
 
-        if ($day->area_id !== $this->getItinerary()->getBaseAreaId()) {
-            switch ($period) {
-                case Period::MORNING:
-                    return true;
-                case Period::EVENING:
-                    $activities = $day->getPeriods()[Period::AFTERNOON]->getActivities();
-                    $areaDistance = AreaDistance::where([
-                        'from_area_id' => $day->area_id,
-                        'to_area_id' => $this->getItinerary()->getBaseAreaId(),
-                    ])->first();
-                    if ($areaDistance) {
-                        $areaDistanceTime = $areaDistance->driving_hours * 60 * 60;
-                    } else {
-                        $areaDistanceTime = self::DEFAULT_DRIVING_TIME_BETWEEN_AREAS;
-                    }
-                    foreach ($activities as $activity) {
-                        if (strtotime($activity->endTime) + $areaDistanceTime >=
-                            strtotime(Period::getTimesForMeals(Period::EVENING)['startTime'])) {
-                            return false;
-                        }
-                    }
-                    return true;
-                case Period::AFTERNOON:
-                case Period::NIGHT:
-                default:
-                    return false;
+        foreach ($occurrences as $occurrence) {
+            $areaId = $occurrence->event?->location?->area_id;
+            $date = date('Y-m-d', strtotime($occurrence->start_date));
+            foreach ($days as $day) {
+                if ($day->date === $date && $areaId && !$this->isArrivalDay($day) && !$this->isDepartureDay($day)) {
+                    $day->area = Area::find($areaId);
+                }
             }
         }
-        return true;
     }
 
-    public function addRandomTrailToPeriod(Day $day, int $period)
+    /**
+     * One-way drive in minutes: area_distances when we have it (either direction), otherwise straight-line distance
+     * padded for roads at DEFAULT_DRIVING_MPH.
+     */
+    public function drivingMinutes(int $fromAreaId, int $toAreaId): int
     {
-        $trail = $this->trailService->getRandomTrailForPeriod(
-            $day->area->id,
-            $period,
-            $this->getItinerary(),
-            $this->getItinerary()->trail_ids
-        );
-
-        if ($trail && !$this->getItinerary()->trailExists($trail)) {
-            $startTime = Period::getStartTimeForActivities($period);
-            $this->getItinerary()->addActivity(
-                $trail,
-                'hiking',
-                ($day->date . ' ' . $startTime),
-                $trail->calculateEndTime($day->date, $startTime),
-                $day->day_num,
-                $period
-            );
+        if ($fromAreaId === $toAreaId) {
+            return 0;
         }
+        $distance = AreaDistance::where(fn($q) => $q->where(['from_area_id' => $fromAreaId, 'to_area_id' => $toAreaId]))
+            ->orWhere(fn($q) => $q->where(['from_area_id' => $toAreaId, 'to_area_id' => $fromAreaId]))
+            ->whereNotNull('driving_hours')->first();
+        if ($distance) {
+            return (int) round($distance->driving_hours * 60);
+        }
+        return (int) round(60 * $this->drivingMiles($fromAreaId, $toAreaId) / self::DEFAULT_DRIVING_MPH);
     }
 
+    public function drivingMiles(int $fromAreaId, int $toAreaId): float
+    {
+        if ($fromAreaId === $toAreaId) {
+            return 0.0;
+        }
+        $distance = AreaDistance::where(fn($q) => $q->where(['from_area_id' => $fromAreaId, 'to_area_id' => $toAreaId]))
+            ->orWhere(fn($q) => $q->where(['from_area_id' => $toAreaId, 'to_area_id' => $fromAreaId]))
+            ->whereNotNull('driving_miles')->first();
+        if ($distance) {
+            return (float) $distance->driving_miles;
+        }
+        $from = Area::find($fromAreaId);
+        $to = Area::find($toAreaId);
+        return $this->locationService->estimateDrivingDistance($from->latitude, $from->longitude, $to->latitude, $to->longitude);
+    }
+
+    /**
+     * Round trips from base to each away day's area, in miles.
+     */
     public function estimateTotalTravelDistance(): float
     {
-        $totalMiles = 0;
-        $baseArea = $this->getItinerary()->getBaseArea();
-        $baseAreaLat = $baseArea->latitude;
-        $baseAreaLon = $baseArea->longitude;
-        $days = $this->getItinerary()->getDays();
-        for ($i = 1; $i < count($days); $i++) {
-            if ($i < count($days)) {
-//                try {
-                    $areaLat = $days[$i]->area->latitude;
-                    $areaLon = $days[$i]->area->longitude;
-//                } catch (\Throwable $e) {
-//                    echo '<pre>'; print_r($days); echo '</pre>';
-//                    echo '<pre>'; print_r($e); echo '</pre>';
-//                }
-
-//                $totalMiles += 2 * (AreaDistance::where('from_area_id', $baseArea->id)->where('to_area_id', $days[$i]->getAreaId())->pluck('driving_miles') ?? 0);
-                $totalMiles += 2 * $this->locationService->estimateDrivingDistance($baseAreaLat, $baseAreaLon, $areaLat, $areaLon);
-
-                foreach (Period::getPeriodTypes() as $periodType) {
-                    $activities = $days[$i]->periods[$periodType]->getActivities();
-                    for ($j = 0; $j < count($activities); $j++) {
-                        $distance = 0;
-                        $data1 = $activities[$j]->data;
-                        if ($data1) {
-                            $lat1 = $data1->location->latitude ?? $data1->latitude;
-                            $lon1 = $data1->location->longitude ?? $data1->longitude;
-
-                            if (in_array(0, [$lat1, $lat1])) {
-                                continue;
-                            }
-
-                            if ($j === 0) {
-                                $distance = $this->locationService->estimateDrivingDistance(
-                                    $areaLat,
-                                    $areaLon,
-                                    $lat1,
-                                    $lon1,
-                                );
-                            }
-                        }
-
-                        if ($j < count($activities) - 1) {
-                            $data2 = $activities[$j + 1]->data;
-                            $lat2 = isset($data2->location) ? $data2->location->latitude : $data2->latitude;
-                            $lon2 = isset($data2->location) ? $data2->location->longitude : $data2->longitude;
-
-                            if (in_array(0, [$lat2, $lat2])) {
-                                continue;
-                            }
-
-                            $distance = $this->locationService->estimateDrivingDistance(
-                                $lat1,
-                                $lon1,
-                                $lat2,
-                                $lon2,
-                            );
-                        }
-                        if ($j === count($activities)) {
-                            $distance = $this->locationService->estimateDrivingDistance(
-                                $lat1,
-                                $lon1,
-                                $areaLat,
-                                $areaLon,
-                            );
-                        }
-                        $totalMiles += $distance;
-                    }
-                }
-            }
+        $baseAreaId = $this->getItinerary()->getBaseAreaId();
+        $total = 0.0;
+        foreach ($this->getItinerary()->getDays() as $day) {
+            $total += 2 * $this->drivingMiles($baseAreaId, $day->area_id);
         }
-        return round($totalMiles);
+        return round($total);
+    }
+
+    private function rememberResource(?string $table, $id): void
+    {
+        $itinerary = $this->getItinerary();
+        match ($table) {
+            'events' => $itinerary->event_ids[] = $id,
+            'locations' => $itinerary->location_ids[] = $id,
+            'restaurants' => $itinerary->restaurant_ids[] = $id,
+            'trails' => $itinerary->trail_ids[] = $id,
+            default => null,
+        };
+    }
+
+    private function isArrivalDay(Day $day): bool
+    {
+        return $day->day_num === 0 && !$this->getItinerary()->getUseFirstDay();
+    }
+
+    private function isDepartureDay(Day $day): bool
+    {
+        return $day->day_num === $this->getItinerary()->getDurationDays() - 1 && !$this->getItinerary()->getUseLastDay()
+            && $this->getItinerary()->getDurationDays() > 1;
+    }
+
+    private function isAtBase(Day $day): bool
+    {
+        return $day->area_id === $this->getItinerary()->getBaseAreaId();
+    }
+
+    /**
+     * No preferred activity types means "anything".
+     */
+    private function wantsTrails(): bool
+    {
+        $types = $this->getItinerary()->getActivityPriorities();
+        return empty($types) || (bool) array_intersect($types, self::TRAIL_ACTIVITY_TYPES);
+    }
+
+    private function wantsEvents(): bool
+    {
+        if ($this->getItinerary()->getAdventurousness() < 0.5) {
+            return false;
+        }
+        $types = $this->getItinerary()->getActivityPriorities();
+        return empty($types) || $types === Itinerary::DEFAULT_ACTIVITY_PRIORITIES
+            || (bool) array_intersect($types, self::EVENT_ACTIVITY_TYPES);
+    }
+
+    private function later(string $a, string $b): string
+    {
+        return Timeline::toMinutes($a) >= Timeline::toMinutes($b) ? $a : $b;
+    }
+
+    private function earlier(string $a, string $b): string
+    {
+        return Timeline::toMinutes($a) <= Timeline::toMinutes($b) ? $a : $b;
     }
 
     private function incrementDate($date) {
@@ -942,51 +852,55 @@ class ItineraryService
 
     public function setupItinerary(Request $request)
     {
-        $accommodationPreference = $request->get('accommodation_preference');
-        $interests = $request->get('interests');
-        $tripPreference = $request->get('trip_preference');
+        $itinerary = $this->getItinerary();
 
         if ($request->get('base_area_id')) {
             $area = Area::where('id', $request->get('base_area_id'))->first();
             if ($area) {
-                $this->getItinerary()->setBaseArea($area);
-                $this->getItinerary()->setBaseAreaId($request->get('base_area_id'));
+                $itinerary->setBaseArea($area);
+                $itinerary->setBaseAreaId($area->id);
             }
         }
 
-        $this->getItinerary()->arrival_date_time = $request->get('arrival_datetime');
-        $this->getItinerary()->departure_date_time = $request->get('departure_datetime');
-        $this->getItinerary()->setCheckInTime($request->get('check_in'));
-        $this->getItinerary()->setCheckOutTime($request->get('check_out'));
-        $this->getItinerary()->setDurationDays($request->get('duration_days'));
-        $this->getItinerary()->setEndDate($request->get('end_date'));
-        $this->getItinerary()->setLatitude($request->get('lat'));
-        $this->getItinerary()->setLongitude($request->get('lng'));
-        $this->getItinerary()->setStartDate($request->get('start_date'));
+        $itinerary->name = $request->get('name');
+        $itinerary->arrival_date_time = $request->get('arrival_datetime');
+        $itinerary->departure_date_time = $request->get('departure_datetime');
+        $itinerary->setCheckInTime($request->get('check_in'));
+        $itinerary->setCheckOutTime($request->get('check_out'));
+        $itinerary->setDurationDays($request->get('duration_days'));
+        $itinerary->setEndDate($request->get('end_date'));
+        $itinerary->setLatitude($request->get('lat'));
+        $itinerary->setLongitude($request->get('lng'));
+        $itinerary->setStartDate($request->get('start_date'));
 
         // Some methods should be called after others have been set.
-        $this->getItinerary()->setMonth($request->get('month'));
-        $this->getItinerary()->setSeason($request->get('season'));
+        $month = $request->get('month');
+        $preferredMonths = array_filter(array_map('intval', (array) ($request->get('preferred_months') ?? [])), fn($m) => $m >= 1 && $m <= 12);
+        if (!$month && $preferredMonths && !$itinerary->getStartDate()) {
+            $month = $preferredMonths[array_rand($preferredMonths)];
+        }
+        $itinerary->setMonth($month);
+        $itinerary->setSeason($request->get('season'));
 
-        if (!$this->getItinerary()->getLatitude() || !$this->getItinerary()->getLongitude()) {
-            $areaId = $request->get('area_id');
-            if ($areaId) {
-                $area = Area::find($areaId);
-                $this->getItinerary()->setLatitude($area->latitude);
-                $this->getItinerary()->setLongitude($area->longitude);
-            }
+        if (!$itinerary->getLatitude() || !$itinerary->getLongitude()) {
+            $area = $itinerary->getBaseArea();
+            $itinerary->setLatitude($area?->latitude);
+            $itinerary->setLongitude($area?->longitude);
         }
 
-        $this->getItinerary()->setAdventurousness($request->get('adventurousness'));
-        $this->getItinerary()->setSolitariness($request->get('solitariness'));
-        $this->getItinerary()->setStrenuousness($request->get('strenuousness'));
-        $this->getItinerary()->setActivityPriorities($request->get('activities'));
-        $this->getItinerary()->setTrailPriorities($request->get('trails'));
-        $this->getItinerary()->setAverageHikingSpeed($request->get('average_hiking_speed'));
+        $itinerary->setAdventurousness($request->get('adventurousness'));
+        $itinerary->setSolitariness($request->get('solitariness'));
+        $itinerary->setStrenuousness($request->get('strenuousness'));
+        $itinerary->setActivityPriorities($request->get('activities') ?? $request->get('preferred_activity_types'));
+        // The Vue app sends *_ids; older clients sent "trails".
+        $itinerary->setTrailPriorities($request->get('trail_ids') ?? $request->get('trails'));
+        $itinerary->setEventPriorities($request->get('event_ids'));
+        $itinerary->setLocationPriorities($request->get('location_ids'));
+        $itinerary->setRestaurantPriorities($request->get('restaurant_ids'));
+        $itinerary->setAreaPriorities($request->get('area_ids'));
+        $itinerary->setAverageHikingSpeed($request->get('average_hiking_speed'));
 
         $this->determineAndSetMissingDates();
-
-        $this->getItinerary()->save();
     }
 
     /**
@@ -1035,7 +949,6 @@ class ItineraryService
                 }
             }
         }
-//        throw new \Exception('Could not set dates: ' . print_r($this->getItinerary(), true));
     }
 
     /**
@@ -1049,29 +962,19 @@ class ItineraryService
 
     public function getRandomDateInMonth($month, ?int $year = null, ?\DateTime $currentDate = null) {
         $month = (int) $month;
-        // Get the current date
         $currentDate = $currentDate ? clone $currentDate : new \DateTime();
 
-        // Calculate the target year
-        if ($year === null) {
-            $targetYear = (int)$currentDate->format('Y');
-        } else {
-            $targetYear = $year;
-        }
-
+        $targetYear = $year ?? (int) $currentDate->format('Y');
         if ($year === null && (int) $currentDate->format('n') > $month) {
             $targetYear++; // Move to the next year if the specified month is in the past
         }
 
-        // Calculate the minimum date (2 weeks from the current date)
+        // At least two weeks from now.
         $minimumDate = clone $currentDate;
         $minimumDate->add(new \DateInterval('P2W'));
 
-        // Generate a random date in the specified month
         $randomDay = mt_rand(1, cal_days_in_month(CAL_GREGORIAN, $month, $targetYear));
         $randomDate = new \DateTime("$targetYear-$month-$randomDay");
-
-        // Check if the random date is at least 2 weeks ahead
         while ($randomDate < $minimumDate) {
             $randomDate->add(new \DateInterval('P1D'));
         }
@@ -1084,63 +987,37 @@ class ItineraryService
     }
 
     /**
-     * Keep the first and last day, and shuffle the rest.
+     * Keep the first and last day, group the rest by area (so you aren't driving back and forth), and shuffle the
+     * order of the groups and the days within them.
      */
     public function shuffleDays(): void
     {
-        $days = $this->getItinerary()->getDays();
-
-        // Return early if there are 3 or fewer days.
+        $days = array_values($this->getItinerary()->getDays());
         if (count($days) <= 3) {
             return;
         }
 
-        // Preserve the first and last elements.
         $first = array_shift($days);
         $last = array_pop($days);
 
-        // Group days by area_id.
-        $groupedDays = [];
+        $groups = [];
         foreach ($days as $day) {
-            $groupedDays[$day->area_id][] = $day;
+            $groups[$day->area_id][] = $day;
         }
-
-        // Flatten the grouped days and shuffle the groups.
-        $shuffledGroups = [];
-        foreach ($groupedDays as $group) {
+        shuffle($groups);
+        $middle = [];
+        foreach ($groups as $group) {
             shuffle($group);
-            $shuffledGroups = array_merge($shuffledGroups, $group);
+            array_push($middle, ...$group);
         }
 
-        // Reinsert the first and last days and update the dayNum.
-        $days = array_merge([$first], $shuffledGroups, [$last]);
-
+        $days = [$first, ...$middle, $last];
         $startDate = $this->getItinerary()->getStartDate();
         foreach ($days as $dayNum => $day) {
-//            $day->dayNum = $dayNum;
             $day->day_num = $dayNum;
             $day->date = date('Y-m-d', strtotime($startDate . ' +' . $dayNum . ' days'));
         }
 
-        // Set the shuffled and grouped days back to the itinerary.
         $this->getItinerary()->setDays($days);
-    }
-
-    public function getEvents()
-    {
-        $query = Event::betweenDates($this->itinerary->getStartDate(), $this->getItinerary()->getEndDate());
-//            ->with('data');
-        $deviations = $this->getDeviations();
-        if (!empty($deviations)) {
-            $query = $query->sortByDeviation($deviations);
-        }
-        return $query->get();
-    }
-
-    private function calculateASSForDays()
-    {
-        foreach ($this->getItinerary()->getDays() as &$day) {
-            $day->calculateASS();
-        }
     }
 }

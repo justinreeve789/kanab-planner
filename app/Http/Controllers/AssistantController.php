@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assistant\Assistant;
+use App\Models\Itinerary\Itinerary;
 use App\Models\Assistant\Message;
 use App\Models\Assistant\Session;
 use App\Models\Assistant\Thread;
@@ -156,15 +157,39 @@ class AssistantController extends Controller
     }
 
     /**
-     * Create a specialized itinerary with AI.
+     * "Make me a new itinerary": generate one with the same dates, base and preferences as itinerary_id, nudged by
+     * what the message asks for (see AssistantService::adjustPreferencesForQuery()).
      */
     public function createItinerary(Request $request)
-    {}
+    {
+        $params = [];
+        if ($request->get('itinerary_id') && ($source = Itinerary::find($request->get('itinerary_id')))) {
+            $params = [
+                'start_date' => $source->start_date,
+                'end_date' => $source->end_date,
+                'base_area_id' => $source->base_area_id,
+                'adventurousness' => $source->adventurousness,
+                'solitariness' => $source->solitariness,
+                'strenuousness' => $source->strenuousness,
+                'average_hiking_speed' => $source->average_hiking_speed,
+                'trail_ids' => $source->trail_priorities,
+                'event_ids' => $source->event_priorities,
+                'location_ids' => $source->location_priorities,
+                'restaurant_ids' => $source->restaurant_priorities,
+                'preferred_activity_types' => $source->activity_priorities,
+            ];
+        }
+        $params = (new AssistantService())->adjustPreferencesForQuery((string) $request->get('query'), $params);
+        $request->merge(array_filter($params, fn($value) => $value !== null));
+
+        return app(ItineraryController::class)->createItinerary($request);
+    }
 
     /**
-     * Update the existing itinerary with specialized parameters. We'll just retrieve resources and tasks that can be
-     * added to days, or replace existing resources on those days.
+     * Not built yet: the assistant offers "create a new itinerary" instead.
      */
     public function updateItinerary(Request $request, string $itineraryId)
-    {}
+    {
+        return response()->json(['errors' => 'Not implemented yet'], 501);
+    }
 }

@@ -126,26 +126,42 @@ class ConversionService
         }
     }
 
+    /**
+     * OCR text of every image in the HTML, joined by blank lines.
+     */
     public function extractTextFromHtmlImages(string $html): ?string
     {
-        $imageUrls = $this->extractImagesFromHtml($html);
-        foreach ($imageUrls as $imageUrl) {
-            $text = $this->ocrService->scanImageUrl($imageUrl);
+        $texts = [];
+        foreach ($this->extractImagesFromHtml($html) as $imageUrl) {
+            $text = $this->convertImageToText($imageUrl);
+            if ($text) {
+                $texts[] = trim($text);
+            }
         }
+        return $texts ? implode("\n\n", $texts) : null;
     }
 
+    /**
+     * Image URLs in document order: <img src> and CSS background-image url(...).
+     */
     public function extractImagesFromHtml(string $html): ?array
     {
-//        preg_match_all('#\bhttps?://[^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/))#', $text, $match);
-        preg_match_all('/<img.+src=[\'"](?P<src>.+?)[\'"].*>|background-image[ ]?:[ ]?url\([ ]?[\']?["]?(.*?\.(?:png|jpg|jpeg|gif|svg))/i', $html, $match);
-        return $match['src'];
+        preg_match_all(
+            '/<img\b[^>]*?\bsrc\s*=\s*([\'"])(?P<img>.+?)\1|background-image\s*:\s*url\(\s*([\'"]?)(?P<bg>[^\'")]+?\.(?:png|jpe?g|gif|svg|webp))\3\s*\)/i',
+            $html,
+            $matches,
+            PREG_SET_ORDER
+        );
+        return array_map(fn($m) => ($m['img'] ?? '') !== '' ? $m['img'] : $m['bg'], $matches);
     }
 
+    /**
+     * href values that point at a .pdf, in document order.
+     */
     public function extractPDFsFromHtml(string $html): ?array
     {
-        preg_match_all('/href=["\']?[^"\'>]+(?:\.pdf)["\']?/', $html, $match);
-        print_r($match);
-        return [];
+        preg_match_all('/href\s*=\s*([\'"]?)([^\'"\s>]+\.pdf(?:[?#][^\'"\s>]*)?)\1/i', $html, $matches);
+        return $matches[2];
     }
 
     public function extractUrlsFromHtml(string $html): ?array
