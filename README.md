@@ -56,7 +56,9 @@ file. **For anything public, set at least these:**
 | `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_ENCRYPTION`, `MAIL_FROM_ADDRESS` | A real SMTP server for password resets. |
 | `UDOT_API_KEY`, `AZ511_API_KEY` | Free keys from [UDOT Traffic](https://udottraffic.utah.gov/developers/doc) and [AZ511](https://az511.gov/help/endpoint/event) for closures and roadwork on drives. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google sign-in; register `APP_URL/auth/google/callback` as a redirect URI. |
-| `OPENAI_API_KEY`, `GEMINI_API_KEY`, `DO_*` | The assistant, and photos from DigitalOcean Spaces. |
+| `OPENAI_API_KEY` (or `CHAT_DRIVER=anthropic` with `ANTHROPIC_API_KEY`) | The trip assistant (see "The trip assistant" below). |
+| `NPS_API_KEY`, `RIDB_API_KEY`, `AIRNOW_API_KEY`, `NWS_USER_AGENT` | The assistant's live sources: park alerts and fees, Recreation.gov permits and campgrounds, air quality, and a contact for the Weather Service. All free; without a key the assistant links the official page instead. |
+| `GEMINI_API_KEY`, `DO_*` | Image tools, and photos from DigitalOcean Spaces. |
 
 Other knobs: `ROUTING_DRIVER=estimate` (skip Valhalla, e.g. on a small server; you can then remove that service),
 `VALHALLA_TILE_URLS` (other OpenStreetMap extracts), `SEED_DATABASE` (`auto`, `always` or `never`).
@@ -86,6 +88,41 @@ the UDOT and AZ511 feeds. Full closures on a route are routed around; anything e
 Without keys the command does nothing. None of the free sources offers live traffic speeds for these rural roads, so
 drive times are free-flow times plus those adjustments.
 
+## The trip assistant
+
+The chat (`app/Chat`) is a tool-using assistant. The model never answers from memory: it calls tools over the
+planner's data and live feeds, and every answer lists its sources. `ChatAgent` runs the loop; each tool in
+`app/Chat/Tools` is one lookup:
+
+- **Trails:** `search_trails` (typos, partial names, duplicates folded, ambiguity flagged), `trail_details`,
+  `trail_profile` (grades and steep sections from the GPS track), `assess_for_hiker` (a verdict for a child, a
+  beginner, bad knees..., with the evidence and a turnaround point), `trail_knowledge` (what blogs and reviews say, by
+  topic), `similar_trails`.
+- **Places and food:** `find_places`, `find_restaurants` (open at a time, diet or cuisine words with the excerpt that
+  matched), `find_lodging`, `crowds` (popular times), `events`.
+- **Conditions:** `forecast` (National Weather Service, hourly, with gear it implies), `status` (seasonal closures,
+  park alerts, weather warnings, road events), `river_flow` (USGS; the Zion Narrows thresholds), `air_quality`,
+  `sun_times` (sunrise, sunset, moon; Arizona time handled).
+- **Logistics:** `drive_time`, `road_events`, `official_info` (NPS fees, hours, things to do), `permits`.
+- **The trip:** `get_itinerary`, `edit_itinerary` (only with the edit token or ownership, through the same controller
+  actions as the editor), and `present_options`, which asks the traveler to pick ("which Overlook trail?").
+
+`CHAT_DRIVER` picks OpenAI's Responses API (default, `CHAT_OPENAI_MODEL`) or Anthropic's Messages API
+(`CHAT_ANTHROPIC_MODEL`). Conversations are stored on our side (`assistant_threads.transcript`), so either works the
+same. Limits: 10 messages a minute and 200 a day per user or IP, 8 tool rounds per answer. Hiker limits, gauges and
+park codes are in `config/chat.php`.
+
+```sh
+php artisan trails:profile                      # steepness profiles from every GPS track (re-run after imports)
+php artisan chat:extract-facts --limit=50       # pull per-trail facts (gear, hazards, kids...) from blog posts
+php artisan chat:eval --ids=1-20                # ask question templates 1-20 and score tool use
+php artisan chat:eval --dry                     # just show the filled-in questions
+```
+
+`resources/chat/question_templates.json` holds 300 question templates with the tools each should use and what a top
+answer includes. `chat:eval` fills them with real records, runs them, and writes a report to
+`storage/app/chat-eval`. Run it after changing prompts, tools or models.
+
 # Setting up the app
 
 ```sh
@@ -93,6 +130,7 @@ composer install
 npm ci
 cp .env.example .env && php artisan key:generate   # then set DB_*, MEILISEARCH_*, GOOGLE_* and OPENAI_* values
 php artisan migrate --seed       # schema, reference rows, and the dataset from database/dumps (DumpSeeder)
+php artisan trails:profile       # steepness profiles for the assistant
 npx mix                          # build the Vue app into public/js and public/css
 npm run docs:build               # build the user guide into public/docs, served at /docs
 ```
@@ -102,7 +140,7 @@ strenuousness scores the itinerary builder matches against. Run it after importi
 or events.
 
 Google sign-in needs `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, with `APP_URL/auth/google/callback` registered
-as an authorized redirect URI in Google Cloud (override it with `GOOGLE_REDIRECT_URI`). Search and the assistant need Meilisearch; the assistant also needs OpenAI.
+as an authorized redirect URI in Google Cloud (override it with `GOOGLE_REDIRECT_URI`). Search needs Meilisearch; the assistant needs an OpenAI or Anthropic key.
 
 # User guide
 
