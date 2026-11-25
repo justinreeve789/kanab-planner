@@ -14,7 +14,7 @@ class Message extends Model
     use SoftDeletes;
 
     protected $appends = ['content_html'];
-    protected $casts = ['is_assistant' => 'bool'];
+    protected $casts = ['is_assistant' => 'bool', 'component_params' => 'array', 'sources' => 'array'];
     protected $guarded = [];
     protected $table = 'assistant_messages';
 

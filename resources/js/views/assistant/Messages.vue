@@ -16,10 +16,18 @@
             <span class="loading loading-dots loading-xs"></span>
           </div>
           <div v-else>
-            <span v-html="message.content_html"></span>
-            <div class="method-component mt-4" v-if="message.component">
-              <component :is="getComponent(message.component)" v-bind="this.parseMessageParams(message.component_params)"></component>
+            <span class="whitespace-pre-line" v-html="message.content_html"></span>
+            <div class="method-component mt-3" v-if="message.component === 'choices'">
+              <ChatChoices
+                v-bind="parseMessageParams(message.component_params)"
+                :disabled="index !== store.lastMessageIndex || store.sending"
+                @pick="(option) => store.send(option.reply || option.label)"
+              />
             </div>
+            <div class="method-component mt-4" v-else-if="message.component">
+              <component :is="getComponent(message.component)" v-bind="parseMessageParams(message.component_params)"></component>
+            </div>
+            <ChatSources v-if="message.is_assistant && message.sources" :sources="message.sources" />
           </div>
         </div>
       </div>
@@ -28,11 +36,13 @@
 </template>
 
 <script>
-import axios from 'axios';
 import {defineAsyncComponent, ref, watch, nextTick} from 'vue';
 import {useAssistantStore} from '../../stores/assistant.js';
+import ChatChoices from './ChatChoices.vue';
+import ChatSources from './ChatSources.vue';
 
 export default {
+  components: { ChatChoices, ChatSources },
   setup() {
     const store = useAssistantStore();
     const messagesContainer = ref(null)
@@ -79,20 +89,7 @@ export default {
   },
   methods: {
     getMessages() {
-      const endpoint = '/api/v1/assistant/thread';
-      axios
-        .get(endpoint, {
-          params: {
-            resource_table: this.store.hasCurrentResource() ? this.store.currentResourceTable : null,
-            resource_id: this.store.hasCurrentResource() ? this.store.currentResourceId : null,
-          },
-        })
-        .then((response) => {
-          this.store.messages = response.data;
-        })
-        .catch((error) => {
-          console.error('Error fetching assistant response:', error);
-        });
+      this.store.loadMessages();
     },
     parseMessageParams(params) {
       try {

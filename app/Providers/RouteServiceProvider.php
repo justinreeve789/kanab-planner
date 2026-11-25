@@ -33,6 +33,14 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(10)->by($request->user('sanctum')?->id ?: $request->ip());
         });
 
+        // Each chat message can call a paid model several times.
+        RateLimiter::for('chat', function (Request $request) {
+            return [
+                Limit::perMinute(10)->by('chat:' . ($request->user('sanctum')?->id ?: $request->ip())),
+                Limit::perDay(200)->by('chat-day:' . ($request->user('sanctum')?->id ?: $request->ip())),
+            ];
+        });
+
         RateLimiter::for('auth', function (Request $request) {
             return Limit::perMinute(10)->by($request->ip());
         });

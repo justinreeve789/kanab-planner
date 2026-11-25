@@ -34,14 +34,15 @@
       v-model="message"
       @keyup.enter="sendMessage"
       type="text"
-      placeholder="Type a message…"
+      placeholder="Ask about trails, weather, food, your trip…"
       class="input input-bordered input-md input-info bg-white text-black mt-2 w-full"
+      :disabled="assistantStore.sending"
+      maxlength="2000"
     />
   </div>
 </template>
 
 <script>
-import axios from "axios";
 import History from "../assistant/History.vue";
 import Messages from "../assistant/Messages.vue";
 import {useAssistantStore} from "../../stores/assistant";
@@ -77,19 +78,9 @@ export default {
       this.assistantStore.isAssistantOpen = false;
     },
     deleteHistory() {
-      axios
-        .delete('/api/v1/assistant/thread', {
-          params: {
-            resource_table: this.assistantStore.hasCurrentResource() ? this.assistantStore.currentResourceTable : null,
-            resource_id: this.assistantStore.hasCurrentResource() ? this.assistantStore.currentResourceId : null,
-          },
-        })
-        .then((response) => {
-          this.assistantStore.clearMessages();
-        })
-        .catch((error) => {
-          console.error('Error deleting assistant history:', error);
-        });
+      this.assistantStore.clearThread().catch((error) => {
+        console.error('Error deleting assistant history:', error);
+      });
     },
     scrollToSlide(slideNumber, smoothScroll = true) {
       this.$nextTick(() => {
@@ -105,34 +96,7 @@ export default {
     sendMessage() {
       const messageToSend = this.message;
       this.message = '';
-      if (messageToSend.trim()) {
-        this.assistantStore.addMessage({
-          is_assistant: false,
-          content: messageToSend,
-          content_html: messageToSend,
-        });
-        this.assistantStore.addMessage({
-          is_assistant: true,
-          content: '...',
-          content_html: '...',
-        });
-        axios
-          .post('/api/v1/assistant/message', {
-            message: messageToSend,
-            resource_type: this.assistantStore.hasCurrentResource() ? this.assistantStore.currentResource.type : null,
-            resource_id: this.assistantStore.hasCurrentResource() ? this.assistantStore.currentResource.id : null,
-          })
-          .then((response) => {
-            this.updateMessages(response.data.assistant_messages);
-          })
-          .catch((error) => {
-            console.error('Error fetching assistant response:', error);
-          });
-      }
-    },
-    updateMessages(messages) {
-      this.assistantStore.removeLastMessage();
-      this.assistantStore.addMessages(messages);
+      this.assistantStore.send(messageToSend);
     },
   }
 }

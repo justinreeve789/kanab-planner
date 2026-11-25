@@ -43,6 +43,9 @@ prepare() {
         NEEDS_INDEX=1
     fi
 
+    # Steepness profiles for the trip assistant; quick, and skips tracks that haven't changed.
+    php artisan trails:profile
+
     if [ "${SCOUT_DRIVER:-meilisearch}" = "meilisearch" ] && [ -n "$MEILISEARCH_HOST" ]; then
         host="$(echo "$MEILISEARCH_HOST" | sed -E 's#^https?://##; s#[:/].*##')"
         port="$(echo "$MEILISEARCH_HOST" | sed -nE 's#^https?://[^:/]+:([0-9]+).*#\1#p')"

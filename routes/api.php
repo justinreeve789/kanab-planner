@@ -56,13 +56,16 @@ Route::prefix('v1')->group(function() {
         Route::get('/', 'App\Http\Controllers\AssistantController@getAssistants');
         Route::post('/itinerary', 'App\Http\Controllers\AssistantController@createItinerary')->middleware('throttle:itineraries');
         Route::put('/itinerary/{itineraryId}', 'App\Http\Controllers\AssistantController@updateItinerary');
-        Route::prefix('message')->group(function() {
-            Route::post('/', 'App\Http\Controllers\AssistantController@sendMessage');
-        });
-        Route::prefix('thread')->group(function() {
-            Route::get('/', 'App\Http\Controllers\AssistantController@getMessages');
-            Route::delete('/', 'App\Http\Controllers\AssistantController@deleteMessages');
-        });
+        // The chat now runs on the tool-using trip assistant (app/Chat); these paths stay for older clients.
+        Route::post('/message', 'App\Http\Controllers\ChatController@send')->middleware('throttle:chat');
+        Route::get('/thread', 'App\Http\Controllers\ChatController@messages');
+        Route::delete('/thread', 'App\Http\Controllers\ChatController@clear');
+    });
+
+    Route::prefix('chat')->group(function() {
+        Route::post('/message', 'App\Http\Controllers\ChatController@send')->middleware('throttle:chat');
+        Route::get('/thread', 'App\Http\Controllers\ChatController@messages');
+        Route::delete('/thread', 'App\Http\Controllers\ChatController@clear');
     });
 
     Route::prefix('day')->group(function() {
